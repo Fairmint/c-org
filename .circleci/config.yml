@@ -8,6 +8,10 @@ jobs:
     steps:
       - checkout
 
+      - run:
+          command: |
+            sudo pip install vyper
+
       - restore_cache:
           keys:
             - v1-{{ checksum "package.json" }}
