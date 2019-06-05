@@ -13,7 +13,7 @@ This repository contains the reference implementation for smart-contracts implem
 # Install
 npm i
 
-pip install vyper
+sudo pip install vyper
 # if that fails, run this instead:
 sudo snap install vyper --edge --devmode
 
