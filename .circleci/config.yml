@@ -3,10 +3,16 @@ jobs:
   test:
     context: docker-hub-credentials
     docker:
-      - image: circleci/node:10
+      - image: circleci/python
     working_directory: ~/repo
     steps:
       - checkout
+
+      - run:
+          command: |
+            curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
+            sudo apt-get install -y nodejs
+            sudo pip install vyper
 
       - restore_cache:
           keys:
