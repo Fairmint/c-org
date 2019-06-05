@@ -5,20 +5,20 @@ pragma solidity ^0.5.0;
 
 contract HelloSolidity
 {
-	uint public data;
+  uint public data;
 
-	constructor() public
-	{
-		data = 42;
-	}
+  constructor() public
+  {
+    data = 42;
+  }
 
-	function setData(uint _data) public
-	{
-  		data = _data;
-  	}
-	
-	function dataPlus(uint _value) public view returns (uint256)
-	{
-	    return data + _value;
-    }
+  function setData(uint _data) public
+  {
+    data = _data;
+  }
+
+  function dataPlus(uint _value) public view returns (uint)
+  {
+     return data + _value;
+  }
 }
