@@ -1,3 +1,7 @@
+/**
+ * A simple test of the environment configuration for supporting both Vyper and Solidity contracts.
+ */
+
 const HelloVyper = artifacts.require('HelloVyper');
 const HelloSolidity = artifacts.require('HelloSolidity');
 
