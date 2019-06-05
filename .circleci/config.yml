@@ -10,7 +10,8 @@ jobs:
 
       - run:
           command: |
-            sudo snap install node --classic --channel=10
+            curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
+            sudo apt-get install -y nodejs
             sudo pip install vyper
 
       - restore_cache:
