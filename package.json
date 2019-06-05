@@ -5,6 +5,8 @@
     "build": "npm run compile",
     "compile": "truffle compile --all",
     "dev": "npm run compile && npm run test",
+    "lint": "eslint . --fix",
+    "lintNoFix": "eslint .",
     "test": "truffle test"
   },
   "repository": {
@@ -12,6 +14,12 @@
     "url": "git+https://github.com/Fairmint/c-org.git"
   },
   "dependencies": {
+    "prettier": "^1.17.1",
     "truffle": "5.0.21"
+  },
+  "devDependencies": {
+    "eslint": "^5.16.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-import": "^2.17.3"
   }
 }
