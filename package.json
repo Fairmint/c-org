@@ -1,0 +1,17 @@
+{
+  "name": "c-org",
+  "description": "Smart-contracts for continuous organizations.",
+  "scripts": {
+    "build": "npm run compile",
+    "compile": "truffle compile --all",
+    "dev": "npm run compile && npm run test",
+    "test": "truffle test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Fairmint/c-org.git"
+  },
+  "dependencies": {
+    "truffle": "5.0.21"
+  }
+}

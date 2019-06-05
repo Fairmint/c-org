@@ -9,7 +9,19 @@ jobs:
     steps:
       - checkout
 
-    # todo
+      - restore_cache:
+          keys:
+            - v1-{{ checksum "package.json" }}
+
+      - run: npm i
+
+      - save_cache:
+          paths:
+            - node_modules
+            - package-lock.json
+          key: v1-{{ checksum "package.json" }}
+
+      - run: npm run test
 
 workflows:
   version: 2
