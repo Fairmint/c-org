@@ -27,6 +27,7 @@ jobs:
           key: v1-{{ checksum "package.json" }}
 
       - run: npm run test
+      - run: npm run lintNoFix
 
 workflows:
   version: 2
