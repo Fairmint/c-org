@@ -10,8 +10,8 @@ jobs:
 
       - run:
           command: |
-            sudo apt-get install python-pip
-            sudo pip install vyper
+            sudo apt-get install python3-pip
+            sudo pip3 install vyper
 
       - restore_cache:
           keys:
