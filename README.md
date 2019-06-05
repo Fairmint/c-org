@@ -6,3 +6,14 @@ This repository contains the reference implementation for smart-contracts implem
 * the code for the ethereum blockchain
 
 
+## Development
+
+
+```
+# Install
+npm i
+pip install vyper
+
+# Test
+npm run test
+```
