@@ -10,7 +10,7 @@ jobs:
 
       - run:
           command: |
-            sudo apt-get install nodejs
+            sudo snap install node --classic --channel=10
             sudo pip install vyper
 
       - restore_cache:
