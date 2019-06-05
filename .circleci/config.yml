@@ -10,6 +10,7 @@ jobs:
 
       - run:
           command: |
+            sudo apt-get install python-pip
             sudo pip install vyper
 
       - restore_cache:
