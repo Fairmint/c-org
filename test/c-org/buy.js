@@ -8,7 +8,7 @@ contract('c-org / buy', (accounts) => {
   let corg;
 
   before(async () => {
-    corg = await corgArtifact.new();
+    corg = await corgArtifact.deployed();
   });
 
   it('balanceOf should be 0 by default', async () => {
