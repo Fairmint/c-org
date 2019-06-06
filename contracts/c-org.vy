@@ -86,3 +86,8 @@ def buy() -> bool:
   tokensPerWei: uint256(tokens / wei) = 42
   self._mint(msg.sender, msg.value * tokensPerWei)
   return True
+
+@public
+def updateTplInterface(_tplInterface: address):
+  assert msg.sender == self.beneficiary, "BENEFICIARY_ONLY"
+  self.tplInterface = _tplInterface
