@@ -1,6 +1,7 @@
 # c-org
 # Reference implementation for continuous organizations
-# Implements http://eips.ethereum.org/EIPS/eip-20
+
+implements: ERC20
 
 units: {
   tokens: "c-org tokens"
