@@ -14,12 +14,13 @@
     "url": "git+https://github.com/Fairmint/c-org.git"
   },
   "dependencies": {
-    "prettier": "^1.17.1",
+    "prettier": "1.17.1",
+    "tpl-contracts": "1.1.2",
     "truffle": "5.0.21"
   },
   "devDependencies": {
-    "eslint": "^5.16.0",
-    "eslint-config-airbnb-base": "^13.1.0",
-    "eslint-plugin-import": "^2.17.3"
+    "eslint": "5.16.0",
+    "eslint-config-airbnb-base": "13.1.0",
+    "eslint-plugin-import": "2.17.3"
   }
 }
