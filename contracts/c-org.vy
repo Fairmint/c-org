@@ -8,6 +8,11 @@ units: {
   tokens: "c-org tokens"
 }
 
+# TODO: switch to an interface file (currently non-native imports fail to compile)
+contract ITPLERC20Interface:
+  def canTransfer(_to: address, _value: uint256(tokens)) -> bool: constant
+  def canTransferFrom(_from: address, _to: address, _value: uint256(tokens)) -> bool: constant
+
 # Events required by the ERC-20 token standard
 Approval: event({_owner: indexed(address), _spender: indexed(address), _value: uint256(tokens)})
 Transfer: event({_from: indexed(address), _to: indexed(address), _value: uint256(tokens)})
@@ -24,10 +29,12 @@ allowances: map(address, map(address, uint256(tokens))) # not public, data is ex
 
 # Data for c-org business logic
 beneficiary: public(address)
+tplInterface: public(ITPLERC20Interface)
 
 @public
-def __init__():
+def __init__(_tplInterface: address):
   self.beneficiary = msg.sender
+  self.tplInterface = ITPLERC20Interface(_tplInterface)
 
 #
 # Private helper functions
@@ -36,6 +43,7 @@ def __init__():
 @private
 def _mint(_to: address, _value: uint256(tokens)):
   assert _to != ZERO_ADDRESS, "INVALID_ADDRESS"
+  assert self.tplInterface.canTransferFrom(ZERO_ADDRESS, _to, _value), "NOT_TPL_APPROVED"
   self.totalSupply += _value
   self.balanceOf[_to] += _value
   log.Transfer(ZERO_ADDRESS, _to, _value)
@@ -51,11 +59,13 @@ def approve(_spender: address, _value: uint256) -> bool:
 
 @public
 def transfer(_to: address, _value: uint256) -> bool:
+  assert self.tplInterface.canTransfer(_to, _value), "NOT_TPL_APPROVED"
   # TODO
   return True
 
 @public
 def transferFrom(_from: address, _to: address, _value: uint256) -> bool:
+  assert self.tplInterface.canTransferFrom(_from, _to, _value), "NOT_TPL_APPROVED"
   # TODO
   return True
 
