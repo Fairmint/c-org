@@ -90,4 +90,4 @@ def buy() -> bool:
 @public
 def updateTplInterface(_tplInterface: address):
   assert msg.sender == self.beneficiary, "BENEFICIARY_ONLY"
-  self.tplInterface = _tplInterface
+  self.tplInterface = ITPLERC20Interface(_tplInterface)
