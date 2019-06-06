@@ -8,6 +8,10 @@ units: {
   tokens: "c-org tokens"
 }
 
+# Events required by the ERC-20 token standard
+Approval: event({_owner: indexed(address), _spender: indexed(address), _value: uint256(tokens)})
+Transfer: event({_from: indexed(address), _to: indexed(address), _value: uint256(tokens)})
+
 # Metadata suggested by the ERC-20 token standard
 decimals: public(uint256)
 name: public(string[64])
