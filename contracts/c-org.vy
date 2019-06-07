@@ -128,7 +128,7 @@ def buy():
   log.Transfer(ZERO_ADDRESS, msg.sender, value)
 
 @public
-def sell():
+def sell(_value: uint256(tokens)):
   self.tplInterface.authorizeTransfer(msg.sender, ZERO_ADDRESS, _value)
 
   # TODO pay seller
