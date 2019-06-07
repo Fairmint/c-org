@@ -32,7 +32,7 @@ beneficiary: public(address)
 tplInterface: public(ITPLERC20Interface)
 
 @public
-def __init__(name: string[64], _symbol: string[8], _decimals: uint256, _tplInterface: address):
+def __init__(_name: string[64], _symbol: string[8], _decimals: uint256, _tplInterface: address):
   self.name = _name
   self.symbol = _symbol
   self.decimals = _decimals
