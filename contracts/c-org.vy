@@ -30,14 +30,26 @@ allowances: map(address, map(address, uint256(tokens))) # not public, data is ex
 # Data for c-org business logic
 beneficiary: public(address)
 tplInterface: public(ITPLERC20Interface)
+initialReserve: public(uint256)
 
 @public
-def __init__(_name: string[64], _symbol: string[8], _decimals: uint256, _tplInterface: address):
+def __init__(
+  _name: string[64],
+  _symbol: string[8],
+  _decimals: uint256,
+  _initialReserve: uint256,
+  _tplInterface: address
+):
   self.name = _name
   self.symbol = _symbol
   self.decimals = _decimals
+  self.initialReserve = _initialReserve
   self.beneficiary = msg.sender
   self.tplInterface = ITPLERC20Interface(_tplInterface)
+
+  self.totalSupply = self.initialReserve
+  self.balanceOf[self.beneficiary] = self.initialReserve
+  log.Transfer(ZERO_ADDRESS, self.beneficiary, self.initialReserve)
 
 #
 # Private helper functions
