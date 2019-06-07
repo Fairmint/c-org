@@ -25,7 +25,7 @@ contract('c-org / tplCanBlockBuy', (accounts) => {
 
   describe('can buy tokens', () => {
     before(async () => {
-      await corg.buy({ value: 100, from: accounts[1] });
+      await corg.buy(100, { value: 100, from: accounts[1] });
     });
 
     it('balanceOf should have increased', async () => {
@@ -36,7 +36,7 @@ contract('c-org / tplCanBlockBuy', (accounts) => {
 
     describe('should fail to buy tokens the 2nd time', () => {
       before(async () => {
-        await shouldFail(corg.buy({ value: 100, from: accounts[1] }));
+        await shouldFail(corg.buy(100, { value: 100, from: accounts[1] }));
       });
 
       it('balanceOf should not have changed', async () => {
@@ -48,7 +48,7 @@ contract('c-org / tplCanBlockBuy', (accounts) => {
       describe('can buy tokens on the 3rd attempt', () => {
         before(async () => {
           await tpl.setAuthorized();
-          await corg.buy({ value: 100, from: accounts[1] });
+          await corg.buy(100, { value: 100, from: accounts[1] });
         });
 
         it('balanceOf should have increased', async () => {
