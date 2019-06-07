@@ -13,6 +13,7 @@ contract('c-org / tplCanBlockBuy', (accounts) => {
   before(async () => {
     tpl = await tplInterfaceArtifact.new();
     corg = await deployCorg({
+      initGoal: 99999,
       tplInterfaceAddress: tpl.address,
     });
   });
