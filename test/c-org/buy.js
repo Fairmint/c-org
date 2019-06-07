@@ -3,12 +3,14 @@
  */
 
 const corgArtifact = artifacts.require('c-org');
+const tplInterfaceArtifact = artifacts.require('TPLInterface-AutoApprove');
 
 contract('c-org / buy', (accounts) => {
   let corg;
 
   before(async () => {
-    corg = await corgArtifact.deployed();
+    const tplInterface = tplInterfaceArtifact.new();
+    corg = await corgArtifact.new('c-org', 'crg', 18, tplInterface.address);
   });
 
   it('balanceOf should be 0 by default', async () => {
