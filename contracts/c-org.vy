@@ -10,8 +10,8 @@ units: {
 
 # TODO: switch to an interface file (currently non-native imports fail to compile)
 contract ITPLERC20Interface:
-  def canTransfer(_to: address, _value: uint256(tokens)) -> bool: constant
-  def canTransferFrom(_from: address, _to: address, _value: uint256(tokens)) -> bool: constant
+  def authorizeTransfer(_from: address, _to: address, _value: uint256(tokens)) -> bool: modifying
+  def authorizeTransferFrom(_sender: address, _from: address, _to: address, _value: uint256(tokens)): modifying
 
 # Events required by the ERC-20 token standard
 Approval: event({_owner: indexed(address), _spender: indexed(address), _value: uint256(tokens)})
@@ -65,13 +65,13 @@ def __init__(
 #
 
 @private
-def _mint(_to: address, _value: uint256(tokens)):
-  assert _to != ZERO_ADDRESS, "INVALID_ADDRESS"
-  assert self.tplInterface.canTransferFrom(ZERO_ADDRESS, _to, _value), "NOT_TPL_APPROVED"
+def _burn(_from: address, _value: uint256(tokens)):
+  assert _from != ZERO_ADDRESS, "INVALID_ADDRESS"
+  # Note: no TPL authorization required to burn tokens
 
-  self.totalSupply += _value
-  self.balanceOf[_to] += _value
-  log.Transfer(ZERO_ADDRESS, _to, _value)
+  self.totalSupply -= _value
+  self.balanceOf[_from] -= _value
+  log.Transfer(_from, ZERO_ADDRESS, _value)
 
 #
 # Functions required by the ERC-20 token standard
@@ -85,7 +85,7 @@ def approve(_spender: address, _value: uint256(tokens)) -> bool:
 
 @public
 def transfer(_to: address, _value: uint256(tokens)) -> bool:
-  assert self.tplInterface.canTransfer(_to, _value), "NOT_TPL_APPROVED"
+  assert self.tplInterface.authorizeTransfer(msg.sender, _to, _value), "NOT_TPL_APPROVED"
 
   self.balanceOf[msg.sender] -= _value
   self.balanceOf[_to] += _value
@@ -94,7 +94,7 @@ def transfer(_to: address, _value: uint256(tokens)) -> bool:
 
 @public
 def transferFrom(_from: address, _to: address, _value: uint256(tokens)) -> bool:
-  assert self.tplInterface.canTransferFrom(_from, _to, _value), "NOT_TPL_APPROVED"
+  assert self.tplInterface.authorizeTransferFrom(msg.sender, _from, _to, _value), "NOT_TPL_APPROVED"
 
   self.balanceOf[_from] -= _value
   self.balanceOf[_to] += _value
@@ -112,11 +112,32 @@ def allowance(_owner: address, _spender: address) -> uint256(tokens):
 #
 
 @public
+def burn(_value: uint256(tokens)):
+  self._burn(msg.sender, _value)
+
+@public
 @payable
 def buy():
   # TODO
   tokensPerWei: uint256(tokens / wei) = 42
-  self._mint(msg.sender, msg.value * tokensPerWei)
+  value: uint256(tokens) = msg.value * tokensPerWei
+  assert self.tplInterface.authorizeTransfer(ZERO_ADDRESS, msg.sender, value), "NOT_TPL_APPROVED"
+
+  self.totalSupply += value
+  self.balanceOf[_to] += value
+  log.Transfer(ZERO_ADDRESS, msg.sender, value)
+
+@public
+def sell():
+  assert self.tplInterface.authorizeTransfer(msg.sender, ZERO_ADDRESS, _value), "NOT_TPL_APPROVED"
+
+  # TODO pay seller
+  self._burn(msg.sender, _value)
+
+#
+# Functions to update c-org configuration
+# These can only be called by the organization accounts
+#
 
 @public
 def updateBeneficiary(_beneficiary: address):
