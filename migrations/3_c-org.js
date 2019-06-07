@@ -11,6 +11,8 @@ module.exports = function deployCorg(deployer) {
     decimals,
     '42000000000000000000', // tokens
     '0x0000000000000000000000000000000000000000', // currency
+    '0', // minGoal
+    '0', // minInvestment
     tplInterfaceArtifact.address, // TODO switch to real TPL interface
   );
 };

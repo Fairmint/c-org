@@ -11,6 +11,7 @@ contract('c-org / buy', (accounts) => {
 
   before(async () => {
     corg = await deployCorg({
+      initGoal: 99999,
       tplInterfaceAddress: (await tplInterfaceArtifact.new()).address,
     });
   });
@@ -23,7 +24,7 @@ contract('c-org / buy', (accounts) => {
 
   describe('can buy tokens', () => {
     before(async () => {
-      await corg.buy({ value: 100, from: accounts[1] });
+      await corg.buy(100, { value: 100, from: accounts[1] });
     });
 
     it('balanceOf should have increased', async () => {
