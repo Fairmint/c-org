@@ -53,27 +53,32 @@ def _mint(_to: address, _value: uint256(tokens)):
 #
 
 @public
-def approve(_spender: address, _value: uint256) -> bool:
-  # TODO
+def approve(_spender: address, _value: uint256(tokens)) -> bool:
+  self.allowances[msg.sender][_spender] = _value
+  log.Approval(msg.sender, _spender, _value)
   return True
 
 @public
-def transfer(_to: address, _value: uint256) -> bool:
+def transfer(_to: address, _value: uint256(tokens)) -> bool:
   assert self.tplInterface.canTransfer(_to, _value), "NOT_TPL_APPROVED"
-  # TODO
+  self.balanceOf[msg.sender] -= _value
+  self.balanceOf[_to] += _value
+  log.Transfer(msg.sender, _to, _value)
   return True
 
 @public
-def transferFrom(_from: address, _to: address, _value: uint256) -> bool:
+def transferFrom(_from: address, _to: address, _value: uint256(tokens)) -> bool:
   assert self.tplInterface.canTransferFrom(_from, _to, _value), "NOT_TPL_APPROVED"
-  # TODO
+  self.balanceOf[_from] -= _value
+  self.balanceOf[_to] += _value
+  self.allowances[_from][msg.sender] -= _value
+  log.Transfer(_from, _to, _value)
   return True
 
 @public
 @constant
-def allowance(_owner: address, _spender: address) -> uint256:
-  # TODO
-  return 0
+def allowance(_owner: address, _spender: address) -> uint256(tokens):
+  return self.allowances[_owner][_spender]
 
 #
 # Functions for c-org business logic
