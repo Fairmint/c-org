@@ -59,7 +59,7 @@ def __init__(
   self.beneficiary = msg.sender
   self.tplInterface = ITPLERC20Interface(_tplInterface)
 
-  _mint(self.beneficiary, self.initialReserve)
+  self._mint(self.beneficiary, self.initialReserve)
 
 #
 # Functions required by the ERC-20 token standard
