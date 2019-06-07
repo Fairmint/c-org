@@ -28,6 +28,7 @@ totalSupply: public(uint256(tokens))
 allowances: map(address, map(address, uint256(tokens))) # not public, data is exposed via the `allowance` function
 
 # Data for c-org business logic
+control: public(address)
 beneficiary: public(address)
 tplInterface: public(ITPLERC20Interface)
 initialReserve: public(uint256)
@@ -40,12 +41,16 @@ def __init__(
   _initialReserve: uint256,
   _tplInterface: address
 ):
+  assert _tplInterface != ZERO_ADDRESS, "INVALID_ADDRESS"
+
   self.name = _name
   self.symbol = _symbol
   self.decimals = _decimals
   self.initialReserve = _initialReserve
-  self.beneficiary = msg.sender
   self.tplInterface = ITPLERC20Interface(_tplInterface)
+
+  self.control = msg.sender
+  self.beneficiary = msg.sender
 
   self.totalSupply = self.initialReserve
   self.balanceOf[self.beneficiary] = self.initialReserve
@@ -59,6 +64,7 @@ def __init__(
 def _mint(_to: address, _value: uint256(tokens)):
   assert _to != ZERO_ADDRESS, "INVALID_ADDRESS"
   assert self.tplInterface.canTransferFrom(ZERO_ADDRESS, _to, _value), "NOT_TPL_APPROVED"
+
   self.totalSupply += _value
   self.balanceOf[_to] += _value
   log.Transfer(ZERO_ADDRESS, _to, _value)
@@ -76,6 +82,7 @@ def approve(_spender: address, _value: uint256(tokens)) -> bool:
 @public
 def transfer(_to: address, _value: uint256(tokens)) -> bool:
   assert self.tplInterface.canTransfer(_to, _value), "NOT_TPL_APPROVED"
+
   self.balanceOf[msg.sender] -= _value
   self.balanceOf[_to] += _value
   log.Transfer(msg.sender, _to, _value)
@@ -84,6 +91,7 @@ def transfer(_to: address, _value: uint256(tokens)) -> bool:
 @public
 def transferFrom(_from: address, _to: address, _value: uint256(tokens)) -> bool:
   assert self.tplInterface.canTransferFrom(_from, _to, _value), "NOT_TPL_APPROVED"
+
   self.balanceOf[_from] -= _value
   self.balanceOf[_to] += _value
   self.allowances[_from][msg.sender] -= _value
@@ -109,5 +117,21 @@ def buy() -> bool:
 
 @public
 def updateTplInterface(_tplInterface: address):
-  assert msg.sender == self.beneficiary, "BENEFICIARY_ONLY"
+  assert msg.sender == self.control, "CONTROL_ONLY"
+  assert _tplInterface != ZERO_ADDRESS, "INVALID_ADDRESS"
+
   self.tplInterface = ITPLERC20Interface(_tplInterface)
+
+@public
+def updateControl(_control: address):
+  assert msg.sender == self.control, "CONTROL_ONLY"
+  assert _control != ZERO_ADDRESS, "INVALID_ADDRESS"
+
+  self.control = _control
+
+@public
+def updateBeneficiary(_beneficiary: address):
+  assert msg.sender == self.control or msg.sender == self.beneficiary, "CONTROL_OR_BENEFICIARY_ONLY"
+  assert _beneficiary != ZERO_ADDRESS, "INVALID_ADDRESS"
+
+  self.beneficiary = _beneficiary
