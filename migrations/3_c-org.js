@@ -1,4 +1,4 @@
-const tplInterfaceArtifact = artifacts.require('TPLInterface-AutoApprove');
+const tplInterfaceArtifact = artifacts.require('TPLInterface_AutoApprove');
 const corgArtifact = artifacts.require('c-org');
 
 module.exports = function deployCorg(deployer) {

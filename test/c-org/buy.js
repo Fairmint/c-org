@@ -3,7 +3,7 @@
  */
 
 const corgArtifact = artifacts.require('c-org');
-const tplInterfaceArtifact = artifacts.require('TPLInterface-AutoApprove');
+const tplInterfaceArtifact = artifacts.require('TPLInterface_AutoApprove');
 
 contract('c-org / buy', (accounts) => {
   let corg;
