@@ -6,8 +6,8 @@ module.exports = function deployCorg(deployer) {
 
   deployer.deploy(
     corgArtifact,
-    'c-org', // name TODO confirm
-    'crg', // symbol TODO confirm
+    'Fairmint', // name
+    'FSE', // symbol
     decimals,
     42 * (10 ** decimals), // tokens
     tplInterfaceArtifact.address, // TODO switch to real TPL interface
