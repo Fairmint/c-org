@@ -21,7 +21,7 @@ Transfer: event({_from: indexed(address), _to: indexed(address), _value: uint256
 beneficiary: public(address)
 control: public(address)
 currency: public(address)
-initReserve: public(uint256)
+initReserve: public(uint256(tokens))
 tplInterface: public(ITPLERC20Interface)
 
 # Data storage required by the ERC-20 token standard
@@ -39,7 +39,7 @@ def __init__(
   _name: string[64],
   _symbol: string[8],
   _decimals: uint256,
-  _initReserve: uint256,
+  _initReserve: uint256(tokens),
   _currency: address,
   _tplInterface: address
 ):
