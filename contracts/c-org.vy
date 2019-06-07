@@ -85,7 +85,7 @@ def approve(_spender: address, _value: uint256(tokens)) -> bool:
 
 @public
 def transfer(_to: address, _value: uint256(tokens)) -> bool:
-  assert self.tplInterface.authorizeTransfer(msg.sender, _to, _value), "NOT_TPL_APPROVED"
+  self.tplInterface.authorizeTransfer(msg.sender, _to, _value)
 
   self.balanceOf[msg.sender] -= _value
   self.balanceOf[_to] += _value
@@ -94,7 +94,7 @@ def transfer(_to: address, _value: uint256(tokens)) -> bool:
 
 @public
 def transferFrom(_from: address, _to: address, _value: uint256(tokens)) -> bool:
-  assert self.tplInterface.authorizeTransferFrom(msg.sender, _from, _to, _value), "NOT_TPL_APPROVED"
+  self.tplInterface.authorizeTransferFrom(msg.sender, _from, _to, _value)
 
   self.balanceOf[_from] -= _value
   self.balanceOf[_to] += _value
@@ -121,7 +121,7 @@ def buy():
   # TODO
   tokensPerWei: uint256(tokens / wei) = 42
   value: uint256(tokens) = msg.value * tokensPerWei
-  assert self.tplInterface.authorizeTransfer(ZERO_ADDRESS, msg.sender, value), "NOT_TPL_APPROVED"
+  self.tplInterface.authorizeTransfer(ZERO_ADDRESS, msg.sender, value)
 
   self.totalSupply += value
   self.balanceOf[_to] += value
@@ -129,7 +129,7 @@ def buy():
 
 @public
 def sell():
-  assert self.tplInterface.authorizeTransfer(msg.sender, ZERO_ADDRESS, _value), "NOT_TPL_APPROVED"
+  self.tplInterface.authorizeTransfer(msg.sender, ZERO_ADDRESS, _value)
 
   # TODO pay seller
   self._burn(msg.sender, _value)
