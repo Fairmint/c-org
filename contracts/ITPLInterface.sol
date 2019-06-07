@@ -1,9 +1,9 @@
 pragma solidity ^0.5.0;
 
 interface ITPLInterface {
-
   /**
    * @notice Check if an account is approved to transfer tokens to account `to` of an amount `value`.
+   * Reverts if not authorized, else may keep a record of the transaction.
    * @param _from address The account holding the tokens to be sent.
    * @param _to address The account of the recipient. When selling tokens _to will be the ZERO_ADDRESS.
    * @param _value uint256 The amount to transfer.
@@ -16,6 +16,7 @@ interface ITPLInterface {
 
   /**
    * @notice Check if an account is approved to transfer tokens on behalf of account `from` to account `to` of an amount `value`.
+   * Reverts if not authorized, else may keep a record of the transaction.
    * @param _sender address The account initiating this transfer.
    * @param _from address The account holding the tokens to be sent. When purchasing / minting new tokens _from will be the ZERO_ADDRESS.
    * @param _to address The account of the recipient.

@@ -2,22 +2,17 @@
  * Tests the ability to buy c-org tokens
  */
 
-const corgArtifact = artifacts.require('c-org');
+import { deployCorg } from '../helpers';
+
 const tplInterfaceArtifact = artifacts.require('TPLInterface_AutoApprove');
 
 contract('c-org / buy', (accounts) => {
   let corg;
 
   before(async () => {
-    const tplInterface = await tplInterfaceArtifact.new();
-    corg = await corgArtifact.new(
-      'Fairmint',
-      'FSE',
-      18,
-      0,
-      '0x0000000000000000000000000000000000000000',
-      tplInterface.address,
-    );
+    corg = await deployCorg({
+      tplInterfaceAddress: (await tplInterfaceArtifact.new()).address,
+    });
   });
 
   it('balanceOf should be 0 by default', async () => {
