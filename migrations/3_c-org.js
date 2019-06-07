@@ -9,7 +9,7 @@ module.exports = function deployCorg(deployer) {
     'Fairmint', // name
     'FSE', // symbol
     decimals,
-    42 * (10 ** decimals), // tokens
+    '42000000000000000000', // tokens
     tplInterfaceArtifact.address, // TODO switch to real TPL interface
   );
 };
