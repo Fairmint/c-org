@@ -167,7 +167,7 @@ def buy(quantityToInvest: uint256(currencyTokens)):
     assert as_wei_value(quantityToInvest, 'wei') == msg.value, "INCORRECT_MSG_VALUE"
   else:
     balanceBefore: uint256 = self.currency.balanceOf(self)
-    self.currency.transferFrom(msg.sender, self, quantityToInvest)
+    self.currency.transferFrom(msg.sender, self, as_unitless_number(quantityToInvest))
     assert self.currency.balanceOf(self) > balanceBefore, "ERC20_TRANSFER_FAILED"
 
   tokenValue: uint256(fseTokens)
