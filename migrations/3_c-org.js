@@ -10,6 +10,7 @@ module.exports = function deployCorg(deployer) {
     'FSE', // symbol
     decimals,
     '42000000000000000000', // tokens
+    '0x0000000000000000000000000000000000000000', // currency
     tplInterfaceArtifact.address, // TODO switch to real TPL interface
   );
 };
