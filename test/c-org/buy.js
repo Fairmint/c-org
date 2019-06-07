@@ -9,7 +9,7 @@ contract('c-org / buy', (accounts) => {
   let corg;
 
   before(async () => {
-    const tplInterface = tplInterfaceArtifact.new();
+    const tplInterface = await tplInterfaceArtifact.new();
     corg = await corgArtifact.new('c-org', 'crg', 18, tplInterface.address);
   });
 
