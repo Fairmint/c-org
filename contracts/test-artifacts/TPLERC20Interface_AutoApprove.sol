@@ -5,20 +5,19 @@ pragma solidity ^0.5.0;
  * Implements the TPL interface and authorizes everything for everyone.
  */
 
-import "../ITPLInterface.sol";
+import "../ITPLERC20Interface.sol";
 
-contract TPLInterface_FailEveryOther is
-  ITPLInterface
+contract TPLERC20Interface_AutoApprove is
+  ITPLERC20Interface
 {
-  uint256 public counter;
-
   function authorizeTransfer(
     address _from,
     address _to,
     uint256 _value
   ) external
+  	returns (bool)
   {
-    require(counter++ % 2 == 0);
+    return true;
   }
 
   function authorizeTransferFrom(
@@ -27,7 +26,8 @@ contract TPLInterface_FailEveryOther is
     address _to,
     uint256 _value
   ) external
+  	returns (bool)
   {
-    require(counter++ % 2 == 0);
+    return true;
   }
 }

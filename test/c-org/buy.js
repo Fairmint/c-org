@@ -2,9 +2,9 @@
  * Tests the ability to buy c-org tokens
  */
 
-import { deployCorg } from '../helpers';
+const { deployCorg } = require('../helpers');
 
-const tplInterfaceArtifact = artifacts.require('TPLInterface_AutoApprove');
+const tplInterfaceArtifact = artifacts.require('TPLERC20Interface_AutoApprove');
 
 contract('c-org / buy', (accounts) => {
   let corg;

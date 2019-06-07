@@ -1,4 +1,4 @@
-import deployCorg from './deployCorg';
-import shouldFail from './shouldFail';
+const deployCorg = require('./deployCorg');
+const shouldFail = require('./shouldFail');
 
-export default { deployCorg, shouldFail };
+module.exports = { deployCorg, shouldFail };

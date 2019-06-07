@@ -1,6 +1,6 @@
 const corgArtifact = artifacts.require('c-org');
 
-export default async function deployCorg(options) {
+module.exports = async function deployCorg(options) {
   if (!options.tplInterfaceAddress) throw new Error('Options must include the tplInterfaceAddress');
 
   const callOptions = Object.assign({
@@ -19,4 +19,4 @@ export default async function deployCorg(options) {
     callOptions.currency,
     callOptions.tplInterfaceAddress,
   );
-}
+};
