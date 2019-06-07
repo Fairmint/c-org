@@ -113,11 +113,10 @@ def allowance(_owner: address, _spender: address) -> uint256(tokens):
 
 @public
 @payable
-def buy() -> bool:
+def buy():
   # TODO
   tokensPerWei: uint256(tokens / wei) = 42
   self._mint(msg.sender, msg.value * tokensPerWei)
-  return True
 
 @public
 def updateBeneficiary(_beneficiary: address):
