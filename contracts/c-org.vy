@@ -17,28 +17,30 @@ contract ITPLERC20Interface:
 Approval: event({_owner: indexed(address), _spender: indexed(address), _value: uint256(tokens)})
 Transfer: event({_from: indexed(address), _to: indexed(address), _value: uint256(tokens)})
 
+# Data for c-org business logic
+beneficiary: public(address)
+control: public(address)
+currency: public(address)
+initReserve: public(uint256)
+tplInterface: public(ITPLERC20Interface)
+
+# Data storage required by the ERC-20 token standard
+allowances: map(address, map(address, uint256(tokens))) # not public, data is exposed via the `allowance` function
+balanceOf: public(map(address, uint256(tokens)))
+totalSupply: public(uint256(tokens))
+
 # Metadata suggested by the ERC-20 token standard
 decimals: public(uint256)
 name: public(string[64])
 symbol: public(string[8])
-
-# Data storage required by the ERC-20 token standard
-balanceOf: public(map(address, uint256(tokens)))
-totalSupply: public(uint256(tokens))
-allowances: map(address, map(address, uint256(tokens))) # not public, data is exposed via the `allowance` function
-
-# Data for c-org business logic
-control: public(address)
-beneficiary: public(address)
-tplInterface: public(ITPLERC20Interface)
-initialReserve: public(uint256)
 
 @public
 def __init__(
   _name: string[64],
   _symbol: string[8],
   _decimals: uint256,
-  _initialReserve: uint256,
+  _initReserve: uint256,
+  _currency: address,
   _tplInterface: address
 ):
   assert _tplInterface != ZERO_ADDRESS, "INVALID_ADDRESS"
@@ -46,15 +48,17 @@ def __init__(
   self.name = _name
   self.symbol = _symbol
   self.decimals = _decimals
-  self.initialReserve = _initialReserve
+  self.initReserve = _initReserve
+  self.currency = _currency
   self.tplInterface = ITPLERC20Interface(_tplInterface)
 
   self.control = msg.sender
   self.beneficiary = msg.sender
 
-  self.totalSupply = self.initialReserve
-  self.balanceOf[self.beneficiary] = self.initialReserve
-  log.Transfer(ZERO_ADDRESS, self.beneficiary, self.initialReserve)
+  # Mint the initial reserve
+  self.totalSupply = self.initReserve
+  self.balanceOf[self.beneficiary] = self.initReserve
+  log.Transfer(ZERO_ADDRESS, self.beneficiary, self.initReserve)
 
 #
 # Private helper functions
@@ -116,11 +120,11 @@ def buy() -> bool:
   return True
 
 @public
-def updateTplInterface(_tplInterface: address):
-  assert msg.sender == self.control, "CONTROL_ONLY"
-  assert _tplInterface != ZERO_ADDRESS, "INVALID_ADDRESS"
+def updateBeneficiary(_beneficiary: address):
+  assert msg.sender == self.control or msg.sender == self.beneficiary, "CONTROL_OR_BENEFICIARY_ONLY"
+  assert _beneficiary != ZERO_ADDRESS, "INVALID_ADDRESS"
 
-  self.tplInterface = ITPLERC20Interface(_tplInterface)
+  self.beneficiary = _beneficiary
 
 @public
 def updateControl(_control: address):
@@ -130,8 +134,20 @@ def updateControl(_control: address):
   self.control = _control
 
 @public
-def updateBeneficiary(_beneficiary: address):
-  assert msg.sender == self.control or msg.sender == self.beneficiary, "CONTROL_OR_BENEFICIARY_ONLY"
-  assert _beneficiary != ZERO_ADDRESS, "INVALID_ADDRESS"
+def updateName(_name: string[64]):
+  assert msg.sender == self.control, "CONTROL_ONLY"
 
-  self.beneficiary = _beneficiary
+  self.name = _name
+
+@public
+def updateSymbol(_symbol: string[8]):
+  assert msg.sender == self.control, "CONTROL_ONLY"
+
+  self.symbol = _symbol
+
+@public
+def updateTplInterface(_tplInterface: address):
+  assert msg.sender == self.control, "CONTROL_ONLY"
+  assert _tplInterface != ZERO_ADDRESS, "INVALID_ADDRESS"
+
+  self.tplInterface = ITPLERC20Interface(_tplInterface)
