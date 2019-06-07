@@ -30,14 +30,7 @@ allowances: map(address, map(address, uint256(tokens))) # not public, data is ex
 # Data for c-org business logic
 beneficiary: public(address)
 tplInterface: public(ITPLERC20Interface)
-
-@public
-def __init__(_name: string[64], _symbol: string[8], _decimals: uint256, _tplInterface: address):
-  self.name = _name
-  self.symbol = _symbol
-  self.decimals = _decimals
-  self.beneficiary = msg.sender
-  self.tplInterface = ITPLERC20Interface(_tplInterface)
+initialReserve: public(uint256)
 
 #
 # Private helper functions
@@ -50,6 +43,23 @@ def _mint(_to: address, _value: uint256(tokens)):
   self.totalSupply += _value
   self.balanceOf[_to] += _value
   log.Transfer(ZERO_ADDRESS, _to, _value)
+
+@public
+def __init__(
+  _name: string[64],
+  _symbol: string[8],
+  _decimals: uint256,
+  _initialReserve: uint256,
+  _tplInterface: address
+):
+  self.name = _name
+  self.symbol = _symbol
+  self.decimals = _decimals
+  self.initialReserve = _initialReserve
+  self.beneficiary = msg.sender
+  self.tplInterface = ITPLERC20Interface(_tplInterface)
+
+  _mint(self.beneficiary, self.initialReserve)
 
 #
 # Functions required by the ERC-20 token standard
