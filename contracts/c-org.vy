@@ -32,18 +32,6 @@ beneficiary: public(address)
 tplInterface: public(ITPLERC20Interface)
 initialReserve: public(uint256)
 
-#
-# Private helper functions
-#
-
-@private
-def _mint(_to: address, _value: uint256(tokens)):
-  assert _to != ZERO_ADDRESS, "INVALID_ADDRESS"
-  assert self.tplInterface.canTransferFrom(ZERO_ADDRESS, _to, _value), "NOT_TPL_APPROVED"
-  self.totalSupply += _value
-  self.balanceOf[_to] += _value
-  log.Transfer(ZERO_ADDRESS, _to, _value)
-
 @public
 def __init__(
   _name: string[64],
@@ -59,7 +47,21 @@ def __init__(
   self.beneficiary = msg.sender
   self.tplInterface = ITPLERC20Interface(_tplInterface)
 
-  self._mint(self.beneficiary, self.initialReserve)
+  self.totalSupply = self.initialReserve
+  self.balanceOf[self.beneficiary] = self.initialReserve
+  log.Transfer(ZERO_ADDRESS, self.beneficiary, self.initialReserve)
+
+#
+# Private helper functions
+#
+
+@private
+def _mint(_to: address, _value: uint256(tokens)):
+  assert _to != ZERO_ADDRESS, "INVALID_ADDRESS"
+  assert self.tplInterface.canTransferFrom(ZERO_ADDRESS, _to, _value), "NOT_TPL_APPROVED"
+  self.totalSupply += _value
+  self.balanceOf[_to] += _value
+  log.Transfer(ZERO_ADDRESS, _to, _value)
 
 #
 # Functions required by the ERC-20 token standard
