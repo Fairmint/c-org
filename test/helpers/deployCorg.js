@@ -7,8 +7,10 @@ module.exports = async function deployCorg(options) {
     name: 'Fairmint',
     symbol: 'FSE',
     decimals: 18,
-    initReserve: 0,
+    initReserve: '0',
     currency: '0x0000000000000000000000000000000000000000',
+    initGoal: '0',
+    minInvestment: '0',
   }, options);
 
   return corgArtifact.new(
@@ -17,6 +19,8 @@ module.exports = async function deployCorg(options) {
     callOptions.decimals,
     callOptions.initReserve,
     callOptions.currency,
+    callOptions.initGoal,
+    callOptions.minInvestment,
     callOptions.tplInterfaceAddress,
   );
 };

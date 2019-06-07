@@ -5,21 +5,24 @@ from vyper.interfaces import ERC20
 implements: ERC20
 
 units: {
-  tokens: "c-org tokens"
+  currencyTokens: "The reserve currency tokens - either ETH or ERC20",
+  fseTokens: "c-org FSE tokens",
+  stateMachine: "c-org state machine"
 }
 
 # TODO: switch to an interface file (currently non-native imports fail to compile)
 contract ITPLERC20Interface:
-  def authorizeTransfer(_from: address, _to: address, _value: uint256(tokens)) -> bool: modifying
-  def authorizeTransferFrom(_sender: address, _from: address, _to: address, _value: uint256(tokens)) -> bool: modifying
+  def authorizeTransfer(_from: address, _to: address, _value: uint256(fseTokens)) -> bool: modifying
+  def authorizeTransferFrom(_sender: address, _from: address, _to: address, _value: uint256(fseTokens)) -> bool: modifying
 
 # Events required by the ERC-20 token standard
-Approval: event({_owner: indexed(address), _spender: indexed(address), _value: uint256(tokens)})
-Transfer: event({_from: indexed(address), _to: indexed(address), _value: uint256(tokens)})
+Approval: event({_owner: indexed(address), _spender: indexed(address), _value: uint256(fseTokens)})
+Transfer: event({_from: indexed(address), _to: indexed(address), _value: uint256(fseTokens)})
 
 # Events triggered when updating the c-org configuration
 BeneficiaryTransferred: event({_previousBeneficiary: address, _beneficiary: address})
 ControlTransferred: event({_previousControl: address, _control: address})
+MinInvestmentUpdated: event({_previousMinInvestment: uint256(currencyTokens), _minInvestment: uint256(currencyTokens)})
 NameUpdated: event({_previousName: string[64], _name: string[64]})
 SymbolUpdated: event({_previousSymbol: string[8], _symbol: string[8]})
 TplInterfaceUpdated: event({_previousTplInterface: address, _tplInterface: address})
@@ -27,47 +30,67 @@ TplInterfaceUpdated: event({_previousTplInterface: address, _tplInterface: addre
 # Data for c-org business logic
 beneficiary: public(address)
 control: public(address)
-currency: public(address)
-initReserve: public(uint256(tokens))
+currencyAddress: public(address)
+currency: ERC20 # redundant information with currencyAddress, for convenient usage
+initGoal: public(uint256(currencyTokens))
+initReserve: public(uint256(fseTokens))
+minInvestment: public(uint256(currencyTokens))
+state: public(uint256(stateMachine))
 tplInterfaceAddress: public(address)
 tplInterface: ITPLERC20Interface # redundant information with tplInterfaceAddress, for convenient usage
 
 # Data storage required by the ERC-20 token standard
-allowances: map(address, map(address, uint256(tokens))) # not public, data is exposed via the `allowance` function
-balanceOf: public(map(address, uint256(tokens)))
-totalSupply: public(uint256(tokens))
+allowances: map(address, map(address, uint256(fseTokens))) # not public, data is exposed via the `allowance` function
+balanceOf: public(map(address, uint256(fseTokens)))
+totalSupply: public(uint256(fseTokens))
 
 # Metadata suggested by the ERC-20 token standard
 decimals: public(uint256)
 name: public(string[64])
 symbol: public(string[8])
 
+# Constants
+STATE_INITIALIZATION: constant(uint256(stateMachine)) = 0
+STATE_RUNNING: constant(uint256(stateMachine)) = 1
+STATE_CLOSING: constant(uint256(stateMachine)) = 2
+
 @public
 def __init__(
   _name: string[64],
   _symbol: string[8],
   _decimals: uint256,
-  _initReserve: uint256(tokens),
-  _currency: address,
+  _initReserve: uint256(fseTokens),
+  _currencyAddress: address,
+  _initGoal: uint256(currencyTokens),
+  _minInvestment: uint256(currencyTokens),
   _tplInterfaceAddress: address
 ):
   assert _tplInterfaceAddress.is_contract, "INVALID_CONTRACT_ADDRESS"
 
   log.NameUpdated(self.name, _name)
   self.name = _name
-  
+
   log.SymbolUpdated(self.symbol, _symbol)
   self.symbol = _symbol
-  
+
   self.decimals = _decimals
-  
+
   # Mint the initial reserve
   self.initReserve = _initReserve
   self.totalSupply = self.initReserve
   self.balanceOf[self.beneficiary] = self.initReserve
   log.Transfer(ZERO_ADDRESS, self.beneficiary, self.initReserve)
-  
-  self.currency = _currency
+
+  self.currencyAddress = _currencyAddress
+  self.currency = ERC20(_currencyAddress)
+
+  # Set initGoal, which in turn defines the initial state
+  if(_initGoal == 0):
+    self.state = STATE_RUNNING
+  else:
+    self.initGoal = _initGoal
+
+  self.minInvestment = _minInvestment
 
   log.TplInterfaceUpdated(self.tplInterfaceAddress, _tplInterfaceAddress)
   self.tplInterfaceAddress = _tplInterfaceAddress
@@ -75,7 +98,7 @@ def __init__(
 
   log.ControlTransferred(self.control, msg.sender)
   self.control = msg.sender
-  
+
   log.BeneficiaryTransferred(self.beneficiary, msg.sender)
   self.beneficiary = msg.sender
 
@@ -84,7 +107,7 @@ def __init__(
 #
 
 @private
-def _burn(_from: address, _value: uint256(tokens)):
+def _burn(_from: address, _value: uint256(fseTokens)):
   assert _from != ZERO_ADDRESS, "INVALID_ADDRESS"
   # Note: no TPL authorization required to burn tokens
 
@@ -97,13 +120,13 @@ def _burn(_from: address, _value: uint256(tokens)):
 #
 
 @public
-def approve(_spender: address, _value: uint256(tokens)) -> bool:
+def approve(_spender: address, _value: uint256(fseTokens)) -> bool:
   self.allowances[msg.sender][_spender] = _value
   log.Approval(msg.sender, _spender, _value)
   return True
 
 @public
-def transfer(_to: address, _value: uint256(tokens)) -> bool:
+def transfer(_to: address, _value: uint256(fseTokens)) -> bool:
   authorized: bool = self.tplInterface.authorizeTransfer(msg.sender, _to, _value)
   assert authorized, "TPL_NOT_AUTHORIZED"
 
@@ -113,7 +136,7 @@ def transfer(_to: address, _value: uint256(tokens)) -> bool:
   return True
 
 @public
-def transferFrom(_from: address, _to: address, _value: uint256(tokens)) -> bool:
+def transferFrom(_from: address, _to: address, _value: uint256(fseTokens)) -> bool:
   authorized: bool = self.tplInterface.authorizeTransferFrom(msg.sender, _from, _to, _value)
   assert authorized, "TPL_NOT_AUTHORIZED"
 
@@ -125,7 +148,7 @@ def transferFrom(_from: address, _to: address, _value: uint256(tokens)) -> bool:
 
 @public
 @constant
-def allowance(_owner: address, _spender: address) -> uint256(tokens):
+def allowance(_owner: address, _spender: address) -> uint256(fseTokens):
   return self.allowances[_owner][_spender]
 
 #
@@ -133,15 +156,31 @@ def allowance(_owner: address, _spender: address) -> uint256(tokens):
 #
 
 @public
-def burn(_value: uint256(tokens)):
+def burn(_value: uint256(fseTokens)):
   self._burn(msg.sender, _value)
 
 @public
 @payable
-def buy():
-  # TODO
-  tokensPerWei: uint256(tokens / wei) = 42
-  tokenValue: uint256(tokens) = msg.value * tokensPerWei
+def buy(quantityToInvest: uint256(currencyTokens)):
+  # Collect investment
+  if(self.currency == ZERO_ADDRESS):
+    assert as_wei_value(quantityToInvest, 'wei') == msg.value, "INCORRECT_MSG_VALUE"
+  else:
+    balanceBefore: uint256 = self.currency.balanceOf(self)
+    self.currency.transferFrom(msg.sender, self, quantityToInvest)
+    assert self.currency.balanceOf(self) > balanceBefore, "ERC20_TRANSFER_FAILED"
+
+  tokenValue: uint256(fseTokens)
+
+  if(self.state == STATE_INITIALIZATION):
+    tokensPerCurrency: uint256(fseTokens / currencyTokens) = 42 # TODO placeholder
+    tokenValue = quantityToInvest * tokensPerCurrency
+  elif(self.state == STATE_RUNNING):
+    tokenValue = 1 # TODO placeholder
+  else:
+    assert False, "INVALID_STATE"
+
+  assert tokenValue > 0, "NOT_ENOUGH_FUNDS"
   authorized: bool = self.tplInterface.authorizeTransfer(ZERO_ADDRESS, msg.sender, tokenValue)
   assert authorized, "TPL_NOT_AUTHORIZED"
 
@@ -150,7 +189,7 @@ def buy():
   log.Transfer(ZERO_ADDRESS, msg.sender, tokenValue)
 
 @public
-def sell(_value: uint256(tokens)):
+def sell(_value: uint256(fseTokens)):
   authorized: bool = self.tplInterface.authorizeTransfer(msg.sender, ZERO_ADDRESS, _value)
   assert authorized, "TPL_NOT_AUTHORIZED"
 
@@ -177,6 +216,13 @@ def transferControl(_control: address):
 
   log.ControlTransferred(self.control, _control)
   self.control = _control
+
+@public
+def updateMinInvestment(_minInvestment: uint256(currencyTokens)):
+  assert msg.sender == self.control, "CONTROL_ONLY"
+
+  log.MinInvestmentUpdated(self.minInvestment, _minInvestment)
+  self.minInvestment = _minInvestment
 
 @public
 def updateName(_name: string[64]):
