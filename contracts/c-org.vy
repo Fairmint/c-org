@@ -124,7 +124,7 @@ def buy():
   self.tplInterface.authorizeTransfer(ZERO_ADDRESS, msg.sender, value)
 
   self.totalSupply += value
-  self.balanceOf[_to] += value
+  self.balanceOf[msg.sender] += value
   log.Transfer(ZERO_ADDRESS, msg.sender, value)
 
 @public
