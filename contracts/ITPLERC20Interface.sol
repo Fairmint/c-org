@@ -13,7 +13,7 @@ interface ITPLERC20Interface {
     address _to,
     uint256 _value
   ) external
-  	returns (bool);
+    returns (bool);
 
   /**
    * @notice Check if an account is approved to transfer tokens on behalf of account `from` to account `to` of an amount `value`.
@@ -29,5 +29,5 @@ interface ITPLERC20Interface {
     address _to,
     uint256 _value
   ) external
-  	returns (bool);
+    returns (bool);
 }
