@@ -3,7 +3,7 @@ pragma solidity ^0.5.0;
 interface ITPLERC20Interface {
   /**
    * @notice Check if an account is approved to transfer tokens to account `to` of an amount `value`.
-   * @param _from address The account holding the tokens to be sent.
+   * @param _from address The account holding the tokens to be sent and initiating this transfer.
    * @param _to address The account of the recipient. When selling tokens _to will be the ZERO_ADDRESS.
    * @param _value uint256 The amount to transfer.
    * @return bool true if the transfer is authorized.
