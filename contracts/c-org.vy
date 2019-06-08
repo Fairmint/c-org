@@ -4,11 +4,15 @@
 from vyper.interfaces import ERC20
 implements: ERC20
 
+# Constants
 units: {
   currencyTokens: "The reserve currency tokens - either ETH or ERC20",
   fseTokens: "c-org FSE tokens",
   stateMachine: "c-org state machine"
 }
+STATE_INITIALIZATION: constant(uint256(stateMachine)) = 0
+STATE_RUNNING: constant(uint256(stateMachine)) = 1
+STATE_CLOSING: constant(uint256(stateMachine)) = 2
 
 # TODO: switch to an interface file (currently non-native imports fail to compile)
 contract ITPLERC20Interface:
@@ -48,11 +52,6 @@ totalSupply: public(uint256(fseTokens))
 decimals: public(uint256)
 name: public(string[64])
 symbol: public(string[8])
-
-# Constants
-STATE_INITIALIZATION: constant(uint256(stateMachine)) = 0
-STATE_RUNNING: constant(uint256(stateMachine)) = 1
-STATE_CLOSING: constant(uint256(stateMachine)) = 2
 
 @public
 def __init__(
