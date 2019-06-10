@@ -1,18 +1,18 @@
 /**
- * Tests the ability to buy c-org tokens
+ * Tests the ability to buy dat tokens
  */
 
 const { deployCorg } = require('../helpers');
 
-const tplInterfaceArtifact = artifacts.require('TPLERC20Interface_AutoApprove');
+const authorizationArtifact = artifacts.require('Authorization_AutoApprove');
 
-contract('c-org / buy', (accounts) => {
+contract('dat / buy', (accounts) => {
   let corg;
 
   before(async () => {
     corg = await deployCorg({
       initGoal: 99999,
-      tplInterfaceAddress: (await tplInterfaceArtifact.new()).address,
+      authorizationAddress: (await authorizationArtifact.new()).address,
     });
   });
 

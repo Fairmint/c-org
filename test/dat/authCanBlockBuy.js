@@ -1,20 +1,20 @@
 /**
- * Tests buying when not authorized by the TPL.
+ * Tests buying when not authorized.
  */
 
 const { deployCorg, shouldFail } = require('../helpers');
 
-const tplInterfaceArtifact = artifacts.require('TPLERC20Interface_FailEveryOther');
+const authorizationArtifact = artifacts.require('Authorization_FailEveryOther');
 
-contract('c-org / tplCanBlockBuy', (accounts) => {
+contract('dat / authCanBlockBuy', (accounts) => {
   let corg;
-  let tpl;
+  let auth;
 
   before(async () => {
-    tpl = await tplInterfaceArtifact.new();
+    auth = await authorizationArtifact.new();
     corg = await deployCorg({
       initGoal: 99999,
-      tplInterfaceAddress: tpl.address,
+      authorizationAddress: auth.address,
     });
   });
 
@@ -48,7 +48,7 @@ contract('c-org / tplCanBlockBuy', (accounts) => {
 
       describe('can buy tokens on the 3rd attempt', () => {
         before(async () => {
-          await tpl.setAuthorized();
+          await auth.setAuthorized();
           await corg.buy(100, { value: 100, from: accounts[1] });
         });
 
