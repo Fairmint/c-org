@@ -7,7 +7,7 @@ pragma solidity ^0.5.0;
 
 import "../IAuthorization.sol";
 
-contract IAuthorization_AutoApprove is
+contract Authorization_AutoApprove is
   IAuthorization
 {
   function authorizeTransfer(
