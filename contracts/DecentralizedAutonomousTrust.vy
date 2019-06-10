@@ -451,7 +451,7 @@ def buy(
 
   self.totalSupply += tokenValue
   self.balanceOf[msg.sender] += tokenValue
-  self._callTokensReceived(msg.sender, ZERO_ADDRESS, msg.sender, tokenValue, "", "", True)
+  # TODO causes a stack underflow ? self._callTokensReceived(msg.sender, ZERO_ADDRESS, msg.sender, tokenValue, "", "", True)
   log.Transfer(ZERO_ADDRESS, msg.sender, tokenValue)
   # TODO why does this fail? log.Minted(msg.sender, msg.sender, tokenValue, "", "")
 
