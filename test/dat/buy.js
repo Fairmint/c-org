@@ -4,7 +4,7 @@
 
 const { deployDat } = require('../helpers');
 
-const authorizationArtifact = artifacts.require('Authorization_AutoApprove');
+const authorizationArtifact = artifacts.require('Authorization_Pausable');
 
 contract('dat / buy', (accounts) => {
   let dat;
