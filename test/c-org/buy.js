@@ -4,7 +4,7 @@
 
 const { deployCorg } = require('../helpers');
 
-const tplInterfaceArtifact = artifacts.require('TPLERC20Interface_AutoApprove');
+const authorizationArtifact = artifacts.require('Authorization_AutoApprove');
 
 contract('c-org / buy', (accounts) => {
   let corg;
@@ -12,7 +12,7 @@ contract('c-org / buy', (accounts) => {
   before(async () => {
     corg = await deployCorg({
       initGoal: 99999,
-      tplInterfaceAddress: (await tplInterfaceArtifact.new()).address,
+      authorizationAddress: (await authorizationArtifact.new()).address,
     });
   });
 
