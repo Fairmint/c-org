@@ -13,7 +13,8 @@ module.exports = {
     it: 'readonly',
     assert: 'readonly',
     before: 'readonly',
-    describe: 'readonly'
+    describe: 'readonly',
+    web3: 'readonly'
   },
   parserOptions: {
     ecmaVersion: 2018,
