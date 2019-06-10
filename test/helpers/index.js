@@ -1,4 +1,4 @@
-const deployCorg = require('./deployCorg');
+const deployDat = require('./deployDat');
 const shouldFail = require('./shouldFail');
 
-module.exports = { deployCorg, shouldFail };
+module.exports = { deployDat, shouldFail };

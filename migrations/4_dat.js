@@ -1,4 +1,4 @@
-const authorizationArtifact = artifacts.require('Authorization_AutoApprove');
+const authorizationArtifact = artifacts.require('Authorization_Pausable');
 const datArtifact = artifacts.require('DecentralizedAutonomousTrust');
 
 module.exports = function deployDat(deployer) {

@@ -15,4 +15,17 @@ interface IAuthorization {
     address _to,
     uint256 _value
   ) external;
+
+  function isTransferAllowed(
+    address _operator,
+    address _from,
+    address _to,
+    uint256 _value
+  ) external view
+    returns (bool);
+
+  function availableBalanceOf(
+    address _from
+  ) external view
+    returns (uint256);
 }

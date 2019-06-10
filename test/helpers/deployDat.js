@@ -1,6 +1,6 @@
 const datArtifact = artifacts.require('DecentralizedAutonomousTrust');
 
-module.exports = async function deployCorg(options) {
+module.exports = async function deployDat(options) {
   if (!options.authorizationAddress) throw new Error('Options must include the Authorization contract address');
 
   const callOptions = Object.assign({
