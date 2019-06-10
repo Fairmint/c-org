@@ -14,6 +14,7 @@
     "url": "git+https://github.com/Fairmint/c-org.git"
   },
   "dependencies": {
+    "erc1820": "0.0.2",
     "prettier": "1.17.1",
     "tpl-contracts": "1.1.2",
     "truffle": "5.0.21"
