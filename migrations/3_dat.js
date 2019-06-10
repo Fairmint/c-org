@@ -6,9 +6,9 @@ module.exports = function deployDat(deployer) {
     datArtifact,
     'Fairmint', // name
     'FSE', // symbol
-    '42000000000000000000', // tokens
+    '42000000000000000000', // initReserve
     '0x0000000000000000000000000000000000000000', // currency
-    '0', // minGoal
+    '0', // initGoal
     '0', // minInvestment
     authorizationArtifact.address, // TODO switch to real authorization interface
   );

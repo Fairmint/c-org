@@ -206,8 +206,8 @@ def __init__(
   self.beneficiary = msg.sender
 
   # Register supported interfaces
-  self.ERC1820Registry.setInterfaceImplementer(self, keccak256("ERC20Token"), self)
-  self.ERC1820Registry.setInterfaceImplementer(self, keccak256("ERC777Token"), self)
+  # TODO self.ERC1820Registry.setInterfaceImplementer(self, keccak256("ERC20Token"), self)
+  # TODO self.ERC1820Registry.setInterfaceImplementer(self, keccak256("ERC777Token"), self)
 #endregion
 
 #region Private helper functions
@@ -230,7 +230,7 @@ def _callTokensToSend(
   @param userData bytes extra information provided by the token holder (if any)
   @param operatorData bytes extra information provided by the operator (if any)
   """
-  implementer: address = self.ERC1820Registry.getInterfaceImplementer(_from, TOKENS_SENDER_INTERFACE_HASH)
+  implementer: address = ZERO_ADDRESS # TODO self.ERC1820Registry.getInterfaceImplementer(_from, TOKENS_SENDER_INTERFACE_HASH)
   if(implementer != ZERO_ADDRESS):
     IERC777Sender(implementer).tokensToSend(_operator, _from, _to, _amount, _userData, _operatorData)
 
@@ -255,7 +255,7 @@ def _callTokensReceived(
   @param operatorData bytes extra information provided by the operator (if any)
   @param requireReceptionAck if true, contract recipients are required to implement ERC777TokensRecipient
   """
-  implementer: address = self.ERC1820Registry.getInterfaceImplementer(_to, TOKENS_RECIPIENT_INTERFACE_HASH)
+  implementer: address = ZERO_ADDRESS # TODO self.ERC1820Registry.getInterfaceImplementer(_to, TOKENS_RECIPIENT_INTERFACE_HASH)
   if(implementer != ZERO_ADDRESS):
     IERC777Recipient(implementer).tokensReceived(_operator, _from, _to, _amount, _userData, _operatorData)
   elif(_requireReceptionAck):
@@ -430,6 +430,7 @@ def buy(
   if(self.currency == ZERO_ADDRESS):
     assert as_wei_value(_quantityToInvest, 'wei') == msg.value, "INCORRECT_MSG_VALUE"
   else:
+    # TODO support ERC-777 currency?
     assert msg.value == 0, "DO_NOT_SEND_ETH"
     balanceBefore: uint256 = self.currency.balanceOf(self)
     self.currency.transferFrom(msg.sender, self, as_unitless_number(_quantityToInvest))
