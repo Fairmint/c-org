@@ -1,9 +1,9 @@
 const authorizationArtifact = artifacts.require('Authorization_AutoApprove');
-const corgArtifact = artifacts.require('c-org');
+const datArtifact = artifacts.require('DecentralizedAutonomousTrust');
 
 module.exports = function deployDat(deployer) {
   deployer.deploy(
-    corgArtifact,
+    datArtifact,
     'Fairmint', // name
     'FSE', // symbol
     '42000000000000000000', // tokens

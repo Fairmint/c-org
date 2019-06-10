@@ -6,7 +6,7 @@ const { deployCorg, shouldFail } = require('../helpers');
 
 const authorizationArtifact = artifacts.require('Authorization_FailEveryOther');
 
-contract('c-org / authCanBlockBuy', (accounts) => {
+contract('dat / authCanBlockBuy', (accounts) => {
   let corg;
   let auth;
 

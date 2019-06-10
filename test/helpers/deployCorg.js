@@ -1,4 +1,4 @@
-const corgArtifact = artifacts.require('c-org');
+const datArtifact = artifacts.require('DecentralizedAutonomousTrust');
 
 module.exports = async function deployCorg(options) {
   if (!options.authorizationAddress) throw new Error('Options must include the Authorization contract address');
@@ -12,7 +12,7 @@ module.exports = async function deployCorg(options) {
     minInvestment: '0',
   }, options);
 
-  return corgArtifact.new(
+  return datArtifact.new(
     callOptions.name,
     callOptions.symbol,
     callOptions.initReserve,

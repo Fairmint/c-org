@@ -1,12 +1,12 @@
 /**
- * Tests the ability to buy c-org tokens
+ * Tests the ability to buy dat tokens
  */
 
 const { deployCorg } = require('../helpers');
 
 const authorizationArtifact = artifacts.require('Authorization_AutoApprove');
 
-contract('c-org / buy', (accounts) => {
+contract('dat / buy', (accounts) => {
   let corg;
 
   before(async () => {

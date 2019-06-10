@@ -92,7 +92,7 @@ Sent: event({
   _operatorData: bytes[32]
 })
 
-# Events triggered when updating the c-org configuration
+# Events triggered when updating the DAT's configuration
 AuthorizationAddressUpdated: event({
   _previousAuthorizationAddress: indexed(address),
   _authorizationAddress: indexed(address)
@@ -129,7 +129,7 @@ STATE_CLOSING: constant(uint256(stateMachine)) = 2
 TOKENS_SENDER_INTERFACE_HASH: constant(bytes32) = keccak256("ERC777TokensSender")
 TOKENS_RECIPIENT_INTERFACE_HASH: constant(bytes32) = keccak256("ERC777TokensRecipient")
 
-# Data for c-org business logic
+# Data for DAT business logic
 beneficiary: public(address)
 control: public(address)
 currencyAddress: public(address)
@@ -419,7 +419,7 @@ def send(
   self._send(msg.sender, msg.sender, _recipient, _amount, _data, "", True)
 #endregion
 
-#region Functions for c-org business logic
+#region Functions for DAT business logic
 ##################################################
 @public
 @payable
@@ -464,7 +464,7 @@ def sell(
   self._burn(msg.sender, msg.sender, _amount, "", "")
 #endregion
 
-#region Functions to update c-org configuration
+#region Functions to update DAT configuration
 ##################################################
 # These can only be called by the organization accounts
 
