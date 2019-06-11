@@ -627,7 +627,7 @@ def updateBurnThreshold(
 ):
   assert msg.sender == self.control, "CONTROL_ONLY"
 
-  assert _burnThreshold <= 1, "INVALID_THRESHOLD"
+  assert _burnThreshold <= convert(1, decimal), "INVALID_THRESHOLD"
   log.BurnThresholdUpdated(self.burnThreshold, _burnThreshold)
   self.burnThreshold = _burnThreshold
 
