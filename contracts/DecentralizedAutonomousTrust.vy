@@ -372,7 +372,7 @@ def _sendCurrency(
   _amount: uint256(currencyTokens)
 ):
   if(self.currency == ZERO_ADDRESS):
-    send(_to, _amount)
+    send(_to, as_wei_value(_amount, 'wei'))
   else:
     balanceBefore: uint256 = self.currency.balanceOf(self)
     self.currency.transferFrom(self, _to, as_unitless_number(_amount))
