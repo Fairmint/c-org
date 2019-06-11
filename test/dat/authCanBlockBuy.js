@@ -2,58 +2,62 @@
  * Tests buying when not authorized.
  */
 
-const { deployCorg, shouldFail } = require('../helpers');
+const { deployDat, shouldFail } = require('../helpers');
 
-const authorizationArtifact = artifacts.require('Authorization_FailEveryOther');
+const authorizationArtifact = artifacts.require('Authorization_Pausable');
 
 contract('dat / authCanBlockBuy', (accounts) => {
-  let corg;
+  let dat;
   let auth;
 
   before(async () => {
     auth = await authorizationArtifact.new();
-    corg = await deployCorg({
+    dat = await deployDat({
       initGoal: 99999,
       authorizationAddress: auth.address,
     });
   });
 
   it('balanceOf should be 0 by default', async () => {
-    const balance = await corg.balanceOf(accounts[1]);
+    const balance = await dat.balanceOf(accounts[1]);
 
     assert.equal(balance, 0);
   });
 
   describe('can buy tokens', () => {
     before(async () => {
-      await corg.buy(100, { value: 100, from: accounts[1] });
+      await dat.buy(100, { value: 100, from: accounts[1] });
     });
 
     it('balanceOf should have increased', async () => {
-      const balance = await corg.balanceOf(accounts[1]);
+      const balance = await dat.balanceOf(accounts[1]);
 
       assert.equal(balance, 4200);
     });
 
-    describe('should fail to buy tokens the 2nd time', () => {
+    describe('when blocked', () => {
       before(async () => {
-        await shouldFail(corg.buy(100, { value: 100, from: accounts[1] }));
+        await auth.setAuthorized(false);
+      });
+
+      it('should fail to buy tokens', async () => {
+        await shouldFail(dat.buy(100, { value: 100, from: accounts[1] }));
       });
 
       it('balanceOf should not have changed', async () => {
-        const balance = await corg.balanceOf(accounts[1]);
+        const balance = await dat.balanceOf(accounts[1]);
 
         assert.equal(balance, 4200);
       });
 
       describe('can buy tokens on the 3rd attempt', () => {
         before(async () => {
-          await auth.setAuthorized();
-          await corg.buy(100, { value: 100, from: accounts[1] });
+          await auth.setAuthorized(true);
+          await dat.buy(100, { value: 100, from: accounts[1] });
         });
 
         it('balanceOf should have increased', async () => {
-          const balance = await corg.balanceOf(accounts[1]);
+          const balance = await dat.balanceOf(accounts[1]);
 
           assert.equal(balance, 8400);
         });
