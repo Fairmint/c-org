@@ -3,10 +3,7 @@
 #region Types
 ##################################################
 units: {
-  currencyTokens: "The reserve currency - either ETH or ERC20",
-  denominator: "Fraction denominator",
   FAIRs: "FAIR Securities",
-  numerator: "Fraction numerator",
   stateMachine: "The DAT's internal state machine"
 }
 
@@ -107,10 +104,10 @@ BeneficiaryTransferred: event({
   _beneficiary: indexed(address)
 })
 BurnThresholdUpdated: event({
-  _previousBurnThresholdNum: uint256(numerator),
-  _previousBurnThresholdDen: uint256(denominator),
-  _burnThreshdoldNum: uint256(numerator),
-  _burnThreshdoldDen: uint256(denominator)
+  _previousBurnThresholdNum: uint256(FAIRs),
+  _previousBurnThresholdDen: uint256(FAIRs),
+  _burnThreshdoldNum: uint256(FAIRs),
+  _burnThreshdoldDen: uint256(FAIRs)
 })
 ControlTransferred: event({
   _previousControl: indexed(address),
@@ -121,14 +118,14 @@ FeeCollectorTransferred: event({
   _feeCollector: address
 })
 FeeUpdated: event({
-  _previousFeeNum: uint256(numerator),
-  _previousFeeDen: uint256(denominator),
-  _feeNum: uint256(numerator),
-  _feeDen: uint256(denominator)
+  _previousFeeNum: uint256(FAIRs),
+  _previousFeeDen: uint256(FAIRs),
+  _feeNum: uint256(FAIRs),
+  _feeDen: uint256(FAIRs)
 })
 MinInvestmentUpdated: event({
-  _previousMinInvestment: uint256(currencyTokens),
-  _minInvestment: uint256(currencyTokens)
+  _previousMinInvestment: uint256,
+  _minInvestment: uint256
 })
 NameUpdated: event({
   _previousName: string[64],
@@ -154,25 +151,25 @@ TOKENS_RECIPIENT_INTERFACE_HASH: constant(bytes32) = keccak256("ERC777TokensReci
 authorizationAddress: public(address)
 authorization: IAuthorization # redundant w/ authorizationAddress, for convenience
 beneficiary: public(address)
-burnThresholdNum: public(uint256(numerator))
-burnThresholdDen: public(uint256(denominator))
-buySlopeNum: public(uint256(numerator))
-buySlopeDen: public(uint256(denominator))
+burnThresholdNum: public(uint256(FAIRs))
+burnThresholdDen: public(uint256(FAIRs))
+buySlopeNum: public(uint256)
+buySlopeDen: public(uint256(FAIRs))
 control: public(address)
 currencyAddress: public(address)
 currency: ERC20 # redundant w/ currencyAddress, for convenience
 feeCollector: public(address)
-feeNum: public(uint256(numerator))
-feeDen: public(uint256(denominator))
+feeNum: public(uint256)
+feeDen: public(uint256)
 initDeadline: public(timestamp)
-initGoal: public(uint256(currencyTokens))
-initInvestors: public(map(address, uint256(currencyTokens)))
+initGoal: public(uint256(FAIRs))
+initInvestors: public(map(address, uint256))
 initReserve: public(uint256(FAIRs))
-investmentReserveNum: public(uint256(numerator))
-investmentReserveDen: public(uint256(denominator))
-minInvestment: public(uint256(currencyTokens))
-revenueCommitmentNum: public(uint256(numerator))
-revenueCommitmentDen: public(uint256(denominator))
+investmentReserveNum: public(uint256)
+investmentReserveDen: public(uint256)
+minInvestment: public(uint256)
+revenueCommitmentNum: public(uint256)
+revenueCommitmentDen: public(uint256)
 state: public(uint256(stateMachine))
 
 # Data storage required by the ERC-20 token standard
@@ -197,15 +194,15 @@ def __init__(
   _symbol: string[8],
   _initReserve: uint256(FAIRs),
   _currencyAddress: address,
-  _initGoal: uint256(currencyTokens),
-  _minInvestment: uint256(currencyTokens),
+  _initGoal: uint256(FAIRs),
+  _minInvestment: uint256,
   _initDeadline: timestamp,
-  _buySlopeNum: uint256(numerator),
-  _buySlopeDen: uint256(denominator),
-  _investmentReserveNum: uint256(numerator),
-  _investmentReserveDen: uint256(denominator),
-  _revenueCommitmentNum: uint256(numerator),
-  _revenueCommitmentDen: uint256(denominator),
+  _buySlopeNum: uint256,
+  _buySlopeDen: uint256(FAIRs),
+  _investmentReserveNum: uint256,
+  _investmentReserveDen: uint256,
+  _revenueCommitmentNum: uint256,
+  _revenueCommitmentDen: uint256,
   _authorizationAddress: address
 ):
   self.ERC1820Registry = IERC1820Registry(0x1820a4B7618BdE71Dce8cdc73aAB6C95905faD24) # constant for all networks
@@ -369,7 +366,7 @@ def _send(
 @private
 def _sendCurrency(
   _to: address,
-  _amount: uint256(currencyTokens)
+  _amount: uint256
 ):
   if(self.currency == ZERO_ADDRESS):
     send(_to, as_wei_value(_amount, 'wei'))
@@ -511,16 +508,16 @@ def availableBalanceOf(
 
 @public
 @constant
-def buybackReserve() -> uint256(currencyTokens):
+def buybackReserve() -> uint256:
   if(self.currency == ZERO_ADDRESS):
-    return self.balance
+    return as_unitless_number(self.balance)
   else:
     return self.currency.balanceOf(self)
 
 @public
 @payable
 def buy(
-  _quantityToInvest: uint256(currencyTokens)
+  _quantityToInvest: uint256
 ):
   assert _quantityToInvest >= self.minInvestment, "SEND_AT_LEAST_MIN_INVESTMENT"
 
@@ -543,8 +540,8 @@ def buy(
 
     if(self.totalSupply - self.initReserve >= self.initGoal):
       self.state = STATE_RUNNING
-      reserve: uint256(currencyTokens) = self.buybackReserve() * (self.investmentReserveDen - self.investmentReserveNum) / self.investmentReserveDen
-      fee: uint256(currencyTokens) = reserve * self.feeNum / self.feeDen
+      reserve: uint256(FAIRs) = self.buybackReserve() * (self.investmentReserveDen - self.investmentReserveNum) / self.investmentReserveDen
+      fee: uint256(FAIRs) = reserve * self.feeNum / self.feeDen
       self._sendCurrency(self.feeCollector, fee)
       self._sendCurrency(self.beneficiary, reserve - fee)
   elif(self.state == STATE_RUNNING):
@@ -619,8 +616,8 @@ def transferFeeCollector(
 
 @public
 def updateBurnThreshold(
-  _burnThresholdNum: uint256(numerator),
-  _burnThresholdDen: uint256(denominator)
+  _burnThresholdNum: uint256(FAIRs),
+  _burnThresholdDen: uint256
 ):
   assert msg.sender == self.control, "CONTROL_ONLY"
 
@@ -632,8 +629,8 @@ def updateBurnThreshold(
 
 @public
 def updateFee(
-  _feeNum: uint256(numerator),
-  _feeDen: uint256(denominator)
+  _feeNum: uint256(FAIRs),
+  _feeDen: uint256
 ):
   assert msg.sender == self.control, "CONTROL_ONLY"
   assert _feeDen > 0, "INVALID_FEE_DEM"
@@ -645,7 +642,7 @@ def updateFee(
 
 @public
 def updateMinInvestment(
-  _minInvestment: uint256(currencyTokens)
+  _minInvestment: uint256
 ):
   assert msg.sender == self.control, "CONTROL_ONLY"
   assert _minInvestment > 0, "INVALID_MIN_INVESTMENT"
