@@ -9,7 +9,7 @@ module.exports = function deployDat(deployer) {
     '42000000000000000000', // initReserve
     '0x0000000000000000000000000000000000000000', // currencyAddress
     '0', // initGoal
-    '0', // minInvestment
+    '100000000000000000000', // minInvestment
     '0', // initDeadline
     '1', // buySlopeNum
     '100000', // buySlopeDen

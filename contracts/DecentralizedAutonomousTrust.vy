@@ -166,6 +166,7 @@ feeNum: public(uint256(numerator))
 feeDen: public(uint256(denominator))
 initDeadline: public(timestamp)
 initGoal: public(uint256(currencyTokens))
+initInvestors: public(map(address, uint256(currencyTokens)))
 initReserve: public(uint256(FAIRs))
 investmentReserveNum: public(uint256(numerator))
 investmentReserveDen: public(uint256(denominator))
@@ -207,8 +208,6 @@ def __init__(
   _revenueCommitmentDen: uint256(denominator),
   _authorizationAddress: address
 ):
-  assert _authorizationAddress.is_contract, "INVALID_CONTRACT_ADDRESS"
-
   self.ERC1820Registry = IERC1820Registry(0x1820a4B7618BdE71Dce8cdc73aAB6C95905faD24) # constant for all networks
 
   # TODO test method calls
@@ -233,22 +232,35 @@ def __init__(
   else:
     self.initGoal = _initGoal
 
+  assert _minInvestment > 0, "INVALID_MIN_INVESTMENT"
   log.MinInvestmentUpdated(self.minInvestment, _minInvestment)
   self.minInvestment = _minInvestment
 
   self.initDeadline = _initDeadline
+  assert _buySlopeNum > 0, "INVALID_SLOPE_NUM"
+  assert _buySlopeDen > 0, "INVALID_SLOPE_DEM"
+  assert _buySlopeNum / _buySlopeDen <= 1, "INVALID_SLOPE"
   self.buySlopeNum = _buySlopeNum
   self.buySlopeDen = _buySlopeDen
+  assert _investmentReserveNum > 0, "INVALID_RESERVE_NUM"
+  assert _investmentReserveDen > 0, "INVALID_RESERVE_DEN"
+  assert _investmentReserveNum / _investmentReserveDen <= 1, "INVALID_RESERVE"
   self.investmentReserveNum = _investmentReserveNum
   self.investmentReserveDen = _investmentReserveDen
+  assert _revenueCommitmentNum > 0, "INVALID_COMMITMENT_NUM"
+  assert _revenueCommitmentDen > 0, "INVALID_COMMITMENT_DEN"
+  assert _revenueCommitmentNum / _revenueCommitmentDen <= 1, "INVALID_COMMITMENT"
   self.revenueCommitmentNum = _revenueCommitmentNum
   self.revenueCommitmentDen = _revenueCommitmentDen
 
+  assert _authorizationAddress.is_contract, "INVALID_CONTRACT_ADDRESS"
   log.AuthorizationAddressUpdated(self.authorizationAddress, _authorizationAddress)
   self.authorizationAddress = _authorizationAddress
   self.authorization = IAuthorization(_authorizationAddress)
 
   self.burnThresholdNum = 1
+  self.burnThresholdDen = 1
+  self.feeDen = 1
 
   log.ControlTransferred(self.control, msg.sender)
   self.control = msg.sender
@@ -353,6 +365,18 @@ def _send(
 
   log.Sent(_operator, _from, _to, _amount, _userData, _operatorData)
   log.Transfer(_from, _to, _amount)
+
+@private
+def _sendCurrency(
+  _to: address,
+  _amount: uint256(currencyTokens)
+):
+  if(self.currency == ZERO_ADDRESS):
+    send(_to, _amount)
+  else:
+    balanceBefore: uint256 = self.currency.balanceOf(self)
+    self.currency.transferFrom(self, _to, as_unitless_number(_amount))
+    assert self.currency.balanceOf(self) > balanceBefore, "ERC20_TRANSFER_FAILED"
 #endregion
 
 #region Functions required by the ERC-20 token standard
@@ -486,10 +510,20 @@ def availableBalanceOf(
     return self.authorization.availableBalanceOf(_from)
 
 @public
+@constant
+def buybackReserve() -> uint256(currencyTokens):
+  if(self.currency == ZERO_ADDRESS):
+    return self.balance
+  else:
+    return self.currency.balanceOf(self)
+
+@public
 @payable
 def buy(
   _quantityToInvest: uint256(currencyTokens)
 ):
+  assert _quantityToInvest >= self.minInvestment, "SEND_AT_LEAST_MIN_INVESTMENT"
+
   # Collect investment
   if(self.currency == ZERO_ADDRESS):
     assert as_wei_value(_quantityToInvest, 'wei') == msg.value, "INCORRECT_MSG_VALUE"
@@ -501,11 +535,20 @@ def buy(
     assert self.currency.balanceOf(self) > balanceBefore, "ERC20_TRANSFER_FAILED"
 
   tokenValue: uint256(FAIRs)
-  # TODO placeholder
   if(self.state == STATE_INITIALIZATION):
-    tokensPerCurrency: uint256(FAIRs / currencyTokens) = 42
-    tokenValue = _quantityToInvest * tokensPerCurrency
+    assert self.initDeadline == 0 or self.initDeadline < block.timestamp, "DEADLINE_PASSED"
+
+    tokenValue = 2 * _quantityToInvest * self.buySlopeDen / (self.initGoal * self.buySlopeNum)
+    self.initInvestors[msg.sender] += _quantityToInvest
+
+    if(self.totalSupply - self.initReserve >= self.initGoal):
+      self.state = STATE_RUNNING
+      reserve: uint256(currencyTokens) = self.buybackReserve() * (self.investmentReserveDen - self.investmentReserveNum) / self.investmentReserveDen
+      fee: uint256(currencyTokens) = reserve * self.feeNum / self.feeDen
+      self._sendCurrency(self.feeCollector, fee)
+      self._sendCurrency(self.beneficiary, reserve - fee)
   elif(self.state == STATE_RUNNING):
+    # TODO placeholder
     tokenValue = 1
   else:
     assert False, "INVALID_STATE"
@@ -581,6 +624,8 @@ def updateBurnThreshold(
 ):
   assert msg.sender == self.control, "CONTROL_ONLY"
 
+  assert _burnThresholdDen > 0, "INVALID_THRESHOLD_DEM"
+  assert _burnThresholdNum / _burnThresholdDen <= 1, "INVALID_THRESHOLD"
   log.BurnThresholdUpdated(self.burnThresholdNum, self.burnThresholdDen, _burnThresholdNum, _burnThresholdDen)
   self.burnThresholdNum = _burnThresholdNum
   self.burnThresholdDen = _burnThresholdDen
@@ -591,6 +636,8 @@ def updateFee(
   _feeDen: uint256(denominator)
 ):
   assert msg.sender == self.control, "CONTROL_ONLY"
+  assert _feeDen > 0, "INVALID_FEE_DEM"
+  assert _feeNum / _feeDen <= 1, "INVALID_FEE"
 
   log.FeeUpdated(self.feeNum, self.feeDen, _feeNum, _feeDen)
   self.feeNum = _feeNum
@@ -601,6 +648,7 @@ def updateMinInvestment(
   _minInvestment: uint256(currencyTokens)
 ):
   assert msg.sender == self.control, "CONTROL_ONLY"
+  assert _minInvestment > 0, "INVALID_MIN_INVESTMENT"
 
   log.MinInvestmentUpdated(self.minInvestment, _minInvestment)
   self.minInvestment = _minInvestment

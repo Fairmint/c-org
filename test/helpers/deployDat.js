@@ -9,7 +9,7 @@ module.exports = async function deployDat(options) {
     initReserve: '0',
     currency: '0x0000000000000000000000000000000000000000',
     initGoal: '0',
-    minInvestment: '0',
+    minInvestment: '1',
     initDeadline: '0',
     buySlopeNum: '1',
     buySlopeDen: '100000',
