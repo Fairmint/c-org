@@ -1,6 +1,5 @@
-const authorizationArtifact = artifacts.require('Authorization_Pausable');
+const authorizationArtifact = artifacts.require('Authorization');
 
 module.exports = function deployAuth(deployer) {
-  // TODO switch to real authorization interface
-  deployer.deploy(authorizationArtifact);
+  deployer.deploy(authorizationArtifact, 0);
 };

@@ -12,6 +12,10 @@ contract Authorization_Pausable is
 {
   bool public authorized = true;
 
+  constructor() public
+    Authorization(0)
+  {}
+
   function isTransferAllowed(
     address _operator,
     address _from,

@@ -1,4 +1,4 @@
-const authorizationArtifact = artifacts.require('Authorization_Pausable');
+const authorizationArtifact = artifacts.require('Authorization');
 const datArtifact = artifacts.require('DecentralizedAutonomousTrust');
 
 module.exports = function deployDat(deployer) {
@@ -17,6 +17,6 @@ module.exports = function deployDat(deployer) {
     '10', // investmentReserveDen
     '1', // revenueCommitementNum
     '10', // revenueCommitementDen
-    authorizationArtifact.address, // TODO switch to real authorization interface
+    authorizationArtifact.address,
   );
 };

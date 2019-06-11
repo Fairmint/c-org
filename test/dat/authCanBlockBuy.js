@@ -16,6 +16,7 @@ contract('dat / authCanBlockBuy', (accounts) => {
       initGoal: 99999,
       authorizationAddress: auth.address,
     });
+    await auth.updateDat(dat.address);
   });
 
   it('balanceOf should be 0 by default', async () => {
