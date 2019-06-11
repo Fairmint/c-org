@@ -479,7 +479,7 @@ def send(
 @constant
 def availableBalanceOf(
   _from: address
-) -> uint256:
+) -> uint256(FAIRs):
   if(state == STATE_INITIALIZATION):
     return 0
   else:
