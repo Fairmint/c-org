@@ -123,7 +123,7 @@ FeeCollectorTransferred: event({
 FeeUpdated: event({
   _previousFeeNum: uint256(numerator),
   _previousFeeDen: uint256(denominator),
-  _eeeNum: uint256(numerator),
+  _feeNum: uint256(numerator),
   _feeDen: uint256(denominator)
 })
 MinInvestmentUpdated: event({
@@ -163,7 +163,7 @@ currencyAddress: public(address)
 currency: ERC20 # redundant w/ currencyAddress, for convenience
 feeCollector: public(address)
 feeNum: public(uint256(numerator))
-feeDem: public(uint256(denominator))
+feeDen: public(uint256(denominator))
 initDeadline: public(timestamp)
 initGoal: public(uint256(currencyTokens))
 initReserve: public(uint256(FAIRs))
