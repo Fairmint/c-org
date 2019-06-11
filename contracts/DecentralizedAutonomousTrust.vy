@@ -540,8 +540,8 @@ def buy(
 
     if(self.totalSupply - self.initReserve >= self.initGoal):
       self.state = STATE_RUNNING
-      reserve: uint256(FAIRs) = self.buybackReserve() * (self.investmentReserveDen - self.investmentReserveNum) / self.investmentReserveDen
-      fee: uint256(FAIRs) = reserve * self.feeNum / self.feeDen
+      reserve: uint256 = self.buybackReserve() * (self.investmentReserveDen - self.investmentReserveNum) / self.investmentReserveDen
+      fee: uint256 = reserve * self.feeNum / self.feeDen
       self._sendCurrency(self.feeCollector, fee)
       self._sendCurrency(self.beneficiary, reserve - fee)
   elif(self.state == STATE_RUNNING):
@@ -629,7 +629,7 @@ def updateBurnThreshold(
 
 @public
 def updateFee(
-  _feeNum: uint256(FAIRs),
+  _feeNum: uint256,
   _feeDen: uint256
 ):
   assert msg.sender == self.control, "CONTROL_ONLY"
