@@ -2,7 +2,6 @@ pragma solidity ^0.5.0;
 
 import "./IAuthorization.sol";
 import "./IDAT.sol";
-import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 
 
 contract Authorization is
@@ -19,6 +18,7 @@ contract Authorization is
   uint256 public initLockup;
   mapping(address => LockedFSE[]) public lockedTokens;
 
+  // TODO switch to init pattern in order to support zos upgrades
   constructor(
     uint256 _initLockup
   ) public
@@ -75,6 +75,6 @@ contract Authorization is
       return 0;
     }
     // TODO consider locked tokens
-    return IERC20(msg.sender).balanceOf(_from);
+    return dat.balanceOf(_from);
   }
 }
