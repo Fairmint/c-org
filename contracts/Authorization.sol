@@ -5,8 +5,8 @@ pragma solidity ^0.5.0;
  * Implements the authorization interface and authorizes everything for everyone.
  */
 
-import "IAuthorization.sol";
-import "IDAT.sol";
+import "./IAuthorization.sol";
+import "./IDAT.sol";
 import 'openzeppelin-solidity/contracts/token/ERC20/IERC20.sol';
 
 contract Authorization is
@@ -38,7 +38,7 @@ contract Authorization is
     address _from,
     address _to,
     uint256 _value
-  ) external
+  ) public
   {
     require(msg.sender == dat, "ONLY_CALL_FROM_DAT");
     require(isTransferAllowed(_operator, _from, _to, _value), "NOT_AUTHORIZED");
@@ -53,14 +53,14 @@ contract Authorization is
     returns (bool)
   {
     // TODO state > 0 or tokens are from the initReserve
-    require(dat.state > 0, "NO_TRANSFER_DURING_INIT");
+    require(dat.state() > 0, "NO_TRANSFER_DURING_INIT");
 
     return true;
   }
 
   function availableBalanceOf(
     address _from
-  ) external view
+  ) public view
     returns (uint256)
   {
     return IERC20(msg.sender).balanceOf(_from);

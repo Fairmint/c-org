@@ -238,8 +238,8 @@ def __init__(
   self.buySlopeDen = _buySlopeDen
   self.investmentReserveNum = _investmentReserveNum
   self.investmentReserveDen = _investmentReserveDen
-  self.revenueCommitmentNum = _revenueCommitementNum
-  self.revenueCommitmentDen = _revenueCommitementDen
+  self.revenueCommitmentNum = _revenueCommitmentNum
+  self.revenueCommitmentDen = _revenueCommitmentDen
 
   log.AuthorizationAddressUpdated(self.authorizationAddress, _authorizationAddress)
   self.authorizationAddress = _authorizationAddress

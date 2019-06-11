@@ -25,7 +25,7 @@ contract Authorization_Pausable is
 
   function availableBalanceOf(
     address _from
-  ) external view
+  ) public view
     returns (uint256)
   {
     if(authorized)
@@ -40,7 +40,7 @@ contract Authorization_Pausable is
 
   function setAuthorized(
     bool _authorized
-  ) external
+  ) public
   {
     authorized = _authorized;
   }
