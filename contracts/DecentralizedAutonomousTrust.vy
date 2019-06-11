@@ -4,7 +4,9 @@
 ##################################################
 units: {
   currencyTokens: "The reserve currency - either ETH or ERC20",
+  denominator: "Fraction denominator",
   FAIRs: "FAIR Securities",
+  numerator: "Fraction numerator",
   stateMachine: "The DAT's internal state machine"
 }
 
@@ -19,6 +21,9 @@ contract IAuthorization:
     _to: address,
     _value: uint256(FAIRs)
   ): modifying
+  def availableBalanceOf(
+    _from: address
+  ) -> uint256(FAIRs): constant
 contract IERC1820Registry:
   def setInterfaceImplementer(
     _account: address,
@@ -101,9 +106,25 @@ BeneficiaryTransferred: event({
   _previousBeneficiary: indexed(address),
   _beneficiary: indexed(address)
 })
+BurnThresholdUpdated: event({
+  _previousBurnThresholdNum: uint256(numerator),
+  _previousBurnThresholdDen: uint256(denominator),
+  _burnThreshdoldNum: uint256(numerator),
+  _burnThreshdoldDen: uint256(denominator)
+})
 ControlTransferred: event({
   _previousControl: indexed(address),
   _control: indexed(address)
+})
+FeeCollectorTransferred: event({
+  _previousFeeCollector: address,
+  _feeCollector: address
+})
+FeeUpdated: event({
+  _previousFeeNum: uint256(numerator),
+  _previousFeeDen: uint256(denominator),
+  _eeeNum: uint256(numerator),
+  _feeDen: uint256(denominator)
 })
 MinInvestmentUpdated: event({
   _previousMinInvestment: uint256(currencyTokens),
@@ -130,16 +151,25 @@ TOKENS_SENDER_INTERFACE_HASH: constant(bytes32) = keccak256("ERC777TokensSender"
 TOKENS_RECIPIENT_INTERFACE_HASH: constant(bytes32) = keccak256("ERC777TokensRecipient")
 
 # Data for DAT business logic
+authorizationAddress: public(address)
+authorization: IAuthorization # redundant w/ authorizationAddress, for convenience
 beneficiary: public(address)
+burnThresholdNum: public(uint256(numerator))
+burnThresholdDen: public(uint256(denominator))
+buySlopeNum: public(uint256(numerator))
+buySlopeDen: public(uint256(denominator))
 control: public(address)
 currencyAddress: public(address)
 currency: ERC20 # redundant w/ currencyAddress, for convenience
+initDeadline: public(timestamp)
 initGoal: public(uint256(currencyTokens))
 initReserve: public(uint256(FAIRs))
+investmentReserveNum: public(uint256(numerator))
+investmentReserveDen: public(uint256(denominator))
 minInvestment: public(uint256(currencyTokens))
+revenueCommitmentNum: public(uint256(numerator))
+revenueCommitmentDen: public(uint256(denominator))
 state: public(uint256(stateMachine))
-authorizationAddress: public(address)
-authorization: IAuthorization # redundant w/ authorizationAddress, for convenience
 
 # Data storage required by the ERC-20 token standard
 allowances: map(address, map(address, uint256(FAIRs))) # not public: exposed via `allowance`
@@ -165,6 +195,13 @@ def __init__(
   _currencyAddress: address,
   _initGoal: uint256(currencyTokens),
   _minInvestment: uint256(currencyTokens),
+  _initDeadline: timestamp,
+  _buySlopeNum: uint256(numerator),
+  _buySlopeDen: uint256(denominator),
+  _investmentReserveNum: uint256(numerator),
+  _investmentReserveDen: uint256(denominator),
+  _revenueCommitmentNum: uint256(numerator),
+  _revenueCommitmentDen: uint256(denominator),
   _authorizationAddress: address
 ):
   assert _authorizationAddress.is_contract, "INVALID_CONTRACT_ADDRESS"
@@ -193,17 +230,31 @@ def __init__(
   else:
     self.initGoal = _initGoal
 
+  log.MinInvestmentUpdated(self.minInvestment, _minInvestment)
   self.minInvestment = _minInvestment
+
+  self.initDeadline = _initDeadline
+  self.buySlopeNum = _buySlopeNum
+  self.buySlopeDen = _buySlopeDen
+  self.investmentReserveNum = _investmentReserveNum
+  self.investmentReserveDen = _investmentReserveDen
+  self.revenueCommitmentNum = _revenueCommitementNum
+  self.revenueCommitmentDen = _revenueCommitementDen
 
   log.AuthorizationAddressUpdated(self.authorizationAddress, _authorizationAddress)
   self.authorizationAddress = _authorizationAddress
   self.authorization = IAuthorization(_authorizationAddress)
+
+  self.burnThresholdNum = 1
 
   log.ControlTransferred(self.control, msg.sender)
   self.control = msg.sender
 
   log.BeneficiaryTransferred(self.beneficiary, msg.sender)
   self.beneficiary = msg.sender
+
+  log.FeeCollectorTransferred(self.feeCollector, msg.sender)
+  self.feeCollector = msg.sender
 
   # Register supported interfaces
   self.ERC1820Registry.setInterfaceImplementer(self, keccak256("ERC20Token"), self)
@@ -422,6 +473,16 @@ def send(
 #region Functions for DAT business logic
 ##################################################
 @public
+@constant
+def availableBalanceOf(
+  _from: address
+) -> uint256:
+  if(state == STATE_INITIALIZATION):
+    return 0
+  else:
+    return self.authorization.availableBalanceOf(_from)
+
+@public
 @payable
 def buy(
   _quantityToInvest: uint256(currencyTokens)
@@ -499,6 +560,38 @@ def transferControl(
 
   log.ControlTransferred(self.control, _control)
   self.control = _control
+
+@public
+def transferFeeCollector(
+  _feeCollector: address
+):
+  assert msg.sender == self.control or msg.sender == self.feeCollector, "CONTROL_OR_FEE_COLLECTOR_ONLY"
+  assert _feeCollector != ZERO_ADDRESS, "INVALID_ADDRESS"
+
+  log.FeeCollectorTransferred(self.feeCollector, _feeCollector)
+  self.feeCollector = _feeCollector
+
+@public
+def updateBurnThreshold(
+  _burnThreshdoldNum: uint256(numerator),
+  _burnThreshdoldDen: uint256(denominator)
+):
+  assert msg.sender == self.control, "CONTROL_ONLY"
+
+  log.BurnThresholdUpdated(self.burnThresholdNum, self.burnThresholdDen, _burnThreshdoldNum, burnThresholdDen)
+  self.burnThresholdNum = _burnThreshdoldNum
+  self.burnThresholdDen = _burnThreshdoldDen
+
+@public
+def updateFee(
+  _feeNum: uint256(numerator),
+  _feeDen: uint256(denominator)
+):
+  assert msg.sender == self.control, "CONTROL_ONLY"
+
+  log.FeeUpdated(self.feeNum, self.feeDen, _feeNum, _feeDen)
+  self.feeNum = _feeNum
+  self.feeDen = _feeDen
 
 @public
 def updateMinInvestment(

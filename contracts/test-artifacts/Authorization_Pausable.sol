@@ -5,23 +5,12 @@ pragma solidity ^0.5.0;
  * Implements the authorization interface and authorizes everything for everyone.
  */
 
-import "../IAuthorization.sol";
-import 'openzeppelin-solidity/contracts/token/ERC20/IERC20.sol';
+import "../Authorization.sol";
 
 contract Authorization_Pausable is
-  IAuthorization
+  Authorization
 {
   bool public authorized = true;
-
-  function authorizeTransfer(
-    address _operator,
-    address _from,
-    address _to,
-    uint256 _value
-  ) external
-  {
-    require(isTransferAllowed(_operator, _from, _to, _value), "NOT_AUTHORIZED");
-  }
 
   function isTransferAllowed(
     address _operator,
@@ -41,7 +30,7 @@ contract Authorization_Pausable is
   {
     if(authorized)
     {
-      return IERC20(msg.sender).balanceOf(_from);
+      return super.availableBalanceOf(_from);
     }
     else
     {
