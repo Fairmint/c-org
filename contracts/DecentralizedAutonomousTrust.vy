@@ -104,10 +104,8 @@ BeneficiaryTransferred: event({
   _beneficiary: indexed(address)
 })
 BurnThresholdUpdated: event({
-  _previousBurnThresholdNum: uint256(FAIRs),
-  _previousBurnThresholdDen: uint256(FAIRs),
-  _burnThreshdoldNum: uint256(FAIRs),
-  _burnThreshdoldDen: uint256(FAIRs)
+  _previousBurnThreshold: decimal(FAIRs),
+  _burnThreshdold: decimal(FAIRs)
 })
 ControlTransferred: event({
   _previousControl: indexed(address),
@@ -151,8 +149,8 @@ TOKENS_RECIPIENT_INTERFACE_HASH: constant(bytes32) = keccak256("ERC777TokensReci
 authorizationAddress: public(address)
 authorization: IAuthorization # redundant w/ authorizationAddress, for convenience
 beneficiary: public(address)
-burnThresholdNum: public(uint256(FAIRs))
-burnThresholdDen: public(uint256(FAIRs))
+burnedSupply: public(uint256(FAIRs))
+burnThreshold: public(decimal(FAIRs))
 buySlopeNum: public(uint256)
 buySlopeDen: public(uint256(FAIRs))
 control: public(address)
@@ -255,8 +253,7 @@ def __init__(
   self.authorizationAddress = _authorizationAddress
   self.authorization = IAuthorization(_authorizationAddress)
 
-  self.burnThresholdNum = 1
-  self.burnThresholdDen = 1
+  self.burnThreshold = 1
   self.feeDen = 1
 
   log.ControlTransferred(self.control, msg.sender)
@@ -454,6 +451,7 @@ def burn(
   _data: bytes[32]
 ):
   self._burn(msg.sender, msg.sender, _amount, _data, "")
+  self.burnedSupply += _amount
 
 @public
 def operatorBurn(
@@ -515,6 +513,11 @@ def buybackReserve() -> uint256:
     return self.currency.balanceOf(self)
 
 @public
+@constant
+def sellSlope() -> decimal:
+  return convert(2 * self.buybackReserve(), decimal) / convert((self.totalSupply + self.burnedSupply - self.initReserve) ** 2, decimal)
+
+@public
 @payable
 def buy(
   _quantityToInvest: uint256
@@ -531,6 +534,7 @@ def buy(
     self.currency.transferFrom(msg.sender, self, as_unitless_number(_quantityToInvest))
     assert self.currency.balanceOf(self) > balanceBefore, "ERC20_TRANSFER_FAILED"
 
+  supply: uint256(FAIRs) = self.totalSupply + self.burnedSupply - self.initReserve
   tokenValue: uint256(FAIRs)
   if(self.state == STATE_INITIALIZATION):
     assert self.initDeadline == 0 or self.initDeadline < block.timestamp, "DEADLINE_PASSED"
@@ -538,7 +542,7 @@ def buy(
     tokenValue = 2 * _quantityToInvest * self.buySlopeDen / (self.initGoal * self.buySlopeNum)
     self.initInvestors[msg.sender] += _quantityToInvest
 
-    if(self.totalSupply - self.initReserve >= self.initGoal):
+    if(supply >= self.initGoal):
       self.state = STATE_RUNNING
       reserve: uint256 = self.buybackReserve() * (self.investmentReserveDen - self.investmentReserveNum) / self.investmentReserveDen
       fee: uint256 = reserve * self.feeNum / self.feeDen
@@ -546,7 +550,10 @@ def buy(
       self._sendCurrency(self.beneficiary, reserve - fee)
   elif(self.state == STATE_RUNNING):
     # TODO placeholder
-    tokenValue = 1
+    tokenValue = convert(sqrt(
+      convert(2 * _quantityToInvest, decimal) / self.sellSlope()
+      + convert(supply ** 2, decimal)
+    ) - convert(supply, decimal), uint256)
   else:
     assert False, "INVALID_STATE"
 
@@ -616,16 +623,13 @@ def transferFeeCollector(
 
 @public
 def updateBurnThreshold(
-  _burnThresholdNum: uint256(FAIRs),
-  _burnThresholdDen: uint256
+  _burnThreshold: decimal(FAIRs)
 ):
   assert msg.sender == self.control, "CONTROL_ONLY"
 
-  assert _burnThresholdDen > 0, "INVALID_THRESHOLD_DEM"
-  assert _burnThresholdNum / _burnThresholdDen <= 1, "INVALID_THRESHOLD"
-  log.BurnThresholdUpdated(self.burnThresholdNum, self.burnThresholdDen, _burnThresholdNum, _burnThresholdDen)
-  self.burnThresholdNum = _burnThresholdNum
-  self.burnThresholdDen = _burnThresholdDen
+  assert _burnThreshold <= 1, "INVALID_THRESHOLD"
+  log.BurnThresholdUpdated(self.burnThreshold, _burnThreshold)
+  self.burnThreshold = _burnThreshold
 
 @public
 def updateFee(
