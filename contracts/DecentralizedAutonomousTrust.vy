@@ -557,7 +557,7 @@ def buy(
         > self.burnThreshold
       ):
         self.burn(tokenValue + self.balanceOf[msg.sender] - convert(self.burnThreshold * convert(self.totalSupply + self.burnedSupply, decimal), uint256), "")
-        self.sellSlope =
+        #self.sellSlope =
     # TODO placeholder
   else:
     assert False, "INVALID_STATE"
