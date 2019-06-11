@@ -1,4 +1,4 @@
-const authorizationArtifact = artifacts.require('Authorization_Pausable');
+const authorizationArtifact = artifacts.require('Authorization');
 const datArtifact = artifacts.require('DecentralizedAutonomousTrust');
 
 module.exports = function deployDat(deployer) {
@@ -7,9 +7,16 @@ module.exports = function deployDat(deployer) {
     'Fairmint', // name
     'FSE', // symbol
     '42000000000000000000', // initReserve
-    '0x0000000000000000000000000000000000000000', // currency
+    '0x0000000000000000000000000000000000000000', // currencyAddress
     '0', // initGoal
     '0', // minInvestment
-    authorizationArtifact.address, // TODO switch to real authorization interface
+    '0', // initDeadline
+    '1', // buySlopeNum
+    '100000', // buySlopeDen
+    '1', // investmentReserveNum
+    '10', // investmentReserveDen
+    '1', // revenueCommitementNum
+    '10', // revenueCommitementDen
+    authorizationArtifact.address,
   );
 };

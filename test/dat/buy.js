@@ -10,10 +10,12 @@ contract('dat / buy', (accounts) => {
   let dat;
 
   before(async () => {
+    const auth = await authorizationArtifact.new();
     dat = await deployDat({
       initGoal: 99999,
-      authorizationAddress: (await authorizationArtifact.new()).address,
+      authorizationAddress: auth.address,
     });
+    await auth.updateDat(dat.address);
   });
 
   it('balanceOf should be 0 by default', async () => {
