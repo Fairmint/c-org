@@ -39,7 +39,14 @@ contract Authorization_Pausable is
   ) external view
     returns (uint256)
   {
-    return IERC20(msg.sender).balanceOf(_from);
+    if(authorized)
+    {
+      return IERC20(msg.sender).balanceOf(_from);
+    }
+    else
+    {
+      return 0;
+    }
   }
 
   function setAuthorized(

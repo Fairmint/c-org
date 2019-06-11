@@ -37,7 +37,7 @@ contract('dat / authCanBlockBuy', (accounts) => {
 
     describe('when blocked', () => {
       before(async () => {
-        await dat.setAuthorized(false);
+        await auth.setAuthorized(false);
       });
 
       it('should fail to buy tokens', async () => {
