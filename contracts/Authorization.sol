@@ -17,7 +17,7 @@ contract Authorization is
 
   address public dat;
   uint256 public initLockup;
-  mapping(address => LockedFSE[]) public lockedTokens;
+  mapping(address => LockedFSE[]) public lockedTokens; // TODO switch to linked-list
 
   // TODO switch to init pattern in order to support zos upgrades
   constructor(
@@ -69,8 +69,7 @@ contract Authorization is
   ) public view
     returns (uint256)
   {
-    // TODO update if for unless tokens are from the initReserve
-    // state == 0, from
+    // TODO update if state==0 && tokens are from the initReserve
     if(IDAT(dat).state() == 0)
     {
       return 0;
