@@ -1,26 +1,22 @@
 pragma solidity ^0.5.0;
 
-/**
- * Test contract
- * Implements the authorization interface and authorizes everything for everyone.
- */
-
 import "./IAuthorization.sol";
 import "./IDAT.sol";
-import 'openzeppelin-solidity/contracts/token/ERC20/IERC20.sol';
+import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
+
 
 contract Authorization is
   IAuthorization
 {
-  IDAT public dat;
-  uint256 public initLockup;
-
   struct LockedFSE
   {
     uint256 lockType;
     uint256 expiration;
     uint256 value;
   }
+
+  IDAT public dat;
+  uint256 public initLockup;
   mapping(address => LockedFSE[]) public lockedTokens;
 
   constructor(
@@ -33,8 +29,8 @@ contract Authorization is
   function updateDat(
     address _dat
   ) public
-  {
     // TODO onlyOwner
+  {
     require(_dat != address(0), "INVALID_ADDRESS");
     dat = IDAT(_dat);
   }
@@ -48,6 +44,8 @@ contract Authorization is
   {
     require(msg.sender == address(dat), "ONLY_CALL_FROM_DAT");
     require(isTransferAllowed(_operator, _from, _to, _value), "NOT_AUTHORIZED");
+    // TODO if state == 0 and to == beneficiary and from == 0 then freeze for initLockup
+    // TODO if state == 0 and from == beneficiary and to != 0 then tranfer freeze as well
   }
 
   function isTransferAllowed(
@@ -58,10 +56,11 @@ contract Authorization is
   ) public view
     returns (bool)
   {
-    // TODO state > 0 or tokens are from the initReserve
-    require(dat.state() > 0, "NO_TRANSFER_DURING_INIT");
-
-    return true;
+    if(_from == address(0))
+    { // Mint/Buy
+      return true;
+    }
+    return availableBalanceOf(_from) >= _value;
   }
 
   function availableBalanceOf(
@@ -69,6 +68,13 @@ contract Authorization is
   ) public view
     returns (uint256)
   {
+    // TODO update if for unless tokens are from the initReserve
+    // state == 0, from
+    if(dat.state() == 0)
+    {
+      return 0;
+    }
+    // TODO consider locked tokens
     return IERC20(msg.sender).balanceOf(_from);
   }
 }
