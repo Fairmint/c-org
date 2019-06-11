@@ -2,6 +2,7 @@ pragma solidity ^0.5.0;
 
 import "./IAuthorization.sol";
 import "./IDAT.sol";
+import "openzeppelin-solidity/contracts/token/ERC777/IERC777.sol";
 
 
 contract Authorization is
@@ -75,6 +76,6 @@ contract Authorization is
       return 0;
     }
     // TODO consider locked tokens
-    return dat.balanceOf(_from);
+    return IERC777(dat).balanceOf(_from);
   }
 }
