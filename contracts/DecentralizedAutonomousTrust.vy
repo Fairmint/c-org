@@ -480,7 +480,7 @@ def send(
 def availableBalanceOf(
   _from: address
 ) -> uint256(FAIRs):
-  if(state == STATE_INITIALIZATION):
+  if(self.state == STATE_INITIALIZATION):
     return 0
   else:
     return self.authorization.availableBalanceOf(_from)
@@ -576,14 +576,14 @@ def transferFeeCollector(
 
 @public
 def updateBurnThreshold(
-  _burnThreshdoldNum: uint256(numerator),
-  _burnThreshdoldDen: uint256(denominator)
+  _burnThresholdNum: uint256(numerator),
+  _burnThresholdDen: uint256(denominator)
 ):
   assert msg.sender == self.control, "CONTROL_ONLY"
 
-  log.BurnThresholdUpdated(self.burnThresholdNum, self.burnThresholdDen, _burnThreshdoldNum, burnThresholdDen)
-  self.burnThresholdNum = _burnThreshdoldNum
-  self.burnThresholdDen = _burnThreshdoldDen
+  log.BurnThresholdUpdated(self.burnThresholdNum, self.burnThresholdDen, _burnThresholdNum, _burnThresholdDen)
+  self.burnThresholdNum = _burnThresholdNum
+  self.burnThresholdDen = _burnThresholdDen
 
 @public
 def updateFee(
