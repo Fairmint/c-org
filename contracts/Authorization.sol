@@ -15,7 +15,7 @@ contract Authorization is
     uint256 value;
   }
 
-  public public dat;
+  address public dat;
   uint256 public initLockup;
   mapping(address => LockedFSE[]) public lockedTokens;
 

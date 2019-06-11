@@ -104,8 +104,8 @@ BeneficiaryTransferred: event({
   _beneficiary: indexed(address)
 })
 BurnThresholdUpdated: event({
-  _previousBurnThreshold: decimal(FAIRs),
-  _burnThreshdold: decimal(FAIRs)
+  _previousBurnThreshold: decimal,
+  _burnThreshdold: decimal
 })
 ControlTransferred: event({
   _previousControl: indexed(address),
@@ -150,7 +150,7 @@ authorizationAddress: public(address)
 authorization: IAuthorization # redundant w/ authorizationAddress, for convenience
 beneficiary: public(address)
 burnedSupply: public(uint256(FAIRs))
-burnThreshold: public(decimal(FAIRs))
+burnThreshold: public(decimal)
 buySlopeNum: public(uint256)
 buySlopeDen: public(uint256(FAIRs))
 control: public(address)
@@ -168,6 +168,7 @@ investmentReserveDen: public(uint256)
 minInvestment: public(uint256)
 revenueCommitmentNum: public(uint256)
 revenueCommitmentDen: public(uint256)
+sellSlope: public(decimal)
 state: public(uint256(stateMachine))
 
 # Data storage required by the ERC-20 token standard
@@ -513,11 +514,6 @@ def buybackReserve() -> uint256:
     return self.currency.balanceOf(self)
 
 @public
-@constant
-def sellSlope() -> decimal:
-  return convert(2 * self.buybackReserve(), decimal) / convert((self.totalSupply + self.burnedSupply - self.initReserve) ** 2, decimal)
-
-@public
 @payable
 def buy(
   _quantityToInvest: uint256
@@ -548,12 +544,21 @@ def buy(
       fee: uint256 = reserve * self.feeNum / self.feeDen
       self._sendCurrency(self.feeCollector, fee)
       self._sendCurrency(self.beneficiary, reserve - fee)
+      self.sellSlope = convert(2 * self.buybackReserve(), decimal) / convert((self.totalSupply + self.burnedSupply - self.initReserve) ** 2, decimal)
   elif(self.state == STATE_RUNNING):
-    # TODO placeholder
     tokenValue = convert(sqrt(
-      convert(2 * _quantityToInvest, decimal) / self.sellSlope()
+      convert(2 * _quantityToInvest, decimal) / self.sellSlope
       + convert(supply ** 2, decimal)
     ) - convert(supply, decimal), uint256)
+
+    if(msg.sender == self.beneficiary):
+      if(
+        convert(tokenValue + self.balanceOf[msg.sender], decimal) / convert(self.totalSupply + self.burnedSupply, decimal)
+        > self.burnThreshold
+      ):
+        self.burn(tokenValue + self.balanceOf[msg.sender] - convert(self.burnThreshold * convert(self.totalSupply + self.burnedSupply, decimal), uint256), "")
+        self.sellSlope =
+    # TODO placeholder
   else:
     assert False, "INVALID_STATE"
 
@@ -623,7 +628,7 @@ def transferFeeCollector(
 
 @public
 def updateBurnThreshold(
-  _burnThreshold: decimal(FAIRs)
+  _burnThreshold: decimal
 ):
   assert msg.sender == self.control, "CONTROL_ONLY"
 
