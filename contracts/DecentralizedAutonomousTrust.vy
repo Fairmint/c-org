@@ -624,7 +624,7 @@ def buy(
   # Mint new FAIRs
   self.totalSupply += tokenValue
   self.balanceOf[msg.sender] += tokenValue
-  self._callTokensReceived(msg.sender, ZERO_ADDRESS, msg.sender, tokenValue, _userData, "", True)
+  # TODO VM Exception while processing transaction: stack underflow self._callTokensReceived(msg.sender, ZERO_ADDRESS, msg.sender, tokenValue, _userData, "", True)
   log.Transfer(ZERO_ADDRESS, msg.sender, tokenValue)
   # TODO why does this fail log.Minted(msg.sender, msg.sender, tokenValue, _userData, "")
 
