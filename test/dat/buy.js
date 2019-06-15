@@ -21,7 +21,7 @@ contract('dat / buy', (accounts) => {
 
   describe('can buy tokens', () => {
     before(async () => {
-      await dat.buy(100, { value: 100, from: accounts[1] });
+      await dat.buy(100, '', { value: 100, from: accounts[1] });
     });
 
     it('balanceOf should have increased', async () => {
