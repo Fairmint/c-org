@@ -1,4 +1,3 @@
-const authorizationArtifact = artifacts.require('Authorization');
 const datArtifact = artifacts.require('DecentralizedAutonomousTrust');
 
 module.exports = function deployDat(deployer) {
