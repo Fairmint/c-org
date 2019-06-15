@@ -2,13 +2,14 @@
 
 #region Types
 ##################################################
+
 units: {
   FAIRs: "FAIR Securities",
+  currencyTokens: "The reserve currency - either ETH or an ERC20",
   stateMachine: "The DAT's internal state machine"
 }
 
 from vyper.interfaces import ERC20
-implements: ERC20
 
 # TODO: switch to interface files (currently non-native imports fail to compile)
 contract IAuthorization:
@@ -49,6 +50,9 @@ contract IERC777Sender:
     _userData: bytes[32],
     _operatorData: bytes[32]
   ): modifying
+
+implements: ERC20
+#TODO why does this fail? implements: IERC777Recipient
 
 # Events required by the ERC-20 token standard
 Approval: event({
@@ -122,8 +126,8 @@ FeeUpdated: event({
   _feeDen: uint256(FAIRs)
 })
 MinInvestmentUpdated: event({
-  _previousMinInvestment: uint256,
-  _minInvestment: uint256
+  _previousMinInvestment: uint256(currencyTokens),
+  _minInvestment: uint256(currencyTokens)
 })
 NameUpdated: event({
   _previousName: string[64],
@@ -137,6 +141,7 @@ SymbolUpdated: event({
 
 #region Data
 ##################################################
+
 # Constants
 STATE_INITIALIZATION: constant(uint256(stateMachine)) = 0
 STATE_RUNNING: constant(uint256(stateMachine)) = 1
@@ -151,7 +156,7 @@ authorization: IAuthorization # redundant w/ authorizationAddress, for convenien
 beneficiary: public(address)
 burnedSupply: public(uint256(FAIRs))
 burnThreshold: public(decimal)
-buySlopeNum: public(uint256)
+buySlopeNum: public(uint256(currencyTokens))
 buySlopeDen: public(uint256(FAIRs))
 control: public(address)
 currencyAddress: public(address)
@@ -161,14 +166,13 @@ feeNum: public(uint256)
 feeDen: public(uint256)
 initDeadline: public(timestamp)
 initGoal: public(uint256(FAIRs))
-initInvestors: public(map(address, uint256))
+initInvestors: public(map(address, uint256(currencyTokens)))
 initReserve: public(uint256(FAIRs))
 investmentReserveNum: public(uint256)
 investmentReserveDen: public(uint256)
-minInvestment: public(uint256)
+minInvestment: public(uint256(currencyTokens))
 revenueCommitmentNum: public(uint256)
 revenueCommitmentDen: public(uint256)
-sellSlope: public(decimal)
 state: public(uint256(stateMachine))
 
 # Data storage required by the ERC-20 token standard
@@ -187,6 +191,7 @@ operators: map(address, map(address, bool)) # not public: exposed via `isOperato
 
 #region Constructor
 ##################################################
+
 @public
 def __init__(
   _name: string[64],
@@ -194,15 +199,13 @@ def __init__(
   _initReserve: uint256(FAIRs),
   _currencyAddress: address,
   _initGoal: uint256(FAIRs),
-  _minInvestment: uint256,
   _initDeadline: timestamp,
-  _buySlopeNum: uint256,
+  _buySlopeNum: uint256(currencyTokens),
   _buySlopeDen: uint256(FAIRs),
   _investmentReserveNum: uint256,
   _investmentReserveDen: uint256,
   _revenueCommitmentNum: uint256,
-  _revenueCommitmentDen: uint256,
-  _authorizationAddress: address
+  _revenueCommitmentDen: uint256
 ):
   self.ERC1820Registry = IERC1820Registry(0x1820a4B7618BdE71Dce8cdc73aAB6C95905faD24) # constant for all networks
 
@@ -228,10 +231,6 @@ def __init__(
   else:
     self.initGoal = _initGoal
 
-  assert _minInvestment > 0, "INVALID_MIN_INVESTMENT"
-  log.MinInvestmentUpdated(self.minInvestment, _minInvestment)
-  self.minInvestment = _minInvestment
-
   self.initDeadline = _initDeadline
   assert _buySlopeNum > 0, "INVALID_SLOPE_NUM"
   assert _buySlopeDen > 0, "INVALID_SLOPE_DEM"
@@ -249,13 +248,9 @@ def __init__(
   self.revenueCommitmentNum = _revenueCommitmentNum
   self.revenueCommitmentDen = _revenueCommitmentDen
 
-  assert _authorizationAddress.is_contract, "INVALID_CONTRACT_ADDRESS"
-  log.AuthorizationAddressUpdated(self.authorizationAddress, _authorizationAddress)
-  self.authorizationAddress = _authorizationAddress
-  self.authorization = IAuthorization(_authorizationAddress)
-
   self.burnThreshold = 1
   self.feeDen = 1
+  self.minInvestment = as_unitless_number(as_wei_value(100, "ether"))
 
   log.ControlTransferred(self.control, msg.sender)
   self.control = msg.sender
@@ -269,10 +264,12 @@ def __init__(
   # Register supported interfaces
   self.ERC1820Registry.setInterfaceImplementer(self, keccak256("ERC20Token"), self)
   self.ERC1820Registry.setInterfaceImplementer(self, keccak256("ERC777Token"), self)
+  # TODO plus ERC777TokensRecipient for pay
 #endregion
 
 #region Private helper functions
 ##################################################
+
 @private
 def _callTokensToSend(
   _operator: address,
@@ -351,7 +348,8 @@ def _send(
 ):
   assert _from != ZERO_ADDRESS, "ERC777: send from the zero address"
   assert _to != ZERO_ADDRESS, "ERC777: send to the zero address"
-  self.authorization.authorizeTransfer(_operator, _from, _to, _amount)
+  if(self.authorization != ZERO_ADDRESS):
+    self.authorization.authorizeTransfer(_operator, _from, _to, _amount)
 
   self._callTokensToSend(_operator, _from, _to, _amount, _userData, _operatorData)
   self.balanceOf[_from] -= _amount
@@ -362,20 +360,46 @@ def _send(
   log.Transfer(_from, _to, _amount)
 
 @private
+def _collectInvestment(
+  _from: address,
+  _quantityToInvest: uint256(currencyTokens),
+  _msgValue: uint256(wei)
+):
+  # Collect investment
+  if(self.currency == ZERO_ADDRESS):
+    assert as_wei_value(_quantityToInvest, "wei") == _msgValue, "INCORRECT_MSG_VALUE"
+  else:
+    # TODO support ERC-777 currency?
+    assert _msgValue == 0, "DO_NOT_SEND_ETH"
+    balanceBefore: uint256 = self.currency.balanceOf(self)
+    self.currency.transferFrom(_from, self, as_unitless_number(_quantityToInvest))
+    assert self.currency.balanceOf(self) > balanceBefore, "ERC20_TRANSFER_FAILED"
+
+@private
 def _sendCurrency(
   _to: address,
-  _amount: uint256
+  _amount: uint256(currencyTokens)
 ):
   if(self.currency == ZERO_ADDRESS):
-    send(_to, as_wei_value(_amount, 'wei'))
+    send(_to, as_wei_value(_amount, "wei"))
   else:
     balanceBefore: uint256 = self.currency.balanceOf(self)
     self.currency.transferFrom(self, _to, as_unitless_number(_amount))
     assert self.currency.balanceOf(self) > balanceBefore, "ERC20_TRANSFER_FAILED"
+
+@private
+def _distributeInvestment(
+  _value: uint256(currencyTokens)
+):
+  reserve: uint256(currencyTokens) = _value * (self.investmentReserveDen - self.investmentReserveNum) / self.investmentReserveDen
+  fee: uint256(currencyTokens) = reserve * self.feeNum / self.feeDen
+  self._sendCurrency(self.feeCollector, fee)
+  self._sendCurrency(self.beneficiary, reserve - fee)
 #endregion
 
 #region Functions required by the ERC-20 token standard
 ##################################################
+
 @public
 @constant
 def allowance(
@@ -419,6 +443,7 @@ def transferFrom(
 
 #region Functions required by the ERC-777 token standard
 ##################################################
+
 @public
 @constant
 def isOperatorFor(
@@ -457,7 +482,7 @@ def burn(
 @public
 def operatorBurn(
   _account: address,
-  _amount: uint256,
+  _amount: uint256(FAIRs),
   _data: bytes[32],
   _operatorData: bytes[32]
 ):
@@ -468,7 +493,7 @@ def operatorBurn(
 def operatorSend(
   _sender: address,
   _recipient: address,
-  _amount: uint256,
+  _amount: uint256(FAIRs),
   _data: bytes[32],
   _operatorData: bytes[32]
 ):
@@ -487,7 +512,7 @@ def revokeOperator(
 @public
 def send(
   _recipient: address,
-  _amount: uint256,
+  _amount: uint256(FAIRs),
   _data: bytes[32]
 ):
   self._send(msg.sender, msg.sender, _recipient, _amount, _data, "", True)
@@ -495,6 +520,7 @@ def send(
 
 #region Functions for DAT business logic
 ##################################################
+
 @public
 @constant
 def availableBalanceOf(
@@ -502,87 +528,154 @@ def availableBalanceOf(
 ) -> uint256(FAIRs):
   if(self.state == STATE_INITIALIZATION):
     return 0
-  else:
+  elif(self.authorization != ZERO_ADDRESS):
     return self.authorization.availableBalanceOf(_from)
+  else:
+    return self.balanceOf[_from]
 
 @public
 @constant
-def buybackReserve() -> uint256:
+def buybackReserve() -> uint256(currencyTokens):
+  reserve: uint256(currencyTokens)
   if(self.currency == ZERO_ADDRESS):
-    return as_unitless_number(self.balance)
+    reserve = as_unitless_number(self.balance)
   else:
-    return self.currency.balanceOf(self)
+    reserve = self.currency.balanceOf(self)
+  return reserve
+
+@public
+@constant
+def sellSlope() -> decimal:
+  return as_unitless_number(
+    convert(2 * self.buybackReserve(), decimal)
+    / convert((self.totalSupply + self.burnedSupply - self.initReserve) ** 2, decimal)
+  )
+
+@public
+@constant
+def supplySold() -> uint256(FAIRs):
+  return self.totalSupply + self.burnedSupply - self.initReserve
+
+@public
+@constant
+def estimateTokensForBuy(
+  _quantityToInvest: uint256(currencyTokens)
+) -> uint256(FAIRs):
+  tokenValue: uint256(FAIRs)
+  if(self.state == STATE_INITIALIZATION and (self.initDeadline == 0 or self.initDeadline < block.timestamp)):
+    tokenValue = 2 * _quantityToInvest * self.buySlopeDen / (self.initGoal * self.buySlopeNum)
+  elif(self.state == STATE_RUNNING):
+    tokenValue = convert(sqrt(
+      convert(2 * _quantityToInvest, decimal) / self.sellSlope()
+      + convert(self.supplySold() ** 2, decimal)
+    ) - convert(self.supplySold(), decimal), uint256)
+  return tokenValue
+
+@public
+@constant
+def estimateTokensForSell(
+  _quantityToSell: uint256(FAIRs)
+) -> uint256(currencyTokens):
+  # TODO
+  return 1
 
 @public
 @payable
 def buy(
-  _quantityToInvest: uint256
+  _quantityToInvest: uint256(currencyTokens),
+  _minTokensBought: uint256(FAIRs),
+  _userData: bytes[32]
 ):
   assert _quantityToInvest >= self.minInvestment, "SEND_AT_LEAST_MIN_INVESTMENT"
 
-  # Collect investment
-  if(self.currency == ZERO_ADDRESS):
-    assert as_wei_value(_quantityToInvest, 'wei') == msg.value, "INCORRECT_MSG_VALUE"
-  else:
-    # TODO support ERC-777 currency?
-    assert msg.value == 0, "DO_NOT_SEND_ETH"
-    balanceBefore: uint256 = self.currency.balanceOf(self)
-    self.currency.transferFrom(msg.sender, self, as_unitless_number(_quantityToInvest))
-    assert self.currency.balanceOf(self) > balanceBefore, "ERC20_TRANSFER_FAILED"
+  tokenValue: uint256(FAIRs) = self.estimateTokensForBuy(_quantityToInvest)
 
-  supply: uint256(FAIRs) = self.totalSupply + self.burnedSupply - self.initReserve
-  tokenValue: uint256(FAIRs)
+  assert tokenValue >= _minTokensBought, "PRICE_SLIPPAGE"
+  assert tokenValue > 0, "NOT_ENOUGH_FUNDS"
+  if(self.authorization != ZERO_ADDRESS):
+    self.authorization.authorizeTransfer(msg.sender, ZERO_ADDRESS, msg.sender, tokenValue)
+
+  self._collectInvestment(msg.sender, _quantityToInvest, msg.value)
+
   if(self.state == STATE_INITIALIZATION):
     assert self.initDeadline == 0 or self.initDeadline < block.timestamp, "DEADLINE_PASSED"
 
-    tokenValue = 2 * _quantityToInvest * self.buySlopeDen / (self.initGoal * self.buySlopeNum)
     self.initInvestors[msg.sender] += _quantityToInvest
 
-    if(supply >= self.initGoal):
+    if(self.supplySold() >= self.initGoal):
       self.state = STATE_RUNNING
-      reserve: uint256 = self.buybackReserve() * (self.investmentReserveDen - self.investmentReserveNum) / self.investmentReserveDen
-      fee: uint256 = reserve * self.feeNum / self.feeDen
-      self._sendCurrency(self.feeCollector, fee)
-      self._sendCurrency(self.beneficiary, reserve - fee)
-      self.sellSlope = convert(2 * self.buybackReserve(), decimal) / convert((self.totalSupply + self.burnedSupply - self.initReserve) ** 2, decimal)
+      self._distributeInvestment(self.buybackReserve())
   elif(self.state == STATE_RUNNING):
-    tokenValue = convert(sqrt(
-      convert(2 * _quantityToInvest, decimal) / self.sellSlope
-      + convert(supply ** 2, decimal)
-    ) - convert(supply, decimal), uint256)
-
     if(msg.sender == self.beneficiary):
       if(
-        convert(tokenValue + self.balanceOf[msg.sender], decimal) / convert(self.totalSupply + self.burnedSupply, decimal)
+        convert(tokenValue + self.balanceOf[msg.sender], decimal)
+        / convert(self.totalSupply + self.burnedSupply, decimal)
         > self.burnThreshold
       ):
-        self.burn(tokenValue + self.balanceOf[msg.sender] - convert(self.burnThreshold * convert(self.totalSupply + self.burnedSupply, decimal), uint256), "")
-        #self.sellSlope =
-    # TODO placeholder
+        self.burn(tokenValue + self.balanceOf[msg.sender] - convert(
+          self.burnThreshold * convert(self.totalSupply + self.burnedSupply, decimal),
+          uint256
+        ), _userData)
+    else:
+      self._distributeInvestment(_quantityToInvest)
   else:
     assert False, "INVALID_STATE"
 
-  assert tokenValue > 0, "NOT_ENOUGH_FUNDS"
-  self.authorization.authorizeTransfer(msg.sender, ZERO_ADDRESS, msg.sender, tokenValue)
-
+  # Mint new FAIRs
   self.totalSupply += tokenValue
   self.balanceOf[msg.sender] += tokenValue
-  # TODO causes a stack underflow ? self._callTokensReceived(msg.sender, ZERO_ADDRESS, msg.sender, tokenValue, "", "", True)
+  self._callTokensReceived(msg.sender, ZERO_ADDRESS, msg.sender, tokenValue, _userData, "", True)
   log.Transfer(ZERO_ADDRESS, msg.sender, tokenValue)
-  # TODO why does this fail? log.Minted(msg.sender, msg.sender, tokenValue, "", "")
+  # TODO why does this fail log.Minted(msg.sender, msg.sender, tokenValue, _userData, "")
 
 @public
 def sell(
-  _amount: uint256(FAIRs)
+  _amount: uint256(FAIRs),
+  _minCurrencyReturned: uint256(currencyTokens),
+  _userData: bytes[32]
 ):
-  self.authorization.authorizeTransfer(msg.sender, msg.sender, ZERO_ADDRESS, _amount)
+  if(self.authorization != ZERO_ADDRESS):
+    self.authorization.authorizeTransfer(msg.sender, msg.sender, ZERO_ADDRESS, _amount)
+
+  if(self.state == STATE_INITIALIZATION):
+    pass # TODO
+  elif(self.state == STATE_RUNNING):
+    pass # TODO
+  else: # STATE_CLOSING
+    pass # TODO
 
   # TODO send currency
-  self._burn(msg.sender, msg.sender, _amount, "", "")
+  self._burn(msg.sender, msg.sender, _amount, _userData, "")
+
+# TODO add operator buy/sell?
+
+@public
+def pay():
+  # TODO
+  pass
+
+@public
+@payable
+def __default__():
+  # TODO
+  pass
+
+@public
+def tokensReceived(
+    _operator: address,
+    _from: address,
+    _to: address,
+    _amount: uint256(FAIRs),
+    _data: bytes[32],
+    _operatorData: bytes[32]
+  ):
+  # TODO
+  pass
 #endregion
 
 #region Functions to update DAT configuration
 ##################################################
+
 # These can only be called by the organization accounts
 
 @public
@@ -651,7 +744,7 @@ def updateFee(
 
 @public
 def updateMinInvestment(
-  _minInvestment: uint256
+  _minInvestment: uint256(currencyTokens)
 ):
   assert msg.sender == self.control, "CONTROL_ONLY"
   assert _minInvestment > 0, "INVALID_MIN_INVESTMENT"
