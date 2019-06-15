@@ -8,6 +8,11 @@ jobs:
     working_directory: ~/repo
     steps:
       - checkout
+      - run:
+          command: |
+            curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
+            sudo apt-get install -y nodejs
+            sudo pip install vyper
 
       # - restore_cache:
       #     keys:
@@ -20,11 +25,7 @@ jobs:
       #     key: v1-{{ checksum "package.json" }}
 
       - run: docker run -d -p 8545:8545 trufflesuite/ganache-cli:latest -e 1000000
-      - run:
-          command: |
-            curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
-            sudo apt-get install -y nodejs
-            sudo pip install vyper
+      - run: sleep 5
       - run: npm run test
       - run: npm run lintNoFix
 
