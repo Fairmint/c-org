@@ -27,7 +27,7 @@ contract('dat / buy', (accounts) => {
     it('balanceOf should have increased', async () => {
       const balance = await dat.balanceOf(accounts[1]);
 
-      assert.notEqual(balance, 0);
+      assert.notEqual(balance.toString(), 0);
     });
   });
 });
