@@ -4,28 +4,27 @@ jobs:
     context: docker-hub-credentials
     docker:
       - image: circleci/python
+    command: ['-h=0.0.0.0', '-m=hello unlock save the web', '-i=1984', '-b 1']
     working_directory: ~/repo
     steps:
       - checkout
 
-      - run:
-          command: |
-            curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
-            sudo apt-get install -y nodejs
-            sudo pip install vyper
-
       # - restore_cache:
       #     keys:
       #       - v1-{{ checksum "package.json" }}
-
       - run: npm i
-
       # - save_cache:
       #     paths:
       #       - node_modules
       #       - package-lock.json
       #     key: v1-{{ checksum "package.json" }}
 
+      - run: docker run -d -p 8545:8545 trufflesuite/ganache-cli:latest -e 1000000
+      - run:
+          command: |
+            curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
+            sudo apt-get install -y nodejs
+            sudo pip install vyper
       - run: npm run test
       - run: npm run lintNoFix
 
