@@ -9,7 +9,6 @@ module.exports = function deployDat(deployer) {
     '42000000000000000000', // initReserve
     '0x0000000000000000000000000000000000000000', // currencyAddress
     '0', // initGoal
-    '100000000000000000000', // minInvestment
     '0', // initDeadline
     '1', // buySlopeNum
     '100000', // buySlopeDen
@@ -17,6 +16,5 @@ module.exports = function deployDat(deployer) {
     '10', // investmentReserveDen
     '1', // revenueCommitementNum
     '10', // revenueCommitementDen
-    authorizationArtifact.address,
   );
 };

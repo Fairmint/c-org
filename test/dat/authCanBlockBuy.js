@@ -14,9 +14,9 @@ contract('dat / authCanBlockBuy', (accounts) => {
     auth = await authorizationArtifact.new();
     dat = await deployDat({
       initGoal: 99999,
-      authorizationAddress: auth.address,
     });
     await auth.updateDat(dat.address);
+    await dat.updateAuthorization(auth.address);
   });
 
   it('balanceOf should be 0 by default', async () => {
