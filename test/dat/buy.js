@@ -21,7 +21,7 @@ contract('dat / buy', (accounts) => {
 
   describe('can buy tokens', () => {
     before(async () => {
-      await dat.buy(100000000000000000000, 1, web3.utils.asciiToHex(''), { value: 100, from: accounts[1] });
+      await dat.buy('100000000000000000000', 1, web3.utils.asciiToHex(''), { value: '100000000000000000000', from: accounts[1] });
     });
 
     it('balanceOf should have increased', async () => {
