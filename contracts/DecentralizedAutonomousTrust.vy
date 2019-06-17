@@ -362,10 +362,10 @@ def _send(
   if(self.authorization != ZERO_ADDRESS):
     self.authorization.authorizeTransfer(_operator, _from, _to, _amount)
 
-  self._callTokensToSend(_operator, _from, _to, _amount, _userData, _operatorData)
+  # TODO self._callTokensToSend(_operator, _from, _to, _amount, _userData, _operatorData)
   self.balanceOf[_from] -= _amount
   self.balanceOf[_to] += _amount
-  self._callTokensReceived(_operator, _from, _to, _amount, _userData, _operatorData, _requireReceptionAck)
+  # TODO self._callTokensReceived(_operator, _from, _to, _amount, _userData, _operatorData, _requireReceptionAck)
 
   log.Sent(_operator, _from, _to, _amount, _userData, _operatorData)
   log.Transfer(_from, _to, _amount)
