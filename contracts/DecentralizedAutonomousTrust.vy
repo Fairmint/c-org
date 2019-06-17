@@ -222,12 +222,6 @@ def __init__(
   log.SymbolUpdated(self.symbol, _symbol)
   self.symbol = _symbol
 
-  # Mint the initial reserve
-  self.initReserve = _initReserve
-  self.totalSupply = self.initReserve
-  self.balanceOf[self.beneficiary] = self.initReserve
-  log.Transfer(ZERO_ADDRESS, self.beneficiary, self.initReserve)
-
   self.currencyAddress = _currencyAddress
   self.currency = ERC20(_currencyAddress)
 
@@ -271,6 +265,14 @@ def __init__(
   self.ERC1820Registry.setInterfaceImplementer(self, keccak256("ERC20Token"), self)
   self.ERC1820Registry.setInterfaceImplementer(self, keccak256("ERC777Token"), self)
   # TODO plus ERC777TokensRecipient for pay
+
+  # Mint the initial reserve
+  self.initReserve = _initReserve
+  self.totalSupply = self.initReserve
+  self.balanceOf[self.beneficiary] = self.initReserve
+  log.Transfer(ZERO_ADDRESS, self.beneficiary, self.initReserve)
+  # TODO log.Minted
+
 #endregion
 
 #region Private helper functions
