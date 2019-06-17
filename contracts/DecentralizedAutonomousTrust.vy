@@ -465,12 +465,24 @@ def isOperatorFor(
 @public
 @constant
 def granularity() -> uint256:
-  return 1 # Always 1 for ERC-20 compatibility
+  """
+  @notice Get the smallest part of the token that’s not divisible.
+  @dev Hard-coded to 1 as we have not identified a compelling use case for this.
+  From the ERC-777 spec:
+    NOTE: Most tokens SHOULD be fully partition-able. I.e., this function SHOULD
+    return 1 unless there is a good reason for not allowing any fraction of the token.
+  """
+  return 1
 
 @public
 @constant
 def defaultOperators() -> uint256:
-  return 0 # No default operators simplifies implementation
+  """
+  @notice Get the list of default operators as defined by the token contract.
+  @dev Hard-coded to no default operators as we have not identified a compelling use
+  case for this and to simplify the token implementation.
+  """
+  return 0
 
 @public
 def authorizeOperator(
