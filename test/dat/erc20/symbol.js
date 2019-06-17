@@ -2,6 +2,7 @@ const { deployDat, shouldFail } = require('../../helpers');
 
 contract('dat / erc20 / metadata', (accounts) => {
   const symbol = 'SBL';
+  const maxLengthSymbol = '8charMax';
   let dat;
   let tx;
 
@@ -11,6 +12,10 @@ contract('dat / erc20 / metadata', (accounts) => {
 
   it('should have a symbol', async () => {
     assert.equal(await dat.symbol(), symbol);
+  });
+
+  it('should fail to deploy with a symbol longer than the max', async () => {
+    await shouldFail(deployDat({ name: `${maxLengthSymbol} more characters` }));
   });
 
   describe('updateSymbol', () => {
@@ -33,8 +38,6 @@ contract('dat / erc20 / metadata', (accounts) => {
       });
 
       describe('max length', () => {
-        const maxLengthSymbol = '8charMax';
-
         before(async () => {
           tx = await dat.updateSymbol(maxLengthSymbol);
         });
