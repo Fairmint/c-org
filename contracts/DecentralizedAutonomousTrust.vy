@@ -353,19 +353,19 @@ def _send(
   _from: address,
   _to: address,
   _amount: uint256(FSE),
-  _userData: bytes[256],
-  _operatorData: bytes[256],
-  _requireReceptionAck: bool
+  _requireReceptionAck: bool,
+  _userData: bytes[256]="",
+  _operatorData: bytes[256]=""
 ):
   assert _from != ZERO_ADDRESS, "ERC777: send from the zero address"
   assert _to != ZERO_ADDRESS, "ERC777: send to the zero address"
   if(self.authorization != ZERO_ADDRESS):
     self.authorization.authorizeTransfer(_operator, _from, _to, _amount)
 
-  self._callTokensToSend(_operator, _from, _to, _amount, _userData, _operatorData)
+  # TODO self._callTokensToSend(_operator, _from, _to, _amount, _userData, _operatorData)
   self.balanceOf[_from] -= _amount
   self.balanceOf[_to] += _amount
-  self._callTokensReceived(_operator, _from, _to, _amount, _userData, _operatorData, _requireReceptionAck)
+  # TODO self._callTokensReceived(_operator, _from, _to, _amount, _userData, _operatorData, _requireReceptionAck)
 
   log.Sent(_operator, _from, _to, _amount, _userData, _operatorData)
   log.Transfer(_from, _to, _amount)
@@ -443,7 +443,7 @@ def transfer(
   _to: address,
   _value: uint256(FSE)
 ) -> bool:
-  self._send(msg.sender, msg.sender, _to, _value, "", "", False)
+  self._send(msg.sender, msg.sender, _to, _value, False)
   return True
 
 @public
@@ -452,7 +452,7 @@ def transferFrom(
   _to: address,
   _value: uint256(FSE)
 ) -> bool:
-  self._send(msg.sender, _from, _to, _value, "", "", False)
+  self._send(msg.sender, _from, _to, _value, False)
   self.allowances[_from][msg.sender] -= _value
   return True
 #endregion
@@ -527,7 +527,7 @@ def operatorSend(
   _operatorData: bytes[256]
 ):
   assert self.isOperatorFor(msg.sender, _sender), "ERC777: caller is not an operator for holder"
-  self._send(msg.sender, _sender, _recipient, _amount, _userData, _operatorData, True)
+  self._send(msg.sender, _sender, _recipient, _amount, True, _userData, _operatorData)
 
 @public
 def revokeOperator(
@@ -544,7 +544,7 @@ def send(
   _amount: uint256(FSE),
   _userData: bytes[256]
 ):
-  self._send(msg.sender, msg.sender, _recipient, _amount, _userData, "", True)
+  self._send(msg.sender, msg.sender, _recipient, _amount, True, _userData)
 #endregion
 
 #region Functions for DAT business logic
