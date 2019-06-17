@@ -13,6 +13,7 @@ module.exports = {
     it: 'readonly',
     assert: 'readonly',
     before: 'readonly',
+    beforeEach: 'readonly',
     describe: 'readonly',
     web3: 'readonly'
   },
@@ -20,5 +21,6 @@ module.exports = {
     ecmaVersion: 2018,
   },
   rules: {
+    "no-underscore-dangle": 0
   },
 };
