@@ -2,7 +2,7 @@ const { deployDat, shouldFail } = require('../../helpers');
 
 contract('dat / erc20 / metadata', (accounts) => {
   const symbol = 'SBL';
-  const maxLengthSymbol = '8charMax';
+  const maxLengthSymbol = 'Symbols are 32 characters max...';
   let dat;
   let tx;
 

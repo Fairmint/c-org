@@ -130,12 +130,12 @@ MinInvestmentUpdated: event({
   _minInvestment: uint256(currencyTokens)
 })
 NameUpdated: event({
-  _previousName: string[32],
-  _name: string[32]
+  _previousName: string[64],
+  _name: string[64]
 })
 SymbolUpdated: event({
-  _previousSymbol: string[8],
-  _symbol: string[8]
+  _previousSymbol: string[32],
+  _symbol: string[32]
 })
 #endregion
 
@@ -181,11 +181,11 @@ balanceOf: public(map(address, uint256(FSE)))
 totalSupply: public(uint256(FSE))
 
 # Metadata suggested by the ERC-20 token standard
-name: public(string[32])
+name: public(string[64])
 # @notice Returns the name of the token - e.g. "MyToken".
 # @dev Optional requirement from ERC-20 and ERC-777.
 
-symbol: public(string[8])
+symbol: public(string[32])
 # @notice Returns the symbol of the token. E.g. “HIX”.
 # @dev Optional requirement from ERC-20 and ERC-777
 
@@ -199,8 +199,8 @@ operators: map(address, map(address, bool)) # not public: exposed via `isOperato
 
 @public
 def __init__(
-  _name: string[32],
-  _symbol: string[8],
+  _name: string[64],
+  _symbol: string[32],
   _initReserve: uint256(FSE),
   _currencyAddress: address,
   _initGoal: uint256(FSE),
@@ -778,7 +778,7 @@ def updateMinInvestment(
 
 @public
 def updateName(
-  _name: string[32]
+  _name: string[64]
 ):
   assert msg.sender == self.control, "CONTROL_ONLY"
 
@@ -787,7 +787,7 @@ def updateName(
 
 @public
 def updateSymbol(
-  _symbol: string[8]
+  _symbol: string[32]
 ):
   assert msg.sender == self.control, "CONTROL_ONLY"
 

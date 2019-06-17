@@ -2,7 +2,7 @@ const { deployDat, shouldFail } = require('../../helpers');
 
 contract('dat / erc20 / metadata', (accounts) => {
   const name = 'Token Name';
-  const maxLengthName = 'Names are 32 characters max.....';
+  const maxLengthName = 'Names are 64 characters max.....................................';
   let dat;
   let tx;
 
