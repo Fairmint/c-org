@@ -10,6 +10,7 @@ units: {
 }
 
 from vyper.interfaces import ERC20
+import IERC1820Registry
 
 # TODO: switch to interface files (currently non-native imports fail to compile)
 contract IAuthorization:
@@ -22,16 +23,7 @@ contract IAuthorization:
   def availableBalanceOf(
     _from: address
   ) -> uint256(FSE): constant
-contract IERC1820Registry:
-  def setInterfaceImplementer(
-    _account: address,
-    _interfaceHash: bytes32,
-    _implementer: address
-  ): modifying
-  def getInterfaceImplementer(
-    _addr: address,
-    _interfaceHash: bytes32
-  ) -> address: constant
+
 contract IERC777Recipient:
   def tokensReceived(
     _operator: address,
