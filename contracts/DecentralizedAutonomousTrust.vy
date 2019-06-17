@@ -38,8 +38,8 @@ contract IERC777Recipient:
     _from: address,
     _to: address,
     _amount: uint256(FSE),
-    _data: bytes[32],
-    _operatorData: bytes[32]
+    _userData: bytes[256],
+    _operatorData: bytes[256]
   ): modifying
 contract IERC777Sender:
   def tokensToSend(
@@ -47,8 +47,8 @@ contract IERC777Sender:
     _from: address,
     _to: address,
     _amount: uint256(FSE),
-    _userData: bytes[32],
-    _operatorData: bytes[32]
+    _userData: bytes[256],
+    _operatorData: bytes[256]
   ): modifying
 
 implements: ERC20
@@ -75,15 +75,15 @@ Burned: event({
   _operator: indexed(address),
   _from: indexed(address),
   _amount: uint256(FSE),
-  _data: bytes[32],
-  _operatorData: bytes[32]
+  _userData: bytes[256],
+  _operatorData: bytes[256]
 })
 Minted: event({
   _operator: indexed(address),
   _to: indexed(address),
   _amount: uint256(FSE),
-  _data: bytes[32],
-  _operatorData: bytes[32]
+  _userData: bytes[256],
+  _operatorData: bytes[256]
 })
 RevokedOperator: event({
   _operator: indexed(address),
@@ -94,8 +94,8 @@ Sent: event({
   _from: indexed(address),
   _to: indexed(address),
   _amount: uint256(FSE),
-  _data: bytes[32],
-  _operatorData: bytes[32]
+  _userData: bytes[256],
+  _operatorData: bytes[256]
 })
 
 # Events triggered when updating the DAT's configuration
@@ -284,8 +284,8 @@ def _callTokensToSend(
   _from: address,
   _to: address,
   _amount: uint256(FSE),
-  _userData: bytes[32],
-  _operatorData: bytes[32]
+  _userData: bytes[256],
+  _operatorData: bytes[256]
 ):
   """
   @dev Call from.tokensToSend() if the interface is registered
@@ -306,8 +306,8 @@ def _callTokensReceived(
   _from: address,
   _to: address,
   _amount: uint256(FSE),
-  _userData: bytes[32],
-  _operatorData: bytes[32],
+  _userData: bytes[256],
+  _operatorData: bytes[256],
   _requireReceptionAck: bool
 ):
   """
@@ -332,16 +332,16 @@ def _burn(
   _operator: address,
   _from: address,
   _amount: uint256(FSE),
-  _data: bytes[32],
-  _operatorData: bytes[32]
+  _userData: bytes[256],
+  _operatorData: bytes[256]
 ):
   assert _from != ZERO_ADDRESS, "ERC777: burn from the zero address"
   # Note: no authorization required to burn tokens
 
-  self._callTokensToSend(_operator, _from, ZERO_ADDRESS, _amount, _data, _operatorData)
+  self._callTokensToSend(_operator, _from, ZERO_ADDRESS, _amount, _userData, _operatorData)
   self.totalSupply -= _amount
   self.balanceOf[_from] -= _amount
-  log.Burned(_operator, _from, _amount, _data, _operatorData)
+  log.Burned(_operator, _from, _amount, _userData, _operatorData)
   log.Transfer(_from, ZERO_ADDRESS, _amount)
 
 @private
@@ -350,8 +350,8 @@ def _send(
   _from: address,
   _to: address,
   _amount: uint256(FSE),
-  _userData: bytes[32],
-  _operatorData: bytes[32],
+  _userData: bytes[256],
+  _operatorData: bytes[256],
   _requireReceptionAck: bool
 ):
   assert _from != ZERO_ADDRESS, "ERC777: send from the zero address"
@@ -500,31 +500,31 @@ def authorizeOperator(
 @public
 def burn(
   _amount: uint256(FSE),
-  _data: bytes[32]
+  _userData: bytes[256]
 ):
-  self._burn(msg.sender, msg.sender, _amount, _data, "")
+  self._burn(msg.sender, msg.sender, _amount, _userData, "")
   self.burnedSupply += _amount
 
 @public
 def operatorBurn(
   _account: address,
   _amount: uint256(FSE),
-  _data: bytes[32],
-  _operatorData: bytes[32]
+  _userData: bytes[256],
+  _operatorData: bytes[256]
 ):
   assert self.isOperatorFor(msg.sender, _account), "ERC777: caller is not an operator for holder"
-  self._burn(msg.sender, _account, _amount, _data, _operatorData)
+  self._burn(msg.sender, _account, _amount, _userData, _operatorData)
 
 @public
 def operatorSend(
   _sender: address,
   _recipient: address,
   _amount: uint256(FSE),
-  _data: bytes[32],
-  _operatorData: bytes[32]
+  _userData: bytes[256],
+  _operatorData: bytes[256]
 ):
   assert self.isOperatorFor(msg.sender, _sender), "ERC777: caller is not an operator for holder"
-  self._send(msg.sender, _sender, _recipient, _amount, _data, _operatorData, True)
+  self._send(msg.sender, _sender, _recipient, _amount, _userData, _operatorData, True)
 
 @public
 def revokeOperator(
@@ -539,9 +539,9 @@ def revokeOperator(
 def send(
   _recipient: address,
   _amount: uint256(FSE),
-  _data: bytes[32]
+  _userData: bytes[256]
 ):
-  self._send(msg.sender, msg.sender, _recipient, _amount, _data, "", True)
+  self._send(msg.sender, msg.sender, _recipient, _amount, _userData, "", True)
 #endregion
 
 #region Functions for DAT business logic
@@ -610,7 +610,7 @@ def estimateTokensForSell(
 def buy(
   _quantityToInvest: uint256(currencyTokens),
   _minTokensBought: uint256(FSE),
-  _userData: bytes[32]
+  _userData: bytes[256]
 ):
   assert _quantityToInvest >= self.minInvestment, "SEND_AT_LEAST_MIN_INVESTMENT"
 
@@ -658,7 +658,7 @@ def buy(
 def sell(
   _amount: uint256(FSE),
   _minCurrencyReturned: uint256(currencyTokens),
-  _userData: bytes[32]
+  _userData: bytes[256]
 ):
   if(self.authorization != ZERO_ADDRESS):
     self.authorization.authorizeTransfer(msg.sender, msg.sender, ZERO_ADDRESS, _amount)
@@ -692,8 +692,8 @@ def tokensReceived(
     _from: address,
     _to: address,
     _amount: uint256(FSE),
-    _data: bytes[32],
-    _operatorData: bytes[32]
+    _userData: bytes[256],
+    _operatorData: bytes[256]
   ):
   # TODO
   pass
