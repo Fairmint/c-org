@@ -12,6 +12,8 @@ contract('dat / erc777 / defaultOperators', () => {
      * Hard-coded to no default operators as we have not identified a compelling use
      * case for this and to simplify the token implementation.
      */
-    assert.equal(await dat.defaultOperators(), [constants.ZERO_ADDRESS]);
+    const operators = await dat.defaultOperators();
+    assert.equal(operators.length, 1);
+    assert.equal(operators[0], constants.ZERO_ADDRESS);
   });
 });

@@ -15,6 +15,7 @@ contract('dat / erc20 / metadata', (accounts) => {
   });
 
   it('should fail to deploy with a name longer than the max', async () => {
+    console.log(deployDat({ name: `${maxLengthName} more characters` }));
     await shouldFail(deployDat({ name: `${maxLengthName} more characters` }));
   });
 
