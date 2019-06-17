@@ -214,10 +214,11 @@ def __init__(
 ):
   self.ERC1820Registry = IERC1820Registry(0x1820a4B7618BdE71Dce8cdc73aAB6C95905faD24) # constant for all networks
 
-  # TODO test method calls
+  assert len(_name) <= 32 # In Vyper max-length is enforced except for the constructor it seems
   log.NameUpdated(self.name, _name)
   self.name = _name
 
+  assert len(_symbol) <= 8 # In Vyper max-length is enforced except for the constructor it seems
   log.SymbolUpdated(self.symbol, _symbol)
   self.symbol = _symbol
 
