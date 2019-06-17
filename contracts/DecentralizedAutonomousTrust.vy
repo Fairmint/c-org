@@ -182,16 +182,12 @@ totalSupply: public(uint256(FAIRs))
 
 # Metadata suggested by the ERC-20 token standard
 name: public(string[64])
-"""
-@notice Returns the name of the token - e.g. "MyToken".
-@dev Optional requirement from ERC-20 and ERC-777
-"""
+# @notice Returns the name of the token - e.g. "MyToken".
+# @dev Optional requirement from ERC-20 and ERC-777.
 
 symbol: public(string[8])
-"""
-@notice Returns the symbol of the token. E.g. “HIX”.
-@dev Optional requirement from ERC-20 and ERC-777
-"""
+# @notice Returns the symbol of the token. E.g. “HIX”.
+# @dev Optional requirement from ERC-20 and ERC-777
 
 # Data storage required by the ERC-777 token standard
 ERC1820Registry: IERC1820Registry # not public: constant data
