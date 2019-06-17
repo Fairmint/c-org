@@ -476,13 +476,14 @@ def granularity() -> uint256:
 
 @public
 @constant
-def defaultOperators() -> uint256:
+def defaultOperators() -> address[1]:
   """
   @notice Get the list of default operators as defined by the token contract.
   @dev Hard-coded to no default operators as we have not identified a compelling use
   case for this and to simplify the token implementation.
+  There are no empty lists in Vyper, so returning [ZERO_ADDRESS] instead.
   """
-  return 0
+  return [ZERO_ADDRESS]
 
 @public
 def authorizeOperator(

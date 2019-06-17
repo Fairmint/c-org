@@ -1,4 +1,4 @@
-const { deployDat } = require('../../helpers');
+const { deployDat, constants } = require('../../helpers');
 
 contract('dat / erc777 / defaultOperators', () => {
   let dat;
@@ -12,6 +12,6 @@ contract('dat / erc777 / defaultOperators', () => {
      * Hard-coded to no default operators as we have not identified a compelling use
      * case for this and to simplify the token implementation.
      */
-    assert.equal(await dat.defaultOperators(), []);
+    assert.equal(await dat.defaultOperators(), [constants.ZERO_ADDRESS]);
   });
 });

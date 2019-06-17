@@ -15,7 +15,7 @@ contract('dat / erc20 / metadata', (accounts) => {
   });
 
   it('should fail to deploy with a symbol longer than the max', async () => {
-    await shouldFail(deployDat({ name: `${maxLengthSymbol} more characters` }));
+    await shouldFail(deployDat({ symbol: `${maxLengthSymbol} more characters` }));
   });
 
   describe('updateSymbol', () => {
