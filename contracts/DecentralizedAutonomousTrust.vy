@@ -4,7 +4,7 @@
 ##################################################
 
 units: {
-  FAIRs: "FAIR Securities",
+  FSE: "Fair Synthetic Equity",
   currencyTokens: "The reserve currency - either ETH or an ERC20",
   stateMachine: "The DAT's internal state machine"
 }
@@ -17,11 +17,11 @@ contract IAuthorization:
     _operator: address,
     _from: address,
     _to: address,
-    _value: uint256(FAIRs)
+    _value: uint256(FSE)
   ): modifying
   def availableBalanceOf(
     _from: address
-  ) -> uint256(FAIRs): constant
+  ) -> uint256(FSE): constant
 contract IERC1820Registry:
   def setInterfaceImplementer(
     _account: address,
@@ -37,7 +37,7 @@ contract IERC777Recipient:
     _operator: address,
     _from: address,
     _to: address,
-    _amount: uint256(FAIRs),
+    _amount: uint256(FSE),
     _data: bytes[32],
     _operatorData: bytes[32]
   ): modifying
@@ -46,7 +46,7 @@ contract IERC777Sender:
     _operator: address,
     _from: address,
     _to: address,
-    _amount: uint256(FAIRs),
+    _amount: uint256(FSE),
     _userData: bytes[32],
     _operatorData: bytes[32]
   ): modifying
@@ -58,12 +58,12 @@ implements: ERC20
 Approval: event({
   _owner: indexed(address),
   _spender: indexed(address),
-  _value: uint256(FAIRs)
+  _value: uint256(FSE)
 })
 Transfer: event({
   _from: indexed(address),
   _to: indexed(address),
-  _value: uint256(FAIRs)
+  _value: uint256(FSE)
 })
 
 # Events required by the ERC-777 token standard
@@ -74,14 +74,14 @@ AuthorizedOperator: event({
 Burned: event({
   _operator: indexed(address),
   _from: indexed(address),
-  _amount: uint256(FAIRs),
+  _amount: uint256(FSE),
   _data: bytes[32],
   _operatorData: bytes[32]
 })
 Minted: event({
   _operator: indexed(address),
   _to: indexed(address),
-  _amount: uint256(FAIRs),
+  _amount: uint256(FSE),
   _data: bytes[32],
   _operatorData: bytes[32]
 })
@@ -93,7 +93,7 @@ Sent: event({
   _operator: indexed(address),
   _from: indexed(address),
   _to: indexed(address),
-  _amount: uint256(FAIRs),
+  _amount: uint256(FSE),
   _data: bytes[32],
   _operatorData: bytes[32]
 })
@@ -120,10 +120,10 @@ FeeCollectorTransferred: event({
   _feeCollector: address
 })
 FeeUpdated: event({
-  _previousFeeNum: uint256(FAIRs),
-  _previousFeeDen: uint256(FAIRs),
-  _feeNum: uint256(FAIRs),
-  _feeDen: uint256(FAIRs)
+  _previousFeeNum: uint256(FSE),
+  _previousFeeDen: uint256(FSE),
+  _feeNum: uint256(FSE),
+  _feeDen: uint256(FSE)
 })
 MinInvestmentUpdated: event({
   _previousMinInvestment: uint256(currencyTokens),
@@ -154,10 +154,10 @@ TOKENS_RECIPIENT_INTERFACE_HASH: constant(bytes32) = keccak256("ERC777TokensReci
 authorizationAddress: public(address)
 authorization: IAuthorization # redundant w/ authorizationAddress, for convenience
 beneficiary: public(address)
-burnedSupply: public(uint256(FAIRs))
+burnedSupply: public(uint256(FSE))
 burnThreshold: public(decimal)
 buySlopeNum: public(uint256(currencyTokens))
-buySlopeDen: public(uint256(FAIRs))
+buySlopeDen: public(uint256(FSE))
 control: public(address)
 currencyAddress: public(address)
 currency: ERC20 # redundant w/ currencyAddress, for convenience
@@ -165,9 +165,9 @@ feeCollector: public(address)
 feeNum: public(uint256)
 feeDen: public(uint256)
 initDeadline: public(timestamp)
-initGoal: public(uint256(FAIRs))
+initGoal: public(uint256(FSE))
 initInvestors: public(map(address, uint256(currencyTokens)))
-initReserve: public(uint256(FAIRs))
+initReserve: public(uint256(FSE))
 investmentReserveNum: public(uint256)
 investmentReserveDen: public(uint256)
 minInvestment: public(uint256(currencyTokens))
@@ -176,9 +176,9 @@ revenueCommitmentDen: public(uint256)
 state: public(uint256(stateMachine))
 
 # Data storage required by the ERC-20 token standard
-allowances: map(address, map(address, uint256(FAIRs))) # not public: exposed via `allowance`
-balanceOf: public(map(address, uint256(FAIRs)))
-totalSupply: public(uint256(FAIRs))
+allowances: map(address, map(address, uint256(FSE))) # not public: exposed via `allowance`
+balanceOf: public(map(address, uint256(FSE)))
+totalSupply: public(uint256(FSE))
 
 # Metadata suggested by the ERC-20 token standard
 name: public(string[32])
@@ -201,12 +201,12 @@ operators: map(address, map(address, bool)) # not public: exposed via `isOperato
 def __init__(
   _name: string[32],
   _symbol: string[8],
-  _initReserve: uint256(FAIRs),
+  _initReserve: uint256(FSE),
   _currencyAddress: address,
-  _initGoal: uint256(FAIRs),
+  _initGoal: uint256(FSE),
   _initDeadline: timestamp,
   _buySlopeNum: uint256(currencyTokens),
-  _buySlopeDen: uint256(FAIRs),
+  _buySlopeDen: uint256(FSE),
   _investmentReserveNum: uint256,
   _investmentReserveDen: uint256,
   _revenueCommitmentNum: uint256,
@@ -280,7 +280,7 @@ def _callTokensToSend(
   _operator: address,
   _from: address,
   _to: address,
-  _amount: uint256(FAIRs),
+  _amount: uint256(FSE),
   _userData: bytes[32],
   _operatorData: bytes[32]
 ):
@@ -302,7 +302,7 @@ def _callTokensReceived(
   _operator: address,
   _from: address,
   _to: address,
-  _amount: uint256(FAIRs),
+  _amount: uint256(FSE),
   _userData: bytes[32],
   _operatorData: bytes[32],
   _requireReceptionAck: bool
@@ -328,7 +328,7 @@ def _callTokensReceived(
 def _burn(
   _operator: address,
   _from: address,
-  _amount: uint256(FAIRs),
+  _amount: uint256(FSE),
   _data: bytes[32],
   _operatorData: bytes[32]
 ):
@@ -346,7 +346,7 @@ def _send(
   _operator: address,
   _from: address,
   _to: address,
-  _amount: uint256(FAIRs),
+  _amount: uint256(FSE),
   _userData: bytes[32],
   _operatorData: bytes[32],
   _requireReceptionAck: bool
@@ -410,7 +410,7 @@ def _distributeInvestment(
 def allowance(
   _owner: address,
   _spender: address
-) -> uint256(FAIRs):
+) -> uint256(FSE):
   return self.allowances[_owner][_spender]
 
 @public
@@ -426,7 +426,7 @@ def decimals() -> uint256:
 @public
 def approve(
   _spender: address,
-  _value: uint256(FAIRs)
+  _value: uint256(FSE)
 ) -> bool:
   self.allowances[msg.sender][_spender] = _value
   log.Approval(msg.sender, _spender, _value)
@@ -435,7 +435,7 @@ def approve(
 @public
 def transfer(
   _to: address,
-  _value: uint256(FAIRs)
+  _value: uint256(FSE)
 ) -> bool:
   self._send(msg.sender, msg.sender, _to, _value, "", "", False)
   return True
@@ -444,7 +444,7 @@ def transfer(
 def transferFrom(
   _from: address,
   _to: address,
-  _value: uint256(FAIRs)
+  _value: uint256(FSE)
 ) -> bool:
   self._send(msg.sender, _from, _to, _value, "", "", False)
   self.allowances[_from][msg.sender] -= _value
@@ -495,7 +495,7 @@ def authorizeOperator(
 
 @public
 def burn(
-  _amount: uint256(FAIRs),
+  _amount: uint256(FSE),
   _data: bytes[32]
 ):
   self._burn(msg.sender, msg.sender, _amount, _data, "")
@@ -504,7 +504,7 @@ def burn(
 @public
 def operatorBurn(
   _account: address,
-  _amount: uint256(FAIRs),
+  _amount: uint256(FSE),
   _data: bytes[32],
   _operatorData: bytes[32]
 ):
@@ -515,7 +515,7 @@ def operatorBurn(
 def operatorSend(
   _sender: address,
   _recipient: address,
-  _amount: uint256(FAIRs),
+  _amount: uint256(FSE),
   _data: bytes[32],
   _operatorData: bytes[32]
 ):
@@ -534,7 +534,7 @@ def revokeOperator(
 @public
 def send(
   _recipient: address,
-  _amount: uint256(FAIRs),
+  _amount: uint256(FSE),
   _data: bytes[32]
 ):
   self._send(msg.sender, msg.sender, _recipient, _amount, _data, "", True)
@@ -547,7 +547,7 @@ def send(
 @constant
 def availableBalanceOf(
   _from: address
-) -> uint256(FAIRs):
+) -> uint256(FSE):
   if(self.state == STATE_INITIALIZATION):
     return 0
   elif(self.authorization != ZERO_ADDRESS):
@@ -575,15 +575,15 @@ def sellSlope() -> decimal:
 
 @public
 @constant
-def supplySold() -> uint256(FAIRs):
+def supplySold() -> uint256(FSE):
   return self.totalSupply + self.burnedSupply - self.initReserve
 
 @public
 @constant
 def estimateTokensForBuy(
   _quantityToInvest: uint256(currencyTokens)
-) -> uint256(FAIRs):
-  tokenValue: uint256(FAIRs)
+) -> uint256(FSE):
+  tokenValue: uint256(FSE)
   if(self.state == STATE_INITIALIZATION and (self.initDeadline == 0 or self.initDeadline < block.timestamp)):
     tokenValue = 2 * _quantityToInvest * self.buySlopeDen / (self.initGoal * self.buySlopeNum)
   elif(self.state == STATE_RUNNING):
@@ -596,7 +596,7 @@ def estimateTokensForBuy(
 @public
 @constant
 def estimateTokensForSell(
-  _quantityToSell: uint256(FAIRs)
+  _quantityToSell: uint256(FSE)
 ) -> uint256(currencyTokens):
   # TODO
   return 1
@@ -605,12 +605,12 @@ def estimateTokensForSell(
 @payable
 def buy(
   _quantityToInvest: uint256(currencyTokens),
-  _minTokensBought: uint256(FAIRs),
+  _minTokensBought: uint256(FSE),
   _userData: bytes[32]
 ):
   assert _quantityToInvest >= self.minInvestment, "SEND_AT_LEAST_MIN_INVESTMENT"
 
-  tokenValue: uint256(FAIRs) = self.estimateTokensForBuy(_quantityToInvest)
+  tokenValue: uint256(FSE) = self.estimateTokensForBuy(_quantityToInvest)
 
   assert tokenValue >= _minTokensBought, "PRICE_SLIPPAGE"
   assert tokenValue > 0, "NOT_ENOUGH_FUNDS"
@@ -643,7 +643,7 @@ def buy(
   else:
     assert False, "INVALID_STATE"
 
-  # Mint new FAIRs
+  # Mint new FSE
   self.totalSupply += tokenValue
   self.balanceOf[msg.sender] += tokenValue
   # TODO VM Exception while processing transaction: stack underflow self._callTokensReceived(msg.sender, ZERO_ADDRESS, msg.sender, tokenValue, _userData, "", True)
@@ -652,7 +652,7 @@ def buy(
 
 @public
 def sell(
-  _amount: uint256(FAIRs),
+  _amount: uint256(FSE),
   _minCurrencyReturned: uint256(currencyTokens),
   _userData: bytes[32]
 ):
@@ -687,7 +687,7 @@ def tokensReceived(
     _operator: address,
     _from: address,
     _to: address,
-    _amount: uint256(FAIRs),
+    _amount: uint256(FSE),
     _data: bytes[32],
     _operatorData: bytes[32]
   ):
