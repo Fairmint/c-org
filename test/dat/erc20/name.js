@@ -14,6 +14,10 @@ contract('dat / erc20 / metadata', (accounts) => {
     assert.equal(await dat.name(), name);
   });
 
+  it('can deploy with max length name', async () => {
+    await deployDat({ name: maxLengthName });
+  });
+
   it('should fail to deploy with a name longer than the max', async () => {
     await shouldFail(deployDat({ name: `${maxLengthName} more characters` }));
   });

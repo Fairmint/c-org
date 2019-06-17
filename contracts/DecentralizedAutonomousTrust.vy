@@ -178,6 +178,8 @@ state: public(uint256(stateMachine))
 # Data storage required by the ERC-20 token standard
 allowances: map(address, map(address, uint256(FSE))) # not public: exposed via `allowance`
 balanceOf: public(map(address, uint256(FSE)))
+# @notice Returns the account balance of another account with address _owner.
+
 totalSupply: public(uint256(FSE))
 
 # Metadata suggested by the ERC-20 token standard
@@ -214,11 +216,11 @@ def __init__(
 ):
   self.ERC1820Registry = IERC1820Registry(0x1820a4B7618BdE71Dce8cdc73aAB6C95905faD24) # constant for all networks
 
-  assert len(_name) <= 32 # In Vyper max-length is enforced except for the constructor it seems
+  assert len(_name) <= 64 # In Vyper max-length is enforced except for the constructor it seems
   log.NameUpdated(self.name, _name)
   self.name = _name
 
-  assert len(_symbol) <= 8 # In Vyper max-length is enforced except for the constructor it seems
+  assert len(_symbol) <= 32 # In Vyper max-length is enforced except for the constructor it seems
   log.SymbolUpdated(self.symbol, _symbol)
   self.symbol = _symbol
 

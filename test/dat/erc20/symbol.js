@@ -14,6 +14,10 @@ contract('dat / erc20 / metadata', (accounts) => {
     assert.equal(await dat.symbol(), symbol);
   });
 
+  it('can deploy with max length symbol', async () => {
+    await deployDat({ symbol: maxLengthSymbol });
+  });
+
   it('should fail to deploy with a symbol longer than the max', async () => {
     await shouldFail(deployDat({ symbol: `${maxLengthSymbol} more characters` }));
   });
