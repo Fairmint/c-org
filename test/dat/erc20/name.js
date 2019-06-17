@@ -2,7 +2,7 @@ const { deployDat, shouldFail } = require('../../helpers');
 
 contract('dat / erc20 / metadata', (accounts) => {
   const name = 'Token Name';
-  const maxLengthName = 'Names are 32 characters max.....';
+  const maxLengthName = 'Names are 64 characters max.....................................';
   let dat;
   let tx;
 
@@ -12,6 +12,10 @@ contract('dat / erc20 / metadata', (accounts) => {
 
   it('should have a name', async () => {
     assert.equal(await dat.name(), name);
+  });
+
+  it('can deploy with max length name', async () => {
+    await deployDat({ name: maxLengthName });
   });
 
   it('should fail to deploy with a name longer than the max', async () => {
