@@ -10,7 +10,7 @@ units: {
 }
 
 from vyper.interfaces import ERC20
-import IERC1820Registry
+import IERC1820Registry as IERC1820Registry
 
 # TODO: switch to interface files (currently non-native imports fail to compile)
 contract IAuthorization:
