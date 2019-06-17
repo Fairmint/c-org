@@ -52,14 +52,8 @@ contract('dat / erc20 / metadata', (accounts) => {
           assert.equal(await dat.name(), maxLengthName);
         });
 
-        describe('truncates updates longer than the max', () => {
-          before(async () => {
-            tx = await dat.updateName(`${maxLengthName} more characters`);
-          });
-
-          it('should have the truncated the name', async () => {
-            assert.equal(await dat.name(), maxLengthName);
-          });
+        it('should fail to update longer than the max', async () => {
+          await shouldFail(dat.updateName(`${maxLengthName} more characters`));
         });
       });
     });
@@ -99,14 +93,8 @@ contract('dat / erc20 / metadata', (accounts) => {
           assert.equal(await dat.symbol(), maxLengthSymbol);
         });
 
-        describe('truncates updates longer than the max', () => {
-          before(async () => {
-            tx = await dat.updateSymbol(`${maxLengthSymbol} more characters`);
-          });
-
-          it('should have the truncated the symbol', async () => {
-            assert.equal(await dat.symbol(), maxLengthSymbol);
-          });
+        it('should fail to update longer than the max', async () => {
+          await shouldFail(dat.updateSymbol(`${maxLengthSymbol} more characters`));
         });
       });
     });

@@ -130,8 +130,8 @@ MinInvestmentUpdated: event({
   _minInvestment: uint256(currencyTokens)
 })
 NameUpdated: event({
-  _previousName: string[64],
-  _name: string[64]
+  _previousName: string[32],
+  _name: string[32]
 })
 SymbolUpdated: event({
   _previousSymbol: string[8],
@@ -181,7 +181,7 @@ balanceOf: public(map(address, uint256(FAIRs)))
 totalSupply: public(uint256(FAIRs))
 
 # Metadata suggested by the ERC-20 token standard
-name: public(string[64])
+name: public(string[32])
 # @notice Returns the name of the token - e.g. "MyToken".
 # @dev Optional requirement from ERC-20 and ERC-777.
 
@@ -199,7 +199,7 @@ operators: map(address, map(address, bool)) # not public: exposed via `isOperato
 
 @public
 def __init__(
-  _name: string[64],
+  _name: string[32],
   _symbol: string[8],
   _initReserve: uint256(FAIRs),
   _currencyAddress: address,
@@ -764,7 +764,7 @@ def updateMinInvestment(
 
 @public
 def updateName(
-  _name: string[64]
+  _name: string[32]
 ):
   assert msg.sender == self.control, "CONTROL_ONLY"
 
