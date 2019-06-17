@@ -13,6 +13,7 @@ module.exports = {
     it: 'readonly',
     assert: 'readonly',
     before: 'readonly',
+    beforeEach: 'readonly',
     describe: 'readonly',
     web3: 'readonly'
   },

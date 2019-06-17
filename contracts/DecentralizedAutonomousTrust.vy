@@ -182,7 +182,16 @@ totalSupply: public(uint256(FAIRs))
 
 # Metadata suggested by the ERC-20 token standard
 name: public(string[64])
+"""
+@notice Returns the name of the token - e.g. "MyToken".
+@dev Optional requirement from ERC-20 and ERC-777
+"""
+
 symbol: public(string[8])
+"""
+@notice Returns the symbol of the token. E.g. “HIX”.
+@dev Optional requirement from ERC-20 and ERC-777
+"""
 
 # Data storage required by the ERC-777 token standard
 ERC1820Registry: IERC1820Registry # not public: constant data
@@ -411,7 +420,12 @@ def allowance(
 @public
 @constant
 def decimals() -> uint256:
-  return 18 # Must be 18 per ERC-777
+  """
+  @notice Returns the number of decimals the token uses - e.g. 8, means to divide
+  the token amount by 100000000 to get its user representation.
+  @dev This is optional per ERC-20 but must always be 18 per ERC-777
+  """
+  return 18
 
 @public
 def approve(
