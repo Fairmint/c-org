@@ -39,10 +39,14 @@ contract('dat / erc20 / metadata', (accounts) => {
       });
     });
 
+    it('should fail to set a long name');
+
     it('should fail to change name from a different account', async () => {
       await shouldFail(dat.updateName('Test', { from: accounts[2] }), 'CONTROL_ONLY');
     });
   });
 
-  describe('updateSymbol');
+  describe('updateSymbol', () => {
+    it('todo');
+  });
 });
