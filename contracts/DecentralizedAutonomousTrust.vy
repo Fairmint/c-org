@@ -527,7 +527,7 @@ def operatorSend(
   _operatorData: bytes[256]
 ):
   assert self.isOperatorFor(msg.sender, _sender), "ERC777: caller is not an operator for holder"
-  self._send(msg.sender, _sender, _recipient, _amount, _userData, _operatorData, True)
+  self._send(msg.sender, _sender, _recipient, _amount, True, _userData, _operatorData)
 
 @public
 def revokeOperator(
@@ -544,7 +544,7 @@ def send(
   _amount: uint256(FSE),
   _userData: bytes[256]
 ):
-  self._send(msg.sender, msg.sender, _recipient, _amount, _userData, "", True)
+  self._send(msg.sender, msg.sender, _recipient, _amount, True, _userData)
 #endregion
 
 #region Functions for DAT business logic
