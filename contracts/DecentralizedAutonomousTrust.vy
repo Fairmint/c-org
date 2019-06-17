@@ -353,9 +353,9 @@ def _send(
   _from: address,
   _to: address,
   _amount: uint256(FSE),
-  _userData: bytes[256],
-  _operatorData: bytes[256],
-  _requireReceptionAck: bool
+  _requireReceptionAck: bool,
+  _userData: bytes[256]="",
+  _operatorData: bytes[256]=""
 ):
   assert _from != ZERO_ADDRESS, "ERC777: send from the zero address"
   assert _to != ZERO_ADDRESS, "ERC777: send to the zero address"
@@ -443,7 +443,7 @@ def transfer(
   _to: address,
   _value: uint256(FSE)
 ) -> bool:
-  self._send(msg.sender, msg.sender, _to, _value, "", "", False)
+  self._send(msg.sender, msg.sender, _to, _value, False)
   return True
 
 @public
@@ -452,7 +452,7 @@ def transferFrom(
   _to: address,
   _value: uint256(FSE)
 ) -> bool:
-  self._send(msg.sender, _from, _to, _value, "", "", False)
+  self._send(msg.sender, _from, _to, _value, False)
   self.allowances[_from][msg.sender] -= _value
   return True
 #endregion
