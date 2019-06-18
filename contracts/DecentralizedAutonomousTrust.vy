@@ -266,7 +266,7 @@ def __init__(
   # Register supported interfaces
   self.ERC1820Registry.setInterfaceImplementer(self, keccak256("ERC20Token"), self)
   self.ERC1820Registry.setInterfaceImplementer(self, keccak256("ERC777Token"), self)
-  # TODO plus ERC777TokensRecipient for pay
+  self.ERC1820Registry.setInterfaceImplementer(self, keccak256("ERC777TokensRecipient"), self)
 
   # Mint the initial reserve
   self.initReserve = _initReserve
