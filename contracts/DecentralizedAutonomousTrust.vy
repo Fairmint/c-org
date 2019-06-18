@@ -12,6 +12,7 @@ units: {
 from vyper.interfaces import ERC20
 
 # TODO: switch to interface files (currently non-native imports fail to compile)
+# Depends on https://github.com/ethereum/vyper/issues/1367
 contract IAuthorization:
   def authorizeTransfer(
     _operator: address,
@@ -237,7 +238,7 @@ def __init__(
   log.Transfer(ZERO_ADDRESS, self.beneficiary, self.initReserve)
   emptyData: bytes[256] = ""
   log.Minted(msg.sender, msg.sender, self.initReserve, emptyData, emptyData)
-  # TODO call tokenSender
+  # TODO call tokenReceived
 
 #endregion
 
@@ -250,8 +251,8 @@ def _callTokensToSend(
   _from: address,
   _to: address,
   _amount: uint256(FSE),
-  _userData: bytes[256],
-  _operatorData: bytes[256]
+  _userData: bytes[256]="", # TODO remove default(?)
+  _operatorData: bytes[256]=""
 ):
   """
   @dev Call from.tokensToSend() if the interface is registered
@@ -273,7 +274,7 @@ def _callTokensReceived(
   _to: address,
   _amount: uint256(FSE),
   _requireReceptionAck: bool,
-  _userData: bytes[256]="",
+  _userData: bytes[256]="", # TODO remove default(?)
   _operatorData: bytes[256]=""
 ):
   """
@@ -325,10 +326,10 @@ def _send(
   if(self.authorization != ZERO_ADDRESS):
     self.authorization.authorizeTransfer(_operator, _from, _to, _amount)
 
-  # TODO self._callTokensToSend(_operator, _from, _to, _amount, _userData, _operatorData)
+  self._callTokensToSend(_operator, _from, _to, _amount) # TODO _userData _operatorData stack underflow
   self.balanceOf[_from] -= _amount
   self.balanceOf[_to] += _amount
-  # TODO self._callTokensReceived(_operator, _from, _to, _amount, _userData, _operatorData, _requireReceptionAck)
+  self._callTokensReceived(_operator, _from, _to, _amount, _requireReceptionAck) # TODO _userData _operatorData stack underflow
 
   log.Sent(_operator, _from, _to, _amount, _userData, _operatorData)
   log.Transfer(_from, _to, _amount)
@@ -623,11 +624,12 @@ def buy(
   # Mint new FSE
   self.totalSupply += tokenValue
   self.balanceOf[msg.sender] += tokenValue
-  emptyData: bytes[256] = ""
-  self._callTokensReceived(msg.sender, ZERO_ADDRESS, msg.sender, tokenValue, True)
+  self._callTokensReceived(msg.sender, ZERO_ADDRESS, msg.sender, tokenValue, True) # TODO _userData causes `stack underflow`
   log.Transfer(ZERO_ADDRESS, msg.sender, tokenValue)
+  emptyData: bytes[256] = ""
   log.Minted(msg.sender, msg.sender, tokenValue, _userData, emptyData)
-  # TODO call tokenSender
+
+# TODO buyFor (?)
 
 @public
 def sell(
@@ -672,6 +674,7 @@ def tokensReceived(
   ):
   # TODO
   pass
+
 #endregion
 
 #region Function to update DAT configuration
