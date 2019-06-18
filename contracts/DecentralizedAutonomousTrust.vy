@@ -506,7 +506,7 @@ def revokeOperator(
 def send(
   _recipient: address,
   _amount: uint256(FSE),
-  _userData: bytes[256]
+  _userData: bytes[256]=""
 ):
   self._send(msg.sender, msg.sender, _recipient, _amount, True, _userData)
 #endregion
