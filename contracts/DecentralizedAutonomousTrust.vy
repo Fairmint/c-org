@@ -310,9 +310,9 @@ def _callTokensReceived(
   _from: address,
   _to: address,
   _amount: uint256(FSE),
-  _userData: bytes[256],
-  _operatorData: bytes[256],
-  _requireReceptionAck: bool
+  _requireReceptionAck: bool,
+  _userData: bytes[256]="",
+  _operatorData: bytes[256]=""
 ):
   """
   @dev Call to.tokensReceived() if the interface is registered. Reverts if the recipient is a contract but
@@ -655,7 +655,7 @@ def buy(
   self.totalSupply += tokenValue
   self.balanceOf[msg.sender] += tokenValue
   emptyData: bytes[256] = ""
-  self._callTokensReceived(msg.sender, ZERO_ADDRESS, msg.sender, tokenValue, _userData, emptyData, True)
+  self._callTokensReceived(msg.sender, ZERO_ADDRESS, msg.sender, tokenValue, True, _userData, emptyData)
   log.Transfer(ZERO_ADDRESS, msg.sender, tokenValue)
   log.Minted(msg.sender, msg.sender, tokenValue, _userData, emptyData)
   # TODO call tokenSender
