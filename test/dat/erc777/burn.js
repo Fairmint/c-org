@@ -13,11 +13,14 @@ contract('dat / erc20 / balanceOf', (accounts) => {
 
     before(async () => {
       accountBalanceBefore = await dat.balanceOf(accounts[0]);
-      await dat.burn(42, web3.utils.asciiToHex(''));
+      await dat.burn(20, web3.utils.asciiToHex(''));
     });
 
     it('account balance went down', async () => {
-      assert.equal((await dat.balanceOf(accounts[0])).toString(), accountBalanceBefore.subn(42).toString());
+      assert.equal(
+        (await dat.balanceOf(accounts[0])).toString(),
+        accountBalanceBefore.subn(42).toString(),
+      );
     });
   });
 
