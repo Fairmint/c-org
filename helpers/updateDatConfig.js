@@ -1,4 +1,4 @@
-module.exports = async function updateDatConfig(dat, options, txOptions) {
+module.exports = async function updateDatConfig(dat, options, txOptions = {}) {
   const callOptions = Object.assign({
     authorizationAddress: await dat.authorizationAddress(),
     beneficiary: await dat.beneficiary(),
@@ -25,5 +25,6 @@ module.exports = async function updateDatConfig(dat, options, txOptions) {
     callOptions.minInvestment,
     callOptions.name,
     callOptions.symbol,
-  ).send(txOptions);
+    txOptions,
+  );
 };
