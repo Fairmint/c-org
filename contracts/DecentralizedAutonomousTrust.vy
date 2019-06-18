@@ -251,7 +251,7 @@ def _callTokensToSend(
   _from: address,
   _to: address,
   _amount: uint256(FSE),
-  _userData: bytes[256],
+  _userData: bytes[256]="", # TODO remove default(?)
   _operatorData: bytes[256]=""
 ):
   """
