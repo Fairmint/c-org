@@ -582,7 +582,7 @@ def estimateTokensForSell(
 def buy(
   _quantityToInvest: uint256(currencyTokens),
   _minTokensBought: uint256(FSE),
-  _userData: bytes[256]
+  _userData: bytes[256]=""
 ):
   assert _quantityToInvest >= self.minInvestment, "SEND_AT_LEAST_MIN_INVESTMENT"
 
@@ -623,11 +623,10 @@ def buy(
   # Mint new FSE
   self.totalSupply += tokenValue
   self.balanceOf[msg.sender] += tokenValue
-  emptyData: bytes[256] = ""
   self._callTokensReceived(msg.sender, ZERO_ADDRESS, msg.sender, tokenValue, True, _userData)
   log.Transfer(ZERO_ADDRESS, msg.sender, tokenValue)
+  emptyData: bytes[256] = ""
   log.Minted(msg.sender, msg.sender, tokenValue, _userData, emptyData)
-  # TODO call tokenSender
 
 @public
 def sell(
