@@ -674,7 +674,8 @@ def tokensReceived(
   ):
   # TODO
   pass
-endregion
+
+#endregion
 
 #region Function to update DAT configuration
 ##################################################
