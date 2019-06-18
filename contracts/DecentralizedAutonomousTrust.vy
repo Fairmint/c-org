@@ -326,7 +326,7 @@ def _send(
   if(self.authorization != ZERO_ADDRESS):
     self.authorization.authorizeTransfer(_operator, _from, _to, _amount)
 
-  self._callTokensToSend(_operator, _from, _to, _amount, _userData) # TODO _operatorData stack underflow
+  # TODO self._callTokensToSend(_operator, _from, _to, _amount, _userData) # TODO _operatorData stack underflow
   self.balanceOf[_from] -= _amount
   self.balanceOf[_to] += _amount
   self._callTokensReceived(_operator, _from, _to, _amount, _requireReceptionAck, _userData) # TODO _operatorData stake underflow
