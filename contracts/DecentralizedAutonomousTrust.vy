@@ -318,7 +318,7 @@ def _send(
   _to: address,
   _amount: uint256(FSE),
   _requireReceptionAck: bool,
-  _userData: bytes[256],
+  _userData: bytes[256]="",
   _operatorData: bytes[256]=""
 ):
   assert _from != ZERO_ADDRESS, "ERC777: send from the zero address"
@@ -506,7 +506,7 @@ def revokeOperator(
 def send(
   _recipient: address,
   _amount: uint256(FSE),
-  _userData: bytes[256]=""
+  _userData: bytes[256]
 ):
   self._send(msg.sender, msg.sender, _recipient, _amount, True, _userData)
 #endregion
@@ -628,6 +628,8 @@ def buy(
   log.Transfer(ZERO_ADDRESS, msg.sender, tokenValue)
   emptyData: bytes[256] = ""
   log.Minted(msg.sender, msg.sender, tokenValue, _userData, emptyData)
+
+# TODO buyFor (?)
 
 @public
 def sell(
