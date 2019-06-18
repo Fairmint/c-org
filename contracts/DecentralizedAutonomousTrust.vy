@@ -407,7 +407,8 @@ def transfer(
   _to: address,
   _value: uint256(FSE)
 ) -> bool:
-  self._send(msg.sender, msg.sender, _to, _value, False)
+  emptyData: bytes[256] = ""
+  self._send(msg.sender, msg.sender, _to, _value, False, emptyData)
   return True
 
 @public
