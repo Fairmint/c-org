@@ -27,7 +27,7 @@ contract('dat / erc20 / metadata', (accounts) => {
       const newSymbol = 'NSYM';
 
       before(async () => {
-        tx = await updateDatConfig(dat, { symbol: newSymbol });
+        tx = await updateDatConfig(dat, { symbol: newSymbol }, accounts[0]);
       });
 
       it('should have the new symbol', async () => {
@@ -44,7 +44,7 @@ contract('dat / erc20 / metadata', (accounts) => {
 
       describe('max length', () => {
         before(async () => {
-          tx = await updateDatConfig(dat, { symbol: maxLengthSymbol });
+          tx = await updateDatConfig(dat, { symbol: maxLengthSymbol }, accounts[0]);
         });
 
         it('should have the new symbol', async () => {
@@ -52,7 +52,7 @@ contract('dat / erc20 / metadata', (accounts) => {
         });
 
         it('should fail to update longer than the max', async () => {
-          await shouldFail(updateDatConfig(dat, { symbol: `${maxLengthSymbol} more characters` }));
+          await shouldFail(updateDatConfig(dat, { symbol: `${maxLengthSymbol} more characters` }, accounts[0]));
         });
       });
     });

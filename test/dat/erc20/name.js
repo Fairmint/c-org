@@ -27,7 +27,7 @@ contract('dat / erc20 / metadata', (accounts) => {
       const newName = 'New Name';
 
       before(async () => {
-        tx = await updateDatConfig(dat, { name: newName });
+        tx = await updateDatConfig(dat, { name: newName }, accounts[0]);
       });
 
       it('should have the new name', async () => {
@@ -44,7 +44,7 @@ contract('dat / erc20 / metadata', (accounts) => {
 
       describe('max length', () => {
         before(async () => {
-          tx = await updateDatConfig(dat, { name: maxLengthName });
+          tx = await updateDatConfig(dat, { name: maxLengthName }, accounts[0]);
         });
 
         it('should have the new name', async () => {
@@ -52,7 +52,7 @@ contract('dat / erc20 / metadata', (accounts) => {
         });
 
         it('should fail to update longer than the max', async () => {
-          await shouldFail(updateDatConfig(dat, { name: `${maxLengthName} more characters` }));
+          await shouldFail(updateDatConfig(dat, { name: `${maxLengthName} more characters` }, accounts[0]));
         });
       });
     });
