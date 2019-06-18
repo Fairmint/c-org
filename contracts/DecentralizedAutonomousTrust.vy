@@ -693,7 +693,6 @@ def updateConfig(
 ):
   assert msg.sender == self.control, "CONTROL_ONLY"
 
-  assert _authorizationAddress.is_contract, "INVALID_CONTRACT_ADDRESS"
   self.authorizationAddress = _authorizationAddress
   self.authorization = IAuthorization(_authorizationAddress)
 
