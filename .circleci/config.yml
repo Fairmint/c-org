@@ -17,15 +17,16 @@ jobs:
             sudo apt-get install -y nodejs
             sudo pip install vyper
 
-      # - restore_cache:
-      #     keys:
-      #       - v1-{{ checksum "package.json" }}
+      - restore_cache:
+          keys:
+            - v2-{{ checksum "package.json" }}
+      - run: rm -Rf node_modules/websocket
       - run: npm i
-      # - save_cache:
-      #     paths:
-      #       - node_modules
-      #       - package-lock.json
-      #     key: v1-{{ checksum "package.json" }}
+      - save_cache:
+          paths:
+            - node_modules
+            - package-lock.json
+          key: v2-{{ checksum "package.json" }}
 
       - run: npm run test
       - run: npm run lintNoFix
