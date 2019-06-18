@@ -654,9 +654,9 @@ def buy(
   # Mint new FSE
   self.totalSupply += tokenValue
   self.balanceOf[msg.sender] += tokenValue
-  # TODO VM Exception while processing transaction: stack underflow self._callTokensReceived(msg.sender, ZERO_ADDRESS, msg.sender, tokenValue, _userData, "", True)
-  log.Transfer(ZERO_ADDRESS, msg.sender, tokenValue)
   emptyData: bytes[256] = ""
+  self._callTokensReceived(msg.sender, ZERO_ADDRESS, msg.sender, tokenValue, _userData, emptyData, True)
+  log.Transfer(ZERO_ADDRESS, msg.sender, tokenValue)
   log.Minted(msg.sender, msg.sender, tokenValue, _userData, emptyData)
   # TODO call tokenSender
 
