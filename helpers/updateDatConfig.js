@@ -25,6 +25,5 @@ module.exports = async function updateDatConfig(dat, options, txOptions) {
     callOptions.minInvestment,
     callOptions.name,
     callOptions.symbol,
-    txOptions,
-  );
+  ).send(txOptions);
 };

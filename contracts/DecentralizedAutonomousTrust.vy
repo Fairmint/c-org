@@ -683,10 +683,10 @@ def updateConfig(
   _beneficiary: address,
   _control: address,
   _feeCollector: address,
-  _burnThresholdNum: uint256,
-  _burnThresholdDen: uint256,
   _feeNum: uint256,
   _feeDen: uint256,
+  _burnThresholdNum: uint256,
+  _burnThresholdDen: uint256,
   _minInvestment: uint256(currencyTokens),
   _name: string[64],
   _symbol: string[32]
