@@ -631,50 +631,50 @@ def buy(
 
 # TODO buyFor (?)
 
-# @public
-# def sell(
-#   _amount: uint256(FSE),
-#   _minCurrencyReturned: uint256(currencyTokens),
-#   _userData: bytes[256]
-# ):
-#   if(self.authorization != ZERO_ADDRESS):
-#     self.authorization.authorizeTransfer(msg.sender, msg.sender, ZERO_ADDRESS, _amount)
+@public
+def sell(
+  _amount: uint256(FSE),
+  _minCurrencyReturned: uint256(currencyTokens),
+  _userData: bytes[256]
+):
+  if(self.authorization != ZERO_ADDRESS):
+    self.authorization.authorizeTransfer(msg.sender, msg.sender, ZERO_ADDRESS, _amount)
 
-#   if(self.state == STATE_INITIALIZATION):
-#     pass # TODO
-#   elif(self.state == STATE_RUNNING):
-#     pass # TODO
-#   else: # STATE_CLOSING
-#     pass # TODO
+  if(self.state == STATE_INITIALIZATION):
+    pass # TODO
+  elif(self.state == STATE_RUNNING):
+    pass # TODO
+  else: # STATE_CLOSING
+    pass # TODO
 
-#   # TODO send currency
-#   self._burn(msg.sender, msg.sender, _amount, _userData, "")
+  # TODO send currency
+  self._burn(msg.sender, msg.sender, _amount, _userData, "")
 
-# # TODO add operator buy/sell?
+# TODO add operator buy/sell?
 
-# @public
-# def pay():
-#   # TODO
-#   pass
+@public
+def pay():
+  # TODO
+  pass
 
-# @public
-# @payable
-# def __default__():
-#   # TODO
-#   pass
+@public
+@payable
+def __default__():
+  # TODO
+  pass
 
-# @public
-# def tokensReceived(
-#     _operator: address,
-#     _from: address,
-#     _to: address,
-#     _amount: uint256(FSE),
-#     _userData: bytes[256],
-#     _operatorData: bytes[256]
-#   ):
-#   # TODO
-#   pass
-#endregion
+@public
+def tokensReceived(
+    _operator: address,
+    _from: address,
+    _to: address,
+    _amount: uint256(FSE),
+    _userData: bytes[256],
+    _operatorData: bytes[256]
+  ):
+  # TODO
+  pass
+endregion
 
 #region Function to update DAT configuration
 ##################################################
