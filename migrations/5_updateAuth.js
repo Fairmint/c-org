@@ -1,3 +1,5 @@
+const { updateDatConfig } = require('../helpers');
+
 const authorizationArtifact = artifacts.require('Authorization');
 const datArtifact = artifacts.require('DecentralizedAutonomousTrust');
 
@@ -6,5 +8,5 @@ module.exports = async function updateAuth(deployer) {
   const auth = await authorizationArtifact.deployed();
   await auth.updateDat(datArtifact.address);
   const dat = await datArtifact.deployed();
-  await dat.updateAuthorization(auth.address);
+  await updateDatConfig(dat, { authorizationAddress: auth.address });
 };
