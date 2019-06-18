@@ -273,7 +273,8 @@ def __init__(
   self.totalSupply = self.initReserve
   self.balanceOf[self.beneficiary] = self.initReserve
   log.Transfer(ZERO_ADDRESS, self.beneficiary, self.initReserve)
-  # TODO log.Minted
+  emptyData: bytes[256] = ""
+  log.Minted(msg.sender, msg.sender, self.initReserve, emptyData, emptyData)
   # TODO call tokenSender
 
 #endregion
@@ -655,7 +656,8 @@ def buy(
   self.balanceOf[msg.sender] += tokenValue
   # TODO VM Exception while processing transaction: stack underflow self._callTokensReceived(msg.sender, ZERO_ADDRESS, msg.sender, tokenValue, _userData, "", True)
   log.Transfer(ZERO_ADDRESS, msg.sender, tokenValue)
-  # TODO why does this fail log.Minted(msg.sender, msg.sender, tokenValue, _userData, "")
+  emptyData: bytes[256] = ""
+  log.Minted(msg.sender, msg.sender, tokenValue, _userData, emptyData)
   # TODO call tokenSender
 
 @public
