@@ -25,6 +25,6 @@ module.exports = async function updateDatConfig(dat, options, from) {
     callOptions.minInvestment,
     callOptions.name,
     callOptions.symbol,
-    { from: from || web3.defaultAccount },
+    from ? { from } : undefined,
   );
 };
