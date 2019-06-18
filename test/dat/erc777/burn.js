@@ -17,7 +17,7 @@ contract('dat / erc20 / balanceOf', (accounts) => {
     });
 
     it('account balance went down', async () => {
-      assert.equal(await dat.balanceOf(accounts[0]), accountBalanceBefore.sub(42));
+      assert.equal(await dat.balanceOf(accounts[0]), accountBalanceBefore.subn(42));
     });
   });
 
