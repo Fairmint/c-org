@@ -12,6 +12,7 @@ units: {
 from vyper.interfaces import ERC20
 
 # TODO: switch to interface files (currently non-native imports fail to compile)
+# Depends on https://github.com/ethereum/vyper/issues/1367
 contract IAuthorization:
   def authorizeTransfer(
     _operator: address,
@@ -251,7 +252,7 @@ def _callTokensToSend(
   _to: address,
   _amount: uint256(FSE),
   _userData: bytes[256],
-  _operatorData: bytes[256]
+  _operatorData: bytes[256]=""
 ):
   """
   @dev Call from.tokensToSend() if the interface is registered
@@ -273,7 +274,7 @@ def _callTokensReceived(
   _to: address,
   _amount: uint256(FSE),
   _requireReceptionAck: bool,
-  _userData: bytes[256]="",
+  _userData: bytes[256],
   _operatorData: bytes[256]=""
 ):
   """
@@ -317,7 +318,7 @@ def _send(
   _to: address,
   _amount: uint256(FSE),
   _requireReceptionAck: bool,
-  _userData: bytes[256]="",
+  _userData: bytes[256],
   _operatorData: bytes[256]=""
 ):
   assert _from != ZERO_ADDRESS, "ERC777: send from the zero address"
@@ -325,10 +326,10 @@ def _send(
   if(self.authorization != ZERO_ADDRESS):
     self.authorization.authorizeTransfer(_operator, _from, _to, _amount)
 
-  # TODO self._callTokensToSend(_operator, _from, _to, _amount, _userData, _operatorData)
+  self._callTokensToSend(_operator, _from, _to, _amount, _userData) # TODO _operatorData stack underflow
   self.balanceOf[_from] -= _amount
   self.balanceOf[_to] += _amount
-  # TODO self._callTokensReceived(_operator, _from, _to, _amount, _userData, _operatorData, _requireReceptionAck)
+  self._callTokensReceived(_operator, _from, _to, _amount, _requireReceptionAck, _userData) # TODO _operatorData stake underflow
 
   log.Sent(_operator, _from, _to, _amount, _userData, _operatorData)
   log.Transfer(_from, _to, _amount)
@@ -582,7 +583,7 @@ def estimateTokensForSell(
 def buy(
   _quantityToInvest: uint256(currencyTokens),
   _minTokensBought: uint256(FSE),
-  _userData: bytes[256]=""
+  _userData: bytes[256]
 ):
   assert _quantityToInvest >= self.minInvestment, "SEND_AT_LEAST_MIN_INVESTMENT"
 
@@ -623,7 +624,7 @@ def buy(
   # Mint new FSE
   self.totalSupply += tokenValue
   self.balanceOf[msg.sender] += tokenValue
-  self._callTokensReceived(msg.sender, ZERO_ADDRESS, msg.sender, tokenValue, True, _userData)
+  self._callTokensReceived(msg.sender, ZERO_ADDRESS, msg.sender, tokenValue, True) # TODO _userData causes `stack underflow`
   log.Transfer(ZERO_ADDRESS, msg.sender, tokenValue)
   emptyData: bytes[256] = ""
   log.Minted(msg.sender, msg.sender, tokenValue, _userData, emptyData)
