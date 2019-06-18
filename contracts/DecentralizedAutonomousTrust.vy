@@ -705,14 +705,21 @@ def tokensReceived(
   pass
 #endregion
 
-#region Functions to update DAT configuration
+#region Function to update DAT configuration
 ##################################################
 
-# These can only be called by the organization accounts
-
 @public
-def updateAuthorization(
-  _authorizationAddress: address
+def updateConfig(
+  _authorizationAddress: address,
+  _beneficiary: address,
+  _control: address,
+  _feeCollector: address,
+  _burnThreshold: decimal,
+  _feeNum: uint256,
+  _feeDen: uint256,
+  _minInvestment: uint256(currencyTokens),
+  _name: string[64],
+  _symbol: string[32]
 ):
   assert msg.sender == self.control, "CONTROL_ONLY"
   assert _authorizationAddress.is_contract, "INVALID_CONTRACT_ADDRESS"
@@ -721,52 +728,25 @@ def updateAuthorization(
   self.authorizationAddress = _authorizationAddress
   self.authorization = IAuthorization(_authorizationAddress)
 
-@public
-def transferBeneficiary(
-  _beneficiary: address
-):
-  assert msg.sender == self.control or msg.sender == self.beneficiary, "CONTROL_OR_BENEFICIARY_ONLY"
   assert _beneficiary != ZERO_ADDRESS, "INVALID_ADDRESS"
 
   log.BeneficiaryTransferred(self.beneficiary, _beneficiary)
   self.beneficiary = _beneficiary
 
-@public
-def transferControl(
-  _control: address
-):
-  assert msg.sender == self.control, "CONTROL_ONLY"
   assert _control != ZERO_ADDRESS, "INVALID_ADDRESS"
 
   log.ControlTransferred(self.control, _control)
   self.control = _control
 
-@public
-def transferFeeCollector(
-  _feeCollector: address
-):
-  assert msg.sender == self.control or msg.sender == self.feeCollector, "CONTROL_OR_FEE_COLLECTOR_ONLY"
   assert _feeCollector != ZERO_ADDRESS, "INVALID_ADDRESS"
 
   log.FeeCollectorTransferred(self.feeCollector, _feeCollector)
   self.feeCollector = _feeCollector
 
-@public
-def updateBurnThreshold(
-  _burnThreshold: decimal
-):
-  assert msg.sender == self.control, "CONTROL_ONLY"
-
   assert _burnThreshold <= convert(1, decimal), "INVALID_THRESHOLD"
   log.BurnThresholdUpdated(self.burnThreshold, _burnThreshold)
   self.burnThreshold = _burnThreshold
 
-@public
-def updateFee(
-  _feeNum: uint256,
-  _feeDen: uint256
-):
-  assert msg.sender == self.control, "CONTROL_ONLY"
   assert _feeDen > 0, "INVALID_FEE_DEM"
   assert _feeNum / _feeDen <= 1, "INVALID_FEE"
 
@@ -774,30 +754,13 @@ def updateFee(
   self.feeNum = _feeNum
   self.feeDen = _feeDen
 
-@public
-def updateMinInvestment(
-  _minInvestment: uint256(currencyTokens)
-):
-  assert msg.sender == self.control, "CONTROL_ONLY"
   assert _minInvestment > 0, "INVALID_MIN_INVESTMENT"
 
   log.MinInvestmentUpdated(self.minInvestment, _minInvestment)
   self.minInvestment = _minInvestment
 
-@public
-def updateName(
-  _name: string[64]
-):
-  assert msg.sender == self.control, "CONTROL_ONLY"
-
   log.NameUpdated(self.name, _name)
   self.name = _name
-
-@public
-def updateSymbol(
-  _symbol: string[32]
-):
-  assert msg.sender == self.control, "CONTROL_ONLY"
 
   log.SymbolUpdated(self.symbol, _symbol)
   self.symbol = _symbol
