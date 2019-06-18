@@ -20,7 +20,7 @@ jobs:
       - restore_cache:
           keys:
             - v2-{{ checksum "package.json" }}
-      - run: rm -R node_modules/websocket
+      - run: rm -Rf node_modules/websocket
       - run: npm i
       - save_cache:
           paths:
