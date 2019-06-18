@@ -99,42 +99,17 @@ Sent: event({
 })
 
 # Events triggered when updating the DAT's configuration
-AuthorizationAddressUpdated: event({
-  _previousAuthorizationAddress: indexed(address),
-  _authorizationAddress: indexed(address)
-})
-BeneficiaryTransferred: event({
-  _previousBeneficiary: indexed(address),
-  _beneficiary: indexed(address)
-})
-BurnThresholdUpdated: event({
-  _previousBurnThreshold: decimal,
-  _burnThreshdold: decimal
-})
-ControlTransferred: event({
-  _previousControl: indexed(address),
-  _control: indexed(address)
-})
-FeeCollectorTransferred: event({
-  _previousFeeCollector: address,
-  _feeCollector: address
-})
-FeeUpdated: event({
-  _previousFeeNum: uint256(FSE),
-  _previousFeeDen: uint256(FSE),
-  _feeNum: uint256(FSE),
-  _feeDen: uint256(FSE)
-})
-MinInvestmentUpdated: event({
-  _previousMinInvestment: uint256(currencyTokens),
-  _minInvestment: uint256(currencyTokens)
-})
-NameUpdated: event({
-  _previousName: string[64],
-  _name: string[64]
-})
-SymbolUpdated: event({
-  _previousSymbol: string[32],
+UpdateConfig: event({
+  _authorizationAddress: address,
+  _beneficiary: indexed(address),
+  _control: indexed(address),
+  _feeCollector: indexed(address),
+  _burnThresholdNum: uint256,
+  _burnThresholdDen: uint256,
+  _feeNum: uint256,
+  _feeDen: uint256,
+  _minInvestment: uint256(currencyTokens),
+  _name: string[64],
   _symbol: string[32]
 })
 #endregion
@@ -155,9 +130,10 @@ authorizationAddress: public(address)
 authorization: IAuthorization # redundant w/ authorizationAddress, for convenience
 beneficiary: public(address)
 burnedSupply: public(uint256(FSE))
-burnThreshold: public(decimal)
+burnThresholdNum: public(uint256)
+burnThresholdDen: public(uint256)
 buySlopeNum: public(uint256(currencyTokens))
-buySlopeDen: public(uint256(FSE))
+buySlopeDen: public(uint256(FSE * FSE))
 control: public(address)
 currencyAddress: public(address)
 currency: ERC20 # redundant w/ currencyAddress, for convenience
@@ -201,28 +177,18 @@ operators: map(address, map(address, bool)) # not public: exposed via `isOperato
 
 @public
 def __init__(
-  _name: string[64],
-  _symbol: string[32],
   _initReserve: uint256(FSE),
   _currencyAddress: address,
   _initGoal: uint256(FSE),
   _initDeadline: timestamp,
   _buySlopeNum: uint256(currencyTokens),
-  _buySlopeDen: uint256(FSE),
+  _buySlopeDen: uint256(FSE ** 2),
   _investmentReserveNum: uint256,
   _investmentReserveDen: uint256,
   _revenueCommitmentNum: uint256,
   _revenueCommitmentDen: uint256
 ):
   self.ERC1820Registry = IERC1820Registry(0x1820a4B7618BdE71Dce8cdc73aAB6C95905faD24) # constant for all networks
-
-  assert len(_name) <= 64 # In Vyper max-length is enforced except for the constructor it seems
-  log.NameUpdated(self.name, _name)
-  self.name = _name
-
-  assert len(_symbol) <= 32 # In Vyper max-length is enforced except for the constructor it seems
-  log.SymbolUpdated(self.symbol, _symbol)
-  self.symbol = _symbol
 
   self.currencyAddress = _currencyAddress
   self.currency = ERC20(_currencyAddress)
@@ -250,17 +216,13 @@ def __init__(
   self.revenueCommitmentNum = _revenueCommitmentNum
   self.revenueCommitmentDen = _revenueCommitmentDen
 
-  self.burnThreshold = 1
+  self.burnThresholdNum = 1
+  self.burnThresholdDen = 1
   self.feeDen = 1
   self.minInvestment = as_unitless_number(as_wei_value(100, "ether"))
 
-  log.ControlTransferred(self.control, msg.sender)
   self.control = msg.sender
-
-  log.BeneficiaryTransferred(self.beneficiary, msg.sender)
   self.beneficiary = msg.sender
-
-  log.FeeCollectorTransferred(self.feeCollector, msg.sender)
   self.feeCollector = msg.sender
 
   # Register supported interfaces
@@ -575,10 +537,10 @@ def buybackReserve() -> uint256(currencyTokens):
 
 @public
 @constant
-def sellSlope() -> decimal:
-  return as_unitless_number(
-    convert(2 * self.buybackReserve(), decimal)
-    / convert((self.totalSupply + self.burnedSupply - self.initReserve) ** 2, decimal)
+def sellSlope() -> (uint256, uint256):
+  return (
+    as_unitless_number(2 * self.buybackReserve()),
+    (self.totalSupply + self.burnedSupply - self.initReserve) ** 2
   )
 
 @public
@@ -591,15 +553,21 @@ def supplySold() -> uint256(FSE):
 def estimateTokensForBuy(
   _quantityToInvest: uint256(currencyTokens)
 ) -> uint256(FSE):
-  tokenValue: uint256(FSE)
-  if(self.state == STATE_INITIALIZATION and (self.initDeadline == 0 or self.initDeadline < block.timestamp)):
-    tokenValue = 2 * _quantityToInvest * self.buySlopeDen / (self.initGoal * self.buySlopeNum)
+  if(self.state == STATE_INITIALIZATION):
+    if(self.initDeadline == 0 or self.initDeadline < block.timestamp):
+      return 2 * _quantityToInvest * self.buySlopeDen / (self.initGoal * self.buySlopeNum)
   elif(self.state == STATE_RUNNING):
-    tokenValue = convert(sqrt(
-      convert(2 * _quantityToInvest, decimal) / self.sellSlope()
-      + convert(self.supplySold() ** 2, decimal)
-    ) - convert(self.supplySold(), decimal), uint256)
-  return tokenValue
+    sellSlopeNum: uint256
+    sellSlopeDen: uint256
+    (sellSlopeNum, sellSlopeDen) = self.sellSlope()
+    return convert(
+      sqrt(
+        convert(2 * _quantityToInvest * sellSlopeNum, decimal)
+        / convert(sellSlopeDen, decimal)
+        + convert(self.supplySold() ** 2, decimal)
+      ), uint256) - self.supplySold()
+
+  return 0
 
 @public
 @constant
@@ -637,13 +605,14 @@ def buy(
       self._distributeInvestment(self.buybackReserve())
   elif(self.state == STATE_RUNNING):
     if(msg.sender == self.beneficiary):
+      burnThreshold: decimal = convert(self.burnThresholdNum, decimal) / convert(self.burnThresholdDen, decimal)
       if(
         convert(tokenValue + self.balanceOf[msg.sender], decimal)
         / convert(self.totalSupply + self.burnedSupply, decimal)
-        > self.burnThreshold
+        > burnThreshold
       ):
         self.burn(tokenValue + self.balanceOf[msg.sender] - convert(
-          self.burnThreshold * convert(self.totalSupply + self.burnedSupply, decimal),
+          burnThreshold * convert(self.totalSupply + self.burnedSupply, decimal),
           uint256
         ), _userData)
     else:
@@ -705,100 +674,53 @@ def tokensReceived(
   pass
 #endregion
 
-#region Functions to update DAT configuration
+#region Function to update DAT configuration
 ##################################################
 
-# These can only be called by the organization accounts
-
 @public
-def updateAuthorization(
-  _authorizationAddress: address
-):
-  assert msg.sender == self.control, "CONTROL_ONLY"
-  assert _authorizationAddress.is_contract, "INVALID_CONTRACT_ADDRESS"
-
-  log.AuthorizationAddressUpdated(self.authorizationAddress, _authorizationAddress)
-  self.authorizationAddress = _authorizationAddress
-  self.authorization = IAuthorization(_authorizationAddress)
-
-@public
-def transferBeneficiary(
-  _beneficiary: address
-):
-  assert msg.sender == self.control or msg.sender == self.beneficiary, "CONTROL_OR_BENEFICIARY_ONLY"
-  assert _beneficiary != ZERO_ADDRESS, "INVALID_ADDRESS"
-
-  log.BeneficiaryTransferred(self.beneficiary, _beneficiary)
-  self.beneficiary = _beneficiary
-
-@public
-def transferControl(
-  _control: address
-):
-  assert msg.sender == self.control, "CONTROL_ONLY"
-  assert _control != ZERO_ADDRESS, "INVALID_ADDRESS"
-
-  log.ControlTransferred(self.control, _control)
-  self.control = _control
-
-@public
-def transferFeeCollector(
-  _feeCollector: address
-):
-  assert msg.sender == self.control or msg.sender == self.feeCollector, "CONTROL_OR_FEE_COLLECTOR_ONLY"
-  assert _feeCollector != ZERO_ADDRESS, "INVALID_ADDRESS"
-
-  log.FeeCollectorTransferred(self.feeCollector, _feeCollector)
-  self.feeCollector = _feeCollector
-
-@public
-def updateBurnThreshold(
-  _burnThreshold: decimal
-):
-  assert msg.sender == self.control, "CONTROL_ONLY"
-
-  assert _burnThreshold <= convert(1, decimal), "INVALID_THRESHOLD"
-  log.BurnThresholdUpdated(self.burnThreshold, _burnThreshold)
-  self.burnThreshold = _burnThreshold
-
-@public
-def updateFee(
+def updateConfig(
+  _authorizationAddress: address,
+  _beneficiary: address,
+  _control: address,
+  _feeCollector: address,
   _feeNum: uint256,
-  _feeDen: uint256
-):
-  assert msg.sender == self.control, "CONTROL_ONLY"
-  assert _feeDen > 0, "INVALID_FEE_DEM"
-  assert _feeNum / _feeDen <= 1, "INVALID_FEE"
-
-  log.FeeUpdated(self.feeNum, self.feeDen, _feeNum, _feeDen)
-  self.feeNum = _feeNum
-  self.feeDen = _feeDen
-
-@public
-def updateMinInvestment(
-  _minInvestment: uint256(currencyTokens)
-):
-  assert msg.sender == self.control, "CONTROL_ONLY"
-  assert _minInvestment > 0, "INVALID_MIN_INVESTMENT"
-
-  log.MinInvestmentUpdated(self.minInvestment, _minInvestment)
-  self.minInvestment = _minInvestment
-
-@public
-def updateName(
-  _name: string[64]
-):
-  assert msg.sender == self.control, "CONTROL_ONLY"
-
-  log.NameUpdated(self.name, _name)
-  self.name = _name
-
-@public
-def updateSymbol(
+  _feeDen: uint256,
+  _burnThresholdNum: uint256,
+  _burnThresholdDen: uint256,
+  _minInvestment: uint256(currencyTokens),
+  _name: string[64],
   _symbol: string[32]
 ):
   assert msg.sender == self.control, "CONTROL_ONLY"
 
-  log.SymbolUpdated(self.symbol, _symbol)
+  self.authorizationAddress = _authorizationAddress
+  self.authorization = IAuthorization(_authorizationAddress)
+
+  assert _beneficiary != ZERO_ADDRESS, "INVALID_ADDRESS"
+  self.beneficiary = _beneficiary
+
+  assert _control != ZERO_ADDRESS, "INVALID_ADDRESS"
+  self.control = _control
+
+  assert _feeCollector != ZERO_ADDRESS, "INVALID_ADDRESS"
+  self.feeCollector = _feeCollector
+
+  burnThreshold: decimal = convert(_burnThresholdNum, decimal) / convert(_burnThresholdDen, decimal)
+  assert burnThreshold <= convert(1, decimal), "INVALID_THRESHOLD"
+  self.burnThresholdNum = _burnThresholdNum
+  self.burnThresholdDen = _burnThresholdDen
+
+  assert _feeDen > 0, "INVALID_FEE_DEM"
+  assert _feeNum / _feeDen <= 1, "INVALID_FEE"
+  self.feeNum = _feeNum
+  self.feeDen = _feeDen
+
+  assert _minInvestment > 0, "INVALID_MIN_INVESTMENT"
+  self.minInvestment = _minInvestment
+
+  self.name = _name
+
   self.symbol = _symbol
+
+  log.UpdateConfig(_authorizationAddress, _beneficiary, _control, _feeCollector, _burnThresholdNum, _burnThresholdDen, _feeNum, _feeDen, _minInvestment, _name, _symbol)
 #endregion

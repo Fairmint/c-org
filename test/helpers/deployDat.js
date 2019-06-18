@@ -2,8 +2,6 @@ const datArtifact = artifacts.require('DecentralizedAutonomousTrust');
 
 module.exports = async function deployDat(options) {
   const callOptions = Object.assign({
-    name: 'Fairmint',
-    symbol: 'FSE',
     initReserve: '0',
     currency: '0x0000000000000000000000000000000000000000',
     initGoal: '0',
@@ -17,8 +15,6 @@ module.exports = async function deployDat(options) {
   }, options);
 
   return datArtifact.new(
-    callOptions.name,
-    callOptions.symbol,
     callOptions.initReserve,
     callOptions.currency,
     callOptions.initGoal,
