@@ -299,8 +299,8 @@ def _burn(
   _operator: address,
   _from: address,
   _amount: uint256(FSE),
-  _userData: bytes[256],
-  _operatorData: bytes[256]
+  _userData: bytes[256]="",
+  _operatorData: bytes[256]=""
 ):
   assert _from != ZERO_ADDRESS, "ERC777: burn from the zero address"
   # Note: no authorization required to burn tokens
@@ -469,7 +469,7 @@ def burn(
   _amount: uint256(FSE),
   _userData: bytes[256]
 ):
-  self._burn(msg.sender, msg.sender, _amount, _userData, "")
+  self._burn(msg.sender, msg.sender, _amount) # TODO _userData, ""
   self.burnedSupply += _amount
 
 @public

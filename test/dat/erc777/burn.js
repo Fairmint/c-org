@@ -13,7 +13,7 @@ contract('dat / erc20 / balanceOf', (accounts) => {
 
     before(async () => {
       accountBalanceBefore = await dat.balanceOf(accounts[0]);
-      await dat.burn(42);
+      await dat.burn(42, web3.utils.asciiToHex(''));
     });
 
     it('account balance went down', async () => {
