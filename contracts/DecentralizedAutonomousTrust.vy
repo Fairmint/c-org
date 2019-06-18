@@ -274,7 +274,7 @@ def _callTokensReceived(
   _to: address,
   _amount: uint256(FSE),
   _requireReceptionAck: bool,
-  _userData: bytes[256],
+  _userData: bytes[256]="", # TODO remove default(?)
   _operatorData: bytes[256]=""
 ):
   """
