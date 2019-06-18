@@ -58,7 +58,7 @@ contract('dat / erc20 / metadata', (accounts) => {
     });
 
     it('should fail to change name from a different account', async () => {
-      await shouldFail(updateDatConfig(dat, { name: 'Test' }, { from: accounts[2] }), 'CONTROL_ONLY');
+      await shouldFail(updateDatConfig(dat, { name: 'Test' }, accounts[2]), 'CONTROL_ONLY');
     });
   });
 });

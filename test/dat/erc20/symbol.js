@@ -58,7 +58,7 @@ contract('dat / erc20 / metadata', (accounts) => {
     });
 
     it('should fail to change symbol from a different account', async () => {
-      await shouldFail(updateDatConfig(dat, { symbol: 'Test' }, { from: accounts[2] }), 'CONTROL_ONLY');
+      await shouldFail(updateDatConfig(dat, { symbol: 'Test' }, accounts[2]), 'CONTROL_ONLY');
     });
   });
 });
