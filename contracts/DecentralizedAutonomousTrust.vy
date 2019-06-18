@@ -299,13 +299,13 @@ def _burn(
   _operator: address,
   _from: address,
   _amount: uint256(FSE),
-  _userData: bytes[256],
-  _operatorData: bytes[256]
+  _userData: bytes[256]="",
+  _operatorData: bytes[256]=""
 ):
   assert _from != ZERO_ADDRESS, "ERC777: burn from the zero address"
   # Note: no authorization required to burn tokens
 
-  self._callTokensToSend(_operator, _from, ZERO_ADDRESS, _amount, _userData, _operatorData)
+  self._callTokensToSend(_operator, _from, ZERO_ADDRESS, _amount) # TODO _userData, _operatorData
   self.totalSupply -= _amount
   self.balanceOf[_from] -= _amount
   log.Burned(_operator, _from, _amount, _userData, _operatorData)
@@ -469,7 +469,7 @@ def burn(
   _amount: uint256(FSE),
   _userData: bytes[256]
 ):
-  self._burn(msg.sender, msg.sender, _amount, _userData, "")
+  self._burn(msg.sender, msg.sender, _amount) # TODO _userData, ""
   self.burnedSupply += _amount
 
 @public
@@ -480,7 +480,7 @@ def operatorBurn(
   _operatorData: bytes[256]
 ):
   assert self.isOperatorFor(msg.sender, _account), "ERC777: caller is not an operator for holder"
-  self._burn(msg.sender, _account, _amount, _userData, _operatorData)
+  self._burn(msg.sender, _account, _amount) # TODO _userData, _operatorData
 
 @public
 def operatorSend(
@@ -648,7 +648,7 @@ def sell(
     pass # TODO
 
   # TODO send currency
-  self._burn(msg.sender, msg.sender, _amount, _userData, "")
+  self._burn(msg.sender, msg.sender, _amount) # TODO _userData, ""
 
 # TODO add operator buy/sell?
 
