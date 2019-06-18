@@ -624,7 +624,7 @@ def buy(
   self.totalSupply += tokenValue
   self.balanceOf[msg.sender] += tokenValue
   emptyData: bytes[256] = ""
-  self._callTokensReceived(msg.sender, ZERO_ADDRESS, msg.sender, tokenValue, True)
+  self._callTokensReceived(msg.sender, ZERO_ADDRESS, msg.sender, tokenValue, True, _userData)
   log.Transfer(ZERO_ADDRESS, msg.sender, tokenValue)
   log.Minted(msg.sender, msg.sender, tokenValue, _userData, emptyData)
   # TODO call tokenSender
