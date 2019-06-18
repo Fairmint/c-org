@@ -99,42 +99,16 @@ Sent: event({
 })
 
 # Events triggered when updating the DAT's configuration
-AuthorizationAddressUpdated: event({
-  _previousAuthorizationAddress: indexed(address),
-  _authorizationAddress: indexed(address)
-})
-BeneficiaryTransferred: event({
-  _previousBeneficiary: indexed(address),
-  _beneficiary: indexed(address)
-})
-BurnThresholdUpdated: event({
-  _previousBurnThreshold: decimal,
-  _burnThreshdold: decimal
-})
-ControlTransferred: event({
-  _previousControl: indexed(address),
-  _control: indexed(address)
-})
-FeeCollectorTransferred: event({
-  _previousFeeCollector: address,
-  _feeCollector: address
-})
-FeeUpdated: event({
-  _previousFeeNum: uint256(FSE),
-  _previousFeeDen: uint256(FSE),
-  _feeNum: uint256(FSE),
-  _feeDen: uint256(FSE)
-})
-MinInvestmentUpdated: event({
-  _previousMinInvestment: uint256(currencyTokens),
-  _minInvestment: uint256(currencyTokens)
-})
-NameUpdated: event({
-  _previousName: string[64],
-  _name: string[64]
-})
-SymbolUpdated: event({
-  _previousSymbol: string[32],
+UpdateConfig: event({
+  _authorizationAddress: address,
+  _beneficiary: indexed(address),
+  _control: indexed(address),
+  _feeCollector: indexed(address),
+  _burnThreshold: decimal,
+  _feeNum: uint256,
+  _feeDen: uint256,
+  _minInvestment: uint256(currencyTokens),
+  _name: string[64],
   _symbol: string[32]
 })
 #endregion
@@ -201,8 +175,6 @@ operators: map(address, map(address, bool)) # not public: exposed via `isOperato
 
 @public
 def __init__(
-  _name: string[64],
-  _symbol: string[32],
   _initReserve: uint256(FSE),
   _currencyAddress: address,
   _initGoal: uint256(FSE),
@@ -215,14 +187,6 @@ def __init__(
   _revenueCommitmentDen: uint256
 ):
   self.ERC1820Registry = IERC1820Registry(0x1820a4B7618BdE71Dce8cdc73aAB6C95905faD24) # constant for all networks
-
-  assert len(_name) <= 64 # In Vyper max-length is enforced except for the constructor it seems
-  log.NameUpdated(self.name, _name)
-  self.name = _name
-
-  assert len(_symbol) <= 32 # In Vyper max-length is enforced except for the constructor it seems
-  log.SymbolUpdated(self.symbol, _symbol)
-  self.symbol = _symbol
 
   self.currencyAddress = _currencyAddress
   self.currency = ERC20(_currencyAddress)
@@ -254,13 +218,8 @@ def __init__(
   self.feeDen = 1
   self.minInvestment = as_unitless_number(as_wei_value(100, "ether"))
 
-  log.ControlTransferred(self.control, msg.sender)
   self.control = msg.sender
-
-  log.BeneficiaryTransferred(self.beneficiary, msg.sender)
   self.beneficiary = msg.sender
-
-  log.FeeCollectorTransferred(self.feeCollector, msg.sender)
   self.feeCollector = msg.sender
 
   # Register supported interfaces
@@ -722,46 +681,34 @@ def updateConfig(
   _symbol: string[32]
 ):
   assert msg.sender == self.control, "CONTROL_ONLY"
-  assert _authorizationAddress.is_contract, "INVALID_CONTRACT_ADDRESS"
 
-  log.AuthorizationAddressUpdated(self.authorizationAddress, _authorizationAddress)
+  assert _authorizationAddress.is_contract, "INVALID_CONTRACT_ADDRESS"
   self.authorizationAddress = _authorizationAddress
   self.authorization = IAuthorization(_authorizationAddress)
 
   assert _beneficiary != ZERO_ADDRESS, "INVALID_ADDRESS"
-
-  log.BeneficiaryTransferred(self.beneficiary, _beneficiary)
   self.beneficiary = _beneficiary
 
   assert _control != ZERO_ADDRESS, "INVALID_ADDRESS"
-
-  log.ControlTransferred(self.control, _control)
   self.control = _control
 
   assert _feeCollector != ZERO_ADDRESS, "INVALID_ADDRESS"
-
-  log.FeeCollectorTransferred(self.feeCollector, _feeCollector)
   self.feeCollector = _feeCollector
 
   assert _burnThreshold <= convert(1, decimal), "INVALID_THRESHOLD"
-  log.BurnThresholdUpdated(self.burnThreshold, _burnThreshold)
   self.burnThreshold = _burnThreshold
 
   assert _feeDen > 0, "INVALID_FEE_DEM"
   assert _feeNum / _feeDen <= 1, "INVALID_FEE"
-
-  log.FeeUpdated(self.feeNum, self.feeDen, _feeNum, _feeDen)
   self.feeNum = _feeNum
   self.feeDen = _feeDen
 
   assert _minInvestment > 0, "INVALID_MIN_INVESTMENT"
-
-  log.MinInvestmentUpdated(self.minInvestment, _minInvestment)
   self.minInvestment = _minInvestment
 
-  log.NameUpdated(self.name, _name)
   self.name = _name
 
-  log.SymbolUpdated(self.symbol, _symbol)
   self.symbol = _symbol
+
+  log.UpdateConfig(_authorizationAddress, _beneficiary, _control, _feeCollector, _burnThreshold, _feeNum, _feeDen, _minInvestment, _name, _symbol)
 #endregion
