@@ -1,25 +1,16 @@
 const { deployDat, shouldFail, updateDatConfig } = require('../../helpers');
 
-contract('dat / erc20 / metadata', (accounts) => {
-  const symbol = 'SBL';
+contract('dat / erc20 / symbol', (accounts) => {
   const maxLengthSymbol = 'Symbols are 32 characters max...';
   let dat;
   let tx;
 
   before(async () => {
-    dat = await deployDat({ symbol });
+    dat = await deployDat();
   });
 
-  it('should have a symbol', async () => {
-    assert.equal(await dat.symbol(), symbol);
-  });
-
-  it('can deploy with max length symbol', async () => {
-    await deployDat({ symbol: maxLengthSymbol });
-  });
-
-  it('should fail to deploy with a symbol longer than the max', async () => {
-    await shouldFail(deployDat({ symbol: `${maxLengthSymbol} more characters` }));
+  it('should have an empty symbol by default', async () => {
+    assert.equal(await dat.symbol(), '');
   });
 
   describe('updateSymbol', () => {
@@ -35,8 +26,9 @@ contract('dat / erc20 / metadata', (accounts) => {
       });
 
       it('should emit an event', async () => {
+        const log = tx.logs[0];
         // TODO
-        // const log = tx.logs[0];
+        assert.notEqual(log, undefined);
         // assert.equal(log.event, 'SymbolUpdated');
         // assert.equal(log.args._previousSymbol, symbol);
         // assert.equal(log.args._symbol, newSymbol);

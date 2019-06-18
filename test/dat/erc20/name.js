@@ -1,25 +1,16 @@
 const { deployDat, shouldFail, updateDatConfig } = require('../../helpers');
 
-contract('dat / erc20 / metadata', (accounts) => {
-  const name = 'Token Name';
+contract('dat / erc20 / name', (accounts) => {
   const maxLengthName = 'Names are 64 characters max.....................................';
   let dat;
   let tx;
 
   before(async () => {
-    dat = await deployDat({ name });
+    dat = await deployDat();
   });
 
-  it('should have a name', async () => {
-    assert.equal(await dat.name(), name);
-  });
-
-  it('can deploy with max length name', async () => {
-    await deployDat({ name: maxLengthName });
-  });
-
-  it('should fail to deploy with a name longer than the max', async () => {
-    await shouldFail(deployDat({ name: `${maxLengthName} more characters` }));
+  it('should have an empty name by default name', async () => {
+    assert.equal(await dat.name(), '');
   });
 
   describe('updateName', () => {
@@ -35,8 +26,9 @@ contract('dat / erc20 / metadata', (accounts) => {
       });
 
       it('should emit an event', async () => {
+        const log = tx.logs[0];
+        assert.notEqual(log, undefined);
         // TODO
-        // const log = tx.logs[0];
         // assert.equal(log.event, 'NameUpdated');
         // assert.equal(log.args._previousName, name);
         // assert.equal(log.args._name, newName);

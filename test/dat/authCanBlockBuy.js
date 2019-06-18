@@ -2,7 +2,7 @@
  * Tests buying when not authorized.
  */
 
-const { deployDat, shouldFail } = require('../helpers');
+const { deployDat, shouldFail, updateDatConfig } = require('../helpers');
 
 const authorizationArtifact = artifacts.require('Authorization_Pausable');
 
@@ -16,7 +16,7 @@ contract('dat / authCanBlockBuy', (accounts) => {
       initGoal: 99999,
     });
     await auth.updateDat(dat.address);
-    await dat.updateAuthorization(auth.address);
+    await updateDatConfig(dat, { authorizationAddress: auth.address });
   });
 
   it('balanceOf should be 0 by default', async () => {
