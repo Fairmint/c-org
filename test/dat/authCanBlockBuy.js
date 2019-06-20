@@ -27,7 +27,14 @@ contract('dat / authCanBlockBuy', (accounts) => {
 
   describe('can buy tokens', () => {
     before(async () => {
-      await dat.buy('100000000000000000000', 1, web3.utils.asciiToHex(''), { value: '100000000000000000000', from: accounts[1] });
+      await dat.buy(
+        accounts[0],
+        '100000000000000000000',
+        1,
+        web3.utils.asciiToHex(''),
+        web3.utils.asciiToHex(''),
+        { value: '100000000000000000000', from: accounts[1] },
+      );
     });
 
     it('balanceOf should have increased', async () => {
@@ -42,7 +49,16 @@ contract('dat / authCanBlockBuy', (accounts) => {
       });
 
       it('should fail to buy tokens', async () => {
-        await shouldFail(dat.buy('100000000000000000000', 1, web3.utils.asciiToHex(''), { value: '100000000000000000000', from: accounts[1] }));
+        await shouldFail(
+          dat.buy(
+            accounts[1],
+            '100000000000000000000',
+            1,
+            web3.utils.asciiToHex(''),
+            web3.utils.asciiToHex(''),
+            { value: '100000000000000000000', from: accounts[1] },
+          ),
+        );
       });
 
       it('balanceOf should not have changed', async () => {
@@ -54,7 +70,14 @@ contract('dat / authCanBlockBuy', (accounts) => {
       describe('can buy tokens on the 3rd attempt', () => {
         before(async () => {
           await auth.setAuthorized(true);
-          await dat.buy('100000000000000000000', 1, web3.utils.asciiToHex(''), { value: '100000000000000000000', from: accounts[1] });
+          await dat.buy(
+            accounts[0],
+            '100000000000000000000',
+            1,
+            web3.utils.asciiToHex(''),
+            web3.utils.asciiToHex(''),
+            { value: '100000000000000000000', from: accounts[1] },
+          );
         });
 
         it('balanceOf should have increased', async () => {
