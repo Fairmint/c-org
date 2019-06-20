@@ -143,7 +143,7 @@ feeNum: public(uint256)
 feeDen: public(uint256)
 initDeadline: public(timestamp)
 initGoal: public(uint256(FSE))
-initInvestors: public(map(address, uint256(currencyTokens)))
+initInvestors: public(map(address, uint256(FSE)))
 initReserve: public(uint256(FSE))
 investmentReserveNum: public(uint256)
 investmentReserveDen: public(uint256)
@@ -599,7 +599,7 @@ def buy(
   if(self.state == STATE_INITIALIZATION):
     assert self.initDeadline == 0 or self.initDeadline < block.timestamp, "DEADLINE_PASSED"
 
-    self.initInvestors[msg.sender] += _quantityToInvest
+    self.initInvestors[msg.sender] += tokenValue
 
     if(self.supplySold() >= self.initGoal):
       self.state = STATE_RUNNING
