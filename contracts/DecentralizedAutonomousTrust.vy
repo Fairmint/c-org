@@ -581,10 +581,13 @@ def estimateTokensForSell(
 @public
 @payable
 def buy(
+  _to: address,
   _quantityToInvest: uint256(currencyTokens),
   _minTokensBought: uint256(FSE),
-  _userData: bytes[256]
+  _userData: bytes[256],
+  _operatorData: bytes[256]
 ):
+  assert _to != ZERO_ADDRESS, "INVALID_ADDRESS"
   assert _quantityToInvest >= self.minInvestment, "SEND_AT_LEAST_MIN_INVESTMENT"
 
   tokenValue: uint256(FSE) = self.estimateTokensForBuy(_quantityToInvest)
@@ -592,27 +595,27 @@ def buy(
   assert tokenValue >= _minTokensBought, "PRICE_SLIPPAGE"
   assert tokenValue > 0, "NOT_ENOUGH_FUNDS"
   if(self.authorization != ZERO_ADDRESS):
-    self.authorization.authorizeTransfer(msg.sender, ZERO_ADDRESS, msg.sender, tokenValue)
+    self.authorization.authorizeTransfer(msg.sender, ZERO_ADDRESS, _to, tokenValue)
 
   self._collectInvestment(msg.sender, _quantityToInvest, msg.value)
 
   if(self.state == STATE_INITIALIZATION):
     assert self.initDeadline == 0 or self.initDeadline < block.timestamp, "DEADLINE_PASSED"
 
-    self.initInvestors[msg.sender] += tokenValue
+    self.initInvestors[_to] += tokenValue
 
     if(self.supplySold() >= self.initGoal):
       self.state = STATE_RUNNING
       self._distributeInvestment(self.buybackReserve())
   elif(self.state == STATE_RUNNING):
-    if(msg.sender == self.beneficiary):
+    if(_to == self.beneficiary):
       burnThreshold: decimal = convert(self.burnThresholdNum, decimal) / convert(self.burnThresholdDen, decimal)
       if(
-        convert(tokenValue + self.balanceOf[msg.sender], decimal)
+        convert(tokenValue + self.balanceOf[_to], decimal)
         / convert(self.totalSupply + self.burnedSupply, decimal)
         > burnThreshold
       ):
-        self.burn(tokenValue + self.balanceOf[msg.sender] - convert(
+        self.burn(tokenValue + self.balanceOf[_to] - convert(
           burnThreshold * convert(self.totalSupply + self.burnedSupply, decimal),
           uint256
         ), _userData)
@@ -623,13 +626,10 @@ def buy(
 
   # Mint new FSE
   self.totalSupply += tokenValue
-  self.balanceOf[msg.sender] += tokenValue
-  self._callTokensReceived(msg.sender, ZERO_ADDRESS, msg.sender, tokenValue, True) # TODO _userData causes `stack underflow`
-  log.Transfer(ZERO_ADDRESS, msg.sender, tokenValue)
-  emptyData: bytes[256] = ""
-  log.Minted(msg.sender, msg.sender, tokenValue, _userData, emptyData)
-
-# TODO buyFor (?)
+  self.balanceOf[_to] += tokenValue
+  self._callTokensReceived(msg.sender, ZERO_ADDRESS, _to, tokenValue, True) # TODO _userData, _operatorData causes `stack underflow`
+  log.Transfer(ZERO_ADDRESS, _to, tokenValue)
+  log.Minted(msg.sender, _to, tokenValue, _userData, _operatorData)
 
 @public
 def sell(
