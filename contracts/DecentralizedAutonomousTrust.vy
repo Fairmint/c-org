@@ -555,7 +555,7 @@ def estimateTokensForBuy(
   _quantityToInvest: uint256(currencyTokens)
 ) -> uint256(FSE):
   if(self.state == STATE_INITIALIZATION):
-    if(self.initDeadline == 0 or self.initDeadline < block.timestamp):
+    if(self.initDeadline == 0 or self.initDeadline > block.timestamp):
       return 2 * _quantityToInvest * self.buySlopeDen / (self.initGoal * self.buySlopeNum)
   elif(self.state == STATE_RUNNING):
     sellSlopeNum: uint256
