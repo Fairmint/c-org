@@ -28,7 +28,7 @@ contract('dat / authCanBlockBuy', (accounts) => {
   describe('can buy tokens', () => {
     before(async () => {
       await dat.buy(
-        accounts[0],
+        accounts[1],
         '100000000000000000000',
         1,
         web3.utils.asciiToHex(''),
@@ -71,7 +71,7 @@ contract('dat / authCanBlockBuy', (accounts) => {
         before(async () => {
           await auth.setAuthorized(true);
           await dat.buy(
-            accounts[0],
+            accounts[1],
             '100000000000000000000',
             1,
             web3.utils.asciiToHex(''),
