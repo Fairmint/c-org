@@ -6,7 +6,7 @@ const fseArtifact = artifacts.require('FairSyntheticEquity');
 const datArtifact = artifacts.require('DecentralizedAutonomousTrust');
 
 module.exports = async function deployAndConfigure(deployer, network, accounts) {
-  if (network === 'local') {
+  if (network === 'development') {
     await erc1820.deploy(web3);
   }
 
