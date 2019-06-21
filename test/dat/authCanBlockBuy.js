@@ -4,18 +4,17 @@
 
 const { deployDat, shouldFail, updateDatConfig } = require("../helpers");
 
-const authorizationArtifact = artifacts.require("Authorization_Pausable");
+const authArtifact = artifacts.require("Authorization_Pausable");
 
 contract("dat / authCanBlockBuy", accounts => {
   let dat;
   let auth;
 
   before(async () => {
-    auth = await authorizationArtifact.new();
     dat = await deployDat({
       initGoal: 99999
     });
-    await auth.updateDat(dat.address);
+    auth = await authArtifact.new(dat.address);
     await updateDatConfig(
       dat,
       { authorizationAddress: auth.address },
