@@ -18,5 +18,6 @@ sudo snap install vyper --edge --devmode
 sudo pip install vyper
 
 # Test
-npm run test
+npm run ganache
+npm run test # in a second prompt
 ```
