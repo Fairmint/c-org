@@ -21,19 +21,13 @@ contract Authorization is
 
   // TODO switch to init pattern in order to support zos upgrades
   constructor(
+    address _dat,
     uint256 _initLockup
   ) public
   {
-    initLockup = _initLockup;
-  }
-
-  function updateDat(
-    address _dat
-  ) public
-    // TODO onlyOwner
-  {
     require(_dat != address(0), "INVALID_ADDRESS");
     dat = _dat;
+    initLockup = _initLockup;
   }
 
   function authorizeTransfer(

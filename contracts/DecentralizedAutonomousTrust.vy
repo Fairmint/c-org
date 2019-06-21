@@ -45,6 +45,7 @@ contract IFSE:
   def balanceOf(
     _account: address
   ) -> uint256: constant
+  def initialize(): modifying
   def burn(
     _amount: uint256,
     _userData: bytes[256]
@@ -225,6 +226,7 @@ def __init__(
   self.initReserve = _initReserve
   self.fseAddress = _fseAddress
   self.fse = IFSE(_fseAddress)
+  self.fse.initialize()
   self.fse.mint(msg.sender, self.beneficiary, self.initReserve, "", "")
 
 #endregion

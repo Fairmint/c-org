@@ -1,7 +1,7 @@
 const erc1820 = require("erc1820");
 const { updateDatConfig } = require("../helpers");
 
-const authorizationArtifact = artifacts.require("Authorization");
+const authArtifact = artifacts.require("Authorization");
 const fseArtifact = artifacts.require("FairSyntheticEquity");
 const datArtifact = artifacts.require("DecentralizedAutonomousTrust");
 
@@ -10,17 +10,18 @@ module.exports = async function deployAndConfigure(
   network,
   accounts
 ) {
+  // Deploy 1820 (for local testing only)
   if (network === "development") {
     await erc1820.deploy(web3);
   }
 
-  await deployer.deploy(
-    authorizationArtifact,
-    0 // initLockup
-  );
+  // Deploy token
   await deployer.deploy(fseArtifact);
-  await deployer.deploy(
+
+  // Deploy Dat
+  const dat = await deployer.deploy(
     datArtifact,
+    fseArtifact.address,
     "42000000000000000000", // initReserve
     "0x0000000000000000000000000000000000000000", // currencyAddress
     "0", // initGoal
@@ -32,12 +33,22 @@ module.exports = async function deployAndConfigure(
     "1", // revenueCommitementNum
     "10" // revenueCommitementDen
   );
-  const auth = await authorizationArtifact.deployed();
-  await auth.updateDat(datArtifact.address);
-  const dat = await datArtifact.deployed();
+
+  // Deploy auth
+  await deployer.deploy(
+    authArtifact,
+    datArtifact.address,
+    0 // initLockup
+  );
+
+  // Update dat with auth (and other settings)
   await updateDatConfig(
     dat,
-    { authorizationAddress: auth.address },
+    {
+      authorizationAddress: authArtifact.address,
+      name: "Fairmint Fair Synthetic Equity",
+      symbol: "FSE"
+    },
     accounts[0]
   );
 };
