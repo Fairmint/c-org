@@ -16,7 +16,7 @@ module.exports = async function deployAndConfigure(
   }
 
   // Deploy token
-  await deployer.deploy(fseArtifact);
+  const fse = await deployer.deploy(fseArtifact);
 
   // Deploy Dat
   const dat = await deployer.deploy(
@@ -44,6 +44,7 @@ module.exports = async function deployAndConfigure(
   // Update dat with auth (and other settings)
   await updateDatConfig(
     dat,
+    fse,
     {
       authorizationAddress: authArtifact.address,
       name: "Fairmint Fair Synthetic Equity",

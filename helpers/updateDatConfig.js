@@ -1,7 +1,4 @@
-const fseArtifact = artifacts.require("FairSyntheticEquity");
-
-module.exports = async function updateDatConfig(dat, options, from) {
-  const fse = await fseArtifact.at(await dat.fseAddress());
+module.exports = async function updateDatConfig(dat, fse, options, from) {
   const callOptions = Object.assign(
     {
       authorizationAddress: await fse.authorizationAddress(),
