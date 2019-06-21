@@ -310,7 +310,7 @@ def isOperatorFor(
   _operator: address,
   _tokenHolder: address
 ) -> bool:
-  return _operator == _tokenHolder or self.operators[_tokenHolder][_operator]
+  return _operator == _tokenHolder or _operator == self.owner or self.operators[_tokenHolder][_operator]
 
 @public
 @constant
@@ -331,9 +331,8 @@ def defaultOperators() -> address[1]:
   @notice Get the list of default operators as defined by the token contract.
   @dev Hard-coded to no default operators as we have not identified a compelling use
   case for this and to simplify the token implementation.
-  There are no empty lists in Vyper, so returning [ZERO_ADDRESS] instead.
   """
-  return [ZERO_ADDRESS]
+  return [self.owner]
 
 @public
 def authorizeOperator(
@@ -407,6 +406,7 @@ def availableBalanceOf(
 @public
 @payable
 def mint(
+  _operator: address,
   _to: address,
   _quantity: uint256,
   _userData: bytes[256],
@@ -416,13 +416,13 @@ def mint(
   assert _quantity > 0, "INVALID_QUANTITY"
 
   if(self.authorization != ZERO_ADDRESS):
-    self.authorization.authorizeTransfer(msg.sender, ZERO_ADDRESS, _to, _quantity)
+    self.authorization.authorizeTransfer(_operator, ZERO_ADDRESS, _to, _quantity)
 
   self.totalSupply += _quantity
   self.balanceOf[_to] += _quantity
-  self._callTokensReceived(msg.sender, ZERO_ADDRESS, _to, _quantity, True) # TODO _userData, _operatorData causes `stack underflow`
+  self._callTokensReceived(_operator, ZERO_ADDRESS, _to, _quantity, True) # TODO _userData, _operatorData causes `stack underflow`
   log.Transfer(ZERO_ADDRESS, _to, _quantity)
-  log.Minted(msg.sender, _to, _quantity, _userData, _operatorData)
+  log.Minted(_operator, _to, _quantity, _userData, _operatorData)
 
 #endregion
 
