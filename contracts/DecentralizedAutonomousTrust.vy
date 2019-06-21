@@ -286,9 +286,7 @@ def estimateSellValue(
 def buy(
   _to: address,
   _quantityToInvest: uint256,
-  _minTokensBought: uint256,
-  _userData: bytes[256],
-  _operatorData: bytes[256]
+  _minTokensBought: uint256
 ):
   assert _to != ZERO_ADDRESS, "INVALID_ADDRESS"
   assert _quantityToInvest >= self.minInvestment, "SEND_AT_LEAST_MIN_INVESTMENT"
@@ -298,7 +296,7 @@ def buy(
   assert tokenValue > 0, "NOT_ENOUGH_FUNDS_OR_DEADLINE_PASSED"
 
   self._collectInvestment(msg.sender, _quantityToInvest, msg.value)
-  self.fse.mint(msg.sender, _to, tokenValue, _userData, _operatorData)
+  self.fse.mint(msg.sender, _to, tokenValue, "", "")
 
   if(self.state == STATE_INITIALIZATION):
     self.initInvestors[_to] += tokenValue
@@ -320,7 +318,7 @@ def buy(
         self.fse.burn(tokenValue + self.fse.balanceOf(_to) - convert(
           burnThreshold * convert(self.fse.totalSupply() + self.fse.burnedSupply(), decimal),
           uint256
-        ), _userData)
+        ), "")
     else:
       self._distributeInvestment(_quantityToInvest)
   else:
@@ -329,8 +327,7 @@ def buy(
 @public
 def sell(
  _amount: uint256,
- _minCurrencyReturned: uint256,
- _userData: bytes[256]
+ _minCurrencyReturned: uint256
 ):
  currencyValue: uint256 = self.estimateSellValue(_amount)
  assert currencyValue > 0, "INSUFFICIENT_FUNDS"
