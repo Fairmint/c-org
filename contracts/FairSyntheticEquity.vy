@@ -150,11 +150,9 @@ def __init__():
   self.ERC1820Registry.setInterfaceImplementer(self, keccak256("ERC777TokensRecipient"), self)
 
 @public
-def initialize(
-  _owner: address
-):
+def initialize():
   assert self.owner == ZERO_ADDRESS, "ALREADY_INITIALIZED"
-  self.owner = _owner
+  self.owner = msg.sender
 
 #endregion
 
