@@ -261,25 +261,25 @@ def estimateTokensForBuy(
 
   return 0
 
-@public
-@constant
-def estimateSellValue(
- _quantityToSell: uint256
-) -> uint256:
- if(self.state == STATE_RUNNING):
-   sellSlopeNum: uint256
-   sellSlopeDen: uint256
-   (sellSlopeNum, sellSlopeDen) = self.sellSlope()
-   return convert(
-     convert(_quantityToSell * sellSlopeNum * (self.fse.burnedSupply() ** 2 + 2 * self.fse.burnedSupply() * self.fse.totalSupply() + 2 * self.fse.totalSupply() ** 2 - _quantityToSell * self.fse.totalSupply()), decimal)
-     / convert(2 * sellSlopeDen * self.fse.totalSupply(), decimal)
-  , uint256)
- else:
-   if(self.state == STATE_INITIALIZATION):
-     assert self.initInvestors[msg.sender] >= _quantityToSell, "INSUFFICIENT_BALANCE"
-     return convert(convert(_quantityToSell * self.buybackReserve(), decimal) / convert(self.fse.totalSupply() - self.initReserve, decimal), uint256)
-   else:
-     return convert(convert(_quantityToSell * self.buybackReserve(), decimal) / convert(self.fse.totalSupply(), decimal), uint256)
+# @public
+# @constant
+# def estimateSellValue(
+#  _quantityToSell: uint256
+# ) -> uint256:
+#  if(self.state == STATE_RUNNING):
+#    sellSlopeNum: uint256
+#    sellSlopeDen: uint256
+#    (sellSlopeNum, sellSlopeDen) = self.sellSlope()
+#    return convert(
+#      convert(_quantityToSell * sellSlopeNum * (self.fse.burnedSupply() ** 2 + 2 * self.fse.burnedSupply() * self.fse.totalSupply() + 2 * self.fse.totalSupply() ** 2 - _quantityToSell * self.fse.totalSupply()), decimal)
+#      / convert(2 * sellSlopeDen * self.fse.totalSupply(), decimal)
+#   , uint256)
+#  else:
+#    if(self.state == STATE_INITIALIZATION):
+#      assert self.initInvestors[msg.sender] >= _quantityToSell, "INSUFFICIENT_BALANCE"
+#      return convert(convert(_quantityToSell * self.buybackReserve(), decimal) / convert(self.fse.totalSupply() - self.initReserve, decimal), uint256)
+#    else:
+#      return convert(convert(_quantityToSell * self.buybackReserve(), decimal) / convert(self.fse.totalSupply(), decimal), uint256)
 
 @public
 @payable
@@ -324,25 +324,25 @@ def buy(
   else:
     assert False, "INVALID_STATE"
 
-@public
-def sell(
- _amount: uint256,
- _minCurrencyReturned: uint256
-):
- currencyValue: uint256 = self.estimateSellValue(_amount)
- assert currencyValue > 0, "INSUFFICIENT_FUNDS"
+# @public
+# def sell(
+#  _amount: uint256,
+#  _minCurrencyReturned: uint256
+# ):
+#  currencyValue: uint256 = self.estimateSellValue(_amount)
+#  assert currencyValue > 0, "INSUFFICIENT_FUNDS"
 
- if(self.state == STATE_INITIALIZATION):
-   pass # TODO
- elif(self.state == STATE_RUNNING):
-   pass # TODO
- else: # STATE_CLOSING
-   pass # TODO
+#  if(self.state == STATE_INITIALIZATION):
+#    pass # TODO
+#  elif(self.state == STATE_RUNNING):
+#    pass # TODO
+#  else: # STATE_CLOSING
+#    pass # TODO
 
- # TODO assert tokenValue > 0, "NOT_ENOUGH_FUNDS"
+#  # TODO assert tokenValue > 0, "NOT_ENOUGH_FUNDS"
 
- # TODO send currency
- # TODO operator burn? self.fse.burn(msg.sender, msg.sender, _amount, _userData, "")
+#  # TODO send currency
+#  # TODO operator burn? self.fse.burn(msg.sender, msg.sender, _amount, _userData, "")
 
 # TODO add operator buy/sell?
 
