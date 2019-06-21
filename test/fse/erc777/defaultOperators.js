@@ -1,6 +1,6 @@
 const { deployDat, constants } = require('../../helpers');
 
-contract('dat / erc777 / defaultOperators', () => {
+contract('fse / erc777 / defaultOperators', () => {
   let dat;
 
   before(async () => {

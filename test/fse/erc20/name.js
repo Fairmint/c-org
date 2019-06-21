@@ -1,12 +1,19 @@
 const { deployDat, shouldFail, updateDatConfig } = require('../../helpers');
 
-contract('dat / erc20 / name', (accounts) => {
+const fseArtifact = artifacts.require('FairSyntheticEquity');
+
+contract('fse / erc20 / name', (accounts) => {
   const maxLengthName = 'Names are 64 characters max.....................................';
-  let dat;
+  let fse;
   let tx;
 
   before(async () => {
     dat = await deployDat();
+  });
+
+  before(async () => {
+    fse = await fseArtifact.deployed();
+    await fse.initialize();
   });
 
   it('should have an empty name by default name', async () => {

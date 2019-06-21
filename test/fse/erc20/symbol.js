@@ -1,6 +1,6 @@
 const { deployDat, shouldFail, updateDatConfig } = require('../../helpers');
 
-contract('dat / erc20 / symbol', (accounts) => {
+contract('fse / erc20 / symbol', (accounts) => {
   const maxLengthSymbol = 'Symbols are 32 characters max...';
   let dat;
   let tx;

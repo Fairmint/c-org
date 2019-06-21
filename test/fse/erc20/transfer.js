@@ -1,6 +1,6 @@
 const { deployDat } = require('../../helpers');
 
-contract('dat / erc20 / transfer', (accounts) => {
+contract('fse / erc20 / transfer', (accounts) => {
   let dat;
   const initReserve = 1000;
 
