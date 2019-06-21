@@ -30,15 +30,6 @@ contract IERC777Recipient:
     _userData: bytes[256],
     _operatorData: bytes[256]
   ): modifying
-contract IERC777Sender:
-  def tokensToSend(
-    _operator: address,
-    _from: address,
-    _to: address,
-    _amount: uint256,
-    _userData: bytes[256],
-    _operatorData: bytes[256]
-  ): modifying
 contract IFSE:
   def burnedSupply() -> uint256: constant
   def totalSupply() -> uint256: constant
@@ -70,50 +61,6 @@ contract IFSE:
   ): modifying
 
 #TODO why does this fail? implements: IERC777Recipient
-
-# Events required by the ERC-20 token standard
-Approval: event({
-  _owner: indexed(address),
-  _spender: indexed(address),
-  _value: uint256
-})
-Transfer: event({
-  _from: indexed(address),
-  _to: indexed(address),
-  _value: uint256
-})
-
-# Events required by the ERC-777 token standard
-AuthorizedOperator: event({
-  _operator: indexed(address),
-  _tokenHolder: indexed(address)
-})
-Burned: event({
-  _operator: indexed(address),
-  _from: indexed(address),
-  _amount: uint256,
-  _userData: bytes[256],
-  _operatorData: bytes[256]
-})
-Minted: event({
-  _operator: indexed(address),
-  _to: indexed(address),
-  _amount: uint256,
-  _userData: bytes[256],
-  _operatorData: bytes[256]
-})
-RevokedOperator: event({
-  _operator: indexed(address),
-  _tokenHolder: indexed(address)
-})
-Sent: event({
-  _operator: indexed(address),
-  _from: indexed(address),
-  _to: indexed(address),
-  _amount: uint256,
-  _userData: bytes[256],
-  _operatorData: bytes[256]
-})
 
 # Events triggered when updating the DAT's configuration
 UpdateConfig: event({
