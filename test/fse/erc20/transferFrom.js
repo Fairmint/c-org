@@ -1,6 +1,6 @@
-const { deployDat } = require('../../helpers');
+const { deployDat } = require("../../helpers");
 
-contract('fse / erc20 / transferFrom', (accounts) => {
+contract("fse / erc20 / transferFrom", accounts => {
   let dat;
   const initReserve = 1000;
 
@@ -8,34 +8,44 @@ contract('fse / erc20 / transferFrom', (accounts) => {
     dat = await deployDat({ initReserve });
   });
 
-  it('has expected balance before transfer', async () => {
+  it("has expected balance before transfer", async () => {
     assert.equal((await dat.balanceOf(accounts[0])).toString(), initReserve);
     assert.equal(await dat.balanceOf(accounts[1]), 0);
   });
 
-  describe('can transfer funds from initReserve', () => {
+  describe("can transfer funds from initReserve", () => {
     const transferAmount = 42;
 
     before(async () => {
       await dat.transferFrom(accounts[1], transferAmount);
     });
 
-    it('has expected after after transfer', async () => {
-      assert.equal((await dat.balanceOf(accounts[0])).toString(), initReserve - transferAmount);
-      assert.equal((await dat.balanceOf(accounts[1])).toString(), transferAmount);
+    it("has expected after after transfer", async () => {
+      assert.equal(
+        (await dat.balanceOf(accounts[0])).toString(),
+        initReserve - transferAmount
+      );
+      assert.equal(
+        (await dat.balanceOf(accounts[1])).toString(),
+        transferAmount
+      );
     });
 
-    it('should emit an event');
+    it("should emit an event");
 
-    describe('can transfer from other accounts', () => {
-      it('todo');
+    describe("can transfer from other accounts", () => {
+      it("todo");
     });
   });
 
-  describe('can transfer tokens after buy', () => {
-    it('todo');
+  describe("can transfer tokens after buy", () => {
+    it("todo");
   });
 
-  it('The function SHOULD throw if the message caller’s account balance does not have enough tokens to spend.');
-  it('Transfers of 0 values MUST be treated as normal transfers and fire the Transfer event.');
+  it(
+    "The function SHOULD throw if the message caller’s account balance does not have enough tokens to spend."
+  );
+  it(
+    "Transfers of 0 values MUST be treated as normal transfers and fire the Transfer event."
+  );
 });

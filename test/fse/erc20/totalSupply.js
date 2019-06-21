@@ -1,6 +1,6 @@
-const { deployDat } = require('../../helpers');
+const { deployDat } = require("../../helpers");
 
-contract('fse / erc20 / totalSupply', () => {
+contract("fse / erc20 / totalSupply", () => {
   let dat;
   const initReserve = 42;
 
@@ -8,12 +8,12 @@ contract('fse / erc20 / totalSupply', () => {
     dat = await deployDat({ initReserve });
   });
 
-  it('defaults to initReserve', async () => {
+  it("defaults to initReserve", async () => {
     assert.equal((await dat.totalSupply()).toString(), initReserve);
   });
 
-  it('goes up on buy');
-  it('goes down on sell');
-  it('goes down on burn');
-  it('no change on transfer');
+  it("goes up on buy");
+  it("goes down on sell");
+  it("goes down on burn");
+  it("no change on transfer");
 });

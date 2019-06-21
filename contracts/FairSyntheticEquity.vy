@@ -95,8 +95,10 @@ Sent: event({
 })
 
 # Events triggered when updating the tokens's configuration
-UpdateAuthorizationAddress: event({
-  _authorizationAddress: address
+UpdateConfig: event({
+  _authorizationAddress: address,
+  _name: string[64],
+  _symbol: string[32]
 })
 
 #endregion
@@ -429,13 +431,18 @@ def mint(
 ##################################################
 
 @public
-def updateAuthorizationAddress(
-  _authorizationAddress: address
+def updateConfig(
+  _authorizationAddress: address,
+  _name: string[64],
+  _symbol: string[32]
 ):
   assert msg.sender == self.owner, "OWNER_ONLY"
 
+  self.name = _name
+  self.symbol = _symbol
+
   self.authorizationAddress = _authorizationAddress
   self.authorization = IAuthorization(_authorizationAddress)
-  log.UpdateAuthorizationAddress(_authorizationAddress)
+  log.UpdateConfig(_authorizationAddress, _name, _symbol)
 
 #endregion

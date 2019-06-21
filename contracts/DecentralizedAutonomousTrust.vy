@@ -150,25 +150,6 @@ revenueCommitmentNum: public(uint256)
 revenueCommitmentDen: public(uint256)
 state: public(uint256(stateMachine))
 
-# Data storage required by the ERC-20 token standard
-allowances: map(address, map(address, uint256)) # not public: exposed via `allowance`
-balanceOf: public(map(address, uint256))
-# @notice Returns the account balance of another account with address _owner.
-
-totalSupply: public(uint256)
-
-# Metadata suggested by the ERC-20 token standard
-name: public(string[64])
-# @notice Returns the name of the token - e.g. "MyToken".
-# @dev Optional requirement from ERC-20 and ERC-777.
-
-symbol: public(string[32])
-# @notice Returns the symbol of the token. E.g. “HIX”.
-# @dev Optional requirement from ERC-20 and ERC-777
-
-# Data storage required by the ERC-777 token standard
-ERC1820Registry: IERC1820Registry # not public: constant data
-operators: map(address, map(address, bool)) # not public: exposed via `isOperatorFor`
 #endregion
 
 #region Constructor
@@ -610,7 +591,7 @@ def buy(
       self._distributeInvestment(self.buybackReserve())
   elif(self.state == STATE_RUNNING):
     assert tokenValue >= _minTokensBought, "PRICE_SLIPPAGE"
-    
+
     if(_to == self.beneficiary):
       # TODO move this to a method, share with `pay`
       burnThreshold: decimal = convert(self.burnThresholdNum, decimal) / convert(self.burnThresholdDen, decimal)
@@ -705,8 +686,7 @@ def updateConfig(
 ):
   assert msg.sender == self.control, "CONTROL_ONLY"
 
-  self.authorizationAddress = _authorizationAddress
-  self.authorization = IAuthorization(_authorizationAddress)
+  self.fse.updateConfig(_authorizationAddress, _name, _symbol);
 
   assert _beneficiary != ZERO_ADDRESS, "INVALID_ADDRESS"
   # TODO move the token balance(?)
@@ -729,10 +709,6 @@ def updateConfig(
 
   assert _minInvestment > 0, "INVALID_MIN_INVESTMENT"
   self.minInvestment = _minInvestment
-
-  self.name = _name
-
-  self.symbol = _symbol
 
   log.UpdateConfig(_authorizationAddress, _beneficiary, _control, _feeCollector, _burnThresholdNum, _burnThresholdDen, _feeNum, _feeDen, _minInvestment, _name, _symbol)
 #endregion

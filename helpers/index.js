@@ -1,3 +1,3 @@
-const updateDatConfig = require('./updateDatConfig');
+const updateDatConfig = require("./updateDatConfig");
 
 module.exports = { updateDatConfig };
