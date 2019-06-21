@@ -18,16 +18,17 @@
     "erc1820": "0.0.2",
     "ganache-cli": "6.4.4",
     "openzeppelin-solidity": "2.3.0",
-    "openzeppelin-test-helpers": "^0.4.0",
+    "openzeppelin-test-helpers": "0.4.0",
     "tpl-contracts": "1.1.2",
     "truffle": "5.0.21"
   },
   "devDependencies": {
+    "chai": "4.2.0",
     "eslint": "5.16.0",
     "eslint-config-airbnb-base": "13.1.0",
-    "eslint-config-prettier": "^5.0.0",
+    "eslint-config-prettier": "5.0.0",
     "eslint-plugin-import": "2.17.3",
-    "eslint-plugin-prettier": "^3.1.0",
+    "eslint-plugin-prettier": "3.1.0",
     "prettier": "1.17.1"
   }
 }
