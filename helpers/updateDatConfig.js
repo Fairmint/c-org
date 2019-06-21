@@ -1,7 +1,10 @@
+const fseArtifact = artifacts.require("FairSyntheticEquity");
+
 module.exports = async function updateDatConfig(dat, options, from) {
+  const fse = await fseArtifact.at(await dat.fseAddress());
   const callOptions = Object.assign(
     {
-      authorizationAddress: await dat.authorizationAddress(),
+      authorizationAddress: await fse.authorizationAddress(),
       beneficiary: await dat.beneficiary(),
       control: await dat.control(),
       feeCollector: await dat.feeCollector(),
@@ -10,8 +13,8 @@ module.exports = async function updateDatConfig(dat, options, from) {
       burnThresholdNum: await dat.burnThresholdNum(),
       burnThresholdDen: await dat.burnThresholdDen(),
       minInvestment: await dat.minInvestment(),
-      name: await dat.name(),
-      symbol: await dat.symbol()
+      name: await fse.name(),
+      symbol: await fse.symbol()
     },
     options
   );
