@@ -11,16 +11,6 @@ from vyper.interfaces import ERC20
 
 # TODO: switch to interface files (currently non-native imports fail to compile)
 # Depends on https://github.com/ethereum/vyper/issues/1367
-contract IAuthorization:
-  def authorizeTransfer(
-    _operator: address,
-    _from: address,
-    _to: address,
-    _value: uint256
-  ): modifying
-  def availableBalanceOf(
-    _from: address
-  ) -> uint256: constant
 contract IERC1820Registry:
   def setInterfaceImplementer(
     _account: address,
@@ -40,62 +30,37 @@ contract IERC777Recipient:
     _userData: bytes[256],
     _operatorData: bytes[256]
   ): modifying
-contract IERC777Sender:
-  def tokensToSend(
-    _operator: address,
-    _from: address,
-    _to: address,
+contract IFSE:
+  def burnedSupply() -> uint256: constant
+  def totalSupply() -> uint256: constant
+  def balanceOf(
+    _account: address
+  ) -> uint256: constant
+  def initialize(): modifying
+  def burn(
+    _amount: uint256,
+    _userData: bytes[256]
+  ): modifying
+  def operatorBurn(
+    _account: address,
     _amount: uint256,
     _userData: bytes[256],
     _operatorData: bytes[256]
   ): modifying
+  def mint(
+    _operator: address,
+    _to: address,
+    _quantity: uint256,
+    _userData: bytes[256],
+    _operatorData: bytes[256]
+  ): modifying
+  def updateConfig(
+    _authorizationAddress: address,
+    _name: string[64],
+    _symbol: string[32]
+  ): modifying
 
-implements: ERC20
 #TODO why does this fail? implements: IERC777Recipient
-
-# Events required by the ERC-20 token standard
-Approval: event({
-  _owner: indexed(address),
-  _spender: indexed(address),
-  _value: uint256
-})
-Transfer: event({
-  _from: indexed(address),
-  _to: indexed(address),
-  _value: uint256
-})
-
-# Events required by the ERC-777 token standard
-AuthorizedOperator: event({
-  _operator: indexed(address),
-  _tokenHolder: indexed(address)
-})
-Burned: event({
-  _operator: indexed(address),
-  _from: indexed(address),
-  _amount: uint256,
-  _userData: bytes[256],
-  _operatorData: bytes[256]
-})
-Minted: event({
-  _operator: indexed(address),
-  _to: indexed(address),
-  _amount: uint256,
-  _userData: bytes[256],
-  _operatorData: bytes[256]
-})
-RevokedOperator: event({
-  _operator: indexed(address),
-  _tokenHolder: indexed(address)
-})
-Sent: event({
-  _operator: indexed(address),
-  _from: indexed(address),
-  _to: indexed(address),
-  _amount: uint256,
-  _userData: bytes[256],
-  _operatorData: bytes[256]
-})
 
 # Events triggered when updating the DAT's configuration
 UpdateConfig: event({
@@ -120,15 +85,9 @@ UpdateConfig: event({
 STATE_INITIALIZATION: constant(uint256(stateMachine)) = 0
 STATE_RUNNING: constant(uint256(stateMachine)) = 1
 STATE_CLOSING: constant(uint256(stateMachine)) = 2
-# TODO test gas of using hex directly (this is not cached in Solidity)
-TOKENS_SENDER_INTERFACE_HASH: constant(bytes32) = keccak256("ERC777TokensSender")
-TOKENS_RECIPIENT_INTERFACE_HASH: constant(bytes32) = keccak256("ERC777TokensRecipient")
 
 # Data for DAT business logic
-authorizationAddress: public(address)
-authorization: IAuthorization # redundant w/ authorizationAddress, for convenience
 beneficiary: public(address)
-burnedSupply: public(uint256)
 burnThresholdNum: public(uint256)
 burnThresholdDen: public(uint256)
 buySlopeNum: public(uint256)
@@ -139,6 +98,8 @@ currency: ERC20 # redundant w/ currencyAddress, for convenience
 feeCollector: public(address)
 feeNum: public(uint256)
 feeDen: public(uint256)
+fseAddress: public(address)
+fse: IFSE # redundant w/ fseAddress, for convenience
 initDeadline: public(timestamp)
 initGoal: public(uint256)
 initInvestors: public(map(address, uint256))
@@ -150,25 +111,6 @@ revenueCommitmentNum: public(uint256)
 revenueCommitmentDen: public(uint256)
 state: public(uint256(stateMachine))
 
-# Data storage required by the ERC-20 token standard
-allowances: map(address, map(address, uint256)) # not public: exposed via `allowance`
-balanceOf: public(map(address, uint256))
-# @notice Returns the account balance of another account with address _owner.
-
-totalSupply: public(uint256)
-
-# Metadata suggested by the ERC-20 token standard
-name: public(string[64])
-# @notice Returns the name of the token - e.g. "MyToken".
-# @dev Optional requirement from ERC-20 and ERC-777.
-
-symbol: public(string[32])
-# @notice Returns the symbol of the token. E.g. “HIX”.
-# @dev Optional requirement from ERC-20 and ERC-777
-
-# Data storage required by the ERC-777 token standard
-ERC1820Registry: IERC1820Registry # not public: constant data
-operators: map(address, map(address, bool)) # not public: exposed via `isOperatorFor`
 #endregion
 
 #region Constructor
@@ -176,6 +118,7 @@ operators: map(address, map(address, bool)) # not public: exposed via `isOperato
 
 @public
 def __init__(
+  _fseAddress: address,
   _initReserve: uint256,
   _currencyAddress: address,
   _initGoal: uint256,
@@ -187,8 +130,6 @@ def __init__(
   _revenueCommitmentNum: uint256,
   _revenueCommitmentDen: uint256
 ):
-  self.ERC1820Registry = IERC1820Registry(0x1820a4B7618BdE71Dce8cdc73aAB6C95905faD24) # constant for all networks
-
   self.currencyAddress = _currencyAddress
   self.currency = ERC20(_currencyAddress)
 
@@ -225,112 +166,20 @@ def __init__(
   self.feeCollector = msg.sender
 
   # Register supported interfaces
-  self.ERC1820Registry.setInterfaceImplementer(self, keccak256("ERC20Token"), self)
-  self.ERC1820Registry.setInterfaceImplementer(self, keccak256("ERC777Token"), self)
-  self.ERC1820Registry.setInterfaceImplementer(self, keccak256("ERC777TokensRecipient"), self)
+  # address is constant for all networks
+  IERC1820Registry(0x1820a4B7618BdE71Dce8cdc73aAB6C95905faD24).setInterfaceImplementer(self, keccak256("ERC777TokensRecipient"), self)
 
   # Mint the initial reserve
   self.initReserve = _initReserve
-  self.totalSupply = self.initReserve
-  self.balanceOf[self.beneficiary] = self.initReserve
-  log.Transfer(ZERO_ADDRESS, self.beneficiary, self.initReserve)
-  emptyData: bytes[256] = ""
-  log.Minted(msg.sender, msg.sender, self.initReserve, emptyData, emptyData)
-  # TODO call tokenReceived(?)
+  self.fseAddress = _fseAddress
+  self.fse = IFSE(_fseAddress)
+  self.fse.initialize()
+  self.fse.mint(msg.sender, self.beneficiary, self.initReserve, "", "")
 
 #endregion
 
 #region Private helper functions
 ##################################################
-
-@private
-def _callTokensToSend(
-  _operator: address,
-  _from: address,
-  _to: address,
-  _amount: uint256,
-  _userData: bytes[256]="", # TODO remove default(?)
-  _operatorData: bytes[256]=""
-):
-  """
-  @dev Call from.tokensToSend() if the interface is registered
-  @param operator address operator requesting the transfer
-  @param from address token holder address
-  @param to address recipient address
-  @param amount uint256 amount of tokens to transfer
-  @param userData bytes extra information provided by the token holder (if any)
-  @param operatorData bytes extra information provided by the operator (if any)
-  """
-  implementer: address = self.ERC1820Registry.getInterfaceImplementer(_from, TOKENS_SENDER_INTERFACE_HASH)
-  if(implementer != ZERO_ADDRESS):
-    IERC777Sender(implementer).tokensToSend(_operator, _from, _to, _amount, _userData, _operatorData)
-
-@private
-def _callTokensReceived(
-  _operator: address,
-  _from: address,
-  _to: address,
-  _amount: uint256,
-  _requireReceptionAck: bool,
-  _userData: bytes[256]="", # TODO remove default(?)
-  _operatorData: bytes[256]=""
-):
-  """
-  @dev Call to.tokensReceived() if the interface is registered. Reverts if the recipient is a contract but
-  tokensReceived() was not registered for the recipient
-  @param operator address operator requesting the transfer
-  @param from address token holder address
-  @param to address recipient address
-  @param amount uint256 amount of tokens to transfer
-  @param userData bytes extra information provided by the token holder (if any)
-  @param operatorData bytes extra information provided by the operator (if any)
-  @param requireReceptionAck if true, contract recipients are required to implement ERC777TokensRecipient
-  """
-  implementer: address = self.ERC1820Registry.getInterfaceImplementer(_to, TOKENS_RECIPIENT_INTERFACE_HASH)
-  if(implementer != ZERO_ADDRESS):
-    IERC777Recipient(implementer).tokensReceived(_operator, _from, _to, _amount, _userData, _operatorData)
-  elif(_requireReceptionAck):
-    assert not implementer.is_contract, "ERC777: token recipient contract has no implementer for ERC777TokensRecipient"
-
-@private
-def _burn(
-  _operator: address,
-  _from: address,
-  _amount: uint256,
-  _userData: bytes[256]="",
-  _operatorData: bytes[256]=""
-):
-  assert _from != ZERO_ADDRESS, "ERC777: burn from the zero address"
-  # Note: no authorization required to burn tokens
-
-  self._callTokensToSend(_operator, _from, ZERO_ADDRESS, _amount) # TODO _userData, _operatorData
-  self.totalSupply -= _amount
-  self.balanceOf[_from] -= _amount
-  log.Burned(_operator, _from, _amount, _userData, _operatorData)
-  log.Transfer(_from, ZERO_ADDRESS, _amount)
-
-@private
-def _send(
-  _operator: address,
-  _from: address,
-  _to: address,
-  _amount: uint256,
-  _requireReceptionAck: bool,
-  _userData: bytes[256]="",
-  _operatorData: bytes[256]=""
-):
-  assert _from != ZERO_ADDRESS, "ERC777: send from the zero address"
-  assert _to != ZERO_ADDRESS, "ERC777: send to the zero address"
-  if(self.authorization != ZERO_ADDRESS):
-    self.authorization.authorizeTransfer(_operator, _from, _to, _amount)
-
-  self._callTokensToSend(_operator, _from, _to, _amount) # TODO _userData _operatorData stack underflow
-  self.balanceOf[_from] -= _amount
-  self.balanceOf[_to] += _amount
-  self._callTokensReceived(_operator, _from, _to, _amount, _requireReceptionAck) # TODO _userData _operatorData stack underflow
-
-  log.Sent(_operator, _from, _to, _amount, _userData, _operatorData)
-  log.Transfer(_from, _to, _amount)
 
 @private
 def _collectInvestment(
@@ -368,161 +217,11 @@ def _distributeInvestment(
   fee: uint256 = reserve * self.feeNum / self.feeDen
   self._sendCurrency(self.feeCollector, fee)
   self._sendCurrency(self.beneficiary, reserve - fee)
-#endregion
 
-#region Functions required by the ERC-20 token standard
-##################################################
-
-@public
-@constant
-def allowance(
-  _owner: address,
-  _spender: address
-) -> uint256:
-  return self.allowances[_owner][_spender]
-
-@public
-@constant
-def decimals() -> uint256:
-  """
-  @notice Returns the number of decimals the token uses - e.g. 8, means to divide
-  the token amount by 100000000 to get its user representation.
-  @dev This is optional per ERC-20 but must always be 18 per ERC-777
-  """
-  return 18
-
-@public
-def approve(
-  _spender: address,
-  _value: uint256
-) -> bool:
-  self.allowances[msg.sender][_spender] = _value
-  log.Approval(msg.sender, _spender, _value)
-  return True
-
-@public
-def transfer(
-  _to: address,
-  _value: uint256
-) -> bool:
-  self._send(msg.sender, msg.sender, _to, _value, False)
-  return True
-
-@public
-def transferFrom(
-  _from: address,
-  _to: address,
-  _value: uint256
-) -> bool:
-  self._send(msg.sender, _from, _to, _value, False)
-  self.allowances[_from][msg.sender] -= _value
-  return True
-#endregion
-
-#region Functions required by the ERC-777 token standard
-##################################################
-
-@public
-@constant
-def isOperatorFor(
-  _operator: address,
-  _tokenHolder: address
-) -> bool:
-  return _operator == _tokenHolder or self.operators[_tokenHolder][_operator]
-
-@public
-@constant
-def granularity() -> uint256:
-  """
-  @notice Get the smallest part of the token that’s not divisible.
-  @dev Hard-coded to 1 as we have not identified a compelling use case for this.
-  From the ERC-777 spec:
-    NOTE: Most tokens SHOULD be fully partition-able. I.e., this function SHOULD
-    return 1 unless there is a good reason for not allowing any fraction of the token.
-  """
-  return 1
-
-@public
-@constant
-def defaultOperators() -> address[1]:
-  """
-  @notice Get the list of default operators as defined by the token contract.
-  @dev Hard-coded to no default operators as we have not identified a compelling use
-  case for this and to simplify the token implementation.
-  There are no empty lists in Vyper, so returning [ZERO_ADDRESS] instead.
-  """
-  return [ZERO_ADDRESS]
-
-@public
-def authorizeOperator(
-  _operator: address
-):
-  assert _operator != msg.sender, "ERC777: authorizing self as operator"
-
-  self.operators[msg.sender][_operator] = True
-  log.AuthorizedOperator(_operator, msg.sender)
-
-@public
-def burn(
-  _amount: uint256,
-  _userData: bytes[256]
-):
-  self._burn(msg.sender, msg.sender, _amount) # TODO _userData, ""
-  self.burnedSupply += _amount
-
-@public
-def operatorBurn(
-  _account: address,
-  _amount: uint256,
-  _userData: bytes[256],
-  _operatorData: bytes[256]
-):
-  assert self.isOperatorFor(msg.sender, _account), "ERC777: caller is not an operator for holder"
-  self._burn(msg.sender, _account, _amount) # TODO _userData, _operatorData
-
-@public
-def operatorSend(
-  _sender: address,
-  _recipient: address,
-  _amount: uint256,
-  _userData: bytes[256],
-  _operatorData: bytes[256]
-):
-  assert self.isOperatorFor(msg.sender, _sender), "ERC777: caller is not an operator for holder"
-  self._send(msg.sender, _sender, _recipient, _amount, True, _userData, _operatorData)
-
-@public
-def revokeOperator(
-  _operator: address
-):
-  assert _operator != msg.sender, "ERC777: revoking self as operator"
-
-  clear(self.operators[msg.sender][_operator])
-  log.RevokedOperator(_operator, msg.sender)
-
-@public
-def send(
-  _recipient: address,
-  _amount: uint256,
-  _userData: bytes[256]
-):
-  self._send(msg.sender, msg.sender, _recipient, _amount, True, _userData)
 #endregion
 
 #region Functions for DAT business logic
 ##################################################
-
-@public
-@constant
-def availableBalanceOf(
-  _from: address
-) -> uint256:
-  if(self.state == STATE_INITIALIZATION):
-    return 0
-  elif(self.authorization != ZERO_ADDRESS):
-    return self.authorization.availableBalanceOf(_from)
-  else:
-    return self.balanceOf[_from]
 
 @public
 @constant
@@ -539,7 +238,7 @@ def buybackReserve() -> uint256:
 def sellSlope() -> (uint256, uint256):
   return (
     as_unitless_number(2 * self.buybackReserve()),
-    (self.totalSupply + self.burnedSupply) ** 2
+    (self.fse.totalSupply() + self.fse.burnedSupply()) ** 2
   )
 
 @public
@@ -557,39 +256,37 @@ def estimateTokensForBuy(
     return convert(sqrt(
       convert(2 * _currencyValue * self.buySlopeDen, decimal)
       / convert(self.buySlopeNum * unitConversion, decimal)
-      + convert(self.totalSupply + self.burnedSupply, decimal)
-    ), uint256) - self.totalSupply - self.burnedSupply
+      + convert(self.fse.totalSupply() + self.fse.burnedSupply(), decimal)
+    ), uint256) - self.fse.totalSupply() - self.fse.burnedSupply()
 
   return 0
 
 # @public
-#@constant
-#def estimateSellValue(
+# @constant
+# def estimateSellValue(
 #  _quantityToSell: uint256
-#) -> uint256:
+# ) -> uint256:
 #  if(self.state == STATE_RUNNING):
 #    sellSlopeNum: uint256
 #    sellSlopeDen: uint256
 #    (sellSlopeNum, sellSlopeDen) = self.sellSlope()
 #    return convert(
-#      convert(_quantityToSell * sellSlopeNum * (self.burnedSupply ** 2 + 2 * self.burnedSupply * self.totalSupply + 2 * self.totalSupply ** 2 - _quantityToSell * self.totalSupply), decimal)
-#      / convert(2 * sellSlopeDen * self.totalSupply, decimal)
+#      convert(_quantityToSell * sellSlopeNum * (self.fse.burnedSupply() ** 2 + 2 * self.fse.burnedSupply() * self.fse.totalSupply() + 2 * self.fse.totalSupply() ** 2 - _quantityToSell * self.fse.totalSupply()), decimal)
+#      / convert(2 * sellSlopeDen * self.fse.totalSupply(), decimal)
 #   , uint256)
 #  else:
 #    if(self.state == STATE_INITIALIZATION):
 #      assert self.initInvestors[msg.sender] >= _quantityToSell, "INSUFFICIENT_BALANCE"
-#      return convert(convert(_quantityToSell * self.buybackReserve(), decimal) / convert(self.totalSupply - self.initReserve, decimal), uint256)
+#      return convert(convert(_quantityToSell * self.buybackReserve(), decimal) / convert(self.fse.totalSupply() - self.initReserve, decimal), uint256)
 #    else:
-#      return convert(convert(_quantityToSell * self.buybackReserve(), decimal) / convert(self.totalSupply, decimal), uint256)
+#      return convert(convert(_quantityToSell * self.buybackReserve(), decimal) / convert(self.fse.totalSupply(), decimal), uint256)
 
 @public
 @payable
 def buy(
   _to: address,
   _quantityToInvest: uint256,
-  _minTokensBought: uint256,
-  _userData: bytes[256],
-  _operatorData: bytes[256]
+  _minTokensBought: uint256
 ):
   assert _to != ZERO_ADDRESS, "INVALID_ADDRESS"
   assert _quantityToInvest >= self.minInvestment, "SEND_AT_LEAST_MIN_INVESTMENT"
@@ -597,53 +294,41 @@ def buy(
   tokenValue: uint256 = self.estimateTokensForBuy(_quantityToInvest)
 
   assert tokenValue > 0, "NOT_ENOUGH_FUNDS_OR_DEADLINE_PASSED"
-  if(self.authorization != ZERO_ADDRESS):
-    self.authorization.authorizeTransfer(msg.sender, ZERO_ADDRESS, _to, tokenValue)
 
   self._collectInvestment(msg.sender, _quantityToInvest, msg.value)
+  self.fse.mint(msg.sender, _to, tokenValue, "", "")
 
   if(self.state == STATE_INITIALIZATION):
     self.initInvestors[_to] += tokenValue
 
-    if(self.totalSupply - self.initReserve >= self.initGoal):
+    if(self.fse.totalSupply() - self.initReserve >= self.initGoal):
       self.state = STATE_RUNNING
       self._distributeInvestment(self.buybackReserve())
   elif(self.state == STATE_RUNNING):
     assert tokenValue >= _minTokensBought, "PRICE_SLIPPAGE"
-    
+
     if(_to == self.beneficiary):
       # TODO move this to a method, share with `pay`
       burnThreshold: decimal = convert(self.burnThresholdNum, decimal) / convert(self.burnThresholdDen, decimal)
       if(
-        convert(tokenValue + self.balanceOf[_to], decimal)
-        / convert(self.totalSupply + self.burnedSupply, decimal)
+        convert(tokenValue + self.fse.balanceOf(_to), decimal)
+        / convert(self.fse.totalSupply() + self.fse.burnedSupply(), decimal)
         > burnThreshold
       ):
-        self.burn(tokenValue + self.balanceOf[_to] - convert(
-          burnThreshold * convert(self.totalSupply + self.burnedSupply, decimal),
+        self.fse.burn(tokenValue + self.fse.balanceOf(_to) - convert(
+          burnThreshold * convert(self.fse.totalSupply() + self.fse.burnedSupply(), decimal),
           uint256
-        ), _userData)
+        ), "")
     else:
       self._distributeInvestment(_quantityToInvest)
   else:
     assert False, "INVALID_STATE"
 
-  # Mint new FSE
-  self.totalSupply += tokenValue
-  self.balanceOf[_to] += tokenValue
-  self._callTokensReceived(msg.sender, ZERO_ADDRESS, _to, tokenValue, True) # TODO _userData, _operatorData causes `stack underflow`
-  log.Transfer(ZERO_ADDRESS, _to, tokenValue)
-  log.Minted(msg.sender, _to, tokenValue, _userData, _operatorData)
-
-#@public
-#def sell(
+# @public
+# def sell(
 #  _amount: uint256,
-#  _minCurrencyReturned: uint256,
-#  _userData: bytes[256]
-#):
-#  if(self.authorization != ZERO_ADDRESS):
-#    self.authorization.authorizeTransfer(msg.sender, msg.sender, ZERO_ADDRESS, _amount)
-
+#  _minCurrencyReturned: uint256
+# ):
 #  currencyValue: uint256 = self.estimateSellValue(_amount)
 #  assert currencyValue > 0, "INSUFFICIENT_FUNDS"
 
@@ -654,10 +339,10 @@ def buy(
 #  else: # STATE_CLOSING
 #    pass # TODO
 
-#  assert tokenValue > 0, "NOT_ENOUGH_FUNDS"
+#  # TODO assert tokenValue > 0, "NOT_ENOUGH_FUNDS"
 
-  # TODO send currency
-#  self._burn(msg.sender, msg.sender, _amount) # TODO _userData, ""
+#  # TODO send currency
+#  # TODO operator burn? self.fse.burn(msg.sender, msg.sender, _amount, _userData, "")
 
 # TODO add operator buy/sell?
 
@@ -705,8 +390,7 @@ def updateConfig(
 ):
   assert msg.sender == self.control, "CONTROL_ONLY"
 
-  self.authorizationAddress = _authorizationAddress
-  self.authorization = IAuthorization(_authorizationAddress)
+  self.fse.updateConfig(_authorizationAddress, _name, _symbol)
 
   assert _beneficiary != ZERO_ADDRESS, "INVALID_ADDRESS"
   # TODO move the token balance(?)
@@ -729,10 +413,6 @@ def updateConfig(
 
   assert _minInvestment > 0, "INVALID_MIN_INVESTMENT"
   self.minInvestment = _minInvestment
-
-  self.name = _name
-
-  self.symbol = _symbol
 
   log.UpdateConfig(_authorizationAddress, _beneficiary, _control, _feeCollector, _burnThresholdNum, _burnThresholdDen, _feeNum, _feeDen, _minInvestment, _name, _symbol)
 #endregion

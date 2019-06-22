@@ -12,7 +12,7 @@ interface IAuthorization {
   function authorizeTransfer(
     address _operator,
     address _from,
-    address _to,
+    address _to, // TODO how to burn vs sell?
     uint256 _amount
   ) external;
 

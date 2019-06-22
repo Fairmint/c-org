@@ -1,9 +1,10 @@
 module.exports = async function shouldFail(promise, expectedRevertReason) {
-  let expectedMessage = 'Returned error: VM Exception while processing transaction: ';
-  if (expectedRevertReason === 'invalid opcode') {
+  let expectedMessage =
+    "Returned error: VM Exception while processing transaction: ";
+  if (expectedRevertReason === "invalid opcode") {
     expectedMessage += expectedRevertReason;
   } else {
-    expectedMessage += 'revert';
+    expectedMessage += "revert";
     if (expectedRevertReason && !process.env.TEST_COVERAGE) {
       expectedMessage += ` ${expectedRevertReason}`;
     }
@@ -18,12 +19,12 @@ module.exports = async function shouldFail(promise, expectedRevertReason) {
       throw new Error(
         `shouldFail reason for revert does not match. Got "${
           error.message
-        }"; expected "${expectedMessage}"`,
+        }"; expected "${expectedMessage}"`
       );
     }
     return;
   }
   throw new Error(
-    `Call should have failed but did not. Expected "${expectedMessage}"`,
+    `Call should have failed but did not. Expected "${expectedMessage}"`
   );
 };
