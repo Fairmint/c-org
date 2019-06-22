@@ -1,6 +1,7 @@
 const { deployDat } = require("../../helpers");
 
 contract("fse / erc777 / granularity", () => {
+  // eslint-disable-next-line no-unused-vars
   let dat;
   let fse;
 
