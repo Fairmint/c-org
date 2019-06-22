@@ -2,7 +2,7 @@
  * Tests buying when not authorized.
  */
 
-const { deployDat, shouldFail, updateDatConfig } = require("../helpers");
+const { deployDat, shouldFail, updateDatConfig } = require("../../helpers");
 
 const authArtifact = artifacts.require("Authorization_Pausable");
 
