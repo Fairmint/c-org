@@ -4,7 +4,7 @@ contract("fse / erc20 / decimals", () => {
   let fse;
 
   before(async () => {
-    fse = await fseArtifact.deployed();
+    fse = await fseArtifact.new();
     await fse.initialize();
   });
 

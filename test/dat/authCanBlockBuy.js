@@ -8,15 +8,17 @@ const authArtifact = artifacts.require("Authorization_Pausable");
 
 contract("dat / authCanBlockBuy", accounts => {
   let dat;
+  let fse;
   let auth;
 
   before(async () => {
-    dat = await deployDat({
+    [dat, fse] = await deployDat({
       initGoal: 99999
     });
     auth = await authArtifact.new(dat.address);
     await updateDatConfig(
       dat,
+      fse,
       { authorizationAddress: auth.address },
       accounts[0]
     );

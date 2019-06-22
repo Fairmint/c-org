@@ -9,7 +9,7 @@ contract("fse / erc20 / name", accounts => {
   let tx;
 
   before(async () => {
-    fse = await fseArtifact.deployed();
+    fse = await fseArtifact.new();
     await fse.initialize();
   });
 

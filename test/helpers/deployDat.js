@@ -18,17 +18,21 @@ module.exports = async function deployDat(options) {
     options
   );
 
-  return datArtifact.new(
-    (await fseArtifact.new()).address,
-    callOptions.initReserve,
-    callOptions.currency,
-    callOptions.initGoal,
-    callOptions.initDeadline,
-    callOptions.buySlopeNum,
-    callOptions.buySlopeDen,
-    callOptions.investmentReserveNum,
-    callOptions.investmentReserveDen,
-    callOptions.revenueCommitementNum,
-    callOptions.revenueCommitementDen
-  );
+  const fse = await fseArtifact.new();
+  return [
+    await datArtifact.new(
+      fse.address,
+      callOptions.initReserve,
+      callOptions.currency,
+      callOptions.initGoal,
+      callOptions.initDeadline,
+      callOptions.buySlopeNum,
+      callOptions.buySlopeDen,
+      callOptions.investmentReserveNum,
+      callOptions.investmentReserveDen,
+      callOptions.revenueCommitementNum,
+      callOptions.revenueCommitementDen
+    ),
+    fse
+  ];
 };
