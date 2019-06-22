@@ -38,7 +38,7 @@ contract Authorization is
   ) public
   {
     // TODO require(msg.sender == dat, "ONLY_CALL_FROM_DAT");
-    // TODO require(isTransferAllowed(_operator, _from, _to, _value), "NOT_AUTHORIZED");
+    require(isTransferAllowed(_operator, _from, _to, _value), "NOT_AUTHORIZED");
     // TODO if state == 0 and to == beneficiary and from == 0 then freeze for initLockup
     // TODO if state == 0 and from == beneficiary and to != 0 then tranfer freeze as well
   }
