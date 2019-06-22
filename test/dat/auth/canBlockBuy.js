@@ -43,7 +43,7 @@ contract("dat / auth / canBlockBuy", accounts => {
     it("balanceOf should have increased", async () => {
       const balance = await fse.balanceOf(accounts[1]);
 
-      assert.equal(balance.toString(), "200002000020000200002");
+      assert.equal(balance.toString(), "20000");
     });
 
     describe("when blocked", () => {
@@ -63,7 +63,7 @@ contract("dat / auth / canBlockBuy", accounts => {
       it("balanceOf should not have changed", async () => {
         const balance = await fse.balanceOf(accounts[1]);
 
-        assert.equal(balance.toString(), "200002000020000200002");
+        assert.equal(balance.toString(), "20000");
       });
 
       describe("can buy tokens on the 3rd attempt", () => {
@@ -78,7 +78,7 @@ contract("dat / auth / canBlockBuy", accounts => {
         it("balanceOf should have increased", async () => {
           const balance = await fse.balanceOf(accounts[1]);
 
-          assert.equal(balance.toString(), "400004000040000400004");
+          assert.equal(balance.toString(), "40000");
         });
       });
     });

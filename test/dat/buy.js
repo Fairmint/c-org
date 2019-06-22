@@ -10,7 +10,7 @@ contract("dat / buy", accounts => {
 
   before(async () => {
     [dat, fse] = await deployDat({
-      initGoal: 99999
+      initGoal: "1000000000000000000000"
     });
   });
 
@@ -31,7 +31,7 @@ contract("dat / buy", accounts => {
     it("balanceOf should have increased", async () => {
       const balance = await fse.balanceOf(accounts[1]);
 
-      assert.notEqual(balance.toString(), 0);
+      assert.equal(balance.toString(), "20000");
     });
   });
 });
