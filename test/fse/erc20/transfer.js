@@ -1,11 +1,12 @@
-const { deployDat } = require("../../helpers");
+const fseArtifact = artifacts.require("FairSyntheticEquity");
 
 contract("fse / erc20 / transfer", accounts => {
-  let dat;
+  let fse;
   const initReserve = 1000;
 
   before(async () => {
-    dat = await deployDat({ initReserve });
+    fse = await fseArtifact.new();
+    await fse.initialize();
   });
 
   it("has expected balance before transfer", async () => {
@@ -17,7 +18,7 @@ contract("fse / erc20 / transfer", accounts => {
     const transferAmount = 42;
 
     before(async () => {
-      await dat.transfer(accounts[1], transferAmount);
+      await fse.transfer(accounts[1], transferAmount);
     });
 
     it("has expected after after transfer", async () => {

@@ -1,15 +1,16 @@
-const { deployDat } = require("../../helpers");
+const fseArtifact = artifacts.require("FairSyntheticEquity");
 
 contract("fse / erc20 / totalSupply", () => {
-  let dat;
+  let fse;
   const initReserve = 42;
 
   before(async () => {
-    dat = await deployDat({ initReserve });
+    fse = await fseArtifact.new();
+    await fse.initialize();
   });
 
   it("defaults to initReserve", async () => {
-    assert.equal((await dat.totalSupply()).toString(), initReserve);
+    assert.equal((await fse.totalSupply()).toString(), initReserve);
   });
 
   it("goes up on buy");

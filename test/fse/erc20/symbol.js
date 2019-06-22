@@ -1,16 +1,19 @@
-const { deployDat, shouldFail, updateDatConfig } = require("../../helpers");
+const { shouldFail, updateFseConfig } = require("../../helpers");
+
+const fseArtifact = artifacts.require("FairSyntheticEquity");
 
 contract("fse / erc20 / symbol", accounts => {
   const maxLengthSymbol = "Symbols are 32 characters max...";
-  let dat;
+  let fse;
   let tx;
 
   before(async () => {
-    dat = await deployDat();
+    fse = await fseArtifact.new();
+    await fse.initialize();
   });
 
   it("should have an empty symbol by default", async () => {
-    assert.equal(await dat.symbol(), "");
+    assert.equal(await fse.symbol(), "");
   });
 
   describe("updateSymbol", () => {
@@ -18,11 +21,11 @@ contract("fse / erc20 / symbol", accounts => {
       const newSymbol = "NSYM";
 
       before(async () => {
-        tx = await updateDatConfig(dat, { symbol: newSymbol }, accounts[0]);
+        tx = await updateFseConfig(fse, { symbol: newSymbol }, accounts[0]);
       });
 
       it("should have the new symbol", async () => {
-        assert.equal(await dat.symbol(), newSymbol);
+        assert.equal(await fse.symbol(), newSymbol);
       });
 
       it("should emit an event", async () => {
@@ -36,21 +39,21 @@ contract("fse / erc20 / symbol", accounts => {
 
       describe("max length", () => {
         before(async () => {
-          tx = await updateDatConfig(
-            dat,
+          tx = await updateFseConfig(
+            fse,
             { symbol: maxLengthSymbol },
             accounts[0]
           );
         });
 
         it("should have the new symbol", async () => {
-          assert.equal(await dat.symbol(), maxLengthSymbol);
+          assert.equal(await fse.symbol(), maxLengthSymbol);
         });
 
         it("should fail to update longer than the max", async () => {
           await shouldFail(
-            updateDatConfig(
-              dat,
+            updateFseConfig(
+              fse,
               { symbol: `${maxLengthSymbol} more characters` },
               accounts[0]
             )
@@ -61,7 +64,7 @@ contract("fse / erc20 / symbol", accounts => {
 
     it("should fail to change symbol from a different account", async () => {
       await shouldFail(
-        updateDatConfig(dat, { symbol: "Test" }, accounts[2]),
+        updateFseConfig(fse, { symbol: "Test" }, accounts[2]),
         "CONTROL_ONLY"
       );
     });

@@ -1,4 +1,4 @@
-const { shouldFail, updateDatConfig } = require("../../helpers");
+const { shouldFail, updateFseConfig } = require("../../helpers");
 
 const fseArtifact = artifacts.require("FairSyntheticEquity");
 
@@ -22,11 +22,11 @@ contract("fse / erc20 / name", accounts => {
       const newName = "New Name";
 
       before(async () => {
-        tx = await updateDatConfig(dat, { name: newName }, accounts[0]);
+        tx = await updateFseConfig(fse, { name: newName }, accounts[0]);
       });
 
       it("should have the new name", async () => {
-        assert.equal(await dat.name(), newName);
+        assert.equal(await fse.name(), newName);
       });
 
       it("should emit an event", async () => {
@@ -40,17 +40,17 @@ contract("fse / erc20 / name", accounts => {
 
       describe("max length", () => {
         before(async () => {
-          tx = await updateDatConfig(dat, { name: maxLengthName }, accounts[0]);
+          tx = await updateFseConfig(fse, { name: maxLengthName }, accounts[0]);
         });
 
         it("should have the new name", async () => {
-          assert.equal(await dat.name(), maxLengthName);
+          assert.equal(await fse.name(), maxLengthName);
         });
 
         it("should fail to update longer than the max", async () => {
           await shouldFail(
-            updateDatConfig(
-              dat,
+            updateFseConfig(
+              fse,
               { name: `${maxLengthName} more characters` },
               accounts[0]
             )
@@ -61,7 +61,7 @@ contract("fse / erc20 / name", accounts => {
 
     it("should fail to change name from a different account", async () => {
       await shouldFail(
-        updateDatConfig(dat, { name: "Test" }, accounts[2]),
+        updateFseConfig(fse, { name: "Test" }, accounts[2]),
         "CONTROL_ONLY"
       );
     });
