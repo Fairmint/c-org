@@ -13,16 +13,14 @@ contract("dat / auth / canBlockBuy", accounts => {
 
   before(async () => {
     [dat, fse] = await deployDat({
-      initGoal: 99999
+      initGoal: "1000000000000000000000"
     });
     auth = await authArtifact.new(dat.address);
     await updateDatConfig(
       dat,
       fse,
       {
-        authorizationAddress: auth.address,
-        name: "Fairmint Fair Synthetic Equity", // TODO remove
-        symbol: "FSE"
+        authorizationAddress: auth.address
       },
       accounts[0]
     );
