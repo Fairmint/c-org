@@ -40,7 +40,7 @@ contract Authorization is
     uint256 _value
   ) public
   {
-    require(msg.sender == dat, "ONLY_CALL_VIA_DAT");
+    require(msg.sender == fse, "ONLY_CALL_VIA_FSE");
     require(isTransferAllowed(_operator, _from, _to, _value), "NOT_AUTHORIZED");
     // TODO if state == 0 and to == beneficiary and from == 0 then freeze for initLockup
     // TODO if state == 0 and from == beneficiary and to != 0 then tranfer freeze as well
