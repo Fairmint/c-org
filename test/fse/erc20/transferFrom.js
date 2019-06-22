@@ -10,7 +10,7 @@ contract("fse / erc20 / transferFrom", accounts => {
     await fse.mint(
       accounts[0],
       accounts[0],
-      42,
+      initReserve,
       web3.utils.asciiToHex(""),
       web3.utils.asciiToHex("")
     );
