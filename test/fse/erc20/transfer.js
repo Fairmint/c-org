@@ -7,7 +7,7 @@ contract("fse / erc20 / transfer", accounts => {
   before(async () => {
     fse = await fseArtifact.new();
     await fse.initialize();
-    await fse.mint(initReserve);
+    await fse.mint(accounts[0], accounts[0], 42, "", "");
   });
 
   it("has expected balance before transfer", async () => {
