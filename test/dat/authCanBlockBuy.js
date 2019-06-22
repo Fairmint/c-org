@@ -15,7 +15,7 @@ contract("dat / authCanBlockBuy", accounts => {
     [dat, fse] = await deployDat({
       initGoal: 99999
     });
-    auth = await authArtifact.new(dat.address);
+    auth = await authArtifact.new(dat.address, 0);
     await updateDatConfig(
       dat,
       fse,
