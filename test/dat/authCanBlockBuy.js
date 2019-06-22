@@ -25,25 +25,21 @@ contract("dat / authCanBlockBuy", accounts => {
   });
 
   it("balanceOf should be 0 by default", async () => {
-    const balance = await dat.balanceOf(accounts[1]);
+    const balance = await fse.balanceOf(accounts[1]);
 
     assert.equal(balance, 0);
   });
 
   describe("can buy tokens", () => {
     before(async () => {
-      await dat.buy(
-        accounts[1],
-        "100000000000000000000",
-        1,
-        web3.utils.asciiToHex(""),
-        web3.utils.asciiToHex(""),
-        { value: "100000000000000000000", from: accounts[1] }
-      );
+      await dat.buy(accounts[1], "100000000000000000000", 1, {
+        value: "100000000000000000000",
+        from: accounts[1]
+      });
     });
 
     it("balanceOf should have increased", async () => {
-      const balance = await dat.balanceOf(accounts[1]);
+      const balance = await fse.balanceOf(accounts[1]);
 
       assert.equal(balance.toString(), "200002000020000200002");
     });
@@ -55,19 +51,15 @@ contract("dat / authCanBlockBuy", accounts => {
 
       it("should fail to buy tokens", async () => {
         await shouldFail(
-          dat.buy(
-            accounts[1],
-            "100000000000000000000",
-            1,
-            web3.utils.asciiToHex(""),
-            web3.utils.asciiToHex(""),
-            { value: "100000000000000000000", from: accounts[1] }
-          )
+          dat.buy(accounts[1], "100000000000000000000", 1, {
+            value: "100000000000000000000",
+            from: accounts[1]
+          })
         );
       });
 
       it("balanceOf should not have changed", async () => {
-        const balance = await dat.balanceOf(accounts[1]);
+        const balance = await fse.balanceOf(accounts[1]);
 
         assert.equal(balance.toString(), "200002000020000200002");
       });
@@ -75,18 +67,14 @@ contract("dat / authCanBlockBuy", accounts => {
       describe("can buy tokens on the 3rd attempt", () => {
         before(async () => {
           await auth.setAuthorized(true);
-          await dat.buy(
-            accounts[1],
-            "100000000000000000000",
-            1,
-            web3.utils.asciiToHex(""),
-            web3.utils.asciiToHex(""),
-            { value: "100000000000000000000", from: accounts[1] }
-          );
+          await dat.buy(accounts[1], "100000000000000000000", 1, {
+            value: "100000000000000000000",
+            from: accounts[1]
+          });
         });
 
         it("balanceOf should have increased", async () => {
-          const balance = await dat.balanceOf(accounts[1]);
+          const balance = await fse.balanceOf(accounts[1]);
 
           assert.equal(balance.toString(), "400004000040000400004");
         });

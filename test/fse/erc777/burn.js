@@ -13,13 +13,13 @@ contract("fse / erc20 / balanceOf", accounts => {
     let accountBalanceBefore;
 
     before(async () => {
-      accountBalanceBefore = await dat.balanceOf(accounts[0]);
+      accountBalanceBefore = await fse.balanceOf(accounts[0]);
       await dat.burn(burnAmount, web3.utils.asciiToHex(""));
     });
 
     it("account balance went down", async () => {
       assert.equal(
-        (await dat.balanceOf(accounts[0])).toString(),
+        (await fse.balanceOf(accounts[0])).toString(),
         accountBalanceBefore.subn(burnAmount).toString()
       );
     });

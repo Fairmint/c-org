@@ -9,8 +9,8 @@ contract("fse / erc20 / transfer", accounts => {
   });
 
   it("has expected balance before transfer", async () => {
-    assert.equal((await dat.balanceOf(accounts[0])).toString(), initReserve);
-    assert.equal(await dat.balanceOf(accounts[1]), 0);
+    assert.equal((await fse.balanceOf(accounts[0])).toString(), initReserve);
+    assert.equal(await fse.balanceOf(accounts[1]), 0);
   });
 
   describe("can transfer funds from initReserve", () => {
@@ -22,11 +22,11 @@ contract("fse / erc20 / transfer", accounts => {
 
     it("has expected after after transfer", async () => {
       assert.equal(
-        (await dat.balanceOf(accounts[0])).toString(),
+        (await fse.balanceOf(accounts[0])).toString(),
         initReserve - transferAmount
       );
       assert.equal(
-        (await dat.balanceOf(accounts[1])).toString(),
+        (await fse.balanceOf(accounts[1])).toString(),
         transferAmount
       );
     });
