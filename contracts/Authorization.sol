@@ -29,7 +29,7 @@ contract Authorization is
   {
     require(_fse != address(0), "INVALID_ADDRESS");
     fse = _fse;
-    dat = IFSE(_fse).dat();
+    dat = IFSE(_fse).owner();
     initLockup = _initLockup;
   }
 
