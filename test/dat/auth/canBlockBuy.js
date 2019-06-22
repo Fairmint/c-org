@@ -19,7 +19,11 @@ contract("dat / auth / canBlockBuy", accounts => {
     await updateDatConfig(
       dat,
       fse,
-      { authorizationAddress: auth.address },
+      {
+        authorizationAddress: auth.address,
+        name: "Fairmint Fair Synthetic Equity", // TODO remove
+        symbol: "FSE"
+      },
       accounts[0]
     );
   });
