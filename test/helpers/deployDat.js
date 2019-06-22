@@ -19,7 +19,7 @@ module.exports = async function deployDat(options) {
   );
 
   return datArtifact.new(
-    await fseArtifact.new(),
+    (await fseArtifact.new()).address,
     callOptions.initReserve,
     callOptions.currency,
     callOptions.initGoal,
