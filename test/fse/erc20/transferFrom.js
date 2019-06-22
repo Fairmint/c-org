@@ -7,6 +7,7 @@ contract("fse / erc20 / transferFrom", accounts => {
   before(async () => {
     fse = await fseArtifact.new();
     await fse.initialize();
+    await fse.mint(initReserve);
   });
 
   it("has expected balance before transfer", async () => {
@@ -18,7 +19,10 @@ contract("fse / erc20 / transferFrom", accounts => {
     const transferAmount = 42;
 
     before(async () => {
-      await fse.transferFrom(accounts[1], transferAmount);
+      await fse.approve(accounts[2], -1);
+      await fse.transferFrom(accounts[0], accounts[1], transferAmount, {
+        from: accounts[2]
+      });
     });
 
     it("has expected after after transfer", async () => {

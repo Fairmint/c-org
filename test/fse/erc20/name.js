@@ -62,7 +62,7 @@ contract("fse / erc20 / name", accounts => {
     it("should fail to change name from a different account", async () => {
       await shouldFail(
         updateFseConfig(fse, { name: "Test" }, accounts[2]),
-        "CONTROL_ONLY"
+        "OWNER_ONLY"
       );
     });
   });

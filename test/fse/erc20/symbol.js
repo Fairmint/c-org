@@ -65,7 +65,7 @@ contract("fse / erc20 / symbol", accounts => {
     it("should fail to change symbol from a different account", async () => {
       await shouldFail(
         updateFseConfig(fse, { symbol: "Test" }, accounts[2]),
-        "CONTROL_ONLY"
+        "OWNER_ONLY"
       );
     });
   });

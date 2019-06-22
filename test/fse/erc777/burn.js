@@ -1,20 +1,21 @@
-const { deployDat } = require("../../helpers");
+const fseArtifact = artifacts.require("FairSyntheticEquity");
 
-contract("fse / erc20 / balanceOf", accounts => {
-  let dat;
-  const initReserve = 42;
+contract("fse / erc20 / burn", accounts => {
+  let fse;
 
   before(async () => {
-    dat = await deployDat({ initReserve });
+    fse = await fseArtifact.new();
+    await fse.initialize();
+    await fse.mint(accounts[0], 42);
   });
 
-  describe("can burn initReserve", () => {
+  describe("can burn", () => {
     const burnAmount = 20;
     let accountBalanceBefore;
 
     before(async () => {
       accountBalanceBefore = await fse.balanceOf(accounts[0]);
-      await dat.burn(burnAmount, web3.utils.asciiToHex(""));
+      await fse.burn(burnAmount, web3.utils.asciiToHex(""));
     });
 
     it("account balance went down", async () => {
@@ -25,5 +26,5 @@ contract("fse / erc20 / balanceOf", accounts => {
     });
   });
 
-  it("can burn after buy");
+  it("can't burn more than I have");
 });

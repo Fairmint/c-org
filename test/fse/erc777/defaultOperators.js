@@ -1,4 +1,4 @@
-const { deployDat, constants } = require("../../helpers");
+const { deployDat } = require("../../helpers");
 
 contract("fse / erc777 / defaultOperators", () => {
   let dat;
@@ -8,13 +8,9 @@ contract("fse / erc777 / defaultOperators", () => {
     [dat, fse] = await deployDat();
   });
 
-  it("should have no default operators", async () => {
-    /**
-     * Hard-coded to no default operators as we have not identified a compelling use
-     * case for this and to simplify the token implementation.
-     */
+  it("should have the dat as the default operator", async () => {
     const operators = await fse.defaultOperators();
     assert.equal(operators.length, 1);
-    assert.equal(operators[0], constants.ZERO_ADDRESS);
+    assert.equal(operators[0], dat.address);
   });
 });
