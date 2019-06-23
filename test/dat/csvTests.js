@@ -36,7 +36,7 @@ contract("dat / csvTests", accounts => {
       initGoal: parseNumber(configJson.init_goal)
         .shiftedBy(18)
         .toFixed(),
-      initReserve: parseNumber(configJson.init_goal)
+      initReserve: parseNumber(configJson.init_reserve)
         .shiftedBy(18)
         .toFixed(),
       feeNum: new BigNumber(fee[0]).toFixed(),
