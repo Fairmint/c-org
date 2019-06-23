@@ -38,7 +38,7 @@ contract Authorization is
     address _from,
     address _to,
     uint256 _value,
-    bytes _operatorData
+    bytes calldata _operatorData
   ) external
   {
     require(msg.sender == fse, "ONLY_CALL_VIA_FSE");
@@ -50,7 +50,7 @@ contract Authorization is
     address _from,
     address _to,
     uint256 _value,
-    bytes _operatorData
+    bytes memory _operatorData
   ) public view
     returns (bool)
   {

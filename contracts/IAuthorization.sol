@@ -15,7 +15,7 @@ interface IAuthorization {
     address _from,
     address _to, // TODO how to burn vs sell?
     uint256 _amount,
-    bytes _operatorData
+    bytes calldata _operatorData
   ) external;
 
   /**
@@ -31,7 +31,7 @@ interface IAuthorization {
     address _from,
     address _to,
     uint256 _amount,
-    bytes _operatorData
+    bytes calldata _operatorData
   ) external view
     returns (bool);
 
