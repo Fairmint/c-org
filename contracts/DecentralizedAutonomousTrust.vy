@@ -242,27 +242,66 @@ def sellSlope() -> (uint256, uint256):
   )
 
 @public
-@constant
-def estimateTokensForBuy(
-  _currencyValue: uint256
-) -> uint256:
+@payable
+def buy(
+  _to: address,
+  _currencyValue: uint256,
+  _minTokensBought: uint256
+):
+  assert _to != ZERO_ADDRESS, "INVALID_ADDRESS"
+  assert _currencyValue >= self.minInvestment, "SEND_AT_LEAST_MIN_INVESTMENT"
+
+  tokenValue: uint256
+
+  self._collectInvestment(msg.sender, _currencyValue, msg.value)
+
   if(self.state == STATE_INITIALIZATION):
     if(self.initDeadline == 0 or self.initDeadline > block.timestamp):
-      return convert(
+      tokenValue = convert(
       	convert(2 * _currencyValue * self.buySlopeDen, decimal) / convert(self.initGoal * self.buySlopeNum, decimal),
       uint256)
+    self.initInvestors[_to] += tokenValue
+
+    if(self.fse.totalSupply() - self.initReserve >= self.initGoal):
+      self.state = STATE_RUNNING
+      self._distributeInvestment(self.buybackReserve())
   elif(self.state == STATE_RUNNING):
     unitConversion: uint256 = 1
-    return convert(sqrt(
+    tokenValue = convert(sqrt(
       convert(2 * _currencyValue * self.buySlopeDen, decimal)
       / convert(self.buySlopeNum * unitConversion, decimal)
       + convert(self.fse.totalSupply() + self.fse.burnedSupply(), decimal)
     ), uint256) - self.fse.totalSupply() - self.fse.burnedSupply()
+    assert tokenValue >= _minTokensBought, "PRICE_SLIPPAGE"
 
-  return 0
+    if(_to == self.beneficiary):
+      # TODO move this to a method, share with `pay`
+      burnThreshold: decimal = convert(self.burnThresholdNum, decimal) / convert(self.burnThresholdDen, decimal)
+      if(
+        convert(tokenValue + self.fse.balanceOf(_to), decimal)
+        / convert(self.fse.totalSupply() + self.fse.burnedSupply(), decimal)
+        > burnThreshold
+      ):
+        self.fse.burn(tokenValue + self.fse.balanceOf(_to) - convert(
+          burnThreshold * convert(self.fse.totalSupply() + self.fse.burnedSupply(), decimal),
+          uint256
+        ), "")
+    else:
+      self._distributeInvestment(_currencyValue)
+  else:
+    assert False, "INVALID_STATE"
+
+  assert tokenValue > 0, "NOT_ENOUGH_FUNDS_OR_DEADLINE_PASSED"
+  self.fse.mint(msg.sender, _to, tokenValue, "", "")
 
 # @public
-# @constant
+# def sell(
+#  _amount: uint256,
+#  _minCurrencyReturned: uint256
+# ):
+#  currencyValue: uint256 = self.estimateSellValue(_amount)
+#  assert currencyValue > 0, "INSUFFICIENT_FUNDS"
+
 # def estimateSellValue(
 #  _quantityToSell: uint256
 # ) -> uint256:
@@ -280,57 +319,6 @@ def estimateTokensForBuy(
 #      return convert(convert(_quantityToSell * self.buybackReserve(), decimal) / convert(self.fse.totalSupply() - self.initReserve, decimal), uint256)
 #    else:
 #      return convert(convert(_quantityToSell * self.buybackReserve(), decimal) / convert(self.fse.totalSupply(), decimal), uint256)
-
-@public
-@payable
-def buy(
-  _to: address,
-  _quantityToInvest: uint256,
-  _minTokensBought: uint256
-):
-  assert _to != ZERO_ADDRESS, "INVALID_ADDRESS"
-  assert _quantityToInvest >= self.minInvestment, "SEND_AT_LEAST_MIN_INVESTMENT"
-
-  tokenValue: uint256 = self.estimateTokensForBuy(_quantityToInvest)
-
-  assert tokenValue > 0, "NOT_ENOUGH_FUNDS_OR_DEADLINE_PASSED"
-
-  self._collectInvestment(msg.sender, _quantityToInvest, msg.value)
-  self.fse.mint(msg.sender, _to, tokenValue, "", "")
-
-  if(self.state == STATE_INITIALIZATION):
-    self.initInvestors[_to] += tokenValue
-
-    if(self.fse.totalSupply() - self.initReserve >= self.initGoal):
-      self.state = STATE_RUNNING
-      self._distributeInvestment(self.buybackReserve())
-  elif(self.state == STATE_RUNNING):
-    assert tokenValue >= _minTokensBought, "PRICE_SLIPPAGE"
-
-    if(_to == self.beneficiary):
-      # TODO move this to a method, share with `pay`
-      burnThreshold: decimal = convert(self.burnThresholdNum, decimal) / convert(self.burnThresholdDen, decimal)
-      if(
-        convert(tokenValue + self.fse.balanceOf(_to), decimal)
-        / convert(self.fse.totalSupply() + self.fse.burnedSupply(), decimal)
-        > burnThreshold
-      ):
-        self.fse.burn(tokenValue + self.fse.balanceOf(_to) - convert(
-          burnThreshold * convert(self.fse.totalSupply() + self.fse.burnedSupply(), decimal),
-          uint256
-        ), "")
-    else:
-      self._distributeInvestment(_quantityToInvest)
-  else:
-    assert False, "INVALID_STATE"
-
-# @public
-# def sell(
-#  _amount: uint256,
-#  _minCurrencyReturned: uint256
-# ):
-#  currencyValue: uint256 = self.estimateSellValue(_amount)
-#  assert currencyValue > 0, "INSUFFICIENT_FUNDS"
 
 #  if(self.state == STATE_INITIALIZATION):
 #    pass # TODO
