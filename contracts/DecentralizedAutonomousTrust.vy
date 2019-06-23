@@ -199,6 +199,20 @@ def _collectInvestment(
     assert self.currency.balanceOf(self) > balanceBefore, "ERC20_TRANSFER_FAILED"
 
 @private
+def _applyBurnThreshold():
+  balanceBefore: uint256 = self.fse.balanceOf(self.beneficiary)
+  burnThreshold: decimal = convert(self.burnThresholdNum, decimal) / convert(self.burnThresholdDen, decimal)
+  if(
+    convert(balanceBefore, decimal)
+    / convert(self.fse.totalSupply() + self.fse.burnedSupply(), decimal)
+    > burnThreshold
+  ):
+    self.fse.operatorBurn(self.beneficiary, balanceBefore - convert(
+      burnThreshold * convert(self.fse.totalSupply() + self.fse.burnedSupply(), decimal),
+      uint256
+    ), "", "")
+
+@private
 def _sendCurrency(
   _to: address,
   _amount: uint256
@@ -261,6 +275,8 @@ def buy(
       tokenValue = convert(
       	convert(2 * _currencyValue * self.buySlopeDen, decimal) / convert(self.initGoal * self.buySlopeNum, decimal),
       uint256)
+    self.fse.mint(msg.sender, _to, tokenValue, "", "")
+
     self.initInvestors[_to] += tokenValue
 
     if(self.fse.totalSupply() - self.initReserve >= self.initGoal):
@@ -274,26 +290,16 @@ def buy(
       + convert(self.fse.totalSupply() + self.fse.burnedSupply(), decimal)
     ), uint256) - self.fse.totalSupply() - self.fse.burnedSupply()
     assert tokenValue >= _minTokensBought, "PRICE_SLIPPAGE"
+    self.fse.mint(msg.sender, _to, tokenValue, "", "")
 
     if(_to == self.beneficiary):
-      # TODO move this to a method, share with `pay`
-      burnThreshold: decimal = convert(self.burnThresholdNum, decimal) / convert(self.burnThresholdDen, decimal)
-      if(
-        convert(tokenValue + self.fse.balanceOf(_to), decimal)
-        / convert(self.fse.totalSupply() + self.fse.burnedSupply(), decimal)
-        > burnThreshold
-      ):
-        self.fse.burn(tokenValue + self.fse.balanceOf(_to) - convert(
-          burnThreshold * convert(self.fse.totalSupply() + self.fse.burnedSupply(), decimal),
-          uint256
-        ), "")
+      self._applyBurnThreshold() # must mint before this call
     else:
       self._distributeInvestment(_currencyValue)
   else:
     assert False, "INVALID_STATE"
 
   assert tokenValue > 0, "NOT_ENOUGH_FUNDS_OR_DEADLINE_PASSED"
-  self.fse.mint(msg.sender, _to, tokenValue, "", "")
 
 @public
 def sell(
@@ -328,9 +334,17 @@ def sell(
 # TODO add operator buy/sell?
 
 @public
-def pay():
-  # TODO
-  pass
+@payable
+def pay(
+  _currencyValue: uint256
+):
+  assert self.state == STATE_RUN, "INVALID_STATE"
+
+  self._collectInvestment(msg.sender, _currencyValue, msg.value)
+  self._sendCurrency(self.beneficiary, _currencyValue - _currencyValue * self.investmentReserveNum / self.investmentReserveDen)
+  # tokenValue: uint256 = TODO
+  # TODO self.fse.mint(msg.sender, self.beneficiary, tokenValue, "", "")
+  self._applyBurnThreshold() # must mint before this call
 
 @public
 @payable
