@@ -300,21 +300,26 @@ def sell(
  _quantityToSell: uint256,
  _minCurrencyReturned: uint256
 ):
+  totalSupply: uint256 = self.fse.totalSupply()
   currencyValue: uint256
 
   if(self.state == STATE_RUN):
+    burnedSupply: uint256 = self.fse.burnedSupply()
     sellSlopeNum: uint256
     sellSlopeDen: uint256
     (sellSlopeNum, sellSlopeDen) = self.sellSlope()
-    currencyValue = convert(
-      convert(_quantityToSell * sellSlopeNum * (self.fse.burnedSupply() ** 2 + 2 * self.fse.burnedSupply() * self.fse.totalSupply() + 2 * self.fse.totalSupply() ** 2 - _quantityToSell * self.fse.totalSupply()), decimal)
-      / convert(2 * sellSlopeDen * self.fse.totalSupply(), decimal)
-  , uint256)
+    currencyValue =
+      _quantityToSell * sellSlopeNum * (
+        burnedSupply ** 2
+        + 2 * burnedSupply * totalSupply
+        + 2 * totalSupply ** 2
+        - _quantityToSell * totalSupply
+      ) / (2 * sellSlopeDen * totalSupply)
   elif(self.state == STATE_CLOSE):
-    currencyValue = convert(convert(_quantityToSell * self.buybackReserve(), decimal) / convert(self.fse.totalSupply(), decimal), uint256)
+    currencyValue = _quantityToSell * self.buybackReserve() / totalSupply
   else:
     self.initInvestors[msg.sender] -= _quantityToSell
-    currencyValue = convert(convert(_quantityToSell * self.buybackReserve(), decimal) / convert(self.fse.totalSupply() - self.initReserve, decimal), uint256)
+    currencyValue = _quantityToSell * self.buybackReserve() / (totalSupply - self.initReserve)
 
   assert currencyValue > 0, "INSUFFICIENT_FUNDS"
 
