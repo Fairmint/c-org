@@ -143,8 +143,8 @@ def __init__(
 
   self.initDeadline = _initDeadline
   assert _buySlopeNum > 0, "INVALID_SLOPE_NUM" # 0 not supported
-  assert _buySlopeNum <= _buySlopeDen, "INVALID_SLOPE" # 100% or less
-  self.buySlopeNum = _buySlopeNum
+  assert _buySlopeDen > 0, "INVALID_SLOPE_DEN"
+  self.buySlopeNum = _buySlopeNum # Fraction may be > 1
   self.buySlopeDen = _buySlopeDen
   assert _investmentReserveDen > 0, "INVALID_RESERVE_DEN"
   assert _investmentReserveNum <= _investmentReserveDen, "INVALID_RESERVE" # 100% or less
