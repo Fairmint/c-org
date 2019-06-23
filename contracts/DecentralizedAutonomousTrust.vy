@@ -357,6 +357,25 @@ def tokensReceived(
   # TODO
   pass
 
+@public
+@payable
+def close(
+  _exitFee: uint256
+):
+  assert msg.sender == self.control, "CONTROL_ONLY"
+
+  if(self.state == STATE_INIT):
+    self.state = STATE_CANCEL
+  elif(state == STATE_RUN):
+    totalSupply: uint256 = self.fse.totalSupply()
+    issuancePrice: uint256 = totalSupply + self.fse.burnedSupply()
+    issuancePrice *= self.buySlopeNum
+    issuancePrice /= self.buySlopeDen
+    assert _exitFee >= totalSupply * issuancePrice - self.buybackReserve()
+    self._collectInvestment(msg.sender, _exitFee, msg.value)
+  else:
+    assert False, "INVALID_STATE"
+
 #endregion
 
 #region Function to update DAT configuration
