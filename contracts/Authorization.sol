@@ -39,12 +39,10 @@ contract Authorization is
     address _to,
     uint256 _value,
     bytes _operatorData
-  ) public
+  ) external
   {
     require(msg.sender == fse, "ONLY_CALL_VIA_FSE");
     require(isTransferAllowed(_operator, _from, _to, _value, _operatorData), "NOT_AUTHORIZED");
-    // TODO if state == 0 and to == beneficiary and from == 0 then freeze for initLockup
-    // TODO if state == 0 and from == beneficiary and to != 0 then tranfer freeze as well
   }
 
   function isTransferAllowed(
@@ -56,6 +54,8 @@ contract Authorization is
   ) public view
     returns (bool)
   {
+    // TODO if state == 0 and to == beneficiary and from == 0 then freeze for initLockup
+    // TODO if state == 0 and from == beneficiary and to != 0 then tranfer freeze as well
     if(_from == address(0))
     { // Mint/Buy
       return true;

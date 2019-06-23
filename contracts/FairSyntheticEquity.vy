@@ -221,7 +221,7 @@ def _burn(
 ):
   assert _from != ZERO_ADDRESS, "ERC777: burn from the zero address"
   if(self.authorization != ZERO_ADDRESS):
-    self.authorization.authorizeTransfer(_operator, _from, _to, _amount, _operatorData)
+    self.authorization.authorizeTransfer(_operator, _from, ZERO_ADDRESS, _amount, _operatorData)
 
   self._callTokensToSend(_operator, _from, ZERO_ADDRESS, _amount) # TODO _userData, _operatorData
   self.totalSupply -= _amount
