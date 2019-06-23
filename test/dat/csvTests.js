@@ -11,18 +11,36 @@ let fse;
 
 contract("dat / csvTests", accounts => {
   before(async () => {
-    dai = await daiArtifact.new();
-    [dat, fse] = await deployDat({
-      initGoal: "1000000000000000000000",
-      currency: dai.address
-    });
     const configJson = Papa.parse(
       fs.readFileSync(
         `${__dirname}/test-data/buy_sell_no-pre-mint Configuration.csv`,
         "utf8"
       ),
       { header: true }
-    ).data;
+    ).data[0];
+    dai = await daiArtifact.new();
+
+    const buySlope = parseFraction(configJson.buy_slope);
+    const investmentReserve = parsePercent(configJson.investment_reserve);
+    const revenueCommitement = parsePercent(configJson.revenue_commitment);
+    const fee = parsePercent(configJson.fee);
+    [dat, fse] = await deployDat({
+      buySlopeNum: buySlope[0],
+      buySlopeDen: buySlope[1],
+      investmentReserveNum: investmentReserve[0],
+      investmentReserveDen: investmentReserve[1],
+      revenueCommitementNum: revenueCommitement[0],
+      revenueCommitementDen: revenueCommitement[1],
+      initGoal: parseNumber(configJson.init_goal)
+        .shiftedBy(18)
+        .toFixed(),
+      initReserve: parseNumber(configJson.init_goal)
+        .shiftedBy(18)
+        .toFixed(),
+      feeNum: fee[0],
+      feeDen: fee[1],
+      currency: dai.address
+    });
     const balanceJson = Papa.parse(
       fs.readFileSync(
         `${__dirname}/test-data/buy_sell_no-pre-mint InitBalances.csv`,
@@ -56,6 +74,16 @@ function parseNumber(numberString) {
       .replace(new RegExp(" ", "g"), "")
       .replace(new RegExp("\u202F", "g"), "")
   );
+}
+
+function parseFraction(percentString) {
+  return parseNumber(percentString).toFraction();
+}
+
+function parsePercent(percentString) {
+  return parseNumber(percentString.replace("%", ""))
+    .div(100)
+    .toFraction();
 }
 
 async function setBalance(account, targetBalance) {
