@@ -172,7 +172,7 @@ def __init__(
   self.fse = IFSE(_fseAddress)
   self.fse.initialize()
 
-  if(_initReserve > 0)
+  if(_initReserve > 0):
     self.initReserve = _initReserve
     self.fse.mint(msg.sender, self.beneficiary, self.initReserve, "", "")
 
