@@ -79,6 +79,7 @@ contract("dat / csvTests", accounts => {
         tx = await dat.buy(account, quantity.toFixed(), 1, {
           from: account
         });
+        console.log(tx);
         console.log(tx.logs);
         // assert.equal(log.event, 'NameUpdated');
         // assert.equal(log.args._previousName, name);
@@ -113,8 +114,10 @@ function parsePercent(percentString) {
 
 async function setBalanceAndApprove(account, targetBalance) {
   targetBalance = parseNumber(targetBalance);
-  console.log(`Set ${account} to $${targetBalance.toFormat()} DAI`);
-  dai.approve(fse.address, -1, { from: account });
+  console.log(
+    `Set ${account} to $${targetBalance.toFormat()} DAI & approve dat`
+  );
+  dai.approve(dat.address, -1, { from: account });
   await dai.mint(account, targetBalance.shiftedBy(18).toFixed());
   const balance = new BigNumber(await dai.balanceOf(account)).shiftedBy(-18);
   assert.equal(balance.toFixed(), targetBalance.toFixed());
