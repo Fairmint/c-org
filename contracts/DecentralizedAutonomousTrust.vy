@@ -242,46 +242,6 @@ def sellSlope() -> (uint256, uint256):
   )
 
 @public
-@constant
-def estimateTokensForBuy(
-  _currencyValue: uint256
-) -> uint256:
-  if(self.state == STATE_INITIALIZATION):
-    if(self.initDeadline == 0 or self.initDeadline > block.timestamp):
-      return convert(
-      	convert(2 * _currencyValue * self.buySlopeDen, decimal) / convert(self.initGoal * self.buySlopeNum, decimal),
-      uint256)
-  elif(self.state == STATE_RUNNING):
-    unitConversion: uint256 = 1
-    return convert(sqrt(
-      convert(2 * _currencyValue * self.buySlopeDen, decimal)
-      / convert(self.buySlopeNum * unitConversion, decimal)
-      + convert(self.fse.totalSupply() + self.fse.burnedSupply(), decimal)
-    ), uint256) - self.fse.totalSupply() - self.fse.burnedSupply()
-
-  return 0
-
-# @public
-# @constant
-# def estimateSellValue(
-#  _quantityToSell: uint256
-# ) -> uint256:
-#  if(self.state == STATE_RUNNING):
-#    sellSlopeNum: uint256
-#    sellSlopeDen: uint256
-#    (sellSlopeNum, sellSlopeDen) = self.sellSlope()
-#    return convert(
-#      convert(_quantityToSell * sellSlopeNum * (self.fse.burnedSupply() ** 2 + 2 * self.fse.burnedSupply() * self.fse.totalSupply() + 2 * self.fse.totalSupply() ** 2 - _quantityToSell * self.fse.totalSupply()), decimal)
-#      / convert(2 * sellSlopeDen * self.fse.totalSupply(), decimal)
-#   , uint256)
-#  else:
-#    if(self.state == STATE_INITIALIZATION):
-#      assert self.initInvestors[msg.sender] >= _quantityToSell, "INSUFFICIENT_BALANCE"
-#      return convert(convert(_quantityToSell * self.buybackReserve(), decimal) / convert(self.fse.totalSupply() - self.initReserve, decimal), uint256)
-#    else:
-#      return convert(convert(_quantityToSell * self.buybackReserve(), decimal) / convert(self.fse.totalSupply(), decimal), uint256)
-
-@public
 @payable
 def buy(
   _to: address,
@@ -291,20 +251,27 @@ def buy(
   assert _to != ZERO_ADDRESS, "INVALID_ADDRESS"
   assert _quantityToInvest >= self.minInvestment, "SEND_AT_LEAST_MIN_INVESTMENT"
 
-  tokenValue: uint256 = self.estimateTokensForBuy(_quantityToInvest)
-
-  assert tokenValue > 0, "NOT_ENOUGH_FUNDS_OR_DEADLINE_PASSED"
+  tokenValue: uint256
 
   self._collectInvestment(msg.sender, _quantityToInvest, msg.value)
-  self.fse.mint(msg.sender, _to, tokenValue, "", "")
 
   if(self.state == STATE_INITIALIZATION):
+    if(self.initDeadline == 0 or self.initDeadline > block.timestamp):
+      tokenValue = convert(
+      	convert(2 * _currencyValue * self.buySlopeDen, decimal) / convert(self.initGoal * self.buySlopeNum, decimal),
+      uint256)
     self.initInvestors[_to] += tokenValue
 
     if(self.fse.totalSupply() - self.initReserve >= self.initGoal):
       self.state = STATE_RUNNING
       self._distributeInvestment(self.buybackReserve())
   elif(self.state == STATE_RUNNING):
+    unitConversion: uint256 = 1
+    tokenValue = convert(sqrt(
+      convert(2 * _currencyValue * self.buySlopeDen, decimal)
+      / convert(self.buySlopeNum * unitConversion, decimal)
+      + convert(self.fse.totalSupply() + self.fse.burnedSupply(), decimal)
+    ), uint256) - self.fse.totalSupply() - self.fse.burnedSupply()
     assert tokenValue >= _minTokensBought, "PRICE_SLIPPAGE"
 
     if(_to == self.beneficiary):
@@ -324,6 +291,9 @@ def buy(
   else:
     assert False, "INVALID_STATE"
 
+  assert tokenValue > 0, "NOT_ENOUGH_FUNDS_OR_DEADLINE_PASSED"
+  self.fse.mint(msg.sender, _to, tokenValue, "", "")
+
 # @public
 # def sell(
 #  _amount: uint256,
@@ -331,6 +301,24 @@ def buy(
 # ):
 #  currencyValue: uint256 = self.estimateSellValue(_amount)
 #  assert currencyValue > 0, "INSUFFICIENT_FUNDS"
+
+# def estimateSellValue(
+#  _quantityToSell: uint256
+# ) -> uint256:
+#  if(self.state == STATE_RUNNING):
+#    sellSlopeNum: uint256
+#    sellSlopeDen: uint256
+#    (sellSlopeNum, sellSlopeDen) = self.sellSlope()
+#    return convert(
+#      convert(_quantityToSell * sellSlopeNum * (self.fse.burnedSupply() ** 2 + 2 * self.fse.burnedSupply() * self.fse.totalSupply() + 2 * self.fse.totalSupply() ** 2 - _quantityToSell * self.fse.totalSupply()), decimal)
+#      / convert(2 * sellSlopeDen * self.fse.totalSupply(), decimal)
+#   , uint256)
+#  else:
+#    if(self.state == STATE_INITIALIZATION):
+#      assert self.initInvestors[msg.sender] >= _quantityToSell, "INSUFFICIENT_BALANCE"
+#      return convert(convert(_quantityToSell * self.buybackReserve(), decimal) / convert(self.fse.totalSupply() - self.initReserve, decimal), uint256)
+#    else:
+#      return convert(convert(_quantityToSell * self.buybackReserve(), decimal) / convert(self.fse.totalSupply(), decimal), uint256)
 
 #  if(self.state == STATE_INITIALIZATION):
 #    pass # TODO
