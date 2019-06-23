@@ -82,6 +82,7 @@ UpdateConfig: event({
 ##################################################
 
 # Constants
+SELL_FLAG: constant(bytes[256]) = b"\x01"
 STATE_INIT: constant(uint256(stateMachine)) = 0
 STATE_RUN: constant(uint256(stateMachine)) = 1
 STATE_CLOSE: constant(uint256(stateMachine)) = 2
@@ -318,7 +319,7 @@ def sell(
 
   self._sendCurrency(msg.sender, currencyValue)
   # Set an operator flag to differentiate a sell vs burn
-  self.fse.operatorBurn(msg.sender, _quantityToSell, "", x"\x01")
+  self.fse.operatorBurn(msg.sender, _quantityToSell, "", SELL_FLAG)
 
 # TODO add operator buy/sell?
 
