@@ -85,7 +85,7 @@ contract("dat / csvTests", accounts => {
         tx = await dat.buy(
           account,
           quantity.toFixed(),
-          parseNumber(row.DAIDelta).shiftedBy(18),
+          parseNumber(row.FSEDelta).shiftedBy(18),
           {
             from: account
           }
