@@ -2,6 +2,7 @@ pragma solidity ^0.5.0;
 
 import "./IAuthorization.sol";
 import "./IDAT.sol";
+import "./IFSE.sol";
 import "openzeppelin-solidity/contracts/token/ERC777/IERC777.sol";
 
 
@@ -15,18 +16,20 @@ contract Authorization is
     uint256 value;
   }
 
+  address public fse;
   address public dat;
   uint256 public initLockup;
   mapping(address => LockedFSE[]) public lockedTokens; // TODO switch to linked-list
 
   // TODO switch to init pattern in order to support zos upgrades
   constructor(
-    address _dat,
+    address _fse,
     uint256 _initLockup
   ) public
   {
-    require(_dat != address(0), "INVALID_ADDRESS");
-    dat = _dat;
+    require(_fse != address(0), "INVALID_ADDRESS");
+    fse = _fse;
+    dat = IFSE(_fse).owner();
     initLockup = _initLockup;
   }
 
@@ -37,7 +40,7 @@ contract Authorization is
     uint256 _value
   ) public
   {
-    require(msg.sender == dat, "ONLY_CALL_FROM_DAT");
+    require(msg.sender == fse, "ONLY_CALL_VIA_FSE");
     require(isTransferAllowed(_operator, _from, _to, _value), "NOT_AUTHORIZED");
     // TODO if state == 0 and to == beneficiary and from == 0 then freeze for initLockup
     // TODO if state == 0 and from == beneficiary and to != 0 then tranfer freeze as well
@@ -63,12 +66,12 @@ contract Authorization is
   ) public view
     returns (uint256)
   {
-    // TODO update if state==0 && tokens are from the initReserve
+    // TODO upfsee if state==0 && tokens are from the initReserve
     if(IDAT(dat).state() == 0)
     {
       return 0;
     }
     // TODO consider locked tokens
-    return IERC777(dat).balanceOf(_from);
+    return IERC777(fse).balanceOf(_from);
   }
 }

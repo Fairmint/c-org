@@ -35,9 +35,9 @@ module.exports = async function deployAndConfigure(
   );
 
   // Deploy auth
-  await deployer.deploy(
+  const auth = await deployer.deploy(
     authArtifact,
-    datArtifact.address,
+    fse.address,
     0 // initLockup
   );
 
@@ -46,7 +46,7 @@ module.exports = async function deployAndConfigure(
     dat,
     fse,
     {
-      authorizationAddress: authArtifact.address,
+      authorizationAddress: auth.address,
       name: "Fairmint Fair Synthetic Equity",
       symbol: "FSE"
     },
