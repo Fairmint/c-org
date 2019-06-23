@@ -27,7 +27,7 @@ contract("dat / csvTests", accounts => {
     const revenueCommitement = parsePercent(configJson.revenue_commitment);
     const fee = parsePercent(configJson.fee);
     [dat, fse] = await deployDat({
-      buySlopeNum: buySlope[0],
+      buySlopeNum: new BigNumber(buySlope[0]).shiftedBy(18).toFixed(), // TODO is this right?
       buySlopeDen: buySlope[1],
       investmentReserveNum: investmentReserve[0],
       investmentReserveDen: investmentReserve[1],
