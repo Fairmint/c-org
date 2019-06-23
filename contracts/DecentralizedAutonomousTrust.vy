@@ -308,13 +308,12 @@ def sell(
     sellSlopeNum: uint256
     sellSlopeDen: uint256
     (sellSlopeNum, sellSlopeDen) = self.sellSlope()
-    currencyValue =
-      _quantityToSell * sellSlopeNum * (
-        burnedSupply ** 2
-        + 2 * burnedSupply * totalSupply
-        + 2 * totalSupply ** 2
-        - _quantityToSell * totalSupply
-      ) / (2 * sellSlopeDen * totalSupply)
+    currencyValue = _quantityToSell * sellSlopeNum * (
+      burnedSupply ** 2
+      + 2 * burnedSupply * totalSupply
+      + 2 * totalSupply ** 2
+      - _quantityToSell * totalSupply
+    ) / (2 * sellSlopeDen * totalSupply)
   elif(self.state == STATE_CLOSE):
     currencyValue = _quantityToSell * self.buybackReserve() / totalSupply
   else:
