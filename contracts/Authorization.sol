@@ -54,8 +54,6 @@ contract Authorization is
   ) public view
     returns (bool)
   {
-    // TODO if state == 0 and to == beneficiary and from == 0 then freeze for initLockup
-    // TODO if state == 0 and from == beneficiary and to != 0 then tranfer freeze as well
     if(_from == address(0))
     { // Mint/Buy
       return true;
@@ -68,8 +66,7 @@ contract Authorization is
   ) public view
     returns (uint256)
   {
-    // TODO upfsee if state==0 && tokens are from the initReserve
-    if(IDAT(dat).state() == 0)
+    if(IDAT(dat).state() == 0 && _from != IDAT(dat).beneficiary())
     {
       return 0;
     }

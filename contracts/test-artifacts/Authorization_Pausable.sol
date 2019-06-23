@@ -23,11 +23,15 @@ contract Authorization_Pausable is
     address _from,
     address _to,
     uint256 _value,
-    bytes _operatorData
+    bytes calldata _operatorData
   ) public view
     returns (bool)
   {
-    return authorized;
+    if(authorized)
+    {
+      return super.isTransferAllowed(_operator, _from, _to, _value, _operatorData);
+    }
+    return false;
   }
 
   function availableBalanceOf(
