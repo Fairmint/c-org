@@ -19,6 +19,7 @@
     "ganache-cli": "6.4.4",
     "openzeppelin-solidity": "2.3.0",
     "openzeppelin-test-helpers": "0.4.0",
+    "papaparse": "5.0.0",
     "tpl-contracts": "1.1.2",
     "truffle": "5.0.21"
   },
