@@ -50,9 +50,9 @@ contract("dat / csvTests", accounts => {
 function parseNumber(numberString) {
   return numberString
     .replace("$", "")
-    .replace(",", ".")
-    .replace(" ", "")
-    .replace("\u202F", "");
+    .replace(new RegExp(",", "g"), ".")
+    .replace(new RegExp(" ", "g"), "")
+    .replace(new RegExp("\u202F", "g"), "");
 }
 
 async function setBalance(account, targetBalance) {
