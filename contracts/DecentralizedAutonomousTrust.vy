@@ -198,7 +198,8 @@ def _collectInvestment(
 @private
 def _applyBurnThreshold():
   balanceBefore: uint256 = self.fse.balanceOf(self.beneficiary)
-  burnThreshold: decimal = convert(self.burnThresholdNum, decimal) / convert(self.burnThresholdDen, decimal)
+  burnThreshold: decimal = convert(self.burnThresholdNum, decimal)
+  burnThreshold /= convert(self.burnThresholdDen, decimal)
   burnThreshold *= convert(self.fse.totalSupply() + self.fse.burnedSupply(), decimal)
   maxHoldings: uint256 = convert(burnThreshold, uint256)
 
@@ -221,8 +222,13 @@ def _sendCurrency(
 def _distributeInvestment(
   _value: uint256
 ):
-  reserve: uint256 = _value * (self.investmentReserveDen - self.investmentReserveNum) / self.investmentReserveDen
-  fee: uint256 = reserve * self.feeNum / self.feeDen
+  reserve: uint256 = self.investmentReserveDen
+  reserve -= self.investmentReserveNum
+  reserve *= _value
+  reserve /= self.investmentReserveDen
+  fee: uint256 = reserve
+  fee *= self.feeNum
+  fee /= self.feeDen
   self._sendCurrency(self.feeCollector, fee)
   self._sendCurrency(self.beneficiary, reserve - fee)
 
@@ -240,14 +246,6 @@ def buybackReserve() -> uint256:
   else:
     reserve = self.currency.balanceOf(self)
   return reserve
-
-@public
-@constant
-def sellSlope() -> (uint256, uint256):
-  return (
-    as_unitless_number(2 * self.buybackReserve()),
-    (self.fse.totalSupply() + self.fse.burnedSupply()) ** 2
-  )
 
 @public
 @payable
@@ -304,15 +302,12 @@ def sell(
 
   if(self.state == STATE_RUN):
     burnedSupply: uint256 = self.fse.burnedSupply()
-    sellSlopeNum: uint256
-    sellSlopeDen: uint256
-    (sellSlopeNum, sellSlopeDen) = self.sellSlope()
-    currencyValue = burnedSupply ** 2
-    currencyValue += 2 * burnedSupply * totalSupply
-    currencyValue += 2 * totalSupply ** 2
+    supply: uint256 = totalSupply + burnedSupply
+    currencyValue = 2 * supply * totalSupply
+    currencyValue += burnedSupply ** 2
     currencyValue -= _quantityToSell * totalSupply
-    currencyValue *= _quantityToSell * sellSlopeNum
-    currencyValue /= 2 * sellSlopeDen * totalSupply
+    currencyValue *= _quantityToSell * self.buybackReserve()
+    currencyValue /= (supply ** 2) * totalSupply
   elif(self.state == STATE_CLOSE):
     currencyValue = _quantityToSell * self.buybackReserve() / totalSupply
   else:
