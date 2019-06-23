@@ -115,19 +115,19 @@ contract("dat / csvTests", accounts => {
       await assertBalance(fse, account, row.FSEBalanceOfAcct);
       await assertBalance(dai, account, row.DAIBalanceOfAcct);
       assert.equal(
-        await fse.totalSupply(),
+        new BigNumber(await fse.totalSupply()).toFixed(),
         parseNumber(row.FSETotalSupply)
           .shiftedBy(18)
           .toFixed()
       );
       assert.equal(
-        await fse.burnedSupply(),
+        new BigNumber(await fse.burnedSupply()).toFixed(),
         parseNumber(row.FSEBurnedSupply)
           .shiftedBy(18)
           .toFixed()
       );
       assert.equal(
-        await dat.buybackReserve(),
+        new BigNumber(await dat.buybackReserve()).toFixed(),
         parseNumber(row.DAIBuybackReserve)
           .shiftedBy(18)
           .toFixed()
