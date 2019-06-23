@@ -134,7 +134,7 @@ function parsePercent(percentString) {
 }
 
 async function assertBalance(token, account, expectedBalance) {
-  expectedBalance = parseNumber(expectedBalance);
+  expectedBalance = parseNumber(expectedBalance).shiftedBy(18);
   const balance = new BigNumber(await token.balanceOf(account));
   assert.equal(expectedBalance.toFixed(), balance.toFixed());
 }
