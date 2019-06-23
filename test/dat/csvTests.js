@@ -44,6 +44,11 @@ contract("dat / csvTests", accounts => {
 
 async function setBalance(account, targetBalance) {
   console.log(`Set ${account} to ${targetBalance}`);
+  targetBalance = targetBalance
+    .replace("$", "")
+    .replace(",", ".")
+    .replace("\u00E9", ",");
+  console.log(`Target parsed: ${targetBalance}`);
   targetBalance = new BigNumber(targetBalance);
   const currentBalance = new BigNumber(
     web3.utils.fromWei(await web3.eth.getBalance(account), "ether")
