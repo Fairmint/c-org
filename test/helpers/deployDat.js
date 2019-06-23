@@ -18,6 +18,8 @@ module.exports = async function deployDat(options) {
     options
   );
 
+  console.log(callOptions);
+
   const fse = await fseArtifact.new();
   return [
     await datArtifact.new(

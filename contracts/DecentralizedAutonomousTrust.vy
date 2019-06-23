@@ -143,8 +143,8 @@ def __init__(
 
   self.initDeadline = _initDeadline
   assert _buySlopeNum > 0, "INVALID_SLOPE_NUM" # 0 not supported
-  assert _buySlopeNum <= _buySlopeDen, "INVALID_SLOPE" # 100% or less
-  self.buySlopeNum = _buySlopeNum
+  assert _buySlopeDen > 0, "INVALID_SLOPE_DEN"
+  self.buySlopeNum = _buySlopeNum # Fraction may be > 1
   self.buySlopeDen = _buySlopeDen
   assert _investmentReserveDen > 0, "INVALID_RESERVE_DEN"
   assert _investmentReserveNum <= _investmentReserveDen, "INVALID_RESERVE" # 100% or less
@@ -168,12 +168,13 @@ def __init__(
   # address is constant for all networks
   IERC1820Registry(0x1820a4B7618BdE71Dce8cdc73aAB6C95905faD24).setInterfaceImplementer(self, keccak256("ERC777TokensRecipient"), self)
 
-  # Mint the initial reserve
-  self.initReserve = _initReserve
   self.fseAddress = _fseAddress
   self.fse = IFSE(_fseAddress)
   self.fse.initialize()
-  self.fse.mint(msg.sender, self.beneficiary, self.initReserve, "", "")
+
+  if(_initReserve > 0):
+    self.initReserve = _initReserve
+    self.fse.mint(msg.sender, self.beneficiary, self.initReserve, "", "")
 
 #endregion
 
@@ -215,18 +216,17 @@ def _sendCurrency(
   if(self.currency == ZERO_ADDRESS):
     send(_to, as_wei_value(_amount, "wei"))
   else:
-    balanceBefore: uint256 = self.currency.balanceOf(self)
-    self.currency.transferFrom(self, _to, as_unitless_number(_amount))
-    assert self.currency.balanceOf(self) > balanceBefore, "ERC20_TRANSFER_FAILED"
+    balanceBefore: uint256 = self.currency.balanceOf(_to)
+    self.currency.transfer(_to, as_unitless_number(_amount))
+    assert self.currency.balanceOf(_to) > balanceBefore, "ERC20_TRANSFER_FAILED"
 
 @private
 def _distributeInvestment(
   _value: uint256
 ):
-  reserve: uint256 = self.investmentReserveDen
-  reserve -= self.investmentReserveNum
-  reserve *= _value
+  reserve: uint256 = self.investmentReserveNum * _value
   reserve /= self.investmentReserveDen
+  reserve = _value - reserve
   fee: uint256 = reserve
   fee *= self.feeNum
   fee /= self.feeDen
@@ -264,9 +264,7 @@ def buy(
 
   if(self.state == STATE_INIT):
     if(self.initDeadline == 0 or self.initDeadline > block.timestamp):
-      tokenValue = convert(
-      	convert(2 * _currencyValue * self.buySlopeDen, decimal) / convert(self.initGoal * self.buySlopeNum, decimal),
-      uint256)
+      tokenValue = 2 * _currencyValue * self.buySlopeDen / (self.initGoal * self.buySlopeNum)
     self.fse.mint(msg.sender, _to, tokenValue, "", "")
 
     self.initInvestors[_to] += tokenValue
@@ -276,11 +274,12 @@ def buy(
       self._distributeInvestment(self.buybackReserve())
   elif(self.state == STATE_RUN):
     unitConversion: uint256 = 1
-    tokenValue = convert(sqrt(
-      convert(2 * _currencyValue * self.buySlopeDen, decimal)
-      / convert(self.buySlopeNum * unitConversion, decimal)
-      + convert(self.fse.totalSupply() + self.fse.burnedSupply(), decimal)
-    ), uint256) - self.fse.totalSupply() - self.fse.burnedSupply()
+    supply: uint256 = self.fse.totalSupply() + self.fse.burnedSupply()
+    tokenValue = 2 * _currencyValue * self.buySlopeDen
+    tokenValue /= self.buySlopeNum * unitConversion
+    tokenValue += supply
+    tokenValue = convert(sqrt(convert(tokenValue, decimal)), uint256)
+    tokenValue -= supply
     assert tokenValue >= _minTokensBought, "PRICE_SLIPPAGE"
     self.fse.mint(msg.sender, _to, tokenValue, "", "")
 
@@ -313,7 +312,8 @@ def sell(
     currencyValue = _quantityToSell * self.buybackReserve() / totalSupply
   else:
     self.initInvestors[msg.sender] -= _quantityToSell
-    currencyValue = _quantityToSell * self.buybackReserve() / (totalSupply - self.initReserve)
+    currencyValue = _quantityToSell * self.buybackReserve()
+    currencyValue /= totalSupply - self.initReserve
 
   assert currencyValue > 0, "INSUFFICIENT_FUNDS"
 
