@@ -311,7 +311,8 @@ def sell(
     currencyValue = _quantityToSell * self.buybackReserve() / totalSupply
   else:
     self.initInvestors[msg.sender] -= _quantityToSell
-    currencyValue = _quantityToSell * self.buybackReserve() / (totalSupply - self.initReserve)
+    currencyValue = _quantityToSell * self.buybackReserve()
+    currencyValue /= totalSupply - self.initReserve
 
   assert currencyValue > 0, "INSUFFICIENT_FUNDS"
 
