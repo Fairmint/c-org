@@ -15,6 +15,7 @@
     "url": "git+https://github.com/Fairmint/c-org.git"
   },
   "dependencies": {
+    "bignumber.js": "9.0.0",
     "erc1820": "0.0.2",
     "ganache-cli": "6.4.4",
     "openzeppelin-solidity": "2.3.0",
