@@ -366,7 +366,7 @@ def close(
 
   if(self.state == STATE_INIT):
     self.state = STATE_CANCEL
-  elif(state == STATE_RUN):
+  elif(self.state == STATE_RUN):
     totalSupply: uint256 = self.fse.totalSupply()
     issuancePrice: uint256 = totalSupply + self.fse.burnedSupply()
     issuancePrice *= self.buySlopeNum
