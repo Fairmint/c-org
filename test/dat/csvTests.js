@@ -3,13 +3,18 @@ const Papa = require("papaparse");
 const fs = require("fs");
 const BigNumber = require("bignumber.js");
 
-contract("dat / csvTests", accounts => {
-  let dat;
-  let fse;
+const daiArtifact = artifacts.require("TestDai");
 
+let dai;
+let dat;
+let fse;
+
+contract("dat / csvTests", accounts => {
   before(async () => {
+    dai = await daiArtifact.new();
     [dat, fse] = await deployDat({
-      initGoal: "1000000000000000000000"
+      initGoal: "1000000000000000000000",
+      currency: dai.address
     });
     const configJson = Papa.parse(
       fs.readFileSync(
@@ -42,26 +47,35 @@ contract("dat / csvTests", accounts => {
   it.only("todo", async () => {});
 });
 
-async function setBalance(account, targetBalance) {
-  console.log(`Set ${account} to ${targetBalance}`);
-  targetBalance = targetBalance
+function parseNumber(numberString) {
+  return numberString
     .replace("$", "")
     .replace(",", ".")
+    .replace(" ", "")
     .replace("\u202F", "");
-  console.log(`Target parsed: ${targetBalance}`);
+}
+
+async function setBalance(account, targetBalance) {
+  targetBalance = parseNumber(targetBalance);
   targetBalance = new BigNumber(targetBalance);
-  const currentBalance = new BigNumber(
-    web3.utils.fromWei(await web3.eth.getBalance(account), "ether")
-  );
-  const burnAmount = currentBalance.minus(targetBalance);
-  console.log(
-    `Current balance ${currentBalance.toFormat()}, target ${targetBalance.toFormat()}, burn ${burnAmount.toFormat()}`
-  );
-  await web3.eth.sendTransaction({
-    from: account,
-    to: constants.ZERO_ADDRESS,
-    value: web3.utils.toWei(burnAmount.toFixed(), "ether")
-  });
-  const finalBalance = new BigNumber(await web3.eth.getBalance(account));
-  console.log(`Final balance ${finalBalance.toFormat()}`);
+  console.log(`Set ${account} to ${targetBalance.toFormat()}`);
+  await dai.mint(account, targetBalance.toFixed());
+  const balance = new BigNumber(await dai.balanceOf(account));
+  assert.equal(balance.toFixed(), targetBalance.toFixed());
+  // TODO for ETH support (but need to deal with gas costs as well - maybe detect and refund gas for simplicity?)
+  // Also instead of burning it send it to a bank account and use an after block to reset balances
+  // const currentBalance = new BigNumber(
+  //   web3.utils.fromWei(await web3.eth.getBalance(account), "ether")
+  // );
+  // const burnAmount = currentBalance.minus(targetBalance);
+  // console.log(
+  //   `Current balance ${currentBalance.toFormat()}, target ${targetBalance.toFormat()}, burn ${burnAmount.toFormat()}`
+  // );
+  // await web3.eth.sendTransaction({
+  //   from: account,
+  //   to: constants.ZERO_ADDRESS,
+  //   value: web3.utils.toWei(burnAmount.toFixed(), "ether")
+  // });
+  // const finalBalance = new BigNumber(await web3.eth.getBalance(account));
+  // console.log(`Final balance ${finalBalance.toFormat()}`);
 }
