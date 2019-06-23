@@ -84,7 +84,7 @@ contract("dat / csvTests", accounts => {
             .shiftedBy(-18)
             .toFormat()} DAI; balance before: $${daiBefore
             .shiftedBy(-18)
-            .toFixed()} DAI and ${fseBefore.shiftedBy(-18).toFixed()} FSE`
+            .toFormat()} DAI and ${fseBefore.shiftedBy(-18).toFormat()} FSE`
         );
         tx = await dat.buy(
           account,
@@ -166,7 +166,7 @@ async function setBalanceAndApprove(account, targetBalance) {
   console.log(
     `Set ${account} to $${targetBalance.toFormat()} DAI & approve dat`
   );
-  dai.approve(dat.address, -1, { from: account });
+  await dai.approve(dat.address, -1, { from: account });
   await dai.mint(account, targetBalance.shiftedBy(18).toFixed());
   const balance = new BigNumber(await dai.balanceOf(account)).shiftedBy(-18);
   assert.equal(balance.toFixed(), targetBalance.toFixed());
