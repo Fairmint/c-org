@@ -264,9 +264,7 @@ def buy(
 
   if(self.state == STATE_INIT):
     if(self.initDeadline == 0 or self.initDeadline > block.timestamp):
-      tokenValue = convert(
-      	convert(2 * _currencyValue * self.buySlopeDen, decimal) / convert(self.initGoal * self.buySlopeNum, decimal),
-      uint256)
+      tokenValue = 2 * _currencyValue * self.buySlopeDen / (self.initGoal * self.buySlopeNum)
     self.fse.mint(msg.sender, _to, tokenValue, "", "")
 
     self.initInvestors[_to] += tokenValue
