@@ -23,7 +23,7 @@ contract Authorization_Pausable is
     address _from,
     address _to,
     uint256 _value,
-    bytes calldata _operatorData
+    bytes memory _operatorData
   ) public view
     returns (bool)
   {
