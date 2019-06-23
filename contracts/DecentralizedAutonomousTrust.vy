@@ -274,11 +274,12 @@ def buy(
       self._distributeInvestment(self.buybackReserve())
   elif(self.state == STATE_RUN):
     unitConversion: uint256 = 1
-    tokenValue = convert(sqrt(
-      convert(2 * _currencyValue * self.buySlopeDen, decimal)
-      / convert(self.buySlopeNum * unitConversion, decimal)
-      + convert(self.fse.totalSupply() + self.fse.burnedSupply(), decimal)
-    ), uint256) - self.fse.totalSupply() - self.fse.burnedSupply()
+    supply: uint256 = self.fse.totalSupply() + self.fse.burnedSupply()
+    tokenValue = 2 * _currencyValue * self.buySlopeDen
+    tokenValue /= self.buySlopeNum * unitConversion
+    tokenValue += supply
+    tokenValue = convert(sqrt(convert(tokenValue, decimal)), uint256)
+    tokenValue -= supply
     assert tokenValue >= _minTokensBought, "PRICE_SLIPPAGE"
     self.fse.mint(msg.sender, _to, tokenValue, "", "")
 
