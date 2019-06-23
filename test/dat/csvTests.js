@@ -90,6 +90,18 @@ contract("dat / csvTests", accounts => {
             from: account
           }
         );
+      } else if (row.Action === "sell") {
+        const quantity = parseNumber(row.SellQty).shiftedBy(18);
+        console.log(
+          `${account} sell ${quantity.shiftedBy(-18).toFormat()} FSE`
+        );
+        tx = await dat.sell(
+          quantity.toFixed(),
+          1, //todoparseNumber(row.DAIDelta).shiftedBy(18),
+          {
+            from: account
+          }
+        );
       } else {
         throw new Error(`Missing action ${row.Action}`);
       }
