@@ -20,7 +20,8 @@ contract("dat / csvTests", accounts => {
       fs.readFileSync(
         `${__dirname}/test-data/buy_sell_no-pre-mint Configuration.csv`,
         "utf8"
-      )
+      ),
+      { header: true }
     ).data;
     const balanceJson = Papa.parse(
       fs.readFileSync(
@@ -48,21 +49,22 @@ contract("dat / csvTests", accounts => {
 });
 
 function parseNumber(numberString) {
-  return numberString
-    .replace("$", "")
-    .replace(new RegExp(",", "g"), ".")
-    .replace(new RegExp(" ", "g"), "")
-    .replace(new RegExp("\u202F", "g"), "");
+  return new BigNumber(
+    numberString
+      .replace("$", "")
+      .replace(new RegExp(",", "g"), ".")
+      .replace(new RegExp(" ", "g"), "")
+      .replace(new RegExp("\u202F", "g"), "")
+  );
 }
 
 async function setBalance(account, targetBalance) {
   targetBalance = parseNumber(targetBalance);
-  console.log(`Parsed: ${targetBalance}`);
-  targetBalance = new BigNumber(targetBalance);
-  console.log(`Set ${account} to ${targetBalance.toFormat()}`);
+  console.log(`Set ${account} to $${targetBalance.toFormat()} DAI`);
   await dai.mint(account, targetBalance.shiftedBy(18).toFixed());
   const balance = new BigNumber(await dai.balanceOf(account)).shiftedBy(-18);
   assert.equal(balance.toFixed(), targetBalance.toFixed());
+
   // TODO for ETH support (but need to deal with gas costs as well - maybe detect and refund gas for simplicity?)
   // Also instead of burning it send it to a bank account and use an after block to reset balances
   // const currentBalance = new BigNumber(
