@@ -8,6 +8,8 @@ const daiArtifact = artifacts.require("TestDai");
 let dai;
 let dat;
 let fse;
+let sheetJson;
+let tx;
 
 contract("dat / csvTests", accounts => {
   before(async () => {
@@ -48,7 +50,7 @@ contract("dat / csvTests", accounts => {
       ),
       { header: true }
     ).data;
-    const sheetJson = Papa.parse(
+    sheetJson = Papa.parse(
       fs.readFileSync(
         `${__dirname}/test-data/buy_sell_no-pre-mint Script.csv`,
         "utf8"
@@ -59,11 +61,30 @@ contract("dat / csvTests", accounts => {
       const row = balanceJson[i];
       await setBalance(accounts[parseInt(row.AccId)], row.InitialBalance);
     }
-    console.log(configJson);
-    console.log(sheetJson);
   });
 
-  it.only("todo", async () => {});
+  it.only("todo", async () => {
+    console.log(sheetJson);
+    for (let i = 0; i < sheetJson.length; i++) {
+      const row = sheetJson[i];
+      const account = accounts[parseInt(row.AccId)];
+      if (row.Action === "buy") {
+        const quantity = parseNumber(row.BuyQty).shiftedBy(18);
+        console.log(`${account} buy for $${quantity.toFormat()} DAI`);
+        tx = await dat.buy(account, quantity.toFixed(), 1, {
+          value: quantity.toFixed(),
+          from: account
+        });
+        console.log(tx.logs);
+        // assert.equal(log.event, 'NameUpdated');
+        // assert.equal(log.args._previousName, name);
+        //console.log(`\tgot ${tokenValue.toFormat()} FSE`);
+        // todo
+      } else {
+        throw new Error(`Missing action ${row.Action}`);
+      }
+    }
+  });
 });
 
 function parseNumber(numberString) {
