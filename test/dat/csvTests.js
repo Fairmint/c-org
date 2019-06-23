@@ -71,6 +71,12 @@ contract("dat / csvTests", accounts => {
     for (let i = 0; i < sheetJson.length; i++) {
       const row = sheetJson[i];
       const account = accounts[parseInt(row.AccId)];
+
+      // pre-conditions
+      await assertBalance(fse, account, row.PreviousFSEBal);
+      await assertBalance(dai, account, row.PreviousDAIBal);
+
+      // action
       if (row.Action === "buy") {
         const quantity = parseNumber(row.BuyQty).shiftedBy(18);
         console.log(
@@ -79,15 +85,30 @@ contract("dat / csvTests", accounts => {
         tx = await dat.buy(account, quantity.toFixed(), 1, {
           from: account
         });
-        console.log(tx);
-        console.log(tx.logs);
-        // assert.equal(log.event, 'NameUpdated');
-        // assert.equal(log.args._previousName, name);
-        //console.log(`\tgot ${tokenValue.toFormat()} FSE`);
-        // todo
       } else {
         throw new Error(`Missing action ${row.Action}`);
       }
+
+      // post-conditions
+      await assertBalance(fse, account, row.FSEBalanceOfAcct);
+      await assertBalance(dai, account, row.DAIBalanceOfAcct);
+      // FSETotalSupply
+      // FSEBurnedSupply
+      // DAIBuybackReserve
+      // TotalDAISentToBeneficiary
+      // TotalDAISentToFeeCollector
+      // SellSlope (needed?)
+      // State
+      // PricePerFSE
+      // BuyBackPrice
+      // CmulatedInvest (how to confirm?)
+      // ReserveVsInvest (how to cofirm?)
+
+      // TODO FSEDelta and DAIDelta via events
+      // console.log(tx.receipt.rawLogs);
+      // assert.equal(log.event, 'NameUpdated');
+      // assert.equal(log.args._previousName, name);
+      //console.log(`\tgot ${tokenValue.toFormat()} FSE`);
     }
   });
 });
@@ -110,6 +131,12 @@ function parsePercent(percentString) {
   return parseNumber(percentString.replace("%", ""))
     .div(100)
     .toFraction();
+}
+
+async function assertBalance(token, account, expectedBalance) {
+  expectedBalance = parseNumber(expectedBalance);
+  const balance = new BigNumber(await token.balanceOf(account));
+  assert.equal(expectedBalance.toFixed(), balance.toFixed());
 }
 
 async function setBalanceAndApprove(account, targetBalance) {
