@@ -1,4 +1,4 @@
-const { deployDat, constants } = require("../helpers");
+const { deployDat } = require("../helpers");
 const Papa = require("papaparse");
 const fs = require("fs");
 const BigNumber = require("bignumber.js");
@@ -9,7 +9,6 @@ let dai;
 let dat;
 let fse;
 let sheetJson;
-let tx;
 
 contract("dat / csvTests", accounts => {
   before(async () => {
@@ -87,7 +86,7 @@ contract("dat / csvTests", accounts => {
             .shiftedBy(-18)
             .toFormat()} DAI and ${fseBefore.shiftedBy(-18).toFormat()} FSE`
         );
-        tx = await dat.buy(
+        await dat.buy(
           account,
           quantity.toFixed(),
           1, //todoparseNumber(row.FSEDelta).shiftedBy(18),
@@ -100,7 +99,7 @@ contract("dat / csvTests", accounts => {
         console.log(
           `${account} sell ${quantity.shiftedBy(-18).toFormat()} FSE`
         );
-        tx = await dat.sell(
+        await dat.sell(
           quantity.toFixed(),
           1, //todoparseNumber(row.DAIDelta).shiftedBy(18),
           {
