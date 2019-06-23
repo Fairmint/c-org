@@ -334,7 +334,7 @@ def pay(
   tokenValue: uint256 = _currencyValue * self.revenueCommitmentNum
   tokenValue /= self.revenueCommitmentDen * self.buybackReserve() * supply * supply
   tokenValue += supply * supply
-  tokenValue = convert(sqrt(convert(tokenValue, decimal), uint256)
+  tokenValue = convert(sqrt(convert(tokenValue, decimal)), uint256)
   tokenValue -= supply
   self.fse.mint(msg.sender, self.beneficiary, tokenValue, "", "")
   self._applyBurnThreshold() # must mint before this call
