@@ -82,9 +82,10 @@ UpdateConfig: event({
 ##################################################
 
 # Constants
-STATE_INITIALIZATION: constant(uint256(stateMachine)) = 0
-STATE_RUNNING: constant(uint256(stateMachine)) = 1
-STATE_CLOSING: constant(uint256(stateMachine)) = 2
+STATE_INIT: constant(uint256(stateMachine)) = 0
+STATE_RUN: constant(uint256(stateMachine)) = 1
+STATE_CLOSE: constant(uint256(stateMachine)) = 2
+STATE_CANCEL: constant(uint256(stateMachine)) = 3
 
 # Data for DAT business logic
 beneficiary: public(address)
@@ -135,7 +136,7 @@ def __init__(
 
   # Set initGoal, which in turn defines the initial state
   if(_initGoal == 0):
-    self.state = STATE_RUNNING
+    self.state = STATE_RUN
   else:
     self.initGoal = _initGoal
 
@@ -255,7 +256,7 @@ def buy(
 
   self._collectInvestment(msg.sender, _currencyValue, msg.value)
 
-  if(self.state == STATE_INITIALIZATION):
+  if(self.state == STATE_INIT):
     if(self.initDeadline == 0 or self.initDeadline > block.timestamp):
       tokenValue = convert(
       	convert(2 * _currencyValue * self.buySlopeDen, decimal) / convert(self.initGoal * self.buySlopeNum, decimal),
@@ -263,9 +264,9 @@ def buy(
     self.initInvestors[_to] += tokenValue
 
     if(self.fse.totalSupply() - self.initReserve >= self.initGoal):
-      self.state = STATE_RUNNING
+      self.state = STATE_RUN
       self._distributeInvestment(self.buybackReserve())
-  elif(self.state == STATE_RUNNING):
+  elif(self.state == STATE_RUN):
     unitConversion: uint256 = 1
     tokenValue = convert(sqrt(
       convert(2 * _currencyValue * self.buySlopeDen, decimal)
@@ -294,43 +295,35 @@ def buy(
   assert tokenValue > 0, "NOT_ENOUGH_FUNDS_OR_DEADLINE_PASSED"
   self.fse.mint(msg.sender, _to, tokenValue, "", "")
 
-# @public
-# def sell(
-#  _amount: uint256,
-#  _minCurrencyReturned: uint256
-# ):
-#  currencyValue: uint256 = self.estimateSellValue(_amount)
-#  assert currencyValue > 0, "INSUFFICIENT_FUNDS"
+@public
+def sell(
+ _quantityToSell: uint256,
+ _minCurrencyReturned: uint256
+):
+  totalSupply: uint256 = self.fse.totalSupply()
+  currencyValue: uint256
 
-# def estimateSellValue(
-#  _quantityToSell: uint256
-# ) -> uint256:
-#  if(self.state == STATE_RUNNING):
-#    sellSlopeNum: uint256
-#    sellSlopeDen: uint256
-#    (sellSlopeNum, sellSlopeDen) = self.sellSlope()
-#    return convert(
-#      convert(_quantityToSell * sellSlopeNum * (self.fse.burnedSupply() ** 2 + 2 * self.fse.burnedSupply() * self.fse.totalSupply() + 2 * self.fse.totalSupply() ** 2 - _quantityToSell * self.fse.totalSupply()), decimal)
-#      / convert(2 * sellSlopeDen * self.fse.totalSupply(), decimal)
-#   , uint256)
-#  else:
-#    if(self.state == STATE_INITIALIZATION):
-#      assert self.initInvestors[msg.sender] >= _quantityToSell, "INSUFFICIENT_BALANCE"
-#      return convert(convert(_quantityToSell * self.buybackReserve(), decimal) / convert(self.fse.totalSupply() - self.initReserve, decimal), uint256)
-#    else:
-#      return convert(convert(_quantityToSell * self.buybackReserve(), decimal) / convert(self.fse.totalSupply(), decimal), uint256)
+  if(self.state == STATE_RUN):
+    burnedSupply: uint256 = self.fse.burnedSupply()
+    sellSlopeNum: uint256
+    sellSlopeDen: uint256
+    (sellSlopeNum, sellSlopeDen) = self.sellSlope()
+    currencyValue = burnedSupply ** 2
+    currencyValue += 2 * burnedSupply * totalSupply
+    currencyValue += 2 * totalSupply ** 2
+    currencyValue -= _quantityToSell * totalSupply
+    currencyValue *= _quantityToSell * sellSlopeNum
+    currencyValue /= 2 * sellSlopeDen * totalSupply
+  elif(self.state == STATE_CLOSE):
+    currencyValue = _quantityToSell * self.buybackReserve() / totalSupply
+  else:
+    self.initInvestors[msg.sender] -= _quantityToSell
+    currencyValue = _quantityToSell * self.buybackReserve() / (totalSupply - self.initReserve)
 
-#  if(self.state == STATE_INITIALIZATION):
-#    pass # TODO
-#  elif(self.state == STATE_RUNNING):
-#    pass # TODO
-#  else: # STATE_CLOSING
-#    pass # TODO
+  assert currencyValue > 0, "INSUFFICIENT_FUNDS"
 
-#  # TODO assert tokenValue > 0, "NOT_ENOUGH_FUNDS"
-
-#  # TODO send currency
-#  # TODO operator burn? self.fse.burn(msg.sender, msg.sender, _amount, _userData, "")
+  self._sendCurrency(msg.sender, currencyValue)
+  self.fse.operatorBurn(msg.sender, _quantityToSell, "", "")
 
 # TODO add operator buy/sell?
 
