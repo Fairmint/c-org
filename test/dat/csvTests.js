@@ -21,14 +21,14 @@ contract("dat / csvTests", accounts => {
         `${__dirname}/test-data/buy_sell_no-pre-mint InitBalances.csv`,
         "utf8"
       ),
-      { headers: true }
+      { header: true }
     );
     const sheetJson = Papa.parse(
       fs.readFileSync(
         `${__dirname}/test-data/buy_sell_no-pre-mint Script.csv`,
         "utf8"
       ),
-      { headers: true }
+      { header: true }
     );
     console.log(configJson.data);
     console.log(balanceJson.data);
