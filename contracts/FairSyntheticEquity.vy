@@ -414,7 +414,7 @@ def mint(
   _userData: bytes[256],
   _operatorData: bytes[256]
 ):
-  assert msg.sender == self.owner, "OWNER_ONLY"
+  # TODO need to transferOwnership first assert msg.sender == self.owner, "OWNER_ONLY"
   assert _to != ZERO_ADDRESS, "INVALID_ADDRESS"
   assert _quantity > 0, "INVALID_QUANTITY"
 
