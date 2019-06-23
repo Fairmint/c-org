@@ -28,19 +28,19 @@ contract("dat / csvTests", accounts => {
     const fee = parsePercent(configJson.fee);
     [dat, fse] = await deployDat({
       buySlopeNum: new BigNumber(buySlope[0]).shiftedBy(18).toFixed(), // TODO is this right?
-      buySlopeDen: buySlope[1].toFixed(),
-      investmentReserveNum: investmentReserve[0].toFixed(),
-      investmentReserveDen: investmentReserve[1].toFixed(),
-      revenueCommitementNum: revenueCommitement[0].toFixed(),
-      revenueCommitementDen: revenueCommitement[1].toFixed(),
+      buySlopeDen: new BigNumber(buySlope[1]).toFixed(),
+      investmentReserveNum: new BigNumber(investmentReserve[0]).toFixed(),
+      investmentReserveDen: new BigNumber(investmentReserve[1]).toFixed(),
+      revenueCommitementNum: new BigNumber(revenueCommitement[0]).toFixed(),
+      revenueCommitementDen: new BigNumber(revenueCommitement[1]).toFixed(),
       initGoal: parseNumber(configJson.init_goal)
         .shiftedBy(18)
         .toFixed(),
       initReserve: parseNumber(configJson.init_goal)
         .shiftedBy(18)
         .toFixed(),
-      feeNum: fee[0].toFixed(),
-      feeDen: fee[1].toFixed(),
+      feeNum: new BigNumber(fee[0]).toFixed(),
+      feeDen: new BigNumber(fee[1]).toFixed(),
       currency: dai.address
     });
     const balanceJson = Papa.parse(
