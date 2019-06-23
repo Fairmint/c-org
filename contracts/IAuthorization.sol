@@ -8,12 +8,14 @@ interface IAuthorization {
    * @param _from address The account holding the tokens to be sent and initiating this transfer.
    * @param _to address The account of the recipient. When selling tokens _to will be the ZERO_ADDRESS.
    * @param _amount uint256 The amount to transfer.
+   * @param _operatorData bytes TODO
    */
   function authorizeTransfer(
     address _operator,
     address _from,
     address _to, // TODO how to burn vs sell?
-    uint256 _amount
+    uint256 _amount,
+    bytes calldata _operatorData
   ) external;
 
   /**
@@ -21,13 +23,15 @@ interface IAuthorization {
    * @param _from address The account holding the tokens to be sent and initiating this transfer.
    * @param _to address The account of the recipient. When selling tokens _to will be the ZERO_ADDRESS.
    * @param _amount uint256 The amount to transfer.
+   * @param _operatorData bytes TODO
    * @return bool true if the transfer is authorized, false if it would revert.
    */
   function isTransferAllowed(
     address _operator,
     address _from,
     address _to,
-    uint256 _amount
+    uint256 _amount,
+    bytes calldata _operatorData
   ) external view
     returns (bool);
 

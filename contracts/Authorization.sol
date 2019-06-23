@@ -37,20 +37,20 @@ contract Authorization is
     address _operator,
     address _from,
     address _to,
-    uint256 _value
-  ) public
+    uint256 _value,
+    bytes calldata _operatorData
+  ) external
   {
     require(msg.sender == fse, "ONLY_CALL_VIA_FSE");
-    require(isTransferAllowed(_operator, _from, _to, _value), "NOT_AUTHORIZED");
-    // TODO if state == 0 and to == beneficiary and from == 0 then freeze for initLockup
-    // TODO if state == 0 and from == beneficiary and to != 0 then tranfer freeze as well
+    require(isTransferAllowed(_operator, _from, _to, _value, _operatorData), "NOT_AUTHORIZED");
   }
 
   function isTransferAllowed(
     address _operator,
     address _from,
     address _to,
-    uint256 _value
+    uint256 _value,
+    bytes memory _operatorData
   ) public view
     returns (bool)
   {
@@ -66,8 +66,7 @@ contract Authorization is
   ) public view
     returns (uint256)
   {
-    // TODO upfsee if state==0 && tokens are from the initReserve
-    if(IDAT(dat).state() == 0)
+    if(IDAT(dat).state() == 0 && _from != IDAT(dat).beneficiary())
     {
       return 0;
     }

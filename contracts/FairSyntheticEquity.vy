@@ -14,7 +14,8 @@ contract IAuthorization:
     _operator: address,
     _from: address,
     _to: address,
-    _value: uint256
+    _value: uint256,
+    _operatorData: bytes[256]
   ): modifying
   def availableBalanceOf(
     _from: address
@@ -219,7 +220,8 @@ def _burn(
   _operatorData: bytes[256]=""
 ):
   assert _from != ZERO_ADDRESS, "ERC777: burn from the zero address"
-  # Note: no authorization required to burn tokens
+  if(self.authorization != ZERO_ADDRESS):
+    self.authorization.authorizeTransfer(_operator, _from, ZERO_ADDRESS, _amount, _operatorData)
 
   self._callTokensToSend(_operator, _from, ZERO_ADDRESS, _amount) # TODO _userData, _operatorData
   self.totalSupply -= _amount
@@ -240,7 +242,7 @@ def _send(
   assert _from != ZERO_ADDRESS, "ERC777: send from the zero address"
   assert _to != ZERO_ADDRESS, "ERC777: send to the zero address"
   if(self.authorization != ZERO_ADDRESS):
-    self.authorization.authorizeTransfer(_operator, _from, _to, _amount)
+    self.authorization.authorizeTransfer(_operator, _from, _to, _amount, _operatorData)
 
   self._callTokensToSend(_operator, _from, _to, _amount) # TODO _userData _operatorData stack underflow
   self.balanceOf[_from] -= _amount
@@ -416,7 +418,7 @@ def mint(
   assert _quantity > 0, "INVALID_QUANTITY"
 
   if(self.authorization != ZERO_ADDRESS):
-    self.authorization.authorizeTransfer(_operator, ZERO_ADDRESS, _to, _quantity)
+    self.authorization.authorizeTransfer(_operator, ZERO_ADDRESS, _to, _quantity, _operatorData)
 
   self.totalSupply += _quantity
   self.balanceOf[_to] += _quantity

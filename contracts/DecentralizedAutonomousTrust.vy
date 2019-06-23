@@ -82,6 +82,7 @@ UpdateConfig: event({
 ##################################################
 
 # Constants
+SELL_FLAG: constant(bytes[256]) = b"\x01"
 STATE_INIT: constant(uint256(stateMachine)) = 0
 STATE_RUN: constant(uint256(stateMachine)) = 1
 STATE_CLOSE: constant(uint256(stateMachine)) = 2
@@ -141,20 +142,17 @@ def __init__(
     self.initGoal = _initGoal
 
   self.initDeadline = _initDeadline
-  assert _buySlopeNum > 0, "INVALID_SLOPE_NUM"
-  assert _buySlopeDen > 0, "INVALID_SLOPE_DEM"
-  assert convert(_buySlopeNum, decimal) / convert(_buySlopeDen, decimal) <= 1.0, "INVALID_SLOPE"
+  assert _buySlopeNum > 0, "INVALID_SLOPE_NUM" # 0 not supported
+  assert _buySlopeNum <= _buySlopeDen, "INVALID_SLOPE" # 100% or less
   self.buySlopeNum = _buySlopeNum
   self.buySlopeDen = _buySlopeDen
-  assert _investmentReserveNum > 0, "INVALID_RESERVE_NUM"
   assert _investmentReserveDen > 0, "INVALID_RESERVE_DEN"
-  assert convert(_investmentReserveNum, decimal) / convert(_investmentReserveDen, decimal) <= 1.0, "INVALID_RESERVE"
-  self.investmentReserveNum = _investmentReserveNum
+  assert _investmentReserveNum <= _investmentReserveDen, "INVALID_RESERVE" # 100% or less
+  self.investmentReserveNum = _investmentReserveNum # 0 means all investments go to the beneficiary
   self.investmentReserveDen = _investmentReserveDen
-  assert _revenueCommitmentNum > 0, "INVALID_COMMITMENT_NUM"
   assert _revenueCommitmentDen > 0, "INVALID_COMMITMENT_DEN"
-  assert convert(_revenueCommitmentNum, decimal) / convert(_revenueCommitmentDen, decimal) <= 1.0, "INVALID_COMMITMENT"
-  self.revenueCommitmentNum = _revenueCommitmentNum
+  assert _revenueCommitmentNum <= _revenueCommitmentDen, "INVALID_COMMITMENT" # 100% or less
+  self.revenueCommitmentNum = _revenueCommitmentNum # 0 means all renvue goes to the beneficiary
   self.revenueCommitmentDen = _revenueCommitmentDen
 
   self.burnThresholdNum = 1
@@ -199,6 +197,17 @@ def _collectInvestment(
     assert self.currency.balanceOf(self) > balanceBefore, "ERC20_TRANSFER_FAILED"
 
 @private
+def _applyBurnThreshold():
+  balanceBefore: uint256 = self.fse.balanceOf(self.beneficiary)
+  burnThreshold: decimal = convert(self.burnThresholdNum, decimal)
+  burnThreshold /= convert(self.burnThresholdDen, decimal)
+  burnThreshold *= convert(self.fse.totalSupply() + self.fse.burnedSupply(), decimal)
+  maxHoldings: uint256 = convert(burnThreshold, uint256)
+
+  if(balanceBefore > maxHoldings):
+    self.fse.operatorBurn(self.beneficiary, balanceBefore - maxHoldings, "", "")
+
+@private
 def _sendCurrency(
   _to: address,
   _amount: uint256
@@ -214,8 +223,13 @@ def _sendCurrency(
 def _distributeInvestment(
   _value: uint256
 ):
-  reserve: uint256 = _value * (self.investmentReserveDen - self.investmentReserveNum) / self.investmentReserveDen
-  fee: uint256 = reserve * self.feeNum / self.feeDen
+  reserve: uint256 = self.investmentReserveDen
+  reserve -= self.investmentReserveNum
+  reserve *= _value
+  reserve /= self.investmentReserveDen
+  fee: uint256 = reserve
+  fee *= self.feeNum
+  fee /= self.feeDen
   self._sendCurrency(self.feeCollector, fee)
   self._sendCurrency(self.beneficiary, reserve - fee)
 
@@ -233,14 +247,6 @@ def buybackReserve() -> uint256:
   else:
     reserve = self.currency.balanceOf(self)
   return reserve
-
-@public
-@constant
-def sellSlope() -> (uint256, uint256):
-  return (
-    as_unitless_number(2 * self.buybackReserve()),
-    (self.fse.totalSupply() + self.fse.burnedSupply()) ** 2
-  )
 
 @public
 @payable
@@ -261,6 +267,8 @@ def buy(
       tokenValue = convert(
       	convert(2 * _currencyValue * self.buySlopeDen, decimal) / convert(self.initGoal * self.buySlopeNum, decimal),
       uint256)
+    self.fse.mint(msg.sender, _to, tokenValue, "", "")
+
     self.initInvestors[_to] += tokenValue
 
     if(self.fse.totalSupply() - self.initReserve >= self.initGoal):
@@ -274,26 +282,16 @@ def buy(
       + convert(self.fse.totalSupply() + self.fse.burnedSupply(), decimal)
     ), uint256) - self.fse.totalSupply() - self.fse.burnedSupply()
     assert tokenValue >= _minTokensBought, "PRICE_SLIPPAGE"
+    self.fse.mint(msg.sender, _to, tokenValue, "", "")
 
     if(_to == self.beneficiary):
-      # TODO move this to a method, share with `pay`
-      burnThreshold: decimal = convert(self.burnThresholdNum, decimal) / convert(self.burnThresholdDen, decimal)
-      if(
-        convert(tokenValue + self.fse.balanceOf(_to), decimal)
-        / convert(self.fse.totalSupply() + self.fse.burnedSupply(), decimal)
-        > burnThreshold
-      ):
-        self.fse.burn(tokenValue + self.fse.balanceOf(_to) - convert(
-          burnThreshold * convert(self.fse.totalSupply() + self.fse.burnedSupply(), decimal),
-          uint256
-        ), "")
+      self._applyBurnThreshold() # must mint before this call
     else:
       self._distributeInvestment(_currencyValue)
   else:
     assert False, "INVALID_STATE"
 
   assert tokenValue > 0, "NOT_ENOUGH_FUNDS_OR_DEADLINE_PASSED"
-  self.fse.mint(msg.sender, _to, tokenValue, "", "")
 
 @public
 def sell(
@@ -305,15 +303,12 @@ def sell(
 
   if(self.state == STATE_RUN):
     burnedSupply: uint256 = self.fse.burnedSupply()
-    sellSlopeNum: uint256
-    sellSlopeDen: uint256
-    (sellSlopeNum, sellSlopeDen) = self.sellSlope()
-    currencyValue = burnedSupply ** 2
-    currencyValue += 2 * burnedSupply * totalSupply
-    currencyValue += 2 * totalSupply ** 2
+    supply: uint256 = totalSupply + burnedSupply
+    currencyValue = 2 * supply * totalSupply
+    currencyValue += burnedSupply ** 2
     currencyValue -= _quantityToSell * totalSupply
-    currencyValue *= _quantityToSell * sellSlopeNum
-    currencyValue /= 2 * sellSlopeDen * totalSupply
+    currencyValue *= _quantityToSell * self.buybackReserve()
+    currencyValue /= (supply ** 2) * totalSupply
   elif(self.state == STATE_CLOSE):
     currencyValue = _quantityToSell * self.buybackReserve() / totalSupply
   else:
@@ -323,14 +318,28 @@ def sell(
   assert currencyValue > 0, "INSUFFICIENT_FUNDS"
 
   self._sendCurrency(msg.sender, currencyValue)
-  self.fse.operatorBurn(msg.sender, _quantityToSell, "", "")
+  # Set an operator flag to differentiate a sell vs burn
+  self.fse.operatorBurn(msg.sender, _quantityToSell, "", SELL_FLAG)
 
 # TODO add operator buy/sell?
 
 @public
-def pay():
-  # TODO
-  pass
+@payable
+def pay(
+  _currencyValue: uint256
+):
+  assert self.state == STATE_RUN, "INVALID_STATE"
+
+  self._collectInvestment(msg.sender, _currencyValue, msg.value)
+  self._sendCurrency(self.beneficiary, _currencyValue - _currencyValue * self.investmentReserveNum / self.investmentReserveDen)
+  supply: uint256 = self.fse.totalSupply() + self.fse.burnedSupply()
+  tokenValue: uint256 = _currencyValue * self.revenueCommitmentNum
+  tokenValue /= self.revenueCommitmentDen * self.buybackReserve() * supply * supply
+  tokenValue += supply * supply
+  tokenValue = convert(sqrt(convert(tokenValue, decimal)), uint256)
+  tokenValue -= supply
+  self.fse.mint(msg.sender, self.beneficiary, tokenValue, "", "")
+  self._applyBurnThreshold() # must mint before this call
 
 @public
 @payable
@@ -349,6 +358,25 @@ def tokensReceived(
   ):
   # TODO
   pass
+
+@public
+@payable
+def close(
+  _exitFee: uint256
+):
+  assert msg.sender == self.control, "CONTROL_ONLY"
+
+  if(self.state == STATE_INIT):
+    self.state = STATE_CANCEL
+  elif(self.state == STATE_RUN):
+    totalSupply: uint256 = self.fse.totalSupply()
+    issuancePrice: uint256 = totalSupply + self.fse.burnedSupply()
+    issuancePrice *= self.buySlopeNum
+    issuancePrice /= self.buySlopeDen
+    assert _exitFee >= totalSupply * issuancePrice - self.buybackReserve()
+    self._collectInvestment(msg.sender, _exitFee, msg.value)
+  else:
+    assert False, "INVALID_STATE"
 
 #endregion
 
@@ -383,13 +411,14 @@ def updateConfig(
   assert _feeCollector != ZERO_ADDRESS, "INVALID_ADDRESS"
   self.feeCollector = _feeCollector
 
-  assert convert(_burnThresholdNum, decimal) / convert(_burnThresholdDen, decimal) <= 1.0, "INVALID_THRESHOLD"
-  self.burnThresholdNum = _burnThresholdNum
+  assert _burnThresholdDen > 0, "INVALID_THRESHOLD_DEN"
+  assert _burnThresholdNum <= _burnThresholdDen, "INVALID_THRESHOLD" # 100% or less
+  self.burnThresholdNum = _burnThresholdNum # 0 means burn all of beneficiary's holdings
   self.burnThresholdDen = _burnThresholdDen
 
   assert _feeDen > 0, "INVALID_FEE_DEM"
-  assert convert(_feeNum, decimal) / convert(_feeDen, decimal) <= 1.0, "INVALID_FEE"
-  self.feeNum = _feeNum
+  assert _feeNum <= _feeDen, "INVALID_FEE" # 100% or less
+  self.feeNum = _feeNum # 0 means no fee
   self.feeDen = _feeDen
 
   assert _minInvestment > 0, "INVALID_MIN_INVESTMENT"
