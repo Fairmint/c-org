@@ -59,7 +59,10 @@ contract("dat / csvTests", accounts => {
     ).data;
     for (let i = 0; i < balanceJson.length; i++) {
       const row = balanceJson[i];
-      await setBalance(accounts[parseInt(row.AccId)], row.InitialBalance);
+      await setBalanceAndApprove(
+        accounts[parseInt(row.AccId)],
+        row.InitialBalance
+      );
     }
   });
 
@@ -70,9 +73,10 @@ contract("dat / csvTests", accounts => {
       const account = accounts[parseInt(row.AccId)];
       if (row.Action === "buy") {
         const quantity = parseNumber(row.BuyQty).shiftedBy(18);
-        console.log(`${account} buy for $${quantity.toFormat()} DAI`);
+        console.log(
+          `${account} buy for $${quantity.shiftedBy(-18).toFormat()} DAI`
+        );
         tx = await dat.buy(account, quantity.toFixed(), 1, {
-          value: quantity.toFixed(),
           from: account
         });
         console.log(tx.logs);
@@ -107,9 +111,10 @@ function parsePercent(percentString) {
     .toFraction();
 }
 
-async function setBalance(account, targetBalance) {
+async function setBalanceAndApprove(account, targetBalance) {
   targetBalance = parseNumber(targetBalance);
   console.log(`Set ${account} to $${targetBalance.toFormat()} DAI`);
+  dai.approve(fse.address, -1, { from: account });
   await dai.mint(account, targetBalance.shiftedBy(18).toFixed());
   const balance = new BigNumber(await dai.balanceOf(account)).shiftedBy(-18);
   assert.equal(balance.toFixed(), targetBalance.toFixed());
