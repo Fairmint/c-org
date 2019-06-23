@@ -73,14 +73,18 @@ contract("dat / csvTests", accounts => {
       const account = accounts[parseInt(row.AccId)];
 
       // pre-conditions
-      await assertBalance(fse, account, row.PreviousFSEBal);
-      await assertBalance(dai, account, row.PreviousDAIBal);
+      const fseBefore = await assertBalance(fse, account, row.PreviousFSEBal);
+      const daiBefore = await assertBalance(dai, account, row.PreviousDAIBal);
 
       // action
       if (row.Action === "buy") {
         const quantity = parseNumber(row.BuyQty).shiftedBy(18);
         console.log(
-          `${account} buy for $${quantity.shiftedBy(-18).toFormat()} DAI`
+          `${account} buy for $${quantity
+            .shiftedBy(-18)
+            .toFormat()} DAI; balance before: $${daiBefore
+            .shiftedBy(-18)
+            .toFixed()} DAI and ${fseBefore.shiftedBy(-18).toFixed()} FSE`
         );
         tx = await dat.buy(
           account,
@@ -154,6 +158,7 @@ async function assertBalance(token, account, expectedBalance) {
   expectedBalance = parseNumber(expectedBalance).shiftedBy(18);
   const balance = new BigNumber(await token.balanceOf(account));
   assert.equal(balance.toFixed(), expectedBalance.toFixed());
+  return balance;
 }
 
 async function setBalanceAndApprove(account, targetBalance) {
