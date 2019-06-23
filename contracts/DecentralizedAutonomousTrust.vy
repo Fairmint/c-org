@@ -168,12 +168,13 @@ def __init__(
   # address is constant for all networks
   IERC1820Registry(0x1820a4B7618BdE71Dce8cdc73aAB6C95905faD24).setInterfaceImplementer(self, keccak256("ERC777TokensRecipient"), self)
 
-  # Mint the initial reserve
-  self.initReserve = _initReserve
   self.fseAddress = _fseAddress
   self.fse = IFSE(_fseAddress)
   self.fse.initialize()
-  self.fse.mint(msg.sender, self.beneficiary, self.initReserve, "", "")
+
+  if(_initReserve > 0)
+    self.initReserve = _initReserve
+    self.fse.mint(msg.sender, self.beneficiary, self.initReserve, "", "")
 
 #endregion
 
