@@ -141,20 +141,17 @@ def __init__(
     self.initGoal = _initGoal
 
   self.initDeadline = _initDeadline
-  assert _buySlopeNum > 0, "INVALID_SLOPE_NUM"
-  assert _buySlopeDen > 0, "INVALID_SLOPE_DEM"
-  assert convert(_buySlopeNum, decimal) / convert(_buySlopeDen, decimal) <= 1.0, "INVALID_SLOPE"
+  assert _buySlopeNum > 0, "INVALID_SLOPE_NUM" # 0 not supported
+  assert _buySlopeNum <= _buySlopeDen, "INVALID_SLOPE" # 100% or less
   self.buySlopeNum = _buySlopeNum
   self.buySlopeDen = _buySlopeDen
-  assert _investmentReserveNum > 0, "INVALID_RESERVE_NUM"
   assert _investmentReserveDen > 0, "INVALID_RESERVE_DEN"
-  assert convert(_investmentReserveNum, decimal) / convert(_investmentReserveDen, decimal) <= 1.0, "INVALID_RESERVE"
-  self.investmentReserveNum = _investmentReserveNum
+  assert _investmentReserveNum <= _investmentReserveDen, "INVALID_RESERVE" # 100% or less
+  self.investmentReserveNum = _investmentReserveNum # 0 means all investments go to the beneficiary
   self.investmentReserveDen = _investmentReserveDen
-  assert _revenueCommitmentNum > 0, "INVALID_COMMITMENT_NUM"
   assert _revenueCommitmentDen > 0, "INVALID_COMMITMENT_DEN"
-  assert convert(_revenueCommitmentNum, decimal) / convert(_revenueCommitmentDen, decimal) <= 1.0, "INVALID_COMMITMENT"
-  self.revenueCommitmentNum = _revenueCommitmentNum
+  assert _revenueCommitmentNum <= _revenueCommitmentDen, "INVALID_COMMITMENT" # 100% or less
+  self.revenueCommitmentNum = _revenueCommitmentNum # 0 means all renvue goes to the beneficiary
   self.revenueCommitmentDen = _revenueCommitmentDen
 
   self.burnThresholdNum = 1
@@ -397,13 +394,14 @@ def updateConfig(
   assert _feeCollector != ZERO_ADDRESS, "INVALID_ADDRESS"
   self.feeCollector = _feeCollector
 
-  assert convert(_burnThresholdNum, decimal) / convert(_burnThresholdDen, decimal) <= 1.0, "INVALID_THRESHOLD"
-  self.burnThresholdNum = _burnThresholdNum
+  assert _burnThresholdDen > 0, "INVALID_THRESHOLD_DEN"
+  assert _burnThresholdNum <= _burnThresholdDen, "INVALID_THRESHOLD" # 100% or less
+  self.burnThresholdNum = _burnThresholdNum # 0 means burn all of beneficiary's holdings
   self.burnThresholdDen = _burnThresholdDen
 
   assert _feeDen > 0, "INVALID_FEE_DEM"
-  assert convert(_feeNum, decimal) / convert(_feeDen, decimal) <= 1.0, "INVALID_FEE"
-  self.feeNum = _feeNum
+  assert _feeNum <= _feeDen, "INVALID_FEE" # 100% or less
+  self.feeNum = _feeNum # 0 means no fee
   self.feeDen = _feeDen
 
   assert _minInvestment > 0, "INVALID_MIN_INVESTMENT"
