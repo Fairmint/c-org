@@ -68,7 +68,7 @@ contract("dat / csvTests", accounts => {
 
   it.only("todo", async () => {
     // todo sheetJson.length
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < 8; i++) {
       const row = sheetJson[i];
       //console.log(row);
       const account = accounts[parseInt(row.AccId)];
