@@ -245,15 +245,15 @@ def sellSlope() -> (uint256, uint256):
 @payable
 def buy(
   _to: address,
-  _quantityToInvest: uint256,
+  _currencyValue: uint256,
   _minTokensBought: uint256
 ):
   assert _to != ZERO_ADDRESS, "INVALID_ADDRESS"
-  assert _quantityToInvest >= self.minInvestment, "SEND_AT_LEAST_MIN_INVESTMENT"
+  assert _currencyValue >= self.minInvestment, "SEND_AT_LEAST_MIN_INVESTMENT"
 
   tokenValue: uint256
 
-  self._collectInvestment(msg.sender, _quantityToInvest, msg.value)
+  self._collectInvestment(msg.sender, _currencyValue, msg.value)
 
   if(self.state == STATE_INITIALIZATION):
     if(self.initDeadline == 0 or self.initDeadline > block.timestamp):
@@ -287,7 +287,7 @@ def buy(
           uint256
         ), "")
     else:
-      self._distributeInvestment(_quantityToInvest)
+      self._distributeInvestment(_currencyValue)
   else:
     assert False, "INVALID_STATE"
 
