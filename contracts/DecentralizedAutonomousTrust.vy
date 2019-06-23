@@ -216,7 +216,7 @@ def _sendCurrency(
     send(_to, as_wei_value(_amount, "wei"))
   else:
     balanceBefore: uint256 = self.currency.balanceOf(self)
-    self.currency.transferFrom(self, _to, as_unitless_number(_amount))
+    self.currency.transfer(_to, as_unitless_number(_amount))
     assert self.currency.balanceOf(self) > balanceBefore, "ERC20_TRANSFER_FAILED"
 
 @private
