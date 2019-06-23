@@ -199,15 +199,11 @@ def _collectInvestment(
 def _applyBurnThreshold():
   balanceBefore: uint256 = self.fse.balanceOf(self.beneficiary)
   burnThreshold: decimal = convert(self.burnThresholdNum, decimal) / convert(self.burnThresholdDen, decimal)
-  if(
-    convert(balanceBefore, decimal)
-    / convert(self.fse.totalSupply() + self.fse.burnedSupply(), decimal)
-    > burnThreshold
-  ):
-    self.fse.operatorBurn(self.beneficiary, balanceBefore - convert(
-      burnThreshold * convert(self.fse.totalSupply() + self.fse.burnedSupply(), decimal),
-      uint256
-    ), "", "")
+  burnThreshold *= convert(self.fse.totalSupply() + self.fse.burnedSupply(), decimal)
+  maxHoldings: uint256 = convert(burnThreshold, uint256)
+
+  if(balanceBefore > maxHoldings):
+    self.fse.operatorBurn(self.beneficiary, balanceBefore - maxHoldings, "", "")
 
 @private
 def _sendCurrency(
