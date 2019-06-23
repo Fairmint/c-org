@@ -47,13 +47,13 @@ async function setBalance(account, targetBalance) {
   targetBalance = targetBalance
     .replace("$", "")
     .replace(",", ".")
-    .replace("\u00E9", ",");
+    .replace("\u202F", "");
   console.log(`Target parsed: ${targetBalance}`);
   targetBalance = new BigNumber(targetBalance);
   const currentBalance = new BigNumber(
     web3.utils.fromWei(await web3.eth.getBalance(account), "ether")
   );
-  const burnAmount = targetBalance.minus(currentBalance);
+  const burnAmount = currentBalance.minus(targetBalance);
   console.log(
     `Current balance ${currentBalance.toFormat()}, target ${targetBalance.toFormat()}, burn ${burnAmount.toFormat()}`
   );
