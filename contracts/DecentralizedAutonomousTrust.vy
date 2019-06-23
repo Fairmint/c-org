@@ -317,7 +317,8 @@ def sell(
   assert currencyValue > 0, "INSUFFICIENT_FUNDS"
 
   self._sendCurrency(msg.sender, currencyValue)
-  self.fse.operatorBurn(msg.sender, _quantityToSell, "", "")
+  # Set an operator flag to differentiate a sell vs burn
+  self.fse.operatorBurn(msg.sender, _quantityToSell, "", x"\x01")
 
 # TODO add operator buy/sell?
 

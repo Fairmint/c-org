@@ -37,11 +37,12 @@ contract Authorization is
     address _operator,
     address _from,
     address _to,
-    uint256 _value
+    uint256 _value,
+    bytes _operatorData
   ) public
   {
     require(msg.sender == fse, "ONLY_CALL_VIA_FSE");
-    require(isTransferAllowed(_operator, _from, _to, _value), "NOT_AUTHORIZED");
+    require(isTransferAllowed(_operator, _from, _to, _value, _operatorData), "NOT_AUTHORIZED");
     // TODO if state == 0 and to == beneficiary and from == 0 then freeze for initLockup
     // TODO if state == 0 and from == beneficiary and to != 0 then tranfer freeze as well
   }
@@ -50,7 +51,8 @@ contract Authorization is
     address _operator,
     address _from,
     address _to,
-    uint256 _value
+    uint256 _value,
+    bytes _operatorData
   ) public view
     returns (bool)
   {
