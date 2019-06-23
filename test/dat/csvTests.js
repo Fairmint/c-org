@@ -39,7 +39,7 @@ contract("dat / csvTests", accounts => {
     console.log(sheetJson);
   });
 
-  it("todo", async () => {});
+  it.only("todo", async () => {});
 });
 
 async function setBalance(account, targetBalance) {
