@@ -12,17 +12,22 @@ contract("dat / csvTests", accounts => {
     });
     const configJson = Papa.parse(
       fs.readFileSync(
-        `${__dirname}/test-data/buy_sell_no-pre-mint Configuration.csv`
+        `${__dirname}/test-data/buy_sell_no-pre-mint Configuration.csv`,
+        "utf8"
       )
     );
     const balanceJson = Papa.parse(
       fs.readFileSync(
-        `${__dirname}/test-data/buy_sell_no-pre-mint InitBalances.csv`
+        `${__dirname}/test-data/buy_sell_no-pre-mint InitBalances.csv`,
+        "utf8"
       ),
       { headers: true }
     );
     const sheetJson = Papa.parse(
-      fs.readFileSync(`${__dirname}/test-data/buy_sell_no-pre-mint Script.csv`),
+      fs.readFileSync(
+        `${__dirname}/test-data/buy_sell_no-pre-mint Script.csv`,
+        "utf8"
+      ),
       { headers: true }
     );
     console.log(configJson.data);
