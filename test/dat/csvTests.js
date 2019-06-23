@@ -11,14 +11,18 @@ contract("dat / csvTests", accounts => {
       initGoal: "1000000000000000000000"
     });
     const configJson = Papa.parse(
-      fs.readFileSync("./test-data/buy_sell_no-pre-mint Configuration.csv")
+      fs.readFileSync(
+        `${__dirname}/test-data/buy_sell_no-pre-mint Configuration.csv`
+      )
     );
     const balanceJson = Papa.parse(
-      fs.readFileSync("./test-data/buy_sell_no-pre-mint InitBalances.csv"),
+      fs.readFileSync(
+        `${__dirname}/test-data/buy_sell_no-pre-mint InitBalances.csv`
+      ),
       { headers: true }
     );
     const sheetJson = Papa.parse(
-      fs.readFileSync("./test-data/buy_sell_no-pre-mint Script.csv"),
+      fs.readFileSync(`${__dirname}/test-data/buy_sell_no-pre-mint Script.csv`),
       { headers: true }
     );
     console.log(configJson.data);
