@@ -67,9 +67,10 @@ contract("dat / csvTests", accounts => {
   });
 
   it.only("todo", async () => {
-    for (let i = 0; i < sheetJson.length; i++) {
+    // todo sheetJson.length
+    for (let i = 0; i < 4; i++) {
       const row = sheetJson[i];
-      console.log(row);
+      //console.log(row);
       const account = accounts[parseInt(row.AccId)];
 
       // pre-conditions
@@ -113,13 +114,29 @@ contract("dat / csvTests", accounts => {
       // post-conditions
       await assertBalance(fse, account, row.FSEBalanceOfAcct);
       await assertBalance(dai, account, row.DAIBalanceOfAcct);
-      // FSETotalSupply
-      // FSEBurnedSupply
-      // DAIBuybackReserve
+      assert.equal(
+        await fse.totalSupply(),
+        parseNumber(row.FSETotalSupply)
+          .shiftedBy(18)
+          .toFixed()
+      );
+      assert.equal(
+        await fse.burnedSupply(),
+        parseNumber(row.FSEBurnedSupply)
+          .shiftedBy(18)
+          .toFixed()
+      );
+      assert.equal(
+        await dat.buybackReserve(),
+        parseNumber(row.DAIBuybackReserve)
+          .shiftedBy(18)
+          .toFixed()
+      );
+      assert.equal(await dat.state(), parseState(row.State));
+
       // TotalDAISentToBeneficiary
       // TotalDAISentToFeeCollector
       // SellSlope (needed?)
-      // State
       // PricePerFSE
       // BuyBackPrice
       // CmulatedInvest (how to confirm?)
@@ -133,6 +150,19 @@ contract("dat / csvTests", accounts => {
     }
   });
 });
+
+function parseState(state) {
+  if (state === "init") {
+    return 0;
+  } else if (state === "run") {
+    return 1;
+  } else if (state === "close") {
+    return 2;
+  } else if (state === "cancel") {
+    return 3;
+  }
+  throw new Error(`Missing state: ${state}`);
+}
 
 function parseNumber(numberString) {
   return new BigNumber(
