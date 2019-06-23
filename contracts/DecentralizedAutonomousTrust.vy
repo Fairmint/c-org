@@ -223,10 +223,9 @@ def _sendCurrency(
 def _distributeInvestment(
   _value: uint256
 ):
-  reserve: uint256 = self.investmentReserveDen
-  reserve -= self.investmentReserveNum
-  reserve *= _value
+  reserve: uint256 = self.investmentReserveNum * _value
   reserve /= self.investmentReserveDen
+  reserve = _value - reserve
   fee: uint256 = reserve
   fee *= self.feeNum
   fee /= self.feeDen
