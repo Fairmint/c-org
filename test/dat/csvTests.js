@@ -82,9 +82,14 @@ contract("dat / csvTests", accounts => {
         console.log(
           `${account} buy for $${quantity.shiftedBy(-18).toFormat()} DAI`
         );
-        tx = await dat.buy(account, quantity.toFixed(), 1, {
-          from: account
-        });
+        tx = await dat.buy(
+          account,
+          quantity.toFixed(),
+          parseNumber(row.DAIDelta).shiftedBy(18),
+          {
+            from: account
+          }
+        );
       } else {
         throw new Error(`Missing action ${row.Action}`);
       }
