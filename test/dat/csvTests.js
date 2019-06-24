@@ -68,22 +68,19 @@ contract("dat / csvTests", accounts => {
   it.only("todo", async () => {
     for (let i = 0; i < sheetJson.length; i++) {
       const row = sheetJson[i];
-      console.log(row);
+      //console.log(row);
       const account = accounts[parseInt(row.AccId)];
 
       // pre-conditions
-      const fseBefore = await assertBalance(fse, account, row.PreviousFSEBal);
-      const daiBefore = await assertBalance(dai, account, row.PreviousDAIBal);
+      await assertBalance(fse, account, row.PreviousFSEBal);
+      await assertBalance(dai, account, row.PreviousDAIBal);
 
       // action
       if (row.Action === "buy") {
         const quantity = parseNumber(row.BuyQty).shiftedBy(18);
         console.log(`
-Row ${i}: ${row.AccId} buy for $${quantity
-          .shiftedBy(-18)
-          .toFormat()} DAI (balance before: $${daiBefore
-          .shiftedBy(-18)
-          .toFormat()} DAI and ${fseBefore.shiftedBy(-18).toFormat()} FSE)`);
+Row ${i}: #${row.AccId} buy for $${quantity.shiftedBy(-18).toFormat()} DAI`);
+        await logState("Before: ", account);
         await dat.buy(
           account,
           quantity.toFixed(),
@@ -97,6 +94,7 @@ Row ${i}: ${row.AccId} buy for $${quantity
         console.log(
           `${account} sell ${quantity.shiftedBy(-18).toFormat()} FSE`
         );
+        await logState("Before: ", account);
         await dat.sell(
           quantity.toFixed(),
           1, //todoparseNumber(row.DAIDelta).shiftedBy(18),
@@ -107,6 +105,8 @@ Row ${i}: ${row.AccId} buy for $${quantity
       } else {
         throw new Error(`Missing action ${row.Action}`);
       }
+
+      await logState("After: ", account);
 
       // post-conditions
       await assertBalance(fse, account, row.FSEBalanceOfAcct);
@@ -141,6 +141,22 @@ Row ${i}: ${row.AccId} buy for $${quantity
     }
   });
 });
+
+async function logState(prefix, account) {
+  const daiBalance = new BigNumber(await dai.balanceOf(account));
+  const fseBalance = new BigNumber(await fse.balanceOf(account));
+  const totalSupply = new BigNumber(await fse.totalSupply());
+  const burnedSupply = new BigNumber(await fse.burnedSupply());
+  const buybackReserve = new BigNumber(await dat.buybackReserve());
+  console.log(`\t${prefix}
+\t\tAccount: $${daiBalance
+    .shiftedBy(-18)
+    .toFormat()} DAI and ${fseBalance.shiftedBy(-18).toFormat()} FSE
+\t\tSupply: ${totalSupply
+    .shiftedBy(-18)
+    .toFormat()} FSE + ${burnedSupply.shiftedBy(-18).toFormat()} burned
+\t\tReserve: $${buybackReserve.shiftedBy(-18).toFormat()} DAI`);
+}
 
 function parseState(state) {
   if (state === "init") {
