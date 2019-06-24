@@ -257,7 +257,9 @@ async function assertBalance(
 ) {
   expectedBalance = parseNumber(expectedBalance);
   if (account == beneficiary) {
-    expectedBalance = expectedBalance.plus(parseNumber(beneficiaryBonus || 0));
+    expectedBalance = expectedBalance.plus(
+      parseNumber(beneficiaryBonus || "0")
+    );
   }
   expectedBalance = expectedBalance.shiftedBy(18);
   const balance = new BigNumber(await token.balanceOf(account));
