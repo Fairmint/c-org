@@ -213,12 +213,13 @@ def _sendCurrency(
   _to: address,
   _amount: uint256
 ):
-  if(self.currency == ZERO_ADDRESS):
-    send(_to, as_wei_value(_amount, "wei"))
-  else:
-    balanceBefore: uint256 = self.currency.balanceOf(_to)
-    self.currency.transfer(_to, as_unitless_number(_amount))
-    assert self.currency.balanceOf(_to) > balanceBefore, "ERC20_TRANSFER_FAILED"
+  if(_amount > 0):
+    if(self.currency == ZERO_ADDRESS):
+      send(_to, as_wei_value(_amount, "wei"))
+    else:
+      balanceBefore: uint256 = self.currency.balanceOf(_to)
+      self.currency.transfer(_to, as_unitless_number(_amount))
+      assert self.currency.balanceOf(_to) > balanceBefore, "ERC20_TRANSFER_FAILED"
 
 @private
 def _distributeInvestment(
