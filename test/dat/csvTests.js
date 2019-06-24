@@ -78,13 +78,12 @@ contract("dat / csvTests", accounts => {
       // action
       if (row.Action === "buy") {
         const quantity = parseNumber(row.BuyQty).shiftedBy(18);
-        console.log(
-          `${account} buy for $${quantity
-            .shiftedBy(-18)
-            .toFormat()} DAI; balance before: $${daiBefore
-            .shiftedBy(-18)
-            .toFormat()} DAI and ${fseBefore.shiftedBy(-18).toFormat()} FSE`
-        );
+        console.log(`
+Row ${i}: ${row.AccId} buy for $${quantity
+          .shiftedBy(-18)
+          .toFormat()} DAI (balance before: $${daiBefore
+          .shiftedBy(-18)
+          .toFormat()} DAI and ${fseBefore.shiftedBy(-18).toFormat()} FSE)`);
         await dat.buy(
           account,
           quantity.toFixed(),
