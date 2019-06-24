@@ -45,11 +45,19 @@ contract("dat / csvTests", accounts => {
       initReserve: parseNumber(configJson.init_reserve)
         .shiftedBy(18)
         .toFixed(),
-      feeNum: new BigNumber(fee[0]).toFixed(),
-      feeDen: new BigNumber(fee[1]).toFixed(),
       currency: dai.address
     });
-    await updateDatConfig(dat, fse, { feeCollector, control }, accounts[0]);
+    await updateDatConfig(
+      dat,
+      fse,
+      {
+        feeCollector,
+        control,
+        feeNum: new BigNumber(fee[0]).toFixed(),
+        feeDen: new BigNumber(fee[1]).toFixed()
+      },
+      accounts[0]
+    );
     const balanceJson = Papa.parse(
       fs.readFileSync(
         `${__dirname}/test-data/buy_sell_no-pre-mint InitBalances.csv`,
