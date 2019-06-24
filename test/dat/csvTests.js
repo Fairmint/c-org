@@ -187,11 +187,11 @@ async function assertBalance(token, account, expectedBalance) {
   const balance = new BigNumber(await token.balanceOf(account));
   assert.equal(
     balance
-      .div(10000000000000) // Rounding errors
+      .div(1000000000000000) // Rounding errors
       .dp(0)
       .toFixed(),
     expectedBalance
-      .div(10000000000000) // Rounding errors
+      .div(1000000000000000) // Rounding errors
       .dp(0)
       .toFixed()
   );
