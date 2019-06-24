@@ -200,10 +200,9 @@ def _collectInvestment(
 @private
 def _applyBurnThreshold():
   balanceBefore: uint256 = self.fse.balanceOf(self.beneficiary)
-  burnThreshold: decimal = convert(self.burnThresholdNum, decimal)
-  burnThreshold /= convert(self.burnThresholdDen, decimal)
-  burnThreshold *= convert(self.fse.totalSupply() + self.fse.burnedSupply(), decimal)
-  maxHoldings: uint256 = convert(burnThreshold, uint256)
+  maxHoldings: uint256 = self.fse.totalSupply() + self.fse.burnedSupply()
+  maxHoldings *= self.burnThresholdNum
+  maxHoldings /= self.burnThresholdDen
 
   if(balanceBefore > maxHoldings):
     self.fse.operatorBurn(self.beneficiary, balanceBefore - maxHoldings, "", "")
@@ -233,20 +232,6 @@ def _distributeInvestment(
   self._sendCurrency(self.feeCollector, fee)
   self._sendCurrency(self.beneficiary, reserve - fee)
 
-@private
-@constant
-def sqrtUint(
-  _value: uint256
-) -> uint256:
-  z: uint256 = (_value + 1) / 2
-  y: uint256 = _value
-  for i in range(10):
-    if(z < y):
-      break
-    y = z
-    z = (_value / z + z) / 2
-
-  return y
 #endregion
 
 #region Functions for DAT business logic
@@ -287,13 +272,15 @@ def buy(
       self.state = STATE_RUN
       self._distributeInvestment(self.buybackReserve())
   elif(self.state == STATE_RUN):
-    unitConversion: uint256 = 1
     supply: uint256 = self.fse.totalSupply() + self.fse.burnedSupply()
-    tokenValue = 2 * _currencyValue * self.buySlopeDen
-    tokenValue /= self.buySlopeNum * unitConversion
+    supply = shift(supply, -9)
+    tokenValue = shift(_currencyValue, -9)
+    tokenValue *= 2 * self.buySlopeDen
+    tokenValue /= self.buySlopeNum
     tokenValue += supply
-    tokenValue = self.sqrtUint(tokenValue)
+    tokenValue = convert(sqrt(convert(tokenValue, decimal)), uint256)
     tokenValue -= supply
+    tokenValue = shift(tokenValue, 9)
     assert tokenValue >= _minTokensBought, "PRICE_SLIPPAGE"
     self.fse.mint(msg.sender, _to, tokenValue, "", "")
 
