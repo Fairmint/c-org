@@ -227,8 +227,7 @@ def _distributeInvestment(
   reserve: uint256 = self.investmentReserveNum * _value
   reserve /= self.investmentReserveDen
   reserve = _value - reserve
-  fee: uint256 = reserve
-  fee *= self.feeNum
+  fee: uint256 = reserve * self.feeNum
   fee /= self.feeDen
   self._sendCurrency(self.feeCollector, fee)
   self._sendCurrency(self.beneficiary, reserve - fee)
