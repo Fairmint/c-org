@@ -233,6 +233,21 @@ def _distributeInvestment(
   self._sendCurrency(self.feeCollector, fee)
   self._sendCurrency(self.beneficiary, reserve - fee)
 
+@private
+@constant
+def sqrtUint(
+  _value: uint256
+) -> uint256:
+  z: uint256 = (x + 1) / 2
+  y: uint256 = x
+  for i in range(10):
+    if(z < y):
+      break
+    y = z
+    z = (x / z + z) / 2
+
+  return y
+}
 #endregion
 
 #region Functions for DAT business logic
@@ -278,7 +293,7 @@ def buy(
     tokenValue = 2 * _currencyValue * self.buySlopeDen
     tokenValue /= self.buySlopeNum * unitConversion
     tokenValue += supply
-    tokenValue = convert(sqrt(convert(tokenValue, decimal)), uint256)
+    tokenValue = sqrtUint(tokenValue)
     tokenValue -= supply
     assert tokenValue >= _minTokensBought, "PRICE_SLIPPAGE"
     self.fse.mint(msg.sender, _to, tokenValue, "", "")
