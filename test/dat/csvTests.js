@@ -112,23 +112,17 @@ contract("dat / csvTests", accounts => {
       // post-conditions
       await assertBalance(fse, account, row.FSEBalanceOfAcct);
       await assertBalance(dai, account, row.DAIBalanceOfAcct);
-      assert.equal(
-        new BigNumber(await fse.totalSupply()).toFixed(),
-        parseNumber(row.FSETotalSupply)
-          .shiftedBy(18)
-          .toFixed()
+      assertAlmostEqual(
+        new BigNumber(await fse.totalSupply()),
+        parseNumber(row.FSETotalSupply).shiftedBy(18)
       );
-      assert.equal(
-        new BigNumber(await fse.burnedSupply()).toFixed(),
-        parseNumber(row.FSEBurnedSupply)
-          .shiftedBy(18)
-          .toFixed()
+      assertAlmostEqual(
+        new BigNumber(await fse.burnedSupply()),
+        parseNumber(row.FSEBurnedSupply).shiftedBy(18)
       );
-      assert.equal(
-        new BigNumber(await dat.buybackReserve()).toFixed(),
-        parseNumber(row.DAIBuybackReserve)
-          .shiftedBy(18)
-          .toFixed()
+      assertAlmostEqual(
+        new BigNumber(await dat.buybackReserve()),
+        parseNumber(row.DAIBuybackReserve).shiftedBy(18)
       );
       assert.equal(await dat.state(), parseState(row.State));
 
@@ -182,19 +176,23 @@ function parsePercent(percentString) {
     .toFraction();
 }
 
-async function assertBalance(token, account, expectedBalance) {
-  expectedBalance = parseNumber(expectedBalance).shiftedBy(18);
-  const balance = new BigNumber(await token.balanceOf(account));
+function assertAlmostEqual(a, b) {
   assert.equal(
-    balance
+    new BigNumber(a)
       .div(1000000000000000) // Rounding errors
       .dp(0)
       .toFixed(),
-    expectedBalance
+    new BigNumber(b)
       .div(1000000000000000) // Rounding errors
       .dp(0)
       .toFixed()
   );
+}
+
+async function assertBalance(token, account, expectedBalance) {
+  expectedBalance = parseNumber(expectedBalance).shiftedBy(18);
+  const balance = new BigNumber(await token.balanceOf(account));
+  assertAlmostEqual(balance, expectedBalance);
   return balance;
 }
 
