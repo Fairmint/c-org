@@ -71,16 +71,30 @@ contract("dat / csvTests", accounts => {
       //console.log(row);
       const account = accounts[parseInt(row.AccId)];
 
+      let quantity;
+      if (row.Action === "buy") {
+        quantity = parseNumber(row.BuyQty).shiftedBy(18);
+        console.log(
+          `Row ${i}: #${row.AccId} buy for $${quantity
+            .shiftedBy(-18)
+            .toFormat()} DAI`
+        );
+      } else if (row.Action === "sell") {
+        quantity = parseNumber(row.SellQty).shiftedBy(18);
+        console.log(
+          `${account} sell ${quantity.shiftedBy(-18).toFormat()} FSE`
+        );
+      } else {
+        throw new Error(`Missing action ${row.Action}`);
+      }
+
+      await logState("Before: ", account);
       // pre-conditions
       await assertBalance(fse, account, row.PreviousFSEBal);
       await assertBalance(dai, account, row.PreviousDAIBal);
 
       // action
       if (row.Action === "buy") {
-        const quantity = parseNumber(row.BuyQty).shiftedBy(18);
-        console.log(`
-Row ${i}: #${row.AccId} buy for $${quantity.shiftedBy(-18).toFormat()} DAI`);
-        await logState("Before: ", account);
         await dat.buy(
           account,
           quantity.toFixed(),
@@ -90,11 +104,6 @@ Row ${i}: #${row.AccId} buy for $${quantity.shiftedBy(-18).toFormat()} DAI`);
           }
         );
       } else if (row.Action === "sell") {
-        const quantity = parseNumber(row.SellQty).shiftedBy(18);
-        console.log(
-          `${account} sell ${quantity.shiftedBy(-18).toFormat()} FSE`
-        );
-        await logState("Before: ", account);
         await dat.sell(
           quantity.toFixed(),
           1, //todoparseNumber(row.DAIDelta).shiftedBy(18),
