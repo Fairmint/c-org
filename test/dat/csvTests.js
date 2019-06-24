@@ -1,4 +1,4 @@
-const { deployDat } = require("../helpers");
+const { deployDat, updateDatConfig } = require("../helpers");
 const Papa = require("papaparse");
 const fs = require("fs");
 const BigNumber = require("bignumber.js");
@@ -9,9 +9,15 @@ let dai;
 let dat;
 let fse;
 let sheetJson;
+let beneficiary;
+let control;
+let feeCollector;
 
 contract("dat / csvTests", accounts => {
   before(async () => {
+    beneficiary = accounts[0];
+    control = accounts[1];
+    feeCollector = accounts[2];
     const configJson = Papa.parse(
       fs.readFileSync(
         `${__dirname}/test-data/buy_sell_no-pre-mint Configuration.csv`,
@@ -42,6 +48,7 @@ contract("dat / csvTests", accounts => {
       feeDen: new BigNumber(fee[1]).toFixed(),
       currency: dai.address
     });
+    await updateDatConfig(dat, fse, { feeCollector, control }, accounts[0]);
     const balanceJson = Papa.parse(
       fs.readFileSync(
         `${__dirname}/test-data/buy_sell_no-pre-mint InitBalances.csv`,
