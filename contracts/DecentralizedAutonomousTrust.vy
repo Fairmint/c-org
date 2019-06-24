@@ -242,7 +242,7 @@ def _distributeInvestment(
 def _toDecimalWithPlaces(
   _value: uint256
 ) -> decimal:
-  temp: uint256 = (_value / DIGITS_UINT)
+  temp: uint256 = _value / DIGITS_UINT
   decimalValue: decimal = convert(_value - temp * DIGITS_UINT, decimal)
   decimalValue /= DIGITS_DECIMAL
   decimalValue += convert(temp, decimal)
@@ -287,13 +287,11 @@ def buy(
       self._distributeInvestment(self.buybackReserve())
   elif(self.state == STATE_RUN):
     supply: uint256 = self.fse.totalSupply() + self.fse.burnedSupply()
-    decimalSupply: decimal = self._toDecimalWithPlaces(supply)
-    decimalValue: decimal = self._toDecimalWithPlaces(_currencyValue)
-    decimalValue *= self._toDecimalWithPlaces(self.buySlopeDen)
-    decimalValue *= 2.0 / convert(self.buySlopeNum, decimal)
-    # tokenValue = 2 * _currencyValue * self.buySlopeDen
-    # tokenValue /= self.buySlopeNum
-    decimalValue += decimalSupply * decimalSupply
+    tokenValue = _currencyValue
+    tokenValue *= self.buySlopeDen
+    tokenValue *= 2.0 / convert(self.buySlopeNum, decimal)
+    decimalValue: decimal = self._toDecimalWithPlaces(tokenValue)
+    decimalValue += self._toDecimalWithPlaces(supply * supply * DIGITS_UINT)
 
     decimalValue = sqrt(decimalValue)
 
@@ -302,6 +300,22 @@ def buy(
     tokenValue = convert(decimalValue, uint256)
 
     tokenValue -= supply
+
+    # This approach got close to the expected value - seems good, looking to optimize
+    # supply: uint256 = self.fse.totalSupply() + self.fse.burnedSupply()
+    # decimalSupply: decimal = self._toDecimalWithPlaces(supply)
+    # decimalValue: decimal = self._toDecimalWithPlaces(_currencyValue)
+    # decimalValue *= self._toDecimalWithPlaces(self.buySlopeDen)
+    # decimalValue *= 2.0 / convert(self.buySlopeNum, decimal)
+    # decimalValue += decimalSupply * decimalSupply
+
+    # decimalValue = sqrt(decimalValue)
+
+    # # Unshift results
+    # decimalValue *= DIGITS_DECIMAL
+    # tokenValue = convert(decimalValue, uint256)
+
+    # tokenValue -= supply
 
     assert tokenValue >= _minTokensBought, "PRICE_SLIPPAGE"
     self.fse.mint(msg.sender, _to, tokenValue, "", "")
