@@ -179,11 +179,11 @@ function parsePercent(percentString) {
 function assertAlmostEqual(a, b) {
   assert.equal(
     new BigNumber(a)
-      .div(1000000000000000) // Rounding errors
+      .div(100000000000000000) // Rounding errors
       .dp(0)
       .toFixed(),
     new BigNumber(b)
-      .div(1000000000000000) // Rounding errors
+      .div(100000000000000000) // Rounding errors
       .dp(0)
       .toFixed()
   );
