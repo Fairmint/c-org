@@ -47,7 +47,8 @@ module.exports = {
       gas: 6721974,
       host: "127.0.0.1",
       port: 8545,
-      network_id: "*" // Match any network id
+      network_id: "*", // Match any network id
+      accounts: 100
     }
 
     // Another network with more advanced options...
