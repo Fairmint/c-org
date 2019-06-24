@@ -288,9 +288,10 @@ def buy(
   elif(self.state == STATE_RUN):
     supply: uint256 = self.fse.totalSupply() + self.fse.burnedSupply()
     decimalSupply: decimal = self._toDecimalWithPlaces(supply)
-    tokenValue = 2 * _currencyValue * self.buySlopeDen
-    tokenValue /= self.buySlopeNum
-    decimalValue: decimal = self._toDecimalWithPlaces(tokenValue)
+    decimalValue: decimal = self._toDecimalWithPlaces(_currencyValue)
+    decimalValue *= 2.0 * convert(self.buySlopeDen, decimal) / convert(self.buySlopeNum)
+    # tokenValue = 2 * _currencyValue * self.buySlopeDen
+    # tokenValue /= self.buySlopeNum
     decimalValue += decimalSupply * decimalSupply
 
     decimalValue = sqrt(decimalValue)
