@@ -242,8 +242,8 @@ def _distributeInvestment(
 def _toDecimalWithPlaces(
   _value: uint256
 ) -> decimal:
-  temp: uint256 = _value / DIGITS_UINT
-  decimalValue: decimal = convert(_value - temp * DIGITS_UINT, decimal)
+  temp: uint256 = (_value / DIGITS_UINT) * DIGITS_UINT
+  decimalValue: decimal = convert(_value - temp, decimal)
   decimalValue /= DIGITS_DECIMAL
   decimalValue += convert(temp, decimal)
   return decimalValue
