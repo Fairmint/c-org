@@ -15,6 +15,7 @@ let feeCollector;
 
 contract("dat / csvTests", accounts => {
   before(async () => {
+    accounts = await web3.eth.getAccounts();
     beneficiary = accounts[0];
     control = accounts[1];
     feeCollector = accounts[2];
