@@ -289,7 +289,7 @@ def buy(
     supply: uint256 = self.fse.totalSupply() + self.fse.burnedSupply()
     tokenValue = _currencyValue
     tokenValue *= self.buySlopeDen
-    tokenValue *= 2.0
+    tokenValue *= 2
     tokenValue /= self.buySlopeNum
     decimalValue: decimal = self._toDecimalWithPlaces(tokenValue)
     decimalValue += self._toDecimalWithPlaces(supply * supply * DIGITS_UINT)
