@@ -87,8 +87,8 @@ STATE_INIT: constant(uint256(stateMachine)) = 0
 STATE_RUN: constant(uint256(stateMachine)) = 1
 STATE_CLOSE: constant(uint256(stateMachine)) = 2
 STATE_CANCEL: constant(uint256(stateMachine)) = 3
-TEN_DIGITS: constant(uint256) = 10 ** 10
-TEN_DIGITS_DEC: constant(decimal) = convert(TEN_DIGITS, decimal)
+DIGITS_UINT: constant(uint256) = 10 ** 18
+DIGITS_DECIMAL: constant(decimal) = convert(DIGITS_UINT, decimal)
 
 # Data for DAT business logic
 beneficiary: public(address)
@@ -236,6 +236,18 @@ def _distributeInvestment(
 
 #endregion
 
+# TODO
+@private
+@constant
+def _toDecimalWithPlaces(
+  _value: uint256
+) -> decimal:
+  temp: uint256 = tokenValue / DIGITS_UINT
+  decimalValue: decimal = convert(tokenValue - temp * DIGITS_UINT, decimal)
+  decimalValue /= DIGITS_DECIMAL
+  decimalValue += convert(temp, decimal)
+  return decimalValue
+
 #region Functions for DAT business logic
 ##################################################
 
@@ -275,20 +287,16 @@ def buy(
       self._distributeInvestment(self.buybackReserve())
   elif(self.state == STATE_RUN):
     supply: uint256 = self.fse.totalSupply() + self.fse.burnedSupply()
+    decimalSupply: decimal = self._toDecimalWithPlaces(supply)
     tokenValue = 2 * _currencyValue * self.buySlopeDen
     tokenValue /= self.buySlopeNum
-    tokenValue += supply
-
-    # Shift value to leverage the decimal's 10 decimal places
-    temp: uint256 = tokenValue / TEN_DIGITS
-    decimalValue: decimal = convert(tokenValue - temp * TEN_DIGITS, decimal)
-    decimalValue /= TEN_DIGITS_DEC
-    decimalValue += convert(temp, decimal)
+    decimalValue: decimal = self._toDecimalWithPlaces(tokenValue)
+    decimalValue += decimalSupply * decimalSupply
 
     decimalValue = sqrt(decimalValue)
 
     # Unshift results
-    decimalValue *= TEN_DIGITS_DEC
+    decimalValue *= DIGITS_DECIMAL
     tokenValue = convert(decimalValue, uint256)
 
     tokenValue -= supply
