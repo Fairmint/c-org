@@ -287,36 +287,20 @@ def buy(
       self._distributeInvestment(self.buybackReserve())
   elif(self.state == STATE_RUN):
     supply: uint256 = self.fse.totalSupply() + self.fse.burnedSupply()
-    tokenValue = _currencyValue
+    tokenValue = 2 * _currencyValue
     tokenValue *= self.buySlopeDen
-    tokenValue *= 2
     tokenValue /= self.buySlopeNum
-    decimalValue: decimal = self._toDecimalWithPlaces(tokenValue)
-    decimalValue += self._toDecimalWithPlaces(supply * supply * DIGITS_UINT)
+    tokenValue += supply * supply # Max of 2**256 - 1
+    tokenValue /= DIGITS_UINT # Truncates last 18 digits
 
+    decimalValue: decimal = self._toDecimalWithPlaces(tokenValue) # Truncates another 8 digits (losing 26 digits in total)
     decimalValue = sqrt(decimalValue)
 
     # Unshift results
-    decimalValue *= DIGITS_DECIMAL
+    decimalValue *= DIGITS_DECIMAL # Max of (2**127 - 1)
     tokenValue = convert(decimalValue, uint256)
 
     tokenValue -= supply
-
-    # This approach got close to the expected value - seems good, looking to optimize
-    # supply: uint256 = self.fse.totalSupply() + self.fse.burnedSupply()
-    # decimalSupply: decimal = self._toDecimalWithPlaces(supply)
-    # decimalValue: decimal = self._toDecimalWithPlaces(_currencyValue)
-    # decimalValue *= self._toDecimalWithPlaces(self.buySlopeDen)
-    # decimalValue *= 2.0 / convert(self.buySlopeNum, decimal)
-    # decimalValue += decimalSupply * decimalSupply
-
-    # decimalValue = sqrt(decimalValue)
-
-    # # Unshift results
-    # decimalValue *= DIGITS_DECIMAL
-    # tokenValue = convert(decimalValue, uint256)
-
-    # tokenValue -= supply
 
     assert tokenValue >= _minTokensBought, "PRICE_SLIPPAGE"
     self.fse.mint(msg.sender, _to, tokenValue, "", "")
