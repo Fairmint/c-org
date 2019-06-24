@@ -98,7 +98,9 @@ contract("dat / csvTests", accounts => {
       } else if (row.Action === "sell") {
         quantity = parseNumber(row.SellQty).shiftedBy(18);
         console.log(
-          `${account} sell ${quantity.shiftedBy(-18).toFormat()} FSE`
+          `Row ${i}: #${row.AccId} sell ${quantity
+            .shiftedBy(-18)
+            .toFormat()} FSE`
         );
       } else {
         throw new Error(`Missing action ${row.Action}`);
@@ -146,6 +148,8 @@ contract("dat / csvTests", accounts => {
         row.DAIBalanceOfAcct,
         row.TotalDAISentToBeneficiary
       );
+      // TODO assert total to beneficiary
+      // TODO assert total to feeCollector
       assertAlmostEqual(
         new BigNumber(await fse.totalSupply()),
         parseNumber(row.FSETotalSupply).shiftedBy(18)
@@ -180,6 +184,18 @@ contract("dat / csvTests", accounts => {
 });
 
 async function logState(prefix, account) {
+  let state = await dat.state();
+  if (state == "0") {
+    state = "init";
+  } else if (state == "1") {
+    state = "run";
+  } else if (state == "2") {
+    state = "close";
+  } else if (state == "3") {
+    state = "cancel";
+  } else {
+    throw new Error(`Missing state: ${state}`);
+  }
   const daiBalance = new BigNumber(await dai.balanceOf(account));
   const fseBalance = new BigNumber(await fse.balanceOf(account));
   const totalSupply = new BigNumber(await fse.totalSupply());
@@ -193,7 +209,7 @@ async function logState(prefix, account) {
   const feeCollectorFseBalance = new BigNumber(
     await fse.balanceOf(feeCollector)
   );
-  console.log(`\t${prefix}
+  console.log(`\t${prefix} while in state ${state}
 \t\tAccount: $${daiBalance
     .shiftedBy(-18)
     .toFormat()} DAI and ${fseBalance.shiftedBy(-18).toFormat()} FSE
