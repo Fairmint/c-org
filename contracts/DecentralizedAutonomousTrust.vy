@@ -87,6 +87,8 @@ STATE_INIT: constant(uint256(stateMachine)) = 0
 STATE_RUN: constant(uint256(stateMachine)) = 1
 STATE_CLOSE: constant(uint256(stateMachine)) = 2
 STATE_CANCEL: constant(uint256(stateMachine)) = 3
+TEN_DIGITS: constant(uint256) = 10 ** 10
+TEN_DIGITS_DEC: constant(decimal) = convert(TEN_DIGITS, decimal)
 
 # Data for DAT business logic
 beneficiary: public(address)
@@ -278,7 +280,19 @@ def buy(
     tokenValue *= 2 * self.buySlopeDen
     tokenValue /= self.buySlopeNum
     tokenValue += supply
-    tokenValue = convert(sqrt(convert(tokenValue, decimal)), uint256)
+
+    # Shift value to leverage the decimal's 10 decimal places
+    temp: uint256 = tokenValue / TEN_DIGITS
+    decimalValue: decimal = convert(tokenValue - temp * TEN_DIGITS, decimal)
+    decimalValue /= TEN_DIGITS_DEC
+    decimalValue += convert(temp, decimal)
+
+    decimalValue = sqrt(decimalValue)
+
+    # Unshift results
+    decimalValue *= TEN_DIGITS_DEC
+
+    tokenValue = convert(decimalValue, uint256)
     tokenValue -= supply
     tokenValue = shift(tokenValue, 9)
     assert tokenValue >= _minTokensBought, "PRICE_SLIPPAGE"
