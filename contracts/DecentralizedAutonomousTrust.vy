@@ -290,14 +290,20 @@ def buy(
     tokenValue = 2 * _currencyValue
     tokenValue *= self.buySlopeDen
     tokenValue /= self.buySlopeNum
-    tokenValue += supply * supply # Max of 2**256 - 1
-    tokenValue /= DIGITS_UINT # Truncates last 18 digits
+    tokenValue += supply * supply
+    # Max total tokenValue of 2**256 - 1 (else tx reverts)
 
-    decimalValue: decimal = self._toDecimalWithPlaces(tokenValue) # Truncates another 8 digits (losing 26 digits in total)
+    tokenValue /= DIGITS_UINT # Truncates last 18 digits from tokenValue here
+
+    decimalValue: decimal = self._toDecimalWithPlaces(tokenValue) # Truncates another 8 digits from tokenValue (losing 26 digits in total)
+    # Max total decimalValue of 2**127 - 1 (else tx reverts)
+
     decimalValue = sqrt(decimalValue)
 
     # Unshift results
-    decimalValue *= DIGITS_DECIMAL # Max of (2**127 - 1)
+    decimalValue *= DIGITS_DECIMAL
+    # Max total decimalValue of 2**127 - 1 (else tx reverts)
+
     tokenValue = convert(decimalValue, uint256)
 
     tokenValue -= supply
