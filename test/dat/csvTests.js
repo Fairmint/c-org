@@ -150,8 +150,14 @@ async function testSheet(sheetName) {
     // post-conditions
     await assertBalance(fse, account, row.FSEBalanceOfAcct);
     await assertBalance(dai, account, row.DAIBalanceOfAcct);
-    // TODO assert total to beneficiary
-    // TODO assert total to feeCollector
+    assertAlmostEqual(
+      new BigNumber(await fse.balanceOf(beneficiary)),
+      parseNumber(row.TotalDAISentToBeneficiary)
+    );
+    assertAlmostEqual(
+      new BigNumber(await fse.balanceOf(feeCollector)),
+      parseNumber(row.TotalDAISentToFeeCollector)
+    );
     assertAlmostEqual(
       new BigNumber(await fse.totalSupply()),
       parseNumber(row.FSETotalSupply).shiftedBy(18)
