@@ -87,6 +87,8 @@ STATE_INIT: constant(uint256(stateMachine)) = 0
 STATE_RUN: constant(uint256(stateMachine)) = 1
 STATE_CLOSE: constant(uint256(stateMachine)) = 2
 STATE_CANCEL: constant(uint256(stateMachine)) = 3
+DIGITS_UINT: constant(uint256) = 10 ** 18
+DIGITS_DECIMAL: constant(decimal) = convert(DIGITS_UINT, decimal)
 
 # Data for DAT business logic
 beneficiary: public(address)
@@ -200,10 +202,9 @@ def _collectInvestment(
 @private
 def _applyBurnThreshold():
   balanceBefore: uint256 = self.fse.balanceOf(self.beneficiary)
-  burnThreshold: decimal = convert(self.burnThresholdNum, decimal)
-  burnThreshold /= convert(self.burnThresholdDen, decimal)
-  burnThreshold *= convert(self.fse.totalSupply() + self.fse.burnedSupply(), decimal)
-  maxHoldings: uint256 = convert(burnThreshold, uint256)
+  maxHoldings: uint256 = self.fse.totalSupply() + self.fse.burnedSupply()
+  maxHoldings *= self.burnThresholdNum
+  maxHoldings /= self.burnThresholdDen
 
   if(balanceBefore > maxHoldings):
     self.fse.operatorBurn(self.beneficiary, balanceBefore - maxHoldings, "", "")
@@ -213,12 +214,13 @@ def _sendCurrency(
   _to: address,
   _amount: uint256
 ):
-  if(self.currency == ZERO_ADDRESS):
-    send(_to, as_wei_value(_amount, "wei"))
-  else:
-    balanceBefore: uint256 = self.currency.balanceOf(_to)
-    self.currency.transfer(_to, as_unitless_number(_amount))
-    assert self.currency.balanceOf(_to) > balanceBefore, "ERC20_TRANSFER_FAILED"
+  if(_amount > 0):
+    if(self.currency == ZERO_ADDRESS):
+      send(_to, as_wei_value(_amount, "wei"))
+    else:
+      balanceBefore: uint256 = self.currency.balanceOf(_to)
+      self.currency.transfer(_to, as_unitless_number(_amount))
+      assert self.currency.balanceOf(_to) > balanceBefore, "ERC20_TRANSFER_FAILED"
 
 @private
 def _distributeInvestment(
@@ -227,13 +229,24 @@ def _distributeInvestment(
   reserve: uint256 = self.investmentReserveNum * _value
   reserve /= self.investmentReserveDen
   reserve = _value - reserve
-  fee: uint256 = reserve
-  fee *= self.feeNum
+  fee: uint256 = reserve * self.feeNum
   fee /= self.feeDen
   self._sendCurrency(self.feeCollector, fee)
   self._sendCurrency(self.beneficiary, reserve - fee)
 
 #endregion
+
+# TODO
+@private
+@constant
+def _toDecimalWithPlaces(
+  _value: uint256
+) -> decimal:
+  temp: uint256 = _value / DIGITS_UINT
+  decimalValue: decimal = convert(_value - temp * DIGITS_UINT, decimal)
+  decimalValue /= DIGITS_DECIMAL
+  decimalValue += convert(temp, decimal)
+  return decimalValue
 
 #region Functions for DAT business logic
 ##################################################
@@ -273,13 +286,28 @@ def buy(
       self.state = STATE_RUN
       self._distributeInvestment(self.buybackReserve())
   elif(self.state == STATE_RUN):
-    unitConversion: uint256 = 1
     supply: uint256 = self.fse.totalSupply() + self.fse.burnedSupply()
-    tokenValue = 2 * _currencyValue * self.buySlopeDen
-    tokenValue /= self.buySlopeNum * unitConversion
-    tokenValue += supply
-    tokenValue = convert(sqrt(convert(tokenValue, decimal)), uint256)
+    tokenValue = 2 * _currencyValue
+    tokenValue *= self.buySlopeDen
+    tokenValue /= self.buySlopeNum
+    tokenValue += supply * supply
+    # Max total tokenValue of 2**256 - 1 (else tx reverts)
+
+    tokenValue /= DIGITS_UINT # Truncates last 18 digits from tokenValue here
+
+    decimalValue: decimal = self._toDecimalWithPlaces(tokenValue) # Truncates another 8 digits from tokenValue (losing 26 digits in total)
+    # Max total decimalValue of 2**127 - 1 (else tx reverts)
+
+    decimalValue = sqrt(decimalValue)
+
+    # Unshift results
+    decimalValue *= DIGITS_DECIMAL
+    # Max total decimalValue of 2**127 - 1 (else tx reverts)
+
+    tokenValue = convert(decimalValue, uint256)
+
     tokenValue -= supply
+
     assert tokenValue >= _minTokensBought, "PRICE_SLIPPAGE"
     self.fse.mint(msg.sender, _to, tokenValue, "", "")
 
@@ -304,10 +332,12 @@ def sell(
     burnedSupply: uint256 = self.fse.burnedSupply()
     supply: uint256 = totalSupply + burnedSupply
     currencyValue = 2 * supply * totalSupply
-    currencyValue += burnedSupply ** 2
+    currencyValue += burnedSupply * burnedSupply
     currencyValue -= _quantityToSell * totalSupply
-    currencyValue *= _quantityToSell * self.buybackReserve()
-    currencyValue /= (supply ** 2) * totalSupply
+    currencyValue *= self.buybackReserve()
+    currencyValue /= supply * supply
+    currencyValue *= _quantityToSell
+    currencyValue /= totalSupply
   elif(self.state == STATE_CLOSE):
     currencyValue = _quantityToSell * self.buybackReserve() / totalSupply
   else:
@@ -349,13 +379,13 @@ def __default__():
 
 @public
 def tokensReceived(
-    _operator: address,
-    _from: address,
-    _to: address,
-    _amount: uint256,
-    _userData: bytes[256],
-    _operatorData: bytes[256]
-  ):
+  _operator: address,
+  _from: address,
+  _to: address,
+  _amount: uint256,
+  _userData: bytes[256],
+  _operatorData: bytes[256]
+):
   # TODO
   pass
 

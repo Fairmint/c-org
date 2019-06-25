@@ -1,4 +1,4 @@
-const { deployDat } = require("../helpers");
+const { deployDat, updateDatConfig } = require("../helpers");
 const Papa = require("papaparse");
 const fs = require("fs");
 const BigNumber = require("bignumber.js");
@@ -9,9 +9,16 @@ let dai;
 let dat;
 let fse;
 let sheetJson;
+let beneficiary;
+let control;
+let feeCollector;
 
 contract("dat / csvTests", accounts => {
   before(async () => {
+    accounts = await web3.eth.getAccounts();
+    beneficiary = accounts[0];
+    control = accounts[1];
+    feeCollector = accounts[2];
     const configJson = Papa.parse(
       fs.readFileSync(
         `${__dirname}/test-data/buy_sell_no-pre-mint Configuration.csv`,
@@ -38,10 +45,19 @@ contract("dat / csvTests", accounts => {
       initReserve: parseNumber(configJson.init_reserve)
         .shiftedBy(18)
         .toFixed(),
-      feeNum: new BigNumber(fee[0]).toFixed(),
-      feeDen: new BigNumber(fee[1]).toFixed(),
       currency: dai.address
     });
+    await updateDatConfig(
+      dat,
+      fse,
+      {
+        feeCollector,
+        control,
+        feeNum: new BigNumber(fee[0]).toFixed(),
+        feeDen: new BigNumber(fee[1]).toFixed()
+      },
+      accounts[0]
+    );
     const balanceJson = Papa.parse(
       fs.readFileSync(
         `${__dirname}/test-data/buy_sell_no-pre-mint InitBalances.csv`,
@@ -66,26 +82,47 @@ contract("dat / csvTests", accounts => {
   });
 
   it.only("todo", async () => {
-    // todo sheetJson.length
-    for (let i = 0; i < 7; i++) {
+    for (let i = 0; i < sheetJson.length; i++) {
       const row = sheetJson[i];
       //console.log(row);
       const account = accounts[parseInt(row.AccId)];
 
+      const fseBalance = new BigNumber(await fse.balanceOf(account));
+
+      let quantity;
+      if (row.Action === "buy") {
+        quantity = parseNumber(row.BuyQty).shiftedBy(18);
+        console.log(
+          `Row ${i}: #${row.AccId} buy for $${quantity
+            .shiftedBy(-18)
+            .toFormat()} DAI`
+        );
+      } else if (row.Action === "sell") {
+        quantity = parseNumber(row.SellQty).shiftedBy(18);
+        if (quantity.gt(fseBalance)) {
+          quantity = fseBalance;
+        }
+        console.log(
+          `Row ${i}: #${row.AccId} sell ${quantity
+            .shiftedBy(-18)
+            .toFormat()} FSE`
+        );
+      } else {
+        throw new Error(`Missing action ${row.Action}`);
+      }
+
+      await logState("Before:", account);
       // pre-conditions
-      const fseBefore = await assertBalance(fse, account, row.PreviousFSEBal);
-      const daiBefore = await assertBalance(dai, account, row.PreviousDAIBal);
+      await assertBalance(fse, account, row.PreviousFSEBal);
+      await assertBalance(
+        dai,
+        account,
+        row.PreviousDAIBal,
+        row.TotalDAISentToBeneficiary
+      );
 
       // action
       if (row.Action === "buy") {
-        const quantity = parseNumber(row.BuyQty).shiftedBy(18);
-        console.log(
-          `${account} buy for $${quantity
-            .shiftedBy(-18)
-            .toFormat()} DAI; balance before: $${daiBefore
-            .shiftedBy(-18)
-            .toFormat()} DAI and ${fseBefore.shiftedBy(-18).toFormat()} FSE`
-        );
         await dat.buy(
           account,
           quantity.toFixed(),
@@ -95,10 +132,6 @@ contract("dat / csvTests", accounts => {
           }
         );
       } else if (row.Action === "sell") {
-        const quantity = parseNumber(row.SellQty).shiftedBy(18);
-        console.log(
-          `${account} sell ${quantity.shiftedBy(-18).toFormat()} FSE`
-        );
         await dat.sell(
           quantity.toFixed(),
           1, //todoparseNumber(row.DAIDelta).shiftedBy(18),
@@ -110,45 +143,94 @@ contract("dat / csvTests", accounts => {
         throw new Error(`Missing action ${row.Action}`);
       }
 
+      await logState("After:", account);
+
       // post-conditions
       await assertBalance(fse, account, row.FSEBalanceOfAcct);
-      await assertBalance(dai, account, row.DAIBalanceOfAcct);
-      assert.equal(
-        new BigNumber(await fse.totalSupply()).toFixed(),
-        parseNumber(row.FSETotalSupply)
-          .shiftedBy(18)
-          .toFixed()
+      await assertBalance(
+        dai,
+        account,
+        row.DAIBalanceOfAcct,
+        row.TotalDAISentToBeneficiary
       );
-      assert.equal(
-        new BigNumber(await fse.burnedSupply()).toFixed(),
-        parseNumber(row.FSEBurnedSupply)
-          .shiftedBy(18)
-          .toFixed()
+      // TODO assert total to beneficiary
+      // TODO assert total to feeCollector
+      assertAlmostEqual(
+        new BigNumber(await fse.totalSupply()),
+        parseNumber(row.FSETotalSupply).shiftedBy(18)
       );
-      assert.equal(
-        new BigNumber(await dat.buybackReserve()).toFixed(),
-        parseNumber(row.DAIBuybackReserve)
-          .shiftedBy(18)
-          .toFixed()
+      assertAlmostEqual(
+        new BigNumber(await fse.burnedSupply()),
+        parseNumber(row.FSEBurnedSupply).shiftedBy(18)
+      );
+      assertAlmostEqual(
+        new BigNumber(await dat.buybackReserve()),
+        parseNumber(row.DAIBuybackReserve).shiftedBy(18)
       );
       assert.equal(await dat.state(), parseState(row.State));
 
       // TotalDAISentToBeneficiary
       // TotalDAISentToFeeCollector
-      // SellSlope (needed?)
-      // PricePerFSE
-      // BuyBackPrice
-      // CmulatedInvest (how to confirm?)
-      // ReserveVsInvest (how to cofirm?)
 
       // TODO FSEDelta and DAIDelta via events
       // console.log(tx.receipt.rawLogs);
       // assert.equal(log.event, 'NameUpdated');
       // assert.equal(log.args._previousName, name);
       //console.log(`\tgot ${tokenValue.toFormat()} FSE`);
+
+      // Confirming removal:
+      // SellSlope (needed?)
+      // PricePerFSE
+      // BuyBackPrice
+      // CmulatedInvest (how to confirm?)
+      // ReserveVsInvest (how to cofirm?)
     }
   });
 });
+
+async function logState(prefix, account) {
+  let state = await dat.state();
+  if (state == "0") {
+    state = "init";
+  } else if (state == "1") {
+    state = "run";
+  } else if (state == "2") {
+    state = "close";
+  } else if (state == "3") {
+    state = "cancel";
+  } else {
+    throw new Error(`Missing state: ${state}`);
+  }
+  const daiBalance = new BigNumber(await dai.balanceOf(account));
+  const fseBalance = new BigNumber(await fse.balanceOf(account));
+  const totalSupply = new BigNumber(await fse.totalSupply());
+  const burnedSupply = new BigNumber(await fse.burnedSupply());
+  const buybackReserve = new BigNumber(await dat.buybackReserve());
+  const beneficiaryDaiBalance = new BigNumber(await dai.balanceOf(beneficiary));
+  const beneficiaryFseBalance = new BigNumber(await fse.balanceOf(beneficiary));
+  const feeCollectorDaiBalance = new BigNumber(
+    await dai.balanceOf(feeCollector)
+  );
+  const feeCollectorFseBalance = new BigNumber(
+    await fse.balanceOf(feeCollector)
+  );
+  console.log(`\t${prefix}\tState: ${state}
+\t\tAccount: $${daiBalance
+    .shiftedBy(-18)
+    .toFormat()} DAI and ${fseBalance.shiftedBy(-18).toFormat()} FSE
+\t\tSupply: ${totalSupply
+    .shiftedBy(-18)
+    .toFormat()} FSE + ${burnedSupply.shiftedBy(-18).toFormat()} burned
+\t\tReserve: $${buybackReserve.shiftedBy(-18).toFormat()} DAI
+\t\tBeneficiary: $${beneficiaryDaiBalance
+    .shiftedBy(-18)
+    .toFormat()} DAI and ${beneficiaryFseBalance.shiftedBy(-18).toFormat()} FSE
+\t\tFee Collector: $${feeCollectorDaiBalance
+    .shiftedBy(-18)
+    .toFormat()} DAI and ${feeCollectorFseBalance
+    .shiftedBy(-18)
+    .toFormat()} FSE`);
+}
 
 function parseState(state) {
   if (state === "init") {
@@ -183,10 +265,34 @@ function parsePercent(percentString) {
     .toFraction();
 }
 
-async function assertBalance(token, account, expectedBalance) {
-  expectedBalance = parseNumber(expectedBalance).shiftedBy(18);
+function assertAlmostEqual(a, b) {
+  assert.equal(
+    new BigNumber(a)
+      .div(100000000000000000) // Rounding errors
+      .dp(0)
+      .toFixed(),
+    new BigNumber(b)
+      .div(100000000000000000) // Rounding errors
+      .dp(0)
+      .toFixed()
+  );
+}
+
+async function assertBalance(
+  token,
+  account,
+  expectedBalance,
+  beneficiaryBonus
+) {
+  expectedBalance = parseNumber(expectedBalance);
+  if (account == beneficiary) {
+    expectedBalance = expectedBalance.plus(
+      parseNumber(beneficiaryBonus || "0")
+    );
+  }
+  expectedBalance = expectedBalance.shiftedBy(18);
   const balance = new BigNumber(await token.balanceOf(account));
-  assert.equal(balance.toFixed(), expectedBalance.toFixed());
+  assertAlmostEqual(balance, expectedBalance);
   return balance;
 }
 
