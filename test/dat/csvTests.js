@@ -155,7 +155,7 @@ async function testSheet(sheetName) {
     await assertBalance(fse, account, row.FSEBalanceOfAcct);
     await assertBalance(dai, account, row.DAIBalanceOfAcct);
     assertAlmostEqual(
-      new BigNumber(await fse.balanceOf(beneficiary)).minus(spentByBeneficiary),
+      new BigNumber(await fse.balanceOf(beneficiary)).plus(spentByBeneficiary),
       parseNumber(row.TotalDAISentToBeneficiary)
     );
     assertAlmostEqual(
@@ -316,7 +316,7 @@ async function setBalanceAndApprove(accountId, targetBalance) {
   assert.equal(balance.toFixed(), targetBalance.toFixed());
 
   if (account == beneficiary) {
-    spentByBeneficiary = spentByBeneficiary.plus(targetBalance);
+    spentByBeneficiary = spentByBeneficiary.minus(targetBalance);
   }
 
   // TODO for ETH support (but need to deal with gas costs as well - maybe detect and refund gas for simplicity?)
