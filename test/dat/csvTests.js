@@ -20,171 +20,174 @@ contract("dat / csvTests", () => {
     beneficiary = accounts[0];
     control = accounts[1];
     feeCollector = accounts[2];
-    const configJson = Papa.parse(
-      fs.readFileSync(
-        `${__dirname}/test-data/buy_sell_no-pre-mint Configuration.csv`,
-        "utf8"
-      ),
-      { header: true }
-    ).data[0];
-    dai = await daiArtifact.new();
-
-    const buySlope = parseFraction(configJson.buy_slope);
-    const investmentReserve = parsePercent(configJson.investment_reserve);
-    const revenueCommitement = parsePercent(configJson.revenue_commitment);
-    const fee = parsePercent(configJson.fee);
-    [dat, fse] = await deployDat({
-      buySlopeNum: new BigNumber(buySlope[0]).toFixed(),
-      buySlopeDen: new BigNumber(buySlope[1]).shiftedBy(18).toFixed(), // TODO is this right?
-      investmentReserveNum: new BigNumber(investmentReserve[0]).toFixed(),
-      investmentReserveDen: new BigNumber(investmentReserve[1]).toFixed(),
-      revenueCommitementNum: new BigNumber(revenueCommitement[0]).toFixed(),
-      revenueCommitementDen: new BigNumber(revenueCommitement[1]).toFixed(),
-      initGoal: parseNumber(configJson.init_goal)
-        .shiftedBy(18)
-        .toFixed(),
-      initReserve: parseNumber(configJson.init_reserve)
-        .shiftedBy(18)
-        .toFixed(),
-      currency: dai.address
-    });
-    await updateDatConfig(
-      dat,
-      fse,
-      {
-        feeCollector,
-        control,
-        feeNum: new BigNumber(fee[0]).toFixed(),
-        feeDen: new BigNumber(fee[1]).toFixed()
-      },
-      accounts[0]
-    );
-    const balanceJson = Papa.parse(
-      fs.readFileSync(
-        `${__dirname}/test-data/buy_sell_no-pre-mint InitBalances.csv`,
-        "utf8"
-      ),
-      { header: true }
-    ).data;
-    sheetJson = Papa.parse(
-      fs.readFileSync(
-        `${__dirname}/test-data/buy_sell_no-pre-mint Script.csv`,
-        "utf8"
-      ),
-      { header: true }
-    ).data;
-    for (let i = 0; i < balanceJson.length; i++) {
-      const row = balanceJson[i];
-      await setBalanceAndApprove(parseInt(row.AccId), row.InitialBalance);
-    }
   });
 
-  it("todo", async () => {
-    for (let i = 0; i < sheetJson.length; i++) {
-      const row = sheetJson[i];
-      //console.log(row);
-      const account = accounts[parseInt(row.AccId)];
+  it("buy_sell_no-pre-mint", async () => {
+    await testSheet("buy_sell_no-pre-mint");
+  });
 
-      const fseBalance = new BigNumber(await fse.balanceOf(account));
-
-      let quantity;
-      if (row.Action === "buy") {
-        quantity = parseNumber(row.BuyQty).shiftedBy(18);
-        console.log(
-          `Row ${i}: #${row.AccId} buy for $${quantity
-            .shiftedBy(-18)
-            .toFormat()} DAI`
-        );
-      } else if (row.Action === "sell") {
-        quantity = parseNumber(row.SellQty).shiftedBy(18);
-        if (quantity.plus(new BigNumber(1).shiftedBy(18)).gt(fseBalance)) {
-          quantity = fseBalance;
-        }
-        console.log(
-          `Row ${i}: #${row.AccId} sell ${quantity
-            .shiftedBy(-18)
-            .toFormat()} FSE`
-        );
-      } else {
-        throw new Error(`Missing action ${row.Action}`);
-      }
-
-      await logState("Before:", account);
-      // pre-conditions
-      await assertBalance(fse, account, row.PreviousFSEBal);
-      await assertBalance(
-        dai,
-        account,
-        row.PreviousDAIBal,
-        row.TotalDAISentToBeneficiary
-      );
-
-      // action
-      if (row.Action === "buy") {
-        await dat.buy(
-          account,
-          quantity.toFixed(),
-          1, //todoparseNumber(row.FSEDelta).shiftedBy(18),
-          {
-            from: account
-          }
-        );
-      } else if (row.Action === "sell") {
-        await dat.sell(
-          quantity.toFixed(),
-          1, //todoparseNumber(row.DAIDelta).shiftedBy(18),
-          {
-            from: account
-          }
-        );
-      } else {
-        throw new Error(`Missing action ${row.Action}`);
-      }
-
-      await logState("After:", account);
-
-      // post-conditions
-      await assertBalance(fse, account, row.FSEBalanceOfAcct);
-      await assertBalance(
-        dai,
-        account,
-        row.DAIBalanceOfAcct,
-        row.TotalDAISentToBeneficiary
-      );
-      // TODO assert total to beneficiary
-      // TODO assert total to feeCollector
-      assertAlmostEqual(
-        new BigNumber(await fse.totalSupply()),
-        parseNumber(row.FSETotalSupply).shiftedBy(18)
-      );
-      assertAlmostEqual(
-        new BigNumber(await fse.burnedSupply()),
-        parseNumber(row.FSEBurnedSupply).shiftedBy(18)
-      );
-      assertAlmostEqual(
-        new BigNumber(await dat.buybackReserve()),
-        parseNumber(row.DAIBuybackReserve).shiftedBy(18)
-      );
-      assert.equal(await dat.state(), parseState(row.State));
-
-      // TotalDAISentToBeneficiary
-      // TotalDAISentToFeeCollector
-
-      // TODO FSEDelta and DAIDelta via events
-      // console.log(tx.receipt.rawLogs);
-      // assert.equal(log.event, 'NameUpdated');
-      // assert.equal(log.args._previousName, name);
-      //console.log(`\tgot ${tokenValue.toFormat()} FSE`);
-
-      // Confirming removal:
-      // SellSlope (needed?)
-      // PricePerFSE
-      // BuyBackPrice
-      // CmulatedInvest (how to confirm?)
-      // ReserveVsInvest (how to cofirm?)
-    }
+  it("buy_sell_1000-premint", async () => {
+    await testSheet("buy_sell_1000-premint");
   });
 });
+
+async function testSheet(sheetName) {
+  const configJson = Papa.parse(
+    fs.readFileSync(
+      `${__dirname}/test-data/${sheetName} Configuration.csv`,
+      "utf8"
+    ),
+    { header: true }
+  ).data[0];
+  dai = await daiArtifact.new();
+
+  const buySlope = parseFraction(configJson.buy_slope);
+  const investmentReserve = parsePercent(configJson.investment_reserve);
+  const revenueCommitement = parsePercent(configJson.revenue_commitment);
+  const fee = parsePercent(configJson.fee);
+  [dat, fse] = await deployDat({
+    buySlopeNum: new BigNumber(buySlope[0]).toFixed(),
+    buySlopeDen: new BigNumber(buySlope[1]).shiftedBy(18).toFixed(), // TODO is this right?
+    investmentReserveNum: new BigNumber(investmentReserve[0]).toFixed(),
+    investmentReserveDen: new BigNumber(investmentReserve[1]).toFixed(),
+    revenueCommitementNum: new BigNumber(revenueCommitement[0]).toFixed(),
+    revenueCommitementDen: new BigNumber(revenueCommitement[1]).toFixed(),
+    initGoal: parseNumber(configJson.init_goal)
+      .shiftedBy(18)
+      .toFixed(),
+    initReserve: parseNumber(configJson.init_reserve)
+      .shiftedBy(18)
+      .toFixed(),
+    currency: dai.address
+  });
+  await updateDatConfig(
+    dat,
+    fse,
+    {
+      feeCollector,
+      control,
+      feeNum: new BigNumber(fee[0]).toFixed(),
+      feeDen: new BigNumber(fee[1]).toFixed()
+    },
+    accounts[0]
+  );
+  const balanceJson = Papa.parse(
+    fs.readFileSync(
+      `${__dirname}/test-data/${sheetName} InitBalances.csv`,
+      "utf8"
+    ),
+    { header: true }
+  ).data;
+  sheetJson = Papa.parse(
+    fs.readFileSync(`${__dirname}/test-data/${sheetName} Script.csv`, "utf8"),
+    { header: true }
+  ).data;
+  for (let i = 0; i < balanceJson.length; i++) {
+    const row = balanceJson[i];
+    await setBalanceAndApprove(parseInt(row.AccId), row.InitialBalance);
+  }
+  for (let i = 0; i < sheetJson.length; i++) {
+    const row = sheetJson[i];
+    //console.log(row);
+    const account = accounts[parseInt(row.AccId)];
+
+    const fseBalance = new BigNumber(await fse.balanceOf(account));
+
+    let quantity;
+    if (row.Action === "buy") {
+      quantity = parseNumber(row.BuyQty).shiftedBy(18);
+      console.log(
+        `Row ${i}: #${row.AccId} buy for $${quantity
+          .shiftedBy(-18)
+          .toFormat()} DAI`
+      );
+    } else if (row.Action === "sell") {
+      quantity = parseNumber(row.SellQty).shiftedBy(18);
+      if (quantity.plus(new BigNumber(1).shiftedBy(18)).gt(fseBalance)) {
+        quantity = fseBalance;
+      }
+      console.log(
+        `Row ${i}: #${row.AccId} sell ${quantity.shiftedBy(-18).toFormat()} FSE`
+      );
+    } else {
+      throw new Error(`Missing action ${row.Action}`);
+    }
+
+    await logState("Before:", account);
+    // pre-conditions
+    await assertBalance(fse, account, row.PreviousFSEBal);
+    await assertBalance(
+      dai,
+      account,
+      row.PreviousDAIBal,
+      row.TotalDAISentToBeneficiary
+    );
+
+    // action
+    if (row.Action === "buy") {
+      await dat.buy(
+        account,
+        quantity.toFixed(),
+        1, //todoparseNumber(row.FSEDelta).shiftedBy(18),
+        {
+          from: account
+        }
+      );
+    } else if (row.Action === "sell") {
+      await dat.sell(
+        quantity.toFixed(),
+        1, //todoparseNumber(row.DAIDelta).shiftedBy(18),
+        {
+          from: account
+        }
+      );
+    } else {
+      throw new Error(`Missing action ${row.Action}`);
+    }
+
+    await logState("After:", account);
+
+    // post-conditions
+    await assertBalance(fse, account, row.FSEBalanceOfAcct);
+    await assertBalance(
+      dai,
+      account,
+      row.DAIBalanceOfAcct,
+      row.TotalDAISentToBeneficiary
+    );
+    // TODO assert total to beneficiary
+    // TODO assert total to feeCollector
+    assertAlmostEqual(
+      new BigNumber(await fse.totalSupply()),
+      parseNumber(row.FSETotalSupply).shiftedBy(18)
+    );
+    assertAlmostEqual(
+      new BigNumber(await fse.burnedSupply()),
+      parseNumber(row.FSEBurnedSupply).shiftedBy(18)
+    );
+    assertAlmostEqual(
+      new BigNumber(await dat.buybackReserve()),
+      parseNumber(row.DAIBuybackReserve).shiftedBy(18)
+    );
+    assert.equal(await dat.state(), parseState(row.State));
+
+    // TotalDAISentToBeneficiary
+    // TotalDAISentToFeeCollector
+
+    // TODO FSEDelta and DAIDelta via events
+    // console.log(tx.receipt.rawLogs);
+    // assert.equal(log.event, 'NameUpdated');
+    // assert.equal(log.args._previousName, name);
+    //console.log(`\tgot ${tokenValue.toFormat()} FSE`);
+
+    // Confirming removal:
+    // SellSlope (needed?)
+    // PricePerFSE
+    // BuyBackPrice
+    // CmulatedInvest (how to confirm?)
+    // ReserveVsInvest (how to cofirm?)
+  }
+}
 
 async function logState(prefix, account) {
   let state = await dat.state();
@@ -276,13 +279,16 @@ function assertAlmostEqual(a, b) {
   )
     return true;
 
-  assert(
+  if (
     new BigNumber(a)
       .div(b)
       .minus(1)
       .abs()
-      .lt(0.0001)
-  );
+      .lt(0.0001) // Allow up to .01% error from expected value
+  )
+    return true;
+
+  throw new Error(`Values not equal ${a} vs ${b}`);
 }
 
 async function assertBalance(
