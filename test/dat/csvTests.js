@@ -129,6 +129,9 @@ async function testSheet(sheetName) {
 
     // action
     if (row.Action === "buy") {
+      if (account == beneficiary) {
+        spentByBeneficiary = spentByBeneficiary.plus(quantity);
+      }
       await dat.buy(
         account,
         quantity.toFixed(),
@@ -138,9 +141,6 @@ async function testSheet(sheetName) {
         }
       );
     } else if (row.Action === "sell") {
-      if (account == beneficiary) {
-        spentByBeneficiary = spentByBeneficiary.plus(quantity);
-      }
       await dat.sell(
         quantity.toFixed(),
         1, //todoparseNumber(row.DAIDelta).shiftedBy(18),
