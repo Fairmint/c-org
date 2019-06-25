@@ -119,6 +119,7 @@ async function testSheet(sheetName) {
     const fseBalance = new BigNumber(await fse.balanceOf(account));
 
     let quantity;
+    let targetAddress;
     if (row.Action === "buy") {
       quantity = parseNumber(row.BuyQty).shiftedBy(18);
       console.log(
@@ -141,6 +142,19 @@ async function testSheet(sheetName) {
       //     .shiftedBy(-18)
       //     .toFormat()} exit fee`
       // );
+    } else if (row.Action === "pay") {
+      quantity = parseNumber(row.BuyQty).shiftedBy(18);
+      console.log(
+        `Row ${i}: #${row.AccId} pay $${quantity.shiftedBy(-18).toFormat()}`
+      );
+    } else if (row.Action === "xfer") {
+      quantity = parseNumber(row.BuyQty).shiftedBy(18);
+      targetAddress = accounts[parseInt(row.xferTargetAcc)];
+      console.log(
+        `Row ${i}: #${row.AccId} transfer $${quantity
+          .shiftedBy(-18)
+          .toFormat()} to ${targetAddress}`
+      );
     } else {
       throw new Error(`Missing action ${row.Action}`);
     }
@@ -171,6 +185,10 @@ async function testSheet(sheetName) {
           from: account
         }
       );
+    } else if (row.Action === "pay") {
+      await dat.pay(quantity.toFixed()), { from: account };
+    } else if (row.Action === "xfer") {
+      await fse.transfer(targetAddress, quantity.toFixed(), { from: account });
     } else {
       throw new Error(`Missing action ${row.Action}`);
     }
