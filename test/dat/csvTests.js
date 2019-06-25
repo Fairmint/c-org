@@ -266,15 +266,24 @@ function parsePercent(percentString) {
 }
 
 function assertAlmostEqual(a, b) {
-  assert.equal(
+  if (
     new BigNumber(a)
       .div(100000000000000000) // Rounding errors
       .dp(0)
-      .toFixed(),
+      .toFixed() ==
     new BigNumber(b)
       .div(100000000000000000) // Rounding errors
       .dp(0)
       .toFixed()
+  )
+    return true;
+
+  assert(
+    new BigNumber(a)
+      .div(b)
+      .minus(1)
+      .abs()
+      .lt(0.0001)
   );
 }
 
