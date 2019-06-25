@@ -1,12 +1,12 @@
 const { deployDat } = require("../../helpers");
 
-contract("fse / erc777 / granularity", () => {
+contract("fse / erc777 / granularity", accounts => {
   // eslint-disable-next-line no-unused-vars
   let dat;
   let fse;
 
   before(async () => {
-    [dat, fse] = await deployDat();
+    [dat, fse] = await deployDat(undefined, accounts[0]);
   });
 
   it("should have granularity 1", async () => {

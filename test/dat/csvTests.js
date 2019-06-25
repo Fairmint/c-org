@@ -51,27 +51,30 @@ async function testSheet(sheetName) {
   const investmentReserve = parsePercent(configJson.investment_reserve);
   const revenueCommitement = parsePercent(configJson.revenue_commitment);
   const fee = parsePercent(configJson.fee);
-  [dat, fse] = await deployDat({
-    buySlopeNum: new BigNumber(buySlope[0]).toFixed(),
-    buySlopeDen: new BigNumber(buySlope[1]).shiftedBy(18).toFixed(), // TODO is this right?
-    investmentReserveNum: new BigNumber(investmentReserve[0]).toFixed(),
-    investmentReserveDen: new BigNumber(investmentReserve[1]).toFixed(),
-    revenueCommitementNum: new BigNumber(revenueCommitement[0]).toFixed(),
-    revenueCommitementDen: new BigNumber(revenueCommitement[1]).toFixed(),
-    initGoal: parseNumber(configJson.init_goal)
-      .shiftedBy(18)
-      .toFixed(),
-    initReserve: parseNumber(configJson.init_reserve)
-      .shiftedBy(18)
-      .toFixed(),
-    currency: dai.address
-  });
+  [dat, fse] = await deployDat(
+    {
+      beneficiary,
+      buySlopeNum: new BigNumber(buySlope[0]).toFixed(),
+      buySlopeDen: new BigNumber(buySlope[1]).shiftedBy(18).toFixed(), // TODO is this right?
+      investmentReserveNum: new BigNumber(investmentReserve[0]).toFixed(),
+      investmentReserveDen: new BigNumber(investmentReserve[1]).toFixed(),
+      revenueCommitementNum: new BigNumber(revenueCommitement[0]).toFixed(),
+      revenueCommitementDen: new BigNumber(revenueCommitement[1]).toFixed(),
+      initGoal: parseNumber(configJson.init_goal)
+        .shiftedBy(18)
+        .toFixed(),
+      initReserve: parseNumber(configJson.init_reserve)
+        .shiftedBy(18)
+        .toFixed(),
+      currency: dai.address
+    },
+    control
+  );
   await updateDatConfig(
     dat,
     fse,
     {
       feeCollector,
-      control,
       feeNum: new BigNumber(fee[0]).toFixed(),
       feeDen: new BigNumber(fee[1]).toFixed()
     },

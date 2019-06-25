@@ -12,9 +12,12 @@ contract("dat / auth / canBlockBuy", accounts => {
   let auth;
 
   before(async () => {
-    [dat, fse] = await deployDat({
-      initGoal: "1000000000000000000000"
-    });
+    [dat, fse] = await deployDat(
+      {
+        initGoal: "1000000000000000000000"
+      },
+      accounts[0]
+    );
     auth = await authArtifact.new(fse.address);
     await updateDatConfig(
       dat,

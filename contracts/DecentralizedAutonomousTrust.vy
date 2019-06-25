@@ -122,6 +122,7 @@ state: public(uint256(stateMachine))
 
 @public
 def __init__(
+  _beneficiary: address,
   _fseAddress: address,
   _initReserve: uint256,
   _currencyAddress: address,
@@ -162,8 +163,10 @@ def __init__(
   self.feeDen = 1
   self.minInvestment = as_unitless_number(as_wei_value(100, "ether"))
 
+  assert _beneficiary != ZERO_ADDRESS, "INVALID_ADDRESS"
+  self.beneficiary = _beneficiary
+
   self.control = msg.sender
-  self.beneficiary = msg.sender
   self.feeCollector = msg.sender
 
   # Register supported interfaces
