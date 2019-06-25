@@ -13,6 +13,7 @@ let beneficiary;
 let control;
 let feeCollector;
 let accounts;
+let spentByBeneficiary = new BigNumber(0);
 
 contract("dat / csvTests", () => {
   before(async () => {
@@ -101,6 +102,9 @@ async function testSheet(sheetName) {
     let quantity;
     if (row.Action === "buy") {
       quantity = parseNumber(row.BuyQty).shiftedBy(18);
+      if (account == beneficiary) {
+        spentByBeneficiary = spentByBeneficiary.plus(quantity);
+      }
       console.log(
         `Row ${i}: #${row.AccId} buy for $${quantity
           .shiftedBy(-18)
@@ -151,7 +155,7 @@ async function testSheet(sheetName) {
     await assertBalance(fse, account, row.FSEBalanceOfAcct);
     await assertBalance(dai, account, row.DAIBalanceOfAcct);
     assertAlmostEqual(
-      new BigNumber(await fse.balanceOf(beneficiary)),
+      new BigNumber(await fse.balanceOf(beneficiary)).minus(spentByBeneficiary),
       parseNumber(row.TotalDAISentToBeneficiary)
     );
     assertAlmostEqual(
@@ -269,15 +273,17 @@ function parsePercent(percentString) {
 }
 
 function assertAlmostEqual(a, b) {
+  const aStr = new BigNumber(a)
+    .div(100000000000000000) // Rounding errors
+    .dp(0)
+    .toFixed();
   if (
-    new BigNumber(a)
-      .div(100000000000000000) // Rounding errors
-      .dp(0)
-      .toFixed() ==
-    new BigNumber(b)
-      .div(100000000000000000) // Rounding errors
-      .dp(0)
-      .toFixed()
+    aStr != "0" &&
+    aStr ==
+      new BigNumber(b)
+        .div(100000000000000000) // Rounding errors
+        .dp(0)
+        .toFixed()
   )
     return true;
 
@@ -311,6 +317,10 @@ async function setBalanceAndApprove(accountId, targetBalance) {
   await dai.mint(account, targetBalance.shiftedBy(18).toFixed());
   const balance = new BigNumber(await dai.balanceOf(account)).shiftedBy(-18);
   assert.equal(balance.toFixed(), targetBalance.toFixed());
+
+  if (account == beneficiary) {
+    spentByBeneficiary = spentByBeneficiary.plus(targetBalance);
+  }
 
   // TODO for ETH support (but need to deal with gas costs as well - maybe detect and refund gas for simplicity?)
   // Also instead of burning it send it to a bank account and use an after block to reset balances
