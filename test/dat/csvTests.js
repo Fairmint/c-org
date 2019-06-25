@@ -155,7 +155,7 @@ async function testSheet(sheetName) {
     await assertBalance(fse, account, row.FSEBalanceOfAcct);
     await assertBalance(dai, account, row.DAIBalanceOfAcct);
     assertAlmostEqual(
-      new BigNumber(await fse.balanceOf(beneficiary)).plus(spentByBeneficiary),
+      new BigNumber(await dai.balanceOf(beneficiary)).plus(spentByBeneficiary),
       parseNumber(row.TotalDAISentToBeneficiary)
     );
     assertAlmostEqual(
