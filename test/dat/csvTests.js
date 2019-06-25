@@ -159,11 +159,11 @@ async function testSheet(sheetName) {
     await assertBalance(dai, account, row.DAIBalanceOfAcct);
     assertAlmostEqual(
       new BigNumber(await dai.balanceOf(beneficiary)).plus(spentByBeneficiary),
-      parseNumber(row.TotalDAISentToBeneficiary)
+      parseNumber(row.TotalDAISentToBeneficiary).shiftedBy(18)
     );
     assertAlmostEqual(
       new BigNumber(await fse.balanceOf(feeCollector)),
-      parseNumber(row.TotalDAISentToFeeCollector)
+      parseNumber(row.TotalDAISentToFeeCollector).shiftedBy(18)
     );
     assertAlmostEqual(
       new BigNumber(await fse.totalSupply()),
