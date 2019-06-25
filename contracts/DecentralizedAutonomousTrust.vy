@@ -332,10 +332,12 @@ def sell(
     burnedSupply: uint256 = self.fse.burnedSupply()
     supply: uint256 = totalSupply + burnedSupply
     currencyValue = 2 * supply * totalSupply
-    currencyValue += burnedSupply ** 2
+    currencyValue += burnedSupply * burnedSupply
     currencyValue -= _quantityToSell * totalSupply
-    currencyValue *= _quantityToSell * self.buybackReserve()
-    currencyValue /= (supply ** 2) * totalSupply
+    currencyValue *= self.buybackReserve()
+    currencyValue /= supply * supply
+    currencyValue *= _quantityToSell
+    currencyValue /= totalSupply
   elif(self.state == STATE_CLOSE):
     currencyValue = _quantityToSell * self.buybackReserve() / totalSupply
   else:
