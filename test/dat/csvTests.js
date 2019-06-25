@@ -34,6 +34,10 @@ contract("dat / csvTests", () => {
   it("buy_sell_large_numbers", async () => {
     await testSheet("buy_sell_large_numbers");
   });
+
+  it("buy_close_sell_nopremint", async () => {
+    await testSheet("buy_close_sell_nopremint");
+  });
 });
 
 async function testSheet(sheetName) {
