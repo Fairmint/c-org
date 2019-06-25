@@ -1,7 +1,2 @@
-Params,Value
-buy_slope,2
-investment_reserve,10%
-revenue_commitment,10%
-init_goal,1000
-init_reserve,1000
-fee,3%
+buy_slope,investment_reserve,revenue_commitment,init_goal,init_reserve,fee
+2,10%,10%,1000,1000,3%
