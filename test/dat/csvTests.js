@@ -22,8 +22,8 @@ contract("dat / csvTests", () => {
     feeCollector = accounts[2];
   });
 
-  it("buy_sell_no-pre-mint", async () => {
-    await testSheet("buy_sell_no-pre-mint");
+  it("buy_sell-nopremint", async () => {
+    await testSheet("buy_sell-nopremint");
   });
 
   it("buy_sell_1000-premint", async () => {
