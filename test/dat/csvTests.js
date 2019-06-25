@@ -26,8 +26,8 @@ contract("dat / csvTests", () => {
     await testSheet("buy_sell_no-pre-mint");
   });
 
-  it("buy_sell_1000-pre-mint", async () => {
-    await testSheet("buy_sell_1000-pre-mint");
+  it("buy_sell_1000-premint", async () => {
+    await testSheet("buy_sell_1000-premint");
   });
 });
 
