@@ -215,7 +215,9 @@ async function logState(prefix, account) {
   const totalSupply = new BigNumber(await fse.totalSupply());
   const burnedSupply = new BigNumber(await fse.burnedSupply());
   const buybackReserve = new BigNumber(await dat.buybackReserve());
-  const beneficiaryDaiBalance = new BigNumber(await dai.balanceOf(beneficiary));
+  const beneficiaryDaiBalance = new BigNumber(
+    await dai.balanceOf(beneficiary)
+  ).minus(spentByBeneficiary);
   const beneficiaryFseBalance = new BigNumber(await fse.balanceOf(beneficiary));
   const feeCollectorDaiBalance = new BigNumber(
     await dai.balanceOf(feeCollector)
