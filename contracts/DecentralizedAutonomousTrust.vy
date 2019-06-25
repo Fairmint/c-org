@@ -366,20 +366,22 @@ def pay(
   self._collectInvestment(msg.sender, _currencyValue, msg.value)
   self._sendCurrency(self.beneficiary, _currencyValue - _currencyValue * self.investmentReserveNum / self.investmentReserveDen)
 
+  # buy_slope = n/d
+  # revenue_commitment = c/g
   # sqrt(
-  #  _currencyValue * revenueCommitmentNum
+  #  (2 a c d)
   #  /
-  #  revenueCommitmentDen * buybackReserve * supply^2
-  #  + supply^2
-  # ) - supply
+  #  (g n)
+  #  + s^2
+  # ) - s
 
   supply: uint256 = self.fse.totalSupply() + self.fse.burnedSupply()
-  tokenValue: uint256 = _currencyValue * self.revenueCommitmentNum * DIGITS_UINT
-  tokenValue /= self.revenueCommitmentDen * self.buybackReserve() * supply * supply / DIGITS_UINT
+  tokenValue: uint256 = 2 * _currencyValue * self.revenueCommitmentNum * self.buySlopeDen
+  tokenValue /= self.revenueCommitmentDen * self.buySlopeNum
   tokenValue += supply * supply / DIGITS_UINT
   # Max total tokenValue of 2**256 - 1 (else tx reverts)
 
-  #tokenValue /= DIGITS_UINT # Truncates last 18 digits from tokenValue here
+  tokenValue /= DIGITS_UINT # Truncates last 18 digits from tokenValue here
 
   decimalValue: decimal = self._toDecimalWithPlaces(tokenValue) # Truncates another 8 digits from tokenValue (losing 26 digits in total)
   # Max total decimalValue of 2**127 - 1 (else tx reverts)
