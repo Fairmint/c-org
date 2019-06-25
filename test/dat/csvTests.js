@@ -234,7 +234,7 @@ async function logState(prefix, account) {
 \t\tBeneficiary: $${beneficiaryDaiBalance
     .shiftedBy(-18)
     .toFormat()} DAI ($${beneficiaryDaiBalance
-    .minus(spentByBeneficiary)
+    .plus(spentByBeneficiary)
     .shiftedBy(-18)
     .toFormat()} total sent to) and ${beneficiaryFseBalance
     .shiftedBy(-18)
