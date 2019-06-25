@@ -106,9 +106,9 @@ contract("dat / csvTests", accounts => {
         throw new Error(`Missing action ${row.Action}`);
       }
 
-      await logState("Before: ", account);
+      await logState("Before:", account);
       // pre-conditions
-      await assertBalance(fse, account, row.PreviousFSEBal);
+      const fseBalance = await assertBalance(fse, account, row.PreviousFSEBal);
       await assertBalance(
         dai,
         account,
@@ -127,6 +127,9 @@ contract("dat / csvTests", accounts => {
           }
         );
       } else if (row.Action === "sell") {
+        if (quantity.gt(fseBalance)) {
+          quantity = fseBalance;
+        }
         await dat.sell(
           quantity.toFixed(),
           1, //todoparseNumber(row.DAIDelta).shiftedBy(18),
@@ -138,7 +141,7 @@ contract("dat / csvTests", accounts => {
         throw new Error(`Missing action ${row.Action}`);
       }
 
-      await logState("After: ", account);
+      await logState("After:", account);
 
       // post-conditions
       await assertBalance(fse, account, row.FSEBalanceOfAcct);
@@ -209,7 +212,7 @@ async function logState(prefix, account) {
   const feeCollectorFseBalance = new BigNumber(
     await fse.balanceOf(feeCollector)
   );
-  console.log(`\t${prefix} while in state ${state}
+  console.log(`\t${prefix}\tState: ${state}
 \t\tAccount: $${daiBalance
     .shiftedBy(-18)
     .toFormat()} DAI and ${fseBalance.shiftedBy(-18).toFormat()} FSE
