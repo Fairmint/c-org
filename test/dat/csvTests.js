@@ -12,8 +12,9 @@ let sheetJson;
 let beneficiary;
 let control;
 let feeCollector;
+let accounts;
 
-contract("dat / csvTests", accounts => {
+contract("dat / csvTests", () => {
   before(async () => {
     accounts = await web3.eth.getAccounts();
     beneficiary = accounts[0];
@@ -74,14 +75,11 @@ contract("dat / csvTests", accounts => {
     ).data;
     for (let i = 0; i < balanceJson.length; i++) {
       const row = balanceJson[i];
-      await setBalanceAndApprove(
-        accounts[parseInt(row.AccId)],
-        row.InitialBalance
-      );
+      await setBalanceAndApprove(parseInt(row.AccId), row.InitialBalance);
     }
   });
 
-  it.only("todo", async () => {
+  it("todo", async () => {
     for (let i = 0; i < sheetJson.length; i++) {
       const row = sheetJson[i];
       //console.log(row);
@@ -305,11 +303,12 @@ async function assertBalance(
   return balance;
 }
 
-async function setBalanceAndApprove(account, targetBalance) {
+async function setBalanceAndApprove(accountId, targetBalance) {
   targetBalance = parseNumber(targetBalance);
   console.log(
-    `Set ${account} to $${targetBalance.toFormat()} DAI & approve dat`
+    `Set #${accountId} to $${targetBalance.toFormat()} DAI & approve dat`
   );
+  const account = accounts[accountId];
   await dai.approve(dat.address, -1, { from: account });
   await dai.mint(account, targetBalance.shiftedBy(18).toFixed());
   const balance = new BigNumber(await dai.balanceOf(account)).shiftedBy(-18);

@@ -18,7 +18,7 @@ module.exports = async function deployDat(options) {
     options
   );
 
-  console.log(callOptions);
+  console.log(`Deploy DAT: ${JSON.stringify(callOptions, null, 2)}`);
 
   const fse = await fseArtifact.new();
   return [

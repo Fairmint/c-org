@@ -16,6 +16,8 @@ module.exports = async function updateDatConfig(dat, fse, options, from) {
     options
   );
 
+  console.log(`Update DAT: ${JSON.stringify(callOptions, null, 2)}`);
+
   return dat.updateConfig(
     callOptions.authorizationAddress,
     callOptions.beneficiary,
