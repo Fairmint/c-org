@@ -97,7 +97,7 @@ async function testSheet(sheetName) {
   }
   for (let i = 0; i < sheetJson.length; i++) {
     const row = sheetJson[i];
-    //console.log(row);
+    console.log(row);
     const account = accounts[parseInt(row.AccId)];
 
     const fseBalance = new BigNumber(await fse.balanceOf(account));
