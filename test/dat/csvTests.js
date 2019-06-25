@@ -319,7 +319,7 @@ async function setBalanceAndApprove(accountId, targetBalance) {
   assert.equal(balance.toFixed(), targetBalance.toFixed());
 
   if (account == beneficiary) {
-    spentByBeneficiary = targetBalance.shiftedBy(18);
+    spentByBeneficiary = targetBalance.shiftedBy(18).times(-1);
   }
 
   // TODO for ETH support (but need to deal with gas costs as well - maybe detect and refund gas for simplicity?)
