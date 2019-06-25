@@ -277,14 +277,11 @@ function assertAlmostEqual(a, b) {
     .div(100000000000000000) // Rounding errors
     .dp(0)
     .toFixed();
-  if (
-    aStr != "0" &&
-    aStr ==
-      new BigNumber(b)
-        .div(100000000000000000) // Rounding errors
-        .dp(0)
-        .toFixed()
-  )
+  const bStr = new BigNumber(b)
+    .div(100000000000000000) // Rounding errors
+    .dp(0)
+    .toFixed();
+  if ((aStr != "0" && aStr == bStr) || (aStr == "0" && bStr == "0"))
     return true;
 
   if (
