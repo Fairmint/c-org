@@ -23,7 +23,7 @@ contract("dat / csvTests", () => {
   });
 
   it("buy_sell_no-pre-mint", async () => {
-    testSheet("buy_sell_no-pre-mint");
+    await testSheet("buy_sell_no-pre-mint");
   });
 });
 
