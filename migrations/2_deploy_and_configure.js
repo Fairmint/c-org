@@ -20,8 +20,8 @@ module.exports = async function deployAndConfigure(
 
   // Deploy Dat
   const dat = await deployer.deploy(
-    accounts[0],
     datArtifact,
+    accounts[0],
     fseArtifact.address,
     "42000000000000000000", // initReserve
     "0x0000000000000000000000000000000000000000", // currencyAddress
