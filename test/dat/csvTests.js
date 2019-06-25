@@ -23,24 +23,32 @@ contract("dat / csvTests", () => {
     feeCollector = accounts[2];
   });
 
-  it("buy_sell-nopremint", async () => {
+  it("TS 1", async () => {
     await testSheet("buy_sell-nopremint");
   });
 
-  it("buy_sell_1000-premint", async () => {
+  it("TS 2", async () => {
     await testSheet("buy_sell_1000-premint");
   });
 
-  it("buy_sell_large_numbers", async () => {
+  it("TS 3", async () => {
     await testSheet("buy_sell_large_numbers");
   });
 
-  it("buy_close_sell_nopremint", async () => {
+  it("TS 4", async () => {
     await testSheet("buy_close_sell_nopremint");
   });
 
-  it("buy_close_sell_premint", async () => {
+  it("TS 5", async () => {
     await testSheet("buy_close_sell_premint");
+  });
+
+  it("TS 6", async () => {
+    await testSheet("buy_pay_close-no-premint");
+  });
+
+  it("TS 7", async () => {
+    await testSheet("buy_sell_xfer_pay_close-nopremint");
   });
 });
 
@@ -127,12 +135,12 @@ async function testSheet(sheetName) {
         `Row ${i}: #${row.AccId} sell ${quantity.shiftedBy(-18).toFormat()} FSE`
       );
     } else if (row.Action === "close") {
-      console.log(
-        `Row ${i}: #${row.AccId} close with $${quantity
-          .shiftedBy(-18)
-          .toFormat()} exit fee`
-      );
       throw new Error(`Missing exit fee value`);
+      // console.log(
+      //   `Row ${i}: #${row.AccId} close with $${quantity
+      //     .shiftedBy(-18)
+      //     .toFormat()} exit fee`
+      // );
     } else {
       throw new Error(`Missing action ${row.Action}`);
     }
