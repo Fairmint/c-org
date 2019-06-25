@@ -296,7 +296,11 @@ function assertAlmostEqual(a, b) {
   )
     return true;
 
-  throw new Error(`Values not equal ${a} vs ${b}`);
+  throw new Error(
+    `Values not equal ${new BigNumber(a)
+      .shiftedBy(-18)
+      .toFormat()} vs ${new BigNumber(b).shiftedBy(-18).toFormat()}`
+  );
 }
 
 async function assertBalance(token, account, expectedBalance) {
