@@ -29,9 +29,14 @@ contract("dat / csvTests", () => {
   it("buy_sell_1000-premint", async () => {
     await testSheet("buy_sell_1000-premint");
   });
+
+  it("buy_sell_large_numbers", async () => {
+    await testSheet("buy_sell_large_numbers");
+  });
 });
 
 async function testSheet(sheetName) {
+  console.log(`STARTING NEW SHEET TEST: '${sheetName}'`);
   const configJson = Papa.parse(
     fs.readFileSync(
       `${__dirname}/test-data/${sheetName} Configuration.csv`,
