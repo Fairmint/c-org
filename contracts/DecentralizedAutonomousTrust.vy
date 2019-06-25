@@ -367,15 +367,14 @@ def pay(
   self._sendCurrency(self.beneficiary, _currencyValue - _currencyValue * self.investmentReserveNum / self.investmentReserveDen)
 
   # sqrt(
-  #  _currencyValue * revenueCommitmentNum + revenueCommitmentDen * buybackReserve * supply^4
+  #  _currencyValue * revenueCommitmentNum
   #  /
   #  revenueCommitmentDen * buybackReserve * supply^2
+  #  + supply^2
   # ) - supply
 
   supply: uint256 = self.fse.totalSupply() + self.fse.burnedSupply()
-  tokenValue: uint256 = self.revenueCommitmentDen * self.buybackReserve()
-  tokenValue *= supply ** 4
-  tokenValue += _currencyValue * self.revenueCommitmentNum
+  tokenValue: uint256 = _currencyValue * self.revenueCommitmentNum
   tokenValue /= self.revenueCommitmentDen * self.buybackReserve() * supply ** 2
   # Max total tokenValue of 2**256 - 1 (else tx reverts)
 
