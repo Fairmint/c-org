@@ -279,13 +279,16 @@ function assertAlmostEqual(a, b) {
   )
     return true;
 
-  assert(
+  if (
     new BigNumber(a)
       .div(b)
       .minus(1)
       .abs()
       .lt(0.001)
-  );
+  )
+    return true;
+
+  throw new Error(`Values not equal ${a} vs ${b}`);
 }
 
 async function assertBalance(
