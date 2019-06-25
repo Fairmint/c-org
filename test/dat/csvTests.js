@@ -153,7 +153,7 @@ async function testSheet(sheetName) {
       console.log(
         `Row ${i}: #${row.AccId} transfer $${quantity
           .shiftedBy(-18)
-          .toFormat()} to ${targetAddress}`
+          .toFormat()} to #${parseInt(row.xferTargetAcc)}`
       );
     } else {
       throw new Error(`Missing action ${row.Action}`);
