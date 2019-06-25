@@ -1,0 +1,7 @@
+Params,Value
+buy_slope,2
+investment_reserve,10%
+revenue_commitment,10%
+init_goal,1000
+init_reserve,1000
+fee,3%
