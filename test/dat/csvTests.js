@@ -121,12 +121,7 @@ async function testSheet(sheetName) {
     await logState("Before:", account);
     // pre-conditions
     await assertBalance(fse, account, row.PreviousFSEBal);
-    await assertBalance(
-      dai,
-      account,
-      row.PreviousDAIBal,
-      row.TotalDAISentToBeneficiary
-    );
+    await assertBalance(dai, account, row.PreviousDAIBal);
 
     // action
     if (row.Action === "buy") {
@@ -154,12 +149,7 @@ async function testSheet(sheetName) {
 
     // post-conditions
     await assertBalance(fse, account, row.FSEBalanceOfAcct);
-    await assertBalance(
-      dai,
-      account,
-      row.DAIBalanceOfAcct,
-      row.TotalDAISentToBeneficiary
-    );
+    await assertBalance(dai, account, row.DAIBalanceOfAcct);
     // TODO assert total to beneficiary
     // TODO assert total to feeCollector
     assertAlmostEqual(
@@ -297,18 +287,8 @@ function assertAlmostEqual(a, b) {
   throw new Error(`Values not equal ${a} vs ${b}`);
 }
 
-async function assertBalance(
-  token,
-  account,
-  expectedBalance,
-  beneficiaryBonus
-) {
+async function assertBalance(token, account, expectedBalance) {
   expectedBalance = parseNumber(expectedBalance);
-  if (account == beneficiary) {
-    expectedBalance = expectedBalance.plus(
-      parseNumber(beneficiaryBonus || "0")
-    );
-  }
   expectedBalance = expectedBalance.shiftedBy(18);
   const balance = new BigNumber(await token.balanceOf(account));
   assertAlmostEqual(balance, expectedBalance);
