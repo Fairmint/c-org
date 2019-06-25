@@ -252,6 +252,7 @@ function parseState(state) {
 }
 
 function parseNumber(numberString) {
+  if (!numberString) return new BigNumber(0);
   return new BigNumber(
     numberString
       .replace("$", "")
