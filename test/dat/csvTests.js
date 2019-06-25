@@ -284,7 +284,7 @@ function assertAlmostEqual(a, b) {
       .div(b)
       .minus(1)
       .abs()
-      .lt(0.0001)
+      .lt(0.001)
   );
 }
 
