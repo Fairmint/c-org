@@ -99,7 +99,7 @@ contract("dat / csvTests", accounts => {
         );
       } else if (row.Action === "sell") {
         quantity = parseNumber(row.SellQty).shiftedBy(18);
-        if (quantity.gt(fseBalance)) {
+        if (quantity.plus(new BigNumber(1).shiftedBy(18)).gt(fseBalance)) {
           quantity = fseBalance;
         }
         console.log(
@@ -266,15 +266,24 @@ function parsePercent(percentString) {
 }
 
 function assertAlmostEqual(a, b) {
-  assert.equal(
+  if (
     new BigNumber(a)
       .div(100000000000000000) // Rounding errors
       .dp(0)
-      .toFixed(),
+      .toFixed() ==
     new BigNumber(b)
       .div(100000000000000000) // Rounding errors
       .dp(0)
       .toFixed()
+  )
+    return true;
+
+  assert(
+    new BigNumber(a)
+      .div(b)
+      .minus(1)
+      .abs()
+      .lt(0.0001)
   );
 }
 
