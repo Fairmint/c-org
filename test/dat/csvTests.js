@@ -87,6 +87,8 @@ contract("dat / csvTests", accounts => {
       //console.log(row);
       const account = accounts[parseInt(row.AccId)];
 
+      const fseBalance = new BigNumber(await fse.balanceOf(account));
+
       let quantity;
       if (row.Action === "buy") {
         quantity = parseNumber(row.BuyQty).shiftedBy(18);
@@ -97,6 +99,9 @@ contract("dat / csvTests", accounts => {
         );
       } else if (row.Action === "sell") {
         quantity = parseNumber(row.SellQty).shiftedBy(18);
+        if (quantity.gt(fseBalance)) {
+          quantity = fseBalance;
+        }
         console.log(
           `Row ${i}: #${row.AccId} sell ${quantity
             .shiftedBy(-18)
@@ -108,7 +113,7 @@ contract("dat / csvTests", accounts => {
 
       await logState("Before:", account);
       // pre-conditions
-      const fseBalance = await assertBalance(fse, account, row.PreviousFSEBal);
+      await assertBalance(fse, account, row.PreviousFSEBal);
       await assertBalance(
         dai,
         account,
@@ -127,9 +132,6 @@ contract("dat / csvTests", accounts => {
           }
         );
       } else if (row.Action === "sell") {
-        if (quantity.gt(fseBalance)) {
-          quantity = fseBalance;
-        }
         await dat.sell(
           quantity.toFixed(),
           1, //todoparseNumber(row.DAIDelta).shiftedBy(18),
