@@ -38,6 +38,10 @@ contract("dat / csvTests", () => {
   it("buy_close_sell_nopremint", async () => {
     await testSheet("buy_close_sell_nopremint");
   });
+
+  it("buy_close_sell_premint", async () => {
+    await testSheet("buy_close_sell_premint");
+  });
 });
 
 async function testSheet(sheetName) {
@@ -122,6 +126,13 @@ async function testSheet(sheetName) {
       console.log(
         `Row ${i}: #${row.AccId} sell ${quantity.shiftedBy(-18).toFormat()} FSE`
       );
+    } else if (row.Action === "close") {
+      console.log(
+        `Row ${i}: #${row.AccId} close with $${quantity
+          .shiftedBy(-18)
+          .toFormat()} exit fee`
+      );
+      throw new Error(`Missing exit fee value`);
     } else {
       throw new Error(`Missing action ${row.Action}`);
     }
