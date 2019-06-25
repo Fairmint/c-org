@@ -378,7 +378,7 @@ def pay(
   supply: uint256 = self.fse.totalSupply() + self.fse.burnedSupply()
   tokenValue: uint256 = 2 * _currencyValue * self.revenueCommitmentNum * self.buySlopeDen
   tokenValue /= self.revenueCommitmentDen * self.buySlopeNum
-  tokenValue += supply * supply / DIGITS_UINT
+  tokenValue += supply * supply
   # Max total tokenValue of 2**256 - 1 (else tx reverts)
 
   tokenValue /= DIGITS_UINT # Truncates last 18 digits from tokenValue here
