@@ -148,7 +148,7 @@ async function testSheet(sheetName) {
         `Row ${i}: #${row.AccId} pay $${quantity.shiftedBy(-18).toFormat()}`
       );
     } else if (row.Action === "xfer") {
-      quantity = parseNumber(row.BuyQty).shiftedBy(18);
+      quantity = parseNumber(row.SellQty).shiftedBy(18);
       targetAddress = accounts[parseInt(row.xferTargetAcc)];
       console.log(
         `Row ${i}: #${row.AccId} transfer $${quantity
@@ -186,7 +186,7 @@ async function testSheet(sheetName) {
         }
       );
     } else if (row.Action === "pay") {
-      await dat.pay(quantity.toFixed()), { from: account };
+      await dat.pay(quantity.toFixed(), { from: account });
     } else if (row.Action === "xfer") {
       await fse.transfer(targetAddress, quantity.toFixed(), { from: account });
     } else {
