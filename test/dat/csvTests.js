@@ -162,7 +162,7 @@ async function testSheet(sheetName) {
       parseNumber(row.TotalDAISentToBeneficiary).shiftedBy(18)
     );
     assertAlmostEqual(
-      new BigNumber(await fse.balanceOf(feeCollector)),
+      new BigNumber(await dai.balanceOf(feeCollector)),
       parseNumber(row.TotalDAISentToFeeCollector).shiftedBy(18)
     );
     assertAlmostEqual(
