@@ -120,6 +120,7 @@ async function testSheet(sheetName) {
 
     let quantity;
     let targetAddress;
+    let isDai;
     if (row.Action === "buy") {
       quantity = parseNumber(row.BuyQty).shiftedBy(18);
       console.log(
@@ -148,7 +149,10 @@ async function testSheet(sheetName) {
         `Row ${i}: #${row.AccId} pay $${quantity.shiftedBy(-18).toFormat()}`
       );
     } else if (row.Action === "xfer") {
-      quantity = parseNumber(row.SellQty || row.BuyQty).shiftedBy(18);
+      if (row.BuyQty) {
+        isDai = true;
+      }
+      quantity = parseNumber(isDai ? row.BuyQty : row.SellQty).shiftedBy(18);
       targetAddress = accounts[parseInt(row.xferTargetAcc)];
       console.log(
         `Row ${i}: #${row.AccId} transfer $${quantity
@@ -188,7 +192,15 @@ async function testSheet(sheetName) {
     } else if (row.Action === "pay") {
       await dat.pay(quantity.toFixed(), { from: account });
     } else if (row.Action === "xfer") {
-      await fse.transfer(targetAddress, quantity.toFixed(), { from: account });
+      if (isDai) {
+        await dai.transfer(targetAddress, quantity.toFixed(), {
+          from: account
+        });
+      } else {
+        await fse.transfer(targetAddress, quantity.toFixed(), {
+          from: account
+        });
+      }
     } else {
       throw new Error(`Missing action ${row.Action}`);
     }
