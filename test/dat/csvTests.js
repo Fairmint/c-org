@@ -105,9 +105,6 @@ async function testSheet(sheetName) {
     let quantity;
     if (row.Action === "buy") {
       quantity = parseNumber(row.BuyQty).shiftedBy(18);
-      if (account == beneficiary) {
-        spentByBeneficiary = spentByBeneficiary.plus(quantity);
-      }
       console.log(
         `Row ${i}: #${row.AccId} buy for $${quantity
           .shiftedBy(-18)
@@ -141,6 +138,9 @@ async function testSheet(sheetName) {
         }
       );
     } else if (row.Action === "sell") {
+      if (account == beneficiary) {
+        spentByBeneficiary = spentByBeneficiary.plus(quantity);
+      }
       await dat.sell(
         quantity.toFixed(),
         1, //todoparseNumber(row.DAIDelta).shiftedBy(18),
@@ -236,7 +236,7 @@ async function logState(prefix, account) {
     .toFormat()} DAI ($${beneficiaryDaiBalance
     .plus(spentByBeneficiary)
     .shiftedBy(-18)
-    .toFormat()} total sent to) and ${beneficiaryFseBalance
+    .toFormat()} total sent) and ${beneficiaryFseBalance
     .shiftedBy(-18)
     .toFormat()} FSE
 \t\tFee Collector: $${feeCollectorDaiBalance
