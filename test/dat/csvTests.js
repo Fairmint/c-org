@@ -188,7 +188,7 @@ async function testSheet(sheetName) {
     } else if (row.Action === "pay") {
       await dat.pay(quantity.toFixed(), { from: account });
     } else if (row.Action === "xfer") {
-      await fse.transfer(targetAddress, quantity.toFixed(), { from: account });
+      await dai.transfer(targetAddress, quantity.toFixed(), { from: account });
     } else {
       throw new Error(`Missing action ${row.Action}`);
     }
