@@ -47,7 +47,7 @@ contract("dat / csvTests", () => {
     await testSheet("buy_pay_close-no-premint");
   });
 
-  it.only("TS 7", async () => {
+  it("TS 7", async () => {
     await testSheet("buy_sell_xfer_pay_close-nopremint");
   });
 });
