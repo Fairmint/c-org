@@ -188,6 +188,9 @@ async function testSheet(sheetName) {
       await dat.pay(quantity.toFixed(), { from: account });
     } else if (row.Action === "close") {
       await dat.close({ from: account });
+      const daiBalanceAfter = new BigNumber(await dai.balanceOf(account));
+      const exitFee = daiBalance.minus(daiBalanceAfter);
+      spentByBeneficiary = spentByBeneficiary.plus(exitFee);
     } else if (row.Action === "xfer") {
       if (isDai) {
         await dai.transfer(targetAddress, quantity.toFixed(), {
