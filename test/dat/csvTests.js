@@ -160,7 +160,7 @@ contract("dat / csvTests", accounts => {
       dai: new BigNumber(dai ? await dai.balanceOf(address) : 0)
     };
 
-    if (dai) {
+    if (dai && (await dai.allowance(row.account.address, dat.address)) == 0) {
       await approveSpending(row.account.id);
     }
 
@@ -412,9 +412,7 @@ contract("dat / csvTests", accounts => {
 
   async function setInitialBalance(accountId, targetBalance) {
     targetBalance = parseNumber(targetBalance);
-    console.log(
-      `\tSet #${accountId} to $${targetBalance.toFormat()} DAI & approve dat`
-    );
+    console.log(`  Set #${accountId} to $${targetBalance.toFormat()} DAI`);
     const account = accounts[accountId];
 
     if (dai) {
@@ -436,7 +434,7 @@ contract("dat / csvTests", accounts => {
   }
 
   async function approveSpending(accountId) {
-    console.log(`\tSet #${accountId} to approve dat`);
+    console.log(`  Set #${accountId} to approve dat`);
     const account = accounts[accountId];
     await dai.approve(dat.address, -1, { from: account });
   }
