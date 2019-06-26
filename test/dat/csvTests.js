@@ -1,7 +1,7 @@
 const Papa = require("papaparse");
 const fs = require("fs");
 const BigNumber = require("bignumber.js");
-const { deployDat, updateDatConfig } = require("../helpers");
+const { constants, deployDat, updateDatConfig } = require("../helpers");
 const sheets = require("./test-data/script.json");
 
 const daiArtifact = artifacts.require("TestDai");
@@ -10,20 +10,49 @@ contract("dat / csvTests", accounts => {
   const beneficiary = accounts[0];
   const control = accounts[1];
   const feeCollector = accounts[2];
+  const ethBank = accounts[98];
+  /**
+   * TODO add both false and true
+   * Maybe to cover gas costs we before each tx send them x ETH, then after the tx calc the actual cost and ask for a refund - but that also has a gas cost.
+   * But a well known cost.
+   */
+
+  const usingEth = [false];
 
   let dai;
   let dat;
   let fse;
 
   sheets.forEach(sheet => {
-    describe(`Starting TS ${sheet.id} ${sheet.name}`, () => {
-      it(`TS ${sheet.id} ${sheet.name}`, async () => {
-        if (sheet.disabled) {
-          return console.log("Test skipped.");
-        }
-        await deployAndConfigDat(sheet);
-        await setInitialBalances(sheet);
-        await runTestScript(sheet);
+    usingEth.forEach(isUsingEth => {
+      const sheetTitle = `TS ${sheet.id} ${sheet.name} w/ ${
+        isUsingEth ? "ETH" : "DAI"
+      }`;
+
+      describe(`Starting ${sheetTitle}`, () => {
+        beforeEach(async () => {
+          if (isUsingEth) {
+            dai = undefined;
+          } else {
+            dai = await daiArtifact.new();
+          }
+
+          await setInitialBalances(sheet);
+        });
+
+        afterEach(async () => {
+          if (isUsingEth) {
+            await resetEthBalances();
+          }
+        });
+
+        it(`${sheetTitle} complete`, async () => {
+          if (sheet.disabled) {
+            return console.log("Test skipped.");
+          }
+          await deployAndConfigDat(sheet, isUsingEth);
+          await runTestScript(sheet);
+        });
       });
     });
   });
@@ -36,8 +65,6 @@ contract("dat / csvTests", accounts => {
       ),
       { header: true }
     ).data[0];
-
-    dai = await daiArtifact.new();
 
     const buySlope = parseFraction(configJson.buy_slope);
     const investmentReserve = parsePercent(configJson.investment_reserve);
@@ -58,7 +85,7 @@ contract("dat / csvTests", accounts => {
         initReserve: parseNumber(configJson.init_reserve)
           .shiftedBy(18)
           .toFixed(),
-        currency: dai.address
+        currency: dai ? dai.address : constants.ZERO_ADDRESS
       },
       control
     );
@@ -86,7 +113,7 @@ contract("dat / csvTests", accounts => {
     console.log("Set initial balances:");
     for (let i = 0; i < balanceJson.length; i++) {
       const row = balanceJson[i];
-      await setBalanceAndApprove(parseInt(row.AccId), row.InitialBalance);
+      await setInitialBalance(parseInt(row.AccId), row.InitialBalance);
     }
   }
 
@@ -128,9 +155,15 @@ contract("dat / csvTests", accounts => {
     row.account = {
       id,
       address,
+      eth: new BigNumber(await web3.eth.getBalance(address)),
       fse: new BigNumber(await fse.balanceOf(address)),
-      dai: new BigNumber(await dai.balanceOf(address))
+      dai: new BigNumber(dai ? await dai.balanceOf(address) : 0)
     };
+
+    if (dai) {
+      await approveSpending(row.account.id);
+    }
+
     console.log(
       `\tAccount #${row.account.id}: $${row.account.dai
         .shiftedBy(-18)
@@ -189,7 +222,7 @@ contract("dat / csvTests", accounts => {
     ).shiftedBy(18);
 
     // for xfer
-    const isDai = !row.SellQty;
+    const isCurrency = !row.SellQty;
     const targetAddress = accounts[parseInt(row.xferTargetAcc)];
 
     switch (row.Action) {
@@ -202,7 +235,6 @@ contract("dat / csvTests", accounts => {
         await dat.sell(quantity.toFixed(), 1, {
           from: row.account.address
         });
-
         break;
       case "close":
         await dat.close({ from: row.account.address });
@@ -211,10 +243,18 @@ contract("dat / csvTests", accounts => {
         await dat.pay(quantity.toFixed(), { from: row.account.address });
         break;
       case "xfer":
-        if (isDai) {
-          await dai.transfer(targetAddress, quantity.toFixed(), {
-            from: row.account.address
-          });
+        if (isCurrency) {
+          if (dai) {
+            await dai.transfer(targetAddress, quantity.toFixed(), {
+              from: row.account.address
+            });
+          } else {
+            await web3.eth.sendTransaction({
+              from: row.account.address,
+              to: targetAddress,
+              value: quantity.toFixed()
+            });
+          }
         } else {
           await fse.transfer(targetAddress, quantity.toFixed(), {
             from: row.account.address
@@ -234,10 +274,7 @@ contract("dat / csvTests", accounts => {
   async function checkPostConiditons(row) {
     await assertBalance(fse, row.account.address, row.FSEBalanceOfAcct);
     await assertBalance(dai, row.account.address, row.DAIBalanceOfAcct);
-    assertAlmostEqual(
-      new BigNumber(await dai.balanceOf(feeCollector)),
-      parseNumber(row.TotalDAISentToFeeCollector).shiftedBy(18)
-    );
+    await assertBalance(dai, feeCollector, row.TotalDAISentToFeeCollector);
     assertAlmostEqual(
       new BigNumber(await fse.totalSupply()),
       parseNumber(row.FSETotalSupply).shiftedBy(18)
@@ -270,13 +307,17 @@ contract("dat / csvTests", accounts => {
     const burnedSupply = new BigNumber(await fse.burnedSupply());
     const buybackReserve = new BigNumber(await dat.buybackReserve());
     const beneficiaryDaiBalance = new BigNumber(
-      await dai.balanceOf(beneficiary)
+      dai
+        ? await dai.balanceOf(beneficiary)
+        : await web3.eth.getBalance(beneficiary)
     );
     const beneficiaryFseBalance = new BigNumber(
       await fse.balanceOf(beneficiary)
     );
     const feeCollectorDaiBalance = new BigNumber(
-      await dai.balanceOf(feeCollector)
+      dai
+        ? await dai.balanceOf(feeCollector)
+        : await web3.eth.getBalance(feeCollector)
     );
     const feeCollectorFseBalance = new BigNumber(
       await fse.balanceOf(feeCollector)
@@ -369,32 +410,38 @@ contract("dat / csvTests", accounts => {
     return balance;
   }
 
-  async function setBalanceAndApprove(accountId, targetBalance) {
+  async function setInitialBalance(accountId, targetBalance) {
     targetBalance = parseNumber(targetBalance);
     console.log(
       `\tSet #${accountId} to $${targetBalance.toFormat()} DAI & approve dat`
     );
     const account = accounts[accountId];
-    await dai.approve(dat.address, -1, { from: account });
-    await dai.mint(account, targetBalance.shiftedBy(18).toFixed());
-    const balance = new BigNumber(await dai.balanceOf(account)).shiftedBy(-18);
-    assert.equal(balance.toFixed(), targetBalance.toFixed());
 
-    // TODO for ETH support (but need to deal with gas costs as well - maybe detect and refund gas for simplicity?)
-    // Also instead of burning it send it to a bank account and use an after block to reset balances
-    // const currentBalance = new BigNumber(
-    //   web3.utils.fromWei(await web3.eth.getBalance(account), "ether")
-    // );
-    // const burnAmount = currentBalance.minus(targetBalance);
-    // console.log(
-    //   `Current balance ${currentBalance.toFormat()}, target ${targetBalance.toFormat()}, burn ${burnAmount.toFormat()}`
-    // );
-    // await web3.eth.sendTransaction({
-    //   from: row.account.address,
-    //   to: constants.ZERO_ADDRESS,
-    //   value: web3.utils.toWei(burnAmount.toFixed(), "ether")
-    // });
-    // const finalBalance = new BigNumber(await web3.eth.getBalance(account));
-    // console.log(`Final balance ${finalBalance.toFormat()}`);
+    if (dai) {
+      await dai.mint(account, targetBalance.shiftedBy(18).toFixed());
+    } else {
+      const currentBalance = new BigNumber(
+        web3.utils.fromWei(await web3.eth.getBalance(account), "ether")
+      );
+      const burnAmount = currentBalance.minus(targetBalance);
+      console.log(
+        `Current balance ${currentBalance.toFormat()}, target ${targetBalance.toFormat()}, burn ${burnAmount.toFormat()}`
+      );
+      await web3.eth.sendTransaction({
+        from: account,
+        to: ethBank,
+        value: web3.utils.toWei(burnAmount.toFixed(), "ether")
+      });
+    }
+  }
+
+  async function approveSpending(accountId) {
+    console.log(`\tSet #${accountId} to approve dat`);
+    const account = accounts[accountId];
+    await dai.approve(dat.address, -1, { from: account });
+  }
+
+  async function resetEthBalances() {
+    // TODO
   }
 });

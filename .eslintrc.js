@@ -14,6 +14,7 @@ module.exports = {
     assert: "readonly",
     before: "readonly",
     beforeEach: "readonly",
+    afterEach: "readonly",
     describe: "readonly",
     web3: "readonly",
     context: "readonly"
