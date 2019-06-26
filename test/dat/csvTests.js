@@ -137,12 +137,7 @@ async function testSheet(sheetName) {
         `Row ${i}: #${row.AccId} sell ${quantity.shiftedBy(-18).toFormat()} FSE`
       );
     } else if (row.Action === "close") {
-      throw new Error(`Missing exit fee value`);
-      // console.log(
-      //   `Row ${i}: #${row.AccId} close with $${quantity
-      //     .shiftedBy(-18)
-      //     .toFormat()} exit fee`
-      // );
+      console.log(`Row ${i}: #${row.AccId} close`);
     } else if (row.Action === "pay") {
       quantity = parseNumber(row.BuyQty).shiftedBy(18);
       console.log(
@@ -191,6 +186,8 @@ async function testSheet(sheetName) {
       );
     } else if (row.Action === "pay") {
       await dat.pay(quantity.toFixed(), { from: account });
+    } else if (row.Action === "close") {
+      await dat.close({ from: account });
     } else if (row.Action === "xfer") {
       if (isDai) {
         await dai.transfer(targetAddress, quantity.toFixed(), {

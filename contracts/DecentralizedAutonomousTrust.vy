@@ -419,9 +419,7 @@ def tokensReceived(
 
 @public
 @payable
-def close(
-  _exitFee: uint256
-):
+def close():
   assert msg.sender == self.control, "CONTROL_ONLY"
 
   if(self.state == STATE_INIT):
@@ -431,8 +429,8 @@ def close(
     issuancePrice: uint256 = totalSupply + self.fse.burnedSupply()
     issuancePrice *= self.buySlopeNum
     issuancePrice /= self.buySlopeDen
-    assert _exitFee >= totalSupply * issuancePrice - self.buybackReserve()
-    self._collectInvestment(msg.sender, _exitFee, msg.value)
+    exitFee: uint256 = totalSupply * issuancePrice - self.buybackReserve()
+    self._collectInvestment(msg.sender, exitFee, msg.value) # TODO refund remainder of ETH
   else:
     assert False, "INVALID_STATE"
 
