@@ -24,11 +24,11 @@ contract("dat / csvTests", () => {
   });
 
   it("TS 1", async () => {
-    await testSheet("buy_sell-nopremint");
+    await testSheet("buy_sell_no-pre-mint");
   });
 
   it("TS 2", async () => {
-    await testSheet("buy_sell_1000-premint");
+    await testSheet("buy_sell-premint");
   });
 
   it("TS 3", async () => {
