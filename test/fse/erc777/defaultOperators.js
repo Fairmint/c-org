@@ -1,11 +1,11 @@
 const { deployDat } = require("../../helpers");
 
-contract("fse / erc777 / defaultOperators", () => {
+contract("fse / erc777 / defaultOperators", accounts => {
   let dat;
   let fse;
 
   before(async () => {
-    [dat, fse] = await deployDat();
+    [dat, fse] = await deployDat(undefined, accounts[0]);
   });
 
   it("should have the dat as the default operator", async () => {

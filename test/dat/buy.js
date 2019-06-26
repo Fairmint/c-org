@@ -9,9 +9,12 @@ contract("dat / buy", accounts => {
   let fse;
 
   before(async () => {
-    [dat, fse] = await deployDat({
-      initGoal: "1000000000000000000000"
-    });
+    [dat, fse] = await deployDat(
+      {
+        initGoal: "1000000000000000000000"
+      },
+      accounts[0]
+    );
   });
 
   it("balanceOf should be 0 by default", async () => {

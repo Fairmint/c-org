@@ -122,6 +122,7 @@ state: public(uint256(stateMachine))
 
 @public
 def __init__(
+  _beneficiary: address,
   _fseAddress: address,
   _initReserve: uint256,
   _currencyAddress: address,
@@ -162,8 +163,10 @@ def __init__(
   self.feeDen = 1
   self.minInvestment = as_unitless_number(as_wei_value(100, "ether"))
 
+  assert _beneficiary != ZERO_ADDRESS, "INVALID_ADDRESS"
+  self.beneficiary = _beneficiary
+
   self.control = msg.sender
-  self.beneficiary = msg.sender
   self.feeCollector = msg.sender
 
   # Register supported interfaces
@@ -362,12 +365,37 @@ def pay(
 
   self._collectInvestment(msg.sender, _currencyValue, msg.value)
   self._sendCurrency(self.beneficiary, _currencyValue - _currencyValue * self.investmentReserveNum / self.investmentReserveDen)
+
+  # buy_slope = n/d
+  # revenue_commitment = c/g
+  # sqrt(
+  #  (2 a c d)
+  #  /
+  #  (g n)
+  #  + s^2
+  # ) - s
+
   supply: uint256 = self.fse.totalSupply() + self.fse.burnedSupply()
-  tokenValue: uint256 = _currencyValue * self.revenueCommitmentNum
-  tokenValue /= self.revenueCommitmentDen * self.buybackReserve() * supply * supply
+  tokenValue: uint256 = 2 * _currencyValue * self.revenueCommitmentNum * self.buySlopeDen
+  tokenValue /= self.revenueCommitmentDen * self.buySlopeNum
   tokenValue += supply * supply
-  tokenValue = convert(sqrt(convert(tokenValue, decimal)), uint256)
+  # Max total tokenValue of 2**256 - 1 (else tx reverts)
+
+  tokenValue /= DIGITS_UINT # Truncates last 18 digits from tokenValue here
+
+  decimalValue: decimal = self._toDecimalWithPlaces(tokenValue) # Truncates another 8 digits from tokenValue (losing 26 digits in total)
+  # Max total decimalValue of 2**127 - 1 (else tx reverts)
+
+  decimalValue = sqrt(decimalValue)
+
+  # Unshift results
+  decimalValue *= DIGITS_DECIMAL
+  # Max total decimalValue of 2**127 - 1 (else tx reverts)
+
+  tokenValue = convert(decimalValue, uint256)
+
   tokenValue -= supply
+
   self.fse.mint(msg.sender, self.beneficiary, tokenValue, "", "")
   self._applyBurnThreshold() # must mint before this call
 
@@ -391,20 +419,19 @@ def tokensReceived(
 
 @public
 @payable
-def close(
-  _exitFee: uint256
-):
-  assert msg.sender == self.control, "CONTROL_ONLY"
+def close():
+  assert msg.sender == self.beneficiary, "BENEFICIARY_ONLY"
 
   if(self.state == STATE_INIT):
     self.state = STATE_CANCEL
   elif(self.state == STATE_RUN):
-    totalSupply: uint256 = self.fse.totalSupply()
-    issuancePrice: uint256 = totalSupply + self.fse.burnedSupply()
-    issuancePrice *= self.buySlopeNum
-    issuancePrice /= self.buySlopeDen
-    assert _exitFee >= totalSupply * issuancePrice - self.buybackReserve()
-    self._collectInvestment(msg.sender, _exitFee, msg.value)
+    self.state = STATE_CLOSE
+    supply: uint256 = self.fse.totalSupply()
+    exitFee: uint256 = supply * supply
+    exitFee *= self.buySlopeNum
+    exitFee /= self.buySlopeDen * 2
+    exitFee -= self.buybackReserve()
+    self._collectInvestment(msg.sender, exitFee, msg.value) # TODO refund remainder of ETH
   else:
     assert False, "INVALID_STATE"
 

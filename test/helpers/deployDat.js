@@ -1,9 +1,10 @@
 const fseArtifact = artifacts.require("FairSyntheticEquity");
 const datArtifact = artifacts.require("DecentralizedAutonomousTrust");
 
-module.exports = async function deployDat(options) {
+module.exports = async function deployDat(options, from) {
   const callOptions = Object.assign(
     {
+      beneficiary: from,
       initReserve: "42000000000000000000",
       currency: "0x0000000000000000000000000000000000000000",
       initGoal: "0",
@@ -23,6 +24,7 @@ module.exports = async function deployDat(options) {
   const fse = await fseArtifact.new();
   return [
     await datArtifact.new(
+      callOptions.beneficiary,
       fse.address,
       callOptions.initReserve,
       callOptions.currency,
@@ -35,6 +37,7 @@ module.exports = async function deployDat(options) {
       callOptions.revenueCommitementNum,
       callOptions.revenueCommitementDen
     ),
-    fse
+    fse,
+    { from }
   ];
 };
