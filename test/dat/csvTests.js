@@ -187,6 +187,7 @@ async function testSheet(sheetName) {
     } else if (row.Action === "pay") {
       await dat.pay(quantity.toFixed(), { from: account });
     } else if (row.Action === "close") {
+      const daiBalance = new BigNumber(await dai.balanceOf(account));
       await dat.close({ from: account });
       const daiBalanceAfter = new BigNumber(await dai.balanceOf(account));
       const exitFee = daiBalance.minus(daiBalanceAfter);
