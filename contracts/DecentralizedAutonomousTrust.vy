@@ -420,7 +420,7 @@ def tokensReceived(
 @public
 @payable
 def close():
-  assert msg.sender == self.control, "CONTROL_ONLY"
+  assert msg.sender == self.beneficiary, "BENEFICIARY_ONLY"
 
   if(self.state == STATE_INIT):
     self.state = STATE_CANCEL
