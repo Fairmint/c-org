@@ -1,7 +1,12 @@
 const Papa = require("papaparse");
 const fs = require("fs");
 const BigNumber = require("bignumber.js");
-const { constants, deployDat, updateDatConfig } = require("../helpers");
+const {
+  constants,
+  deployDat,
+  getGasCost,
+  updateDatConfig
+} = require("../helpers");
 const sheets = require("./test-data/script.json");
 
 const daiArtifact = artifacts.require("TestDai");
@@ -12,17 +17,20 @@ contract("dat / csvTests", accounts => {
   const feeCollector = accounts[2];
   const ethBank = accounts[98];
   const TRANSFER_GAS_COST = new BigNumber("22000").times("100000000000");
+  const GAS_COST_BUFFER = new BigNumber("2200000").times("100000000000");
   /**
    * TODO add both false and true
    * Maybe to cover gas costs we before each tx send them x ETH, then after the tx calc the actual cost and ask for a refund - but that also has a gas cost.
    * But a well known cost.
    */
+  // TODO: add a ERC-777 only token?
 
-  const usingEth = [false];
+  const usingEth = [false, true];
 
   let dai;
   let dat;
   let fse;
+  let currencyString;
 
   let initComplete;
 
@@ -47,10 +55,14 @@ contract("dat / csvTests", accounts => {
 
       describe(`Starting ${sheetTitle}`, () => {
         beforeEach(async () => {
+          if (sheet.disabled) return;
+
           if (isUsingEth) {
             dai = undefined;
+            currencyString = "ETH";
           } else {
-            dai = await daiArtifact.new();
+            dai = await daiArtifact.new({ from: control });
+            currencyString = "DAI";
           }
 
           await setInitialBalances(sheet);
@@ -162,6 +174,7 @@ contract("dat / csvTests", accounts => {
   async function loadAccount(row) {
     const id = parseInt(row.AccId);
     const address = accounts[id];
+    if (!address) throw new Error("Missing account!");
     row.account = {
       id,
       address,
@@ -175,9 +188,11 @@ contract("dat / csvTests", accounts => {
     }
 
     console.log(
-      `\tAccount #${row.account.id}: $${row.account.dai
+      `\tAccount #${row.account.id}: ${(dai ? row.account.dai : row.account.eth)
         .shiftedBy(-18)
-        .toFormat()} DAI and ${row.account.fse.shiftedBy(-18).toFormat()} FSE`
+        .toFormat()} ${currencyString} and ${row.account.fse
+        .shiftedBy(-18)
+        .toFormat()} FSE`
     );
   }
 
@@ -186,7 +201,7 @@ contract("dat / csvTests", accounts => {
 
     switch (row.Action) {
       case "buy":
-        log = `for $${parseNumber(row.BuyQty).toFormat()} DAI`;
+        log = `for ${parseNumber(row.BuyQty).toFormat()} ${currencyString}`;
         break;
       case "sell":
         if (
@@ -212,7 +227,7 @@ contract("dat / csvTests", accounts => {
         log = "";
         break;
       case "pay":
-        log = `$${parseNumber(row.BuyQty).toFormat()}`;
+        log = `${parseNumber(row.BuyQty).toFormat()}`;
         break;
       case "xfer":
         log = `${parseNumber(row.BuyQty || row.SellQty).toFormat()} ${
@@ -235,38 +250,52 @@ contract("dat / csvTests", accounts => {
     const isCurrency = !row.SellQty;
     const targetAddress = accounts[parseInt(row.xferTargetAcc)];
 
+    await sendPrepaidGas(row);
+
+    let tx;
     switch (row.Action) {
       case "buy":
-        await dat.buy(row.account.address, quantity.toFixed(), 1, {
-          from: row.account.address
+        tx = await dat.buy(row.account.address, quantity.toFixed(), 1, {
+          from: row.account.address,
+          value: dai ? 0 : quantity.toFixed()
         });
         break;
       case "sell":
-        await dat.sell(quantity.toFixed(), 1, {
+        tx = await dat.sell(quantity.toFixed(), 1, {
           from: row.account.address
         });
         break;
       case "close":
-        await dat.close({ from: row.account.address });
+        tx = await dat.close({
+          from: row.account.address,
+          value: dai
+            ? 0
+            : new BigNumber(await web3.eth.getBalance(row.account.address))
+                .minus(GAS_COST_BUFFER)
+                .toFixed()
+        });
         break;
       case "pay":
-        await dat.pay(quantity.toFixed(), { from: row.account.address });
+        tx = await dat.pay(quantity.toFixed(), {
+          from: row.account.address,
+          value: dai ? 0 : quantity.toFixed()
+        });
         break;
       case "xfer":
         if (isCurrency) {
           if (dai) {
-            await dai.transfer(targetAddress, quantity.toFixed(), {
+            tx = await dai.transfer(targetAddress, quantity.toFixed(), {
               from: row.account.address
             });
           } else {
-            await web3.eth.sendTransaction({
+            tx = await web3.eth.sendTransaction({
               from: row.account.address,
               to: targetAddress,
               value: quantity.toFixed()
             });
           }
         } else {
-          await fse.transfer(targetAddress, quantity.toFixed(), {
+          tx = await fse.transfer(targetAddress, quantity.toFixed(), {
             from: row.account.address
           });
         }
@@ -274,6 +303,8 @@ contract("dat / csvTests", accounts => {
       default:
         throw new Error(`Missing action ${row.Action}`);
     }
+
+    await refundPrepaidGas(row, tx);
   }
 
   async function checkPreConditions(row) {
@@ -336,15 +367,15 @@ contract("dat / csvTests", accounts => {
 \tSupply: ${totalSupply
       .shiftedBy(-18)
       .toFormat()} FSE + ${burnedSupply.shiftedBy(-18).toFormat()} burned
-\tReserve: $${buybackReserve.shiftedBy(-18).toFormat()} DAI
-\tBeneficiary: $${beneficiaryDaiBalance
+\tReserve: ${buybackReserve.shiftedBy(-18).toFormat()} ${currencyString}
+\tBeneficiary: ${beneficiaryDaiBalance
       .shiftedBy(-18)
-      .toFormat()} DAI and ${beneficiaryFseBalance
+      .toFormat()} ${currencyString} and ${beneficiaryFseBalance
       .shiftedBy(-18)
       .toFormat()} FSE
-\tFee Collector: $${feeCollectorDaiBalance
+\tFee Collector: ${feeCollectorDaiBalance
       .shiftedBy(-18)
-      .toFormat()} DAI and ${feeCollectorFseBalance
+      .toFormat()} ${currencyString} and ${feeCollectorFseBalance
       .shiftedBy(-18)
       .toFormat()} FSE`);
   }
@@ -415,7 +446,11 @@ contract("dat / csvTests", accounts => {
   async function assertBalance(token, account, expectedBalance) {
     expectedBalance = parseNumber(expectedBalance);
     expectedBalance = expectedBalance.shiftedBy(18);
-    const balance = new BigNumber(await token.balanceOf(account));
+    const balance = new BigNumber(
+      token
+        ? await token.balanceOf(account)
+        : await web3.eth.getBalance(account)
+    );
     assertAlmostEqual(balance, expectedBalance);
     return balance;
   }
@@ -423,29 +458,32 @@ contract("dat / csvTests", accounts => {
   async function setBalanceTo(token, accountId, targetBalance) {
     const account = accounts[accountId];
     if (account === ethBank) return;
+    if (!token && account === control) {
+      targetBalance = new BigNumber(1000);
+    }
 
     targetBalance = parseNumber(targetBalance);
 
     if (token) {
       if (targetBalance.eq(0)) return;
-      console.log(`  #${accountId} mint $${targetBalance.toFormat()} DAI`);
-      await token.mint(account, targetBalance.shiftedBy(18).toFixed());
+      console.log(`  #${accountId} mint ${targetBalance.toFormat()} DAI`);
+      await token.mint(account, targetBalance.shiftedBy(18).toFixed(), {
+        from: control
+      });
     } else {
       const currentBalance = new BigNumber(
         web3.utils.fromWei(await web3.eth.getBalance(account), "ether")
       );
       let amount = currentBalance.minus(targetBalance);
       let action;
-      if (amount.eq(0)) {
-        return;
-      } else if (amount.gt(0)) {
+      if (amount.gt(0)) {
         action = "burn";
         amount = amount.minus(TRANSFER_GAS_COST.shiftedBy(-18));
       } else {
         amount = amount.times(-1);
         action = "mint";
       }
-      if (amount.lt(0)) {
+      if (amount.lte(0)) {
         return; // value is very close already
       }
       let from, to;
@@ -486,5 +524,25 @@ contract("dat / csvTests", accounts => {
     for (let i = 0; i < accounts.length; i++) {
       await setBalanceTo(undefined, i, new BigNumber(10000));
     }
+  }
+
+  async function sendPrepaidGas(row) {
+    await web3.eth.sendTransaction({
+      from: ethBank,
+      to: row.account.address,
+      value: GAS_COST_BUFFER.toFixed()
+    });
+  }
+
+  async function refundPrepaidGas(row, tx) {
+    let amount = await getGasCost(tx);
+    amount = GAS_COST_BUFFER.minus(amount).minus(TRANSFER_GAS_COST);
+
+    if (amount.lte(0)) return;
+    await web3.eth.sendTransaction({
+      from: row.account.address,
+      to: ethBank,
+      value: amount.toFixed()
+    });
   }
 });

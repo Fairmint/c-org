@@ -4,7 +4,7 @@
   "scripts": {
     "build": "npm run compile",
     "compile": "truffle compile --all",
-    "ganache": "ganache-cli -e 10000000 -a 100",
+    "ganache": "ganache-cli -e 10000000 -a 100 --verbose",
     "dev": "npm run compile && npm run test",
     "lint": "eslint . --fix",
     "lintNoFix": "eslint .",
