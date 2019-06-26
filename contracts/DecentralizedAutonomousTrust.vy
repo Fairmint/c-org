@@ -425,11 +425,11 @@ def close():
   if(self.state == STATE_INIT):
     self.state = STATE_CANCEL
   elif(self.state == STATE_RUN):
-    totalSupply: uint256 = self.fse.totalSupply()
-    issuancePrice: uint256 = totalSupply + self.fse.burnedSupply()
-    issuancePrice *= self.buySlopeNum
-    issuancePrice /= self.buySlopeDen
-    exitFee: uint256 = totalSupply * issuancePrice - self.buybackReserve()
+    supply: uint256 = self.fse.totalSupply() + self.fse.burnedSupply()
+    exitFee: uint256 = supply * supply
+    exitFee *= self.buySlopeNum
+    exitFee /= self.buySlopeDen * 2
+    exitFee -= self.buybackReserve()
     self._collectInvestment(msg.sender, exitFee, msg.value) # TODO refund remainder of ETH
   else:
     assert False, "INVALID_STATE"
