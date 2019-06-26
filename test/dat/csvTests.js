@@ -130,7 +130,10 @@ async function testSheet(sheetName) {
       );
     } else if (row.Action === "sell") {
       quantity = parseNumber(row.SellQty).shiftedBy(18);
-      if (quantity.plus(new BigNumber(1).shiftedBy(18)).gt(fseBalance)) {
+      if (
+        quantity.eq(0) ||
+        quantity.plus(new BigNumber(1).shiftedBy(18)).gt(fseBalance)
+      ) {
         quantity = fseBalance;
       }
       console.log(
