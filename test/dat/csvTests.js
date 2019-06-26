@@ -11,6 +11,7 @@ contract("dat / csvTests", accounts => {
   const control = accounts[1];
   const feeCollector = accounts[2];
   const ethBank = accounts[98];
+  const TRANSFER_GAS_COST = new BigNumber("22000").times("100000000000");
   /**
    * TODO add both false and true
    * Maybe to cover gas costs we before each tx send them x ETH, then after the tx calc the actual cost and ask for a refund - but that also has a gas cost.
@@ -22,6 +23,21 @@ contract("dat / csvTests", accounts => {
   let dai;
   let dat;
   let fse;
+
+  let initComplete;
+
+  beforeEach(async () => {
+    await resetEthBalances();
+  });
+
+  after(async () => {
+    initComplete = false;
+    await resetEthBalances();
+  });
+
+  it("should spam the first balance reset before sheet tests begin", () => {
+    initComplete = true;
+  });
 
   sheets.forEach(sheet => {
     usingEth.forEach(isUsingEth => {
@@ -38,12 +54,6 @@ contract("dat / csvTests", accounts => {
           }
 
           await setInitialBalances(sheet);
-        });
-
-        afterEach(async () => {
-          if (isUsingEth) {
-            await resetEthBalances();
-          }
         });
 
         it(`${sheetTitle} complete`, async () => {
@@ -113,7 +123,7 @@ contract("dat / csvTests", accounts => {
     console.log("Set initial balances:");
     for (let i = 0; i < balanceJson.length; i++) {
       const row = balanceJson[i];
-      await setInitialBalance(parseInt(row.AccId), row.InitialBalance);
+      await setBalanceTo(dai, parseInt(row.AccId), row.InitialBalance);
     }
   }
 
@@ -410,26 +420,56 @@ contract("dat / csvTests", accounts => {
     return balance;
   }
 
-  async function setInitialBalance(accountId, targetBalance) {
-    targetBalance = parseNumber(targetBalance);
-    console.log(`  Set #${accountId} to $${targetBalance.toFormat()} DAI`);
+  async function setBalanceTo(token, accountId, targetBalance) {
     const account = accounts[accountId];
+    if (account === ethBank) return;
 
-    if (dai) {
-      await dai.mint(account, targetBalance.shiftedBy(18).toFixed());
+    targetBalance = parseNumber(targetBalance);
+
+    if (token) {
+      if (targetBalance.eq(0)) return;
+      console.log(`  #${accountId} mint $${targetBalance.toFormat()} DAI`);
+      await token.mint(account, targetBalance.shiftedBy(18).toFixed());
     } else {
       const currentBalance = new BigNumber(
         web3.utils.fromWei(await web3.eth.getBalance(account), "ether")
       );
-      const burnAmount = currentBalance.minus(targetBalance);
-      console.log(
-        `Current balance ${currentBalance.toFormat()}, target ${targetBalance.toFormat()}, burn ${burnAmount.toFormat()}`
-      );
+      let amount = currentBalance.minus(targetBalance);
+      let action;
+      if (amount.eq(0)) {
+        return;
+      } else if (amount.gt(0)) {
+        action = "burn";
+        amount = amount.minus(TRANSFER_GAS_COST.shiftedBy(-18));
+      } else {
+        amount = amount.times(-1);
+        action = "mint";
+      }
+      if (amount.lt(0)) {
+        return; // value is very close already
+      }
+      let from, to;
+      if (action == "mint") {
+        from = ethBank;
+        to = account;
+      } else {
+        from = account;
+        to = ethBank;
+      }
       await web3.eth.sendTransaction({
-        from: account,
-        to: ethBank,
-        value: web3.utils.toWei(burnAmount.toFixed(), "ether")
+        from,
+        to,
+        value: amount.shiftedBy(18).toFixed()
       });
+
+      const afterBalance = new BigNumber(
+        web3.utils.fromWei(await web3.eth.getBalance(account), "ether")
+      );
+      if (initComplete) {
+        console.log(
+          `  #${accountId} ${action} ETH ${amount.toFormat()} (before ${currentBalance.toFormat()} / after ${afterBalance.toFormat()}) `
+        );
+      }
     }
   }
 
@@ -440,6 +480,11 @@ contract("dat / csvTests", accounts => {
   }
 
   async function resetEthBalances() {
-    // TODO
+    if (initComplete) {
+      console.log("Reset ETH balances:");
+    }
+    for (let i = 0; i < accounts.length; i++) {
+      await setBalanceTo(undefined, i, new BigNumber(10000));
+    }
   }
 });
