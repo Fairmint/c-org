@@ -1,0 +1,39 @@
+[
+    {
+      "id": 1,
+      "name": "buy_sell_no-pre-mint"
+    },
+    {
+      "id": 2,
+      "name": "buy_sell-premint"
+    },
+    {
+      "id": 3,
+      "name": "buy_sell_large_numbers",
+      "disabled": true
+    },
+    {
+      "id": 4,
+      "name": "buy_close_sell_nopremint",
+      "disabled": true
+    },
+    {
+      "id": 5,
+      "name": "buy_close_sell_premint",
+      "disabled": true
+    },
+    {
+      "id": 6,
+      "name": "buy_pay_close-no-premint",
+      "disabled": true
+    },
+    {
+      "id": 7,
+      "name": "buy_sell_xfer_pay_close-nopremint"
+    },
+    {
+      "id": 8,
+      "name": "buy_sell_xfer_pay_close-premint"
+    }
+  ]
+  

@@ -12,8 +12,10 @@ module.exports = {
     contract: "readonly",
     it: "readonly",
     assert: "readonly",
+    after: "readonly",
     before: "readonly",
     beforeEach: "readonly",
+    afterEach: "readonly",
     describe: "readonly",
     web3: "readonly",
     context: "readonly"

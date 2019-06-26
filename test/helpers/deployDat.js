@@ -35,9 +35,9 @@ module.exports = async function deployDat(options, from) {
       callOptions.investmentReserveNum,
       callOptions.investmentReserveDen,
       callOptions.revenueCommitementNum,
-      callOptions.revenueCommitementDen
+      callOptions.revenueCommitementDen,
+      { from }
     ),
-    fse,
-    { from }
+    fse
   ];
 };

@@ -190,11 +190,15 @@ def __init__(
 def _collectInvestment(
   _from: address,
   _quantityToInvest: uint256,
-  _msgValue: uint256(wei)
+  _msgValue: uint256(wei),
+  _refundRemainder: bool
 ):
   # Collect investment
   if(self.currency == ZERO_ADDRESS):
-    assert as_wei_value(_quantityToInvest, "wei") == _msgValue, "INCORRECT_MSG_VALUE"
+    if(_refundRemainder):
+      send(_from, _msgValue - _quantityToInvest)
+    else:
+      assert as_wei_value(_quantityToInvest, "wei") == _msgValue, "INCORRECT_MSG_VALUE"
   else:
     # TODO support ERC-777 currency?
     assert _msgValue == 0, "DO_NOT_SEND_ETH"
@@ -276,7 +280,7 @@ def buy(
 
   tokenValue: uint256
 
-  self._collectInvestment(msg.sender, _currencyValue, msg.value)
+  self._collectInvestment(msg.sender, _currencyValue, msg.value, False)
 
   if(self.state == STATE_INIT):
     if(self.initDeadline == 0 or self.initDeadline > block.timestamp):
@@ -363,7 +367,7 @@ def pay(
 ):
   assert self.state == STATE_RUN, "INVALID_STATE"
 
-  self._collectInvestment(msg.sender, _currencyValue, msg.value)
+  self._collectInvestment(msg.sender, _currencyValue, msg.value, False)
   self._sendCurrency(self.beneficiary, _currencyValue - _currencyValue * self.investmentReserveNum / self.investmentReserveDen)
 
   # buy_slope = n/d
@@ -430,8 +434,8 @@ def close():
     exitFee: uint256 = supply * supply
     exitFee *= self.buySlopeNum
     exitFee /= self.buySlopeDen * 2
-    exitFee -= self.buybackReserve()
-    self._collectInvestment(msg.sender, exitFee, msg.value) # TODO refund remainder of ETH
+    exitFee -= self.buybackReserve() - as_unitless_number(msg.value)
+    self._collectInvestment(msg.sender, exitFee, msg.value, True)
   else:
     assert False, "INVALID_STATE"
 
