@@ -31,24 +31,28 @@ contract("dat / csvTests", () => {
     await testSheet("buy_sell-premint");
   });
 
-  it("TS 3", async () => {
+  it.skip("TS 3", async () => {
     await testSheet("buy_sell_large_numbers");
   });
 
-  it("TS 4", async () => {
+  it.skip("TS 4", async () => {
     await testSheet("buy_close_sell_nopremint");
   });
 
-  it("TS 5", async () => {
+  it.skip("TS 5", async () => {
     await testSheet("buy_close_sell_premint");
   });
 
-  it("TS 6", async () => {
+  it.skip("TS 6", async () => {
     await testSheet("buy_pay_close-no-premint");
   });
 
   it("TS 7", async () => {
     await testSheet("buy_sell_xfer_pay_close-nopremint");
+  });
+
+  it("TS 8", async () => {
+    await testSheet("buy_sell_xfer_pay_close-premint");
   });
 });
 
