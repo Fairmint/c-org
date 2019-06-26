@@ -135,6 +135,9 @@ async function testSheet(sheetName) {
         quantity.plus(new BigNumber(1).shiftedBy(18)).gt(fseBalance)
       ) {
         quantity = fseBalance;
+        if (quantity.eq(0)) {
+          continue; // nothing to sell
+        }
       }
       console.log(
         `Row ${i}: #${row.AccId} sell ${quantity.shiftedBy(-18).toFormat()} FSE`
