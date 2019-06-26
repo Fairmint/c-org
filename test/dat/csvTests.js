@@ -233,10 +233,10 @@ async function testSheet(sheetName) {
     //   new BigNumber(await fse.burnedSupply()),
     //   parseNumber(row.FSEBurnedSupply).shiftedBy(18)
     // );
-    // assertAlmostEqual(
-    //   new BigNumber(await dat.buybackReserve()),
-    //   parseNumber(row.DAIBuybackReserve).shiftedBy(18)
-    // );
+    assertAlmostEqual(
+      new BigNumber(await dat.buybackReserve()),
+      parseNumber(row.DAIBuybackReserve).shiftedBy(18)
+    );
     // assert.equal((await dat.state()).toString(), parseState(row.State));
 
     // TotalDAISentToBeneficiary
