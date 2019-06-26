@@ -231,7 +231,7 @@ async function testSheet(sheetName) {
       new BigNumber(await dat.buybackReserve()),
       parseNumber(row.DAIBuybackReserve).shiftedBy(18)
     );
-    assert.equal(await dat.state(), parseState(row.State));
+    assert.equal((await dat.state()).toString(), parseState(row.State));
 
     // TotalDAISentToBeneficiary
     // TotalDAISentToFeeCollector
