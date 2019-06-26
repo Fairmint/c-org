@@ -425,7 +425,7 @@ def close():
   if(self.state == STATE_INIT):
     self.state = STATE_CANCEL
   elif(self.state == STATE_RUN):
-    supply: uint256 = self.fse.totalSupply() + self.fse.burnedSupply()
+    supply: uint256 = self.fse.totalSupply()
     exitFee: uint256 = supply * supply
     exitFee *= self.buySlopeNum
     exitFee /= self.buySlopeDen * 2
