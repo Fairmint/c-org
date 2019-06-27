@@ -129,7 +129,7 @@ buySlopeNum: public(uint256)
 buySlopeDen: public(uint256)
 control: public(address)
 currencyAddress: public(address)
-currency: ERC20 # redundant w/ currencyAddress, for convenience
+currency: IERC777 # redundant w/ currencyAddress, for convenience
 feeCollector: public(address)
 feeNum: public(uint256)
 feeDen: public(uint256)
@@ -141,7 +141,7 @@ initInvestors: public(map(address, uint256))
 initReserve: public(uint256)
 investmentReserveNum: public(uint256)
 investmentReserveDen: public(uint256)
-isCurrencyERC777: public(bool)
+isCurrencyERC20: public(bool)
 minInvestment: public(uint256)
 revenueCommitmentNum: public(uint256)
 revenueCommitmentDen: public(uint256)
@@ -168,7 +168,7 @@ def __init__(
   _revenueCommitmentDen: uint256
 ):
   self.currencyAddress = _currencyAddress
-  self.currency = ERC20(_currencyAddress)
+  self.currency = IERC777(_currencyAddress)
 
   # Set initGoal, which in turn defines the initial state
   if(_initGoal == 0):
@@ -204,8 +204,8 @@ def __init__(
   # Register supported interfaces
   # the 1820 address is constant for all networks
   IERC1820Registry(0x1820a4B7618BdE71Dce8cdc73aAB6C95905faD24).setInterfaceImplementer(self, keccak256("ERC777TokensRecipient"), self)
-  if(IERC1820Registry(0x1820a4B7618BdE71Dce8cdc73aAB6C95905faD24).getInterfaceImplementer(_currencyAddress, keccak256("ERC777")) == _currencyAddress):
-    self.isCurrencyERC777 = True
+  if(IERC1820Registry(0x1820a4B7618BdE71Dce8cdc73aAB6C95905faD24).getInterfaceImplementer(_currencyAddress, keccak256("ERC777")) != _currencyAddress):
+    self.isCurrencyERC20 = True
 
   self.fseAddress = _fseAddress
   self.fse = IFSE(_fseAddress)
@@ -245,11 +245,16 @@ def _collectInvestment(
     else:
       assert as_wei_value(_quantityToInvest, "wei") == _msgValue, "INCORRECT_MSG_VALUE"
   else:
-    # TODO support ERC-777 currency?
     assert _msgValue == 0, "DO_NOT_SEND_ETH"
     balanceBefore: uint256 = self.currency.balanceOf(self)
-    self.currency.transferFrom(_from, self, as_unitless_number(_quantityToInvest))
-    assert self.currency.balanceOf(self) > balanceBefore, "ERC20_TRANSFER_FAILED"
+
+    if(self.isCurrencyERC20):
+      self.currency.transferFrom(_from, self, as_unitless_number(_quantityToInvest))
+    else:
+      self.currency.operatorSend(_from, self, as_unitless_number(_quantityToInvest), "", "")
+    
+    assert self.currency.balanceOf(self) > balanceBefore, "TOKEN_TRANSFER_FAILED"
+
 
 @private
 def _applyBurnThreshold():
@@ -271,7 +276,12 @@ def _sendCurrency(
       send(_to, as_wei_value(_amount, "wei"))
     else:
       balanceBefore: uint256 = self.currency.balanceOf(_to)
-      self.currency.transfer(_to, as_unitless_number(_amount))
+      
+      if(self.isCurrencyERC20):
+        self.currency.transfer(_to, as_unitless_number(_amount))
+      else:
+        self.currency.send(_to, as_unitless_number(_amount), "")
+
       assert self.currency.balanceOf(_to) > balanceBefore, "ERC20_TRANSFER_FAILED"
 
 @private
