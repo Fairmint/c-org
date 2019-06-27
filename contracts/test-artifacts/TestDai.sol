@@ -9,6 +9,6 @@ contract TestDai is
   ERC20Mintable
 {
   constructor() public
-    ERC20Detailed("Test DAI token", "TAI", 18)
+    ERC20Detailed("Test DAI token", "DAI", 18)
   {}
 }
