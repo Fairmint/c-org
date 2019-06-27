@@ -3,11 +3,12 @@
 #region Types
 ##################################################
 
+from vyper.interfaces import ERC20
+
 units: {
   stateMachine: "The DAT's internal state machine"
 }
 
-from vyper.interfaces import ERC20
 # TODO: switch to interface files
 # Depends on https://github.com/ethereum/vyper/issues/1367
 contract IERC1820Registry:
@@ -25,6 +26,32 @@ contract IERC777Recipient:
     _operator: address,
     _from: address,
     _to: address,
+    _amount: uint256,
+    _userData: bytes[256],
+    _operatorData: bytes[256]
+  ): modifying
+contract IERC777:
+  def totalSupply() -> uint256: constant
+  def balanceOf(
+    _account: address
+  ) -> uint256: constant
+  def transfer(
+    _to: address,
+    _value: uint256
+  ) -> bool: modifying
+  def transferFrom(
+    _from: address,
+    _to: address,
+    _value: uint256
+  ) -> bool: modifying
+  def send(
+    _recipient: address,
+    _amount: uint256,
+    _userData: bytes[256]
+  ): modifying
+  def operatorSend(
+    _sender: address,
+    _recipient: address,
     _amount: uint256,
     _userData: bytes[256],
     _operatorData: bytes[256]
@@ -114,6 +141,7 @@ initInvestors: public(map(address, uint256))
 initReserve: public(uint256)
 investmentReserveNum: public(uint256)
 investmentReserveDen: public(uint256)
+isCurrencyERC777: public(bool)
 minInvestment: public(uint256)
 revenueCommitmentNum: public(uint256)
 revenueCommitmentDen: public(uint256)
@@ -176,6 +204,8 @@ def __init__(
   # Register supported interfaces
   # the 1820 address is constant for all networks
   IERC1820Registry(0x1820a4B7618BdE71Dce8cdc73aAB6C95905faD24).setInterfaceImplementer(self, keccak256("ERC777TokensRecipient"), self)
+  if(IERC1820Registry(0x1820a4B7618BdE71Dce8cdc73aAB6C95905faD24).getInterfaceImplementer(_currencyAddress, keccak256("ERC777")) == _currencyAddress):
+    self.isCurrencyERC777 = True
 
   self.fseAddress = _fseAddress
   self.fse = IFSE(_fseAddress)
