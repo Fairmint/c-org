@@ -129,7 +129,7 @@ buySlopeNum: public(uint256)
 buySlopeDen: public(uint256)
 control: public(address)
 currencyAddress: public(address)
-currency: ERC20 # redundant w/ currencyAddress, for convenience
+currency: IERC777 # redundant w/ currencyAddress, for convenience
 feeCollector: public(address)
 feeNum: public(uint256)
 feeDen: public(uint256)
@@ -168,7 +168,7 @@ def __init__(
   _revenueCommitmentDen: uint256
 ):
   self.currencyAddress = _currencyAddress
-  self.currency = ERC20(_currencyAddress)
+  self.currency = IERC777(_currencyAddress)
 
   # Set initGoal, which in turn defines the initial state
   if(_initGoal == 0):
