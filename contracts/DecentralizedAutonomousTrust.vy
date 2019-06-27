@@ -8,8 +8,7 @@ units: {
 }
 
 from vyper.interfaces import ERC20
-
-# TODO: switch to interface files (currently non-native imports fail to compile)
+# TODO: switch to interface files
 # Depends on https://github.com/ethereum/vyper/issues/1367
 contract IERC1820Registry:
   def setInterfaceImplementer(
@@ -47,6 +46,13 @@ contract IFSE:
     _userData: bytes[256],
     _operatorData: bytes[256]
   ): modifying
+  def operatorSend(
+    _sender: address,
+    _recipient: address,
+    _amount: uint256,
+    _userData: bytes[256],
+    _operatorData: bytes[256]
+  ): modifying
   def mint(
     _operator: address,
     _to: address,
@@ -59,8 +65,6 @@ contract IFSE:
     _name: string[64],
     _symbol: string[32]
   ): modifying
-
-#TODO why does this fail? implements: IERC777Recipient
 
 # Events triggered when updating the DAT's configuration
 UpdateConfig: event({
@@ -170,7 +174,7 @@ def __init__(
   self.feeCollector = msg.sender
 
   # Register supported interfaces
-  # address is constant for all networks
+  # the 1820 address is constant for all networks
   IERC1820Registry(0x1820a4B7618BdE71Dce8cdc73aAB6C95905faD24).setInterfaceImplementer(self, keccak256("ERC777TokensRecipient"), self)
 
   self.fseAddress = _fseAddress
@@ -185,6 +189,17 @@ def __init__(
 
 #region Private helper functions
 ##################################################
+
+@private
+@constant
+def _toDecimalWithPlaces(
+  _value: uint256
+) -> decimal:
+  temp: uint256 = _value / DIGITS_UINT
+  decimalValue: decimal = convert(_value - temp * DIGITS_UINT, decimal)
+  decimalValue /= DIGITS_DECIMAL
+  decimalValue += convert(temp, decimal)
+  return decimalValue
 
 @private
 def _collectInvestment(
@@ -241,19 +256,48 @@ def _distributeInvestment(
   self._sendCurrency(self.feeCollector, fee)
   self._sendCurrency(self.beneficiary, reserve - fee)
 
-#endregion
-
-# TODO
 @private
-@constant
-def _toDecimalWithPlaces(
-  _value: uint256
-) -> decimal:
-  temp: uint256 = _value / DIGITS_UINT
-  decimalValue: decimal = convert(_value - temp * DIGITS_UINT, decimal)
-  decimalValue /= DIGITS_DECIMAL
-  decimalValue += convert(temp, decimal)
-  return decimalValue
+def _pay(
+  _to: address,
+  _currencyValue: uint256
+):
+  assert self.state == STATE_RUN, "INVALID_STATE"
+  self._sendCurrency(self.beneficiary, _currencyValue - _currencyValue * self.investmentReserveNum / self.investmentReserveDen)
+
+  # buy_slope = n/d
+  # revenue_commitment = c/g
+  # sqrt(
+  #  (2 a c d)
+  #  /
+  #  (g n)
+  #  + s^2
+  # ) - s
+
+  supply: uint256 = self.fse.totalSupply() + self.fse.burnedSupply()
+  tokenValue: uint256 = 2 * _currencyValue * self.revenueCommitmentNum * self.buySlopeDen
+  tokenValue /= self.revenueCommitmentDen * self.buySlopeNum
+  tokenValue += supply * supply
+  # Max total tokenValue of 2**256 - 1 (else tx reverts)
+
+  tokenValue /= DIGITS_UINT # Truncates last 18 digits from tokenValue here
+
+  decimalValue: decimal = self._toDecimalWithPlaces(tokenValue) # Truncates another 8 digits from tokenValue (losing 26 digits in total)
+  # Max total decimalValue of 2**127 - 1 (else tx reverts)
+
+  decimalValue = sqrt(decimalValue)
+
+  # Unshift results
+  decimalValue *= DIGITS_DECIMAL
+  # Max total decimalValue of 2**127 - 1 (else tx reverts)
+
+  tokenValue = convert(decimalValue, uint256)
+
+  tokenValue -= supply
+
+  self.fse.mint(_to, self.beneficiary, tokenValue, "", "")
+  self._applyBurnThreshold() # must mint before this call
+
+#endregion
 
 #region Functions for DAT business logic
 ##################################################
@@ -358,56 +402,19 @@ def sell(
   # Set an operator flag to differentiate a sell vs burn
   self.fse.operatorBurn(msg.sender, _quantityToSell, "", SELL_FLAG)
 
-# TODO add operator buy/sell?
-
 @public
 @payable
 def pay(
   _currencyValue: uint256
 ):
-  assert self.state == STATE_RUN, "INVALID_STATE"
-
   self._collectInvestment(msg.sender, _currencyValue, msg.value, False)
-  self._sendCurrency(self.beneficiary, _currencyValue - _currencyValue * self.investmentReserveNum / self.investmentReserveDen)
-
-  # buy_slope = n/d
-  # revenue_commitment = c/g
-  # sqrt(
-  #  (2 a c d)
-  #  /
-  #  (g n)
-  #  + s^2
-  # ) - s
-
-  supply: uint256 = self.fse.totalSupply() + self.fse.burnedSupply()
-  tokenValue: uint256 = 2 * _currencyValue * self.revenueCommitmentNum * self.buySlopeDen
-  tokenValue /= self.revenueCommitmentDen * self.buySlopeNum
-  tokenValue += supply * supply
-  # Max total tokenValue of 2**256 - 1 (else tx reverts)
-
-  tokenValue /= DIGITS_UINT # Truncates last 18 digits from tokenValue here
-
-  decimalValue: decimal = self._toDecimalWithPlaces(tokenValue) # Truncates another 8 digits from tokenValue (losing 26 digits in total)
-  # Max total decimalValue of 2**127 - 1 (else tx reverts)
-
-  decimalValue = sqrt(decimalValue)
-
-  # Unshift results
-  decimalValue *= DIGITS_DECIMAL
-  # Max total decimalValue of 2**127 - 1 (else tx reverts)
-
-  tokenValue = convert(decimalValue, uint256)
-
-  tokenValue -= supply
-
-  self.fse.mint(msg.sender, self.beneficiary, tokenValue, "", "")
-  self._applyBurnThreshold() # must mint before this call
+  self._pay(msg.sender, _currencyValue)
 
 @public
 @payable
 def __default__():
-  # TODO
-  pass
+  self._collectInvestment(msg.sender, as_unitless_number(msg.value), msg.value, False)
+  self._pay(msg.sender, as_unitless_number(msg.value))
 
 @public
 def tokensReceived(
@@ -418,8 +425,8 @@ def tokensReceived(
   _userData: bytes[256],
   _operatorData: bytes[256]
 ):
-  # TODO
-  pass
+  assert msg.sender == self.currency, "INVALID_CURRENCY"
+  self._pay(msg.sender, _amount)
 
 @public
 @payable
@@ -462,9 +469,12 @@ def updateConfig(
 
   self.fse.updateConfig(_authorizationAddress, _name, _symbol)
 
-  assert _beneficiary != ZERO_ADDRESS, "INVALID_ADDRESS"
-  # TODO move the token balance(?)
-  self.beneficiary = _beneficiary
+  if(self.beneficiary != _beneficiary):
+    assert _beneficiary != ZERO_ADDRESS, "INVALID_ADDRESS"
+    tokens: uint256 = self.fse.balanceOf(self.beneficiary)
+    if(tokens > 0):
+      self.fse.operatorSend(self.beneficiary, _beneficiary, self.fse.balanceOf(self.beneficiary), "", "")
+      self.beneficiary = _beneficiary
 
   assert _control != ZERO_ADDRESS, "INVALID_ADDRESS"
   self.control = _control
