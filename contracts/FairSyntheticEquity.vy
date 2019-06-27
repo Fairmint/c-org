@@ -111,6 +111,7 @@ UpdateConfig: event({
 # TODO test gas of using hex directly (this is not cached in Solidity)
 TOKENS_SENDER_INTERFACE_HASH: constant(bytes32) = keccak256("ERC777TokensSender")
 TOKENS_RECIPIENT_INTERFACE_HASH: constant(bytes32) = keccak256("ERC777TokensRecipient")
+ERC1820Registry: IERC1820Registry # not public: constant data
 
 # Data specific to our business logic
 authorizationAddress: public(address)
@@ -135,7 +136,6 @@ symbol: public(string[32])
 # @dev Optional requirement from ERC-20 and ERC-777
 
 # Data storage required by the ERC-777 token standard
-ERC1820Registry: IERC1820Registry # not public: constant data
 operators: map(address, map(address, bool)) # not public: exposed via `isOperatorFor`
 
 #endregion
