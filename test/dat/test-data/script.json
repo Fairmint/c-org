@@ -14,17 +14,15 @@
     },
     {
       "id": 4,
-      "name": "buy_close_sell_nopremint",
-      "disabled": true
+      "name": "buy_close_sell-no-pre-mint"
     },
     {
       "id": 5,
-      "name": "buy_close_sell_premint",
-      "disabled": true
+      "name": "buy_close_sell_pre-mint"
     },
     {
       "id": 6,
-      "name": "buy_pay_close-no-premint",
+      "name": "buy_pay_close-pre-mint",
       "disabled": true
     },
     {
