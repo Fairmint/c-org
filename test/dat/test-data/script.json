@@ -9,8 +9,7 @@
     },
     {
       "id": 3,
-      "name": "buy_sell_large_numbers",
-      "disabled": true
+      "name": "buy_sell_large_numbers"
     },
     {
       "id": 4,
@@ -34,8 +33,7 @@
     },
     {
       "id": 9,
-      "name": "buy_sell_pay_xfer_close-pre-mint-large-numbers",
-      "disabled": true
+      "name": "buy_sell_pay_xfer_close-pre-mint-large-numbers"
     }
   ]
   

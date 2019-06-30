@@ -118,6 +118,7 @@ STATE_INIT: constant(uint256(stateMachine)) = 0
 STATE_RUN: constant(uint256(stateMachine)) = 1
 STATE_CLOSE: constant(uint256(stateMachine)) = 2
 STATE_CANCEL: constant(uint256(stateMachine)) = 3
+DIGITS_ROUND_UINT: constant(uint256) = 10 ** 8
 DIGITS_UINT: constant(uint256) = 10 ** 18
 DIGITS_DECIMAL: constant(decimal) = convert(DIGITS_UINT, decimal)
 
@@ -423,18 +424,24 @@ def sell(
     # total_supply = t
     # burnt_supply = b
     # amount = a
-    # s (slope) = (2*r)/((total_supply + burned_supply)^2)
-    # source: (t+b)*a*s-((s*a^2)/2)+(s*a*b^2)/(2*(t)) 
-    # imp: ((a (b^2 + 2 b t + 2 t^2 -a t))/(2 t)) * s
+    # source: (t+b)*a*(2*r)/((t+b)^2)-(((2*r)/((t+b)^2)*a^2)/2)+((2*r)/((t+b)^2)*a*b^2)/(2*(t)) 
+    # imp: (a b^2 r)/(t (b + t)^2) + (2 a r)/(b + t) - (a^2 r)/(b + t)^2
     burnedSupply: uint256 = self.fse.burnedSupply()
     supply: uint256 = totalSupply + burnedSupply
-    temp1: uint256 = _quantityToSell * burnedSupply * burnedSupply * self.buybackReserve()
-    temp1 /= totalSupply * supply * supply
-    temp2: uint256 = 2 * _quantityToSell * self.buybackReserve()
-    temp2 /= supply
-    currencyValue = _quantityToSell * _quantityToSell * self.buybackReserve()
-    currencyValue /= supply * supply
-    currencyValue = temp1 + temp2 - currencyValue
+    buybackReserve: uint256 = self.buybackReserve()
+    quantityToSell: uint256 = _quantityToSell
+    multiple: uint256 = 1
+    if(supply + buybackReserve > 10000000 * DIGITS_UINT):
+      multiple = DIGITS_ROUND_UINT
+      burnedSupply /= multiple
+      totalSupply /= multiple
+      supply /= multiple
+      buybackReserve /= multiple
+    
+    currencyValue = quantityToSell * burnedSupply * burnedSupply * buybackReserve
+    currencyValue /= totalSupply * supply * supply
+    currencyValue += (2 * quantityToSell * buybackReserve) / supply
+    currencyValue -= (quantityToSell * quantityToSell * buybackReserve) / (supply * supply * multiple)
   elif(self.state == STATE_CLOSE):
     currencyValue = _quantityToSell * self.buybackReserve() / totalSupply
   else:
