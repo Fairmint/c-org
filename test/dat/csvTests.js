@@ -43,38 +43,36 @@ contract("dat / csvTests", accounts => {
     initComplete = true;
   });
 
-  sheets.forEach(sheet => {
-    tokenType.forEach(tokenArtifact => {
+  tokenType.forEach(tokenArtifact => {
+    beforeEach(async () => {
+      if (!tokenArtifact) {
+        currency = undefined;
+        currencyString = "ETH";
+      } else {
+        currency = await tokenArtifact.new({ from: control });
+        currencyString = await currency.symbol();
+      }
+    });
+
+    sheets.forEach(sheet => {
       describe("Prep currency", () => {
-        beforeEach(async () => {
-          if (!tokenArtifact) {
-            currency = undefined;
-            currencyString = "ETH";
-          } else {
-            currency = await tokenArtifact.new({ from: control });
-            currencyString = await currency.symbol();
-          }
-        });
+        const sheetTitle = `TS ${sheet.id} ${sheet.name} w/ ${
+          tokenArtifact ? tokenArtifact.contractName : "ETH"
+        }`;
 
-        describe("Prep complete", () => {
-          const sheetTitle = `TS ${sheet.id} ${
-            sheet.name
-          } w/ ${currencyString}`;
+        describe(`Starting ${sheetTitle}`, () => {
+          beforeEach(async () => {
+            if (sheet.disabled) return;
 
-          describe(`Starting ${sheetTitle}`, () => {
-            beforeEach(async () => {
-              if (sheet.disabled) return;
+            await setInitialBalances(sheet);
+          });
 
-              await setInitialBalances(sheet);
-            });
-
-            it(`${sheetTitle} complete`, async () => {
-              if (sheet.disabled) {
-                return console.log("Test skipped.");
-              }
-              await deployAndConfigDat(sheet);
-              await runTestScript(sheet);
-            });
+          it(`${sheetTitle} complete`, async () => {
+            if (sheet.disabled) {
+              return console.log("Test skipped.");
+            }
+            await deployAndConfigDat(sheet);
+            await runTestScript(sheet);
           });
         });
       });
@@ -461,7 +459,7 @@ contract("dat / csvTests", accounts => {
         .div(b)
         .minus(1)
         .abs()
-        .lt(0.0001) // Allow up to .01% error from expected value
+        .lt(0.001) // Allow up to .1% error from expected value
     )
       return true;
 
