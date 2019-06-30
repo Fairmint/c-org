@@ -22,8 +22,7 @@
     },
     {
       "id": 6,
-      "name": "buy_pay_close-pre-mint",
-      "disabled": true
+      "name": "buy_pay_close-pre-mint"
     },
     {
       "id": 7,
@@ -32,6 +31,11 @@
     {
       "id": 8,
       "name": "buy_sell_xfer_pay_close-premint"
+    },
+    {
+      "id": 9,
+      "name": "buy_sell_pay_xfer_close-pre-mint-large-numbers",
+      "disabled": true
     }
   ]
   
