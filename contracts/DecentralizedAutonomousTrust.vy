@@ -255,7 +255,6 @@ def _collectInvestment(
     
     assert self.currency.balanceOf(self) > balanceBefore, "TOKEN_TRANSFER_FAILED"
 
-
 @private
 def _applyBurnThreshold():
   balanceBefore: uint256 = self.fse.balanceOf(self.beneficiary)
