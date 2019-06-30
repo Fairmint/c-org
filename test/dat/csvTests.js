@@ -21,7 +21,7 @@ contract("dat / csvTests", accounts => {
   const TRANSFER_GAS_COST = new BigNumber("22000").times("100000000000");
   const GAS_COST_BUFFER = new BigNumber("2200000").times("100000000000");
 
-  const tokenType = [daiArtifact]; // TODO undefined (and with fse itself?)
+  const tokenType = [undefined, daiArtifact]; // TODO ERC-777 (and with fse itself?)
 
   let dat;
   let fse;
