@@ -40,7 +40,11 @@ contract("fair / erc20 / name", accounts => {
 
       describe("max length", () => {
         before(async () => {
-          tx = await updateFairConfig(fair, { name: maxLengthName }, accounts[0]);
+          tx = await updateFairConfig(
+            fair,
+            { name: maxLengthName },
+            accounts[0]
+          );
         });
 
         it("should have the new name", async () => {
