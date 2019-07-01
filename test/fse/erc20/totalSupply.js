@@ -1,15 +1,15 @@
-const fseArtifact = artifacts.require("FairSyntheticEquity");
+const fairArtifact = artifacts.require("FAIR");
 
-contract("fse / erc20 / totalSupply", () => {
-  let fse;
+contract("fair / erc20 / totalSupply", () => {
+  let fair;
 
   before(async () => {
-    fse = await fseArtifact.new();
-    await fse.initialize();
+    fair = await fairArtifact.new();
+    await fair.initialize();
   });
 
   it("defaults to 0", async () => {
-    assert.equal((await fse.totalSupply()).toString(), 0);
+    assert.equal((await fair.totalSupply()).toString(), 0);
   });
 
   it("goes up on mint");

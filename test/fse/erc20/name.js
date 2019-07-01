@@ -1,20 +1,20 @@
-const { shouldFail, updateFseConfig } = require("../../helpers");
+const { shouldFail, updateFairConfig } = require("../../helpers");
 
-const fseArtifact = artifacts.require("FairSyntheticEquity");
+const fairArtifact = artifacts.require("FAIR");
 
-contract("fse / erc20 / name", accounts => {
+contract("fair / erc20 / name", accounts => {
   const maxLengthName =
     "Names are 64 characters max.....................................";
-  let fse;
+  let fair;
   let tx;
 
   before(async () => {
-    fse = await fseArtifact.new();
-    await fse.initialize();
+    fair = await fairArtifact.new();
+    await fair.initialize();
   });
 
   it("should have an empty name by default name", async () => {
-    assert.equal(await fse.name(), "");
+    assert.equal(await fair.name(), "");
   });
 
   describe("updateName", () => {
@@ -22,11 +22,11 @@ contract("fse / erc20 / name", accounts => {
       const newName = "New Name";
 
       before(async () => {
-        tx = await updateFseConfig(fse, { name: newName }, accounts[0]);
+        tx = await updateFairConfig(fair, { name: newName }, accounts[0]);
       });
 
       it("should have the new name", async () => {
-        assert.equal(await fse.name(), newName);
+        assert.equal(await fair.name(), newName);
       });
 
       it("should emit an event", async () => {
@@ -40,17 +40,21 @@ contract("fse / erc20 / name", accounts => {
 
       describe("max length", () => {
         before(async () => {
-          tx = await updateFseConfig(fse, { name: maxLengthName }, accounts[0]);
+          tx = await updateFairConfig(
+            fair,
+            { name: maxLengthName },
+            accounts[0]
+          );
         });
 
         it("should have the new name", async () => {
-          assert.equal(await fse.name(), maxLengthName);
+          assert.equal(await fair.name(), maxLengthName);
         });
 
         it("should fail to update longer than the max", async () => {
           await shouldFail(
-            updateFseConfig(
-              fse,
+            updateFairConfig(
+              fair,
               { name: `${maxLengthName} more characters` },
               accounts[0]
             )
@@ -61,7 +65,7 @@ contract("fse / erc20 / name", accounts => {
 
     it("should fail to change name from a different account", async () => {
       await shouldFail(
-        updateFseConfig(fse, { name: "Test" }, accounts[2]),
+        updateFairConfig(fair, { name: "Test" }, accounts[2]),
         "OWNER_ONLY"
       );
     });

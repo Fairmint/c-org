@@ -1,12 +1,12 @@
-const fseArtifact = artifacts.require("FairSyntheticEquity");
+const fairArtifact = artifacts.require("FAIR");
 
-contract("fse / erc20 / burn", accounts => {
-  let fse;
+contract("fair / erc20 / burn", accounts => {
+  let fair;
 
   before(async () => {
-    fse = await fseArtifact.new();
-    await fse.initialize();
-    await fse.mint(
+    fair = await fairArtifact.new();
+    await fair.initialize();
+    await fair.mint(
       accounts[0],
       accounts[0],
       42,
@@ -20,13 +20,13 @@ contract("fse / erc20 / burn", accounts => {
     let accountBalanceBefore;
 
     before(async () => {
-      accountBalanceBefore = await fse.balanceOf(accounts[0]);
-      await fse.burn(burnAmount, web3.utils.asciiToHex(""));
+      accountBalanceBefore = await fair.balanceOf(accounts[0]);
+      await fair.burn(burnAmount, web3.utils.asciiToHex(""));
     });
 
     it("account balance went down", async () => {
       assert.equal(
-        (await fse.balanceOf(accounts[0])).toString(),
+        (await fair.balanceOf(accounts[0])).toString(),
         accountBalanceBefore.subn(burnAmount).toString()
       );
     });

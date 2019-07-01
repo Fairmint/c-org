@@ -1,7 +1,7 @@
-module.exports = async function updateDatConfig(dat, fse, options, from) {
+module.exports = async function updateDatConfig(dat, fair, options, from) {
   const callOptions = Object.assign(
     {
-      authorizationAddress: await fse.authorizationAddress(),
+      authorizationAddress: await fair.authorizationAddress(),
       beneficiary: await dat.beneficiary(),
       control: await dat.control(),
       feeCollector: await dat.feeCollector(),
@@ -10,8 +10,8 @@ module.exports = async function updateDatConfig(dat, fse, options, from) {
       burnThresholdNum: await dat.burnThresholdNum(),
       burnThresholdDen: await dat.burnThresholdDen(),
       minInvestment: await dat.minInvestment(),
-      name: await fse.name(),
-      symbol: await fse.symbol()
+      name: await fair.name(),
+      symbol: await fair.symbol()
     },
     options
   );

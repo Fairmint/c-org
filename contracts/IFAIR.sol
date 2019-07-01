@@ -1,6 +1,6 @@
 pragma solidity ^0.5.0;
 
-interface IFSE
+interface IFAIR
 {
   function owner() external view returns (address);
 }

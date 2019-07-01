@@ -1,13 +1,13 @@
-const fseArtifact = artifacts.require("FairSyntheticEquity");
+const fairArtifact = artifacts.require("FAIR");
 
-contract("fse / erc20 / transferFrom", accounts => {
-  let fse;
+contract("fair / erc20 / transferFrom", accounts => {
+  let fair;
   const initReserve = 1000;
 
   before(async () => {
-    fse = await fseArtifact.new();
-    await fse.initialize();
-    await fse.mint(
+    fair = await fairArtifact.new();
+    await fair.initialize();
+    await fair.mint(
       accounts[0],
       accounts[0],
       initReserve,
@@ -17,27 +17,27 @@ contract("fse / erc20 / transferFrom", accounts => {
   });
 
   it("has expected balance before transfer", async () => {
-    assert.equal((await fse.balanceOf(accounts[0])).toString(), initReserve);
-    assert.equal(await fse.balanceOf(accounts[1]), 0);
+    assert.equal((await fair.balanceOf(accounts[0])).toString(), initReserve);
+    assert.equal(await fair.balanceOf(accounts[1]), 0);
   });
 
   describe("can transfer funds from initReserve", () => {
     const transferAmount = 42;
 
     before(async () => {
-      await fse.approve(accounts[2], -1);
-      await fse.transferFrom(accounts[0], accounts[1], transferAmount, {
+      await fair.approve(accounts[2], -1);
+      await fair.transferFrom(accounts[0], accounts[1], transferAmount, {
         from: accounts[2]
       });
     });
 
     it("has expected after after transfer", async () => {
       assert.equal(
-        (await fse.balanceOf(accounts[0])).toString(),
+        (await fair.balanceOf(accounts[0])).toString(),
         initReserve - transferAmount
       );
       assert.equal(
-        (await fse.balanceOf(accounts[1])).toString(),
+        (await fair.balanceOf(accounts[1])).toString(),
         transferAmount
       );
     });

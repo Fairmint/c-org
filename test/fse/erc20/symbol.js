@@ -1,19 +1,19 @@
-const { shouldFail, updateFseConfig } = require("../../helpers");
+const { shouldFail, updateFairConfig } = require("../../helpers");
 
-const fseArtifact = artifacts.require("FairSyntheticEquity");
+const fairArtifact = artifacts.require("FAIR");
 
-contract("fse / erc20 / symbol", accounts => {
+contract("fair / erc20 / symbol", accounts => {
   const maxLengthSymbol = "Symbols are 32 characters max...";
-  let fse;
+  let fair;
   let tx;
 
   before(async () => {
-    fse = await fseArtifact.new();
-    await fse.initialize();
+    fair = await fairArtifact.new();
+    await fair.initialize();
   });
 
   it("should have an empty symbol by default", async () => {
-    assert.equal(await fse.symbol(), "");
+    assert.equal(await fair.symbol(), "");
   });
 
   describe("updateSymbol", () => {
@@ -21,11 +21,11 @@ contract("fse / erc20 / symbol", accounts => {
       const newSymbol = "NSYM";
 
       before(async () => {
-        tx = await updateFseConfig(fse, { symbol: newSymbol }, accounts[0]);
+        tx = await updateFairConfig(fair, { symbol: newSymbol }, accounts[0]);
       });
 
       it("should have the new symbol", async () => {
-        assert.equal(await fse.symbol(), newSymbol);
+        assert.equal(await fair.symbol(), newSymbol);
       });
 
       it("should emit an event", async () => {
@@ -39,21 +39,21 @@ contract("fse / erc20 / symbol", accounts => {
 
       describe("max length", () => {
         before(async () => {
-          tx = await updateFseConfig(
-            fse,
+          tx = await updateFairConfig(
+            fair,
             { symbol: maxLengthSymbol },
             accounts[0]
           );
         });
 
         it("should have the new symbol", async () => {
-          assert.equal(await fse.symbol(), maxLengthSymbol);
+          assert.equal(await fair.symbol(), maxLengthSymbol);
         });
 
         it("should fail to update longer than the max", async () => {
           await shouldFail(
-            updateFseConfig(
-              fse,
+            updateFairConfig(
+              fair,
               { symbol: `${maxLengthSymbol} more characters` },
               accounts[0]
             )
@@ -64,7 +64,7 @@ contract("fse / erc20 / symbol", accounts => {
 
     it("should fail to change symbol from a different account", async () => {
       await shouldFail(
-        updateFseConfig(fse, { symbol: "Test" }, accounts[2]),
+        updateFairConfig(fair, { symbol: "Test" }, accounts[2]),
         "OWNER_ONLY"
       );
     });

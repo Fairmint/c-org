@@ -1,4 +1,4 @@
-AccId,Action,BuyQty,SellQty,BurnQty,xferTargetAcc,PreviousFSEBal,PreviousDAIBal,FSEDelta,DAIDelta,FSEBalanceOfAcct,DAIBalanceOfAcct,FSETotalSupply,FSEBurnedSupply,DAIBuybackReserve,TotalDAISentToBeneficiary,TotalDAISentToFeeCollector,SellSlope,State,PricePerFSE,BuyBackPrice,CmulatedInvest,ReserveVsInvest
+AccId,Action,BuyQty,SellQty,BurnQty,xferTargetAcc,PreviousFAIRBal,PreviousDAIBal,FAIRDelta,DAIDelta,FAIRBalanceOfAcct,DAIBalanceOfAcct,FAIRTotalSupply,FAIRBurnedSupply,DAIBuybackReserve,TotalDAISentToBeneficiary,TotalDAISentToFeeCollector,SellSlope,State,PricePerFAIR,BuyBackPrice,CmulatedInvest,ReserveVsInvest
 0,xfer,,"100,0000",,4,"1 000,0000","$100 000,00","-100,0000","$0,00","900,0000","$100 000,00","1 000,00",,0,"$0,00","$0,00","0,0000000",init,$0,$0,,$0
 0,xfer,,"200,0000",,5,"900,0000","$100 000,00","-200,0000","$0,00","700,0000","$100 000,00","1 000,00","0,0000",0,"$0,00","$0,00","0,0000000",init,$0,$0,$0,$0
 6,buy,"$50 000,00",,,,"0,0000","$100 000,00","1 000,0000","-$50 000,00","1 000,0000","$50 000,00","2 000,00","0,0000","$50 000,00","$0,00","$0,00","0,0000000",init,$50,$0,$50 000,$0

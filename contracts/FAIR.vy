@@ -1,4 +1,4 @@
-# Fair Synthetic Equity (FSE)
+# FAIR tokens
 # ERC-777 and ERC-20 compliance token
 # Allows the owner to mint tokens and uses IAuthorization to validate transfers
 
