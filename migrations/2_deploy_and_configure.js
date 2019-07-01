@@ -2,7 +2,7 @@ const erc1820 = require("erc1820");
 const { updateDatConfig } = require("../helpers");
 
 const authArtifact = artifacts.require("Authorization");
-const fseArtifact = artifacts.require("FairSyntheticEquity");
+const fairArtifact = artifacts.require("FAIR");
 const datArtifact = artifacts.require("DecentralizedAutonomousTrust");
 
 module.exports = async function deployAndConfigure(
@@ -16,13 +16,13 @@ module.exports = async function deployAndConfigure(
   }
 
   // Deploy token
-  const fse = await deployer.deploy(fseArtifact);
+  const fair = await deployer.deploy(fairArtifact);
 
   // Deploy Dat
   const dat = await deployer.deploy(
     datArtifact,
     accounts[0],
-    fseArtifact.address,
+    fairArtifact.address,
     "42000000000000000000", // initReserve
     "0x0000000000000000000000000000000000000000", // currencyAddress
     "0", // initGoal
@@ -38,18 +38,18 @@ module.exports = async function deployAndConfigure(
   // Deploy auth
   const auth = await deployer.deploy(
     authArtifact,
-    fse.address,
+    fair.address,
     0 // initLockup
   );
 
   // Update dat with auth (and other settings)
   await updateDatConfig(
     dat,
-    fse,
+    fair,
     {
       authorizationAddress: auth.address,
       name: "Fairmint Fair Synthetic Equity",
-      symbol: "FSE"
+      symbol: "FAIR"
     },
     accounts[0]
   );

@@ -56,7 +56,7 @@ contract IERC777:
     _userData: bytes[256],
     _operatorData: bytes[256]
   ): modifying
-contract IFSE:
+contract IFAIR:
   def burnedSupply() -> uint256: constant
   def totalSupply() -> uint256: constant
   def balanceOf(
@@ -134,8 +134,8 @@ currency: IERC777 # redundant w/ currencyAddress, for convenience
 feeCollector: public(address)
 feeNum: public(uint256)
 feeDen: public(uint256)
-fseAddress: public(address)
-fse: IFSE # redundant w/ fseAddress, for convenience
+fairAddress: public(address)
+fair: IFAIR # redundant w/ fairAddress, for convenience
 initDeadline: public(timestamp)
 initGoal: public(uint256)
 initInvestors: public(map(address, uint256))
@@ -156,7 +156,7 @@ state: public(uint256(stateMachine))
 @public
 def __init__(
   _beneficiary: address,
-  _fseAddress: address,
+  _fairAddress: address,
   _initReserve: uint256,
   _currencyAddress: address,
   _initGoal: uint256,
@@ -208,13 +208,13 @@ def __init__(
   if(IERC1820Registry(0x1820a4B7618BdE71Dce8cdc73aAB6C95905faD24).getInterfaceImplementer(_currencyAddress, keccak256("ERC777")) != _currencyAddress):
     self.isCurrencyERC20 = True
 
-  self.fseAddress = _fseAddress
-  self.fse = IFSE(_fseAddress)
-  self.fse.initialize()
+  self.fairAddress = _fairAddress
+  self.fair = IFAIR(_fairAddress)
+  self.fair.initialize()
 
   if(_initReserve > 0):
     self.initReserve = _initReserve
-    self.fse.mint(msg.sender, self.beneficiary, self.initReserve, "", "")
+    self.fair.mint(msg.sender, self.beneficiary, self.initReserve, "", "")
 
 #endregion
 
@@ -258,13 +258,13 @@ def _collectInvestment(
 
 @private
 def _applyBurnThreshold():
-  balanceBefore: uint256 = self.fse.balanceOf(self.beneficiary)
-  maxHoldings: uint256 = self.fse.totalSupply() + self.fse.burnedSupply()
+  balanceBefore: uint256 = self.fair.balanceOf(self.beneficiary)
+  maxHoldings: uint256 = self.fair.totalSupply() + self.fair.burnedSupply()
   maxHoldings *= self.burnThresholdNum
   maxHoldings /= self.burnThresholdDen
 
   if(balanceBefore > maxHoldings):
-    self.fse.operatorBurn(self.beneficiary, balanceBefore - maxHoldings, "", "")
+    self.fair.operatorBurn(self.beneficiary, balanceBefore - maxHoldings, "", "")
 
 @private
 def _sendCurrency(
@@ -313,7 +313,7 @@ def _pay(
   #  + s^2
   # ) - s
 
-  supply: uint256 = self.fse.totalSupply() + self.fse.burnedSupply()
+  supply: uint256 = self.fair.totalSupply() + self.fair.burnedSupply()
   tokenValue: uint256 = 2 * _currencyValue * self.revenueCommitmentNum * self.buySlopeDen
   tokenValue /= self.revenueCommitmentDen * self.buySlopeNum
   tokenValue += supply * supply
@@ -334,7 +334,7 @@ def _pay(
 
   tokenValue -= supply
 
-  self.fse.mint(_to, self.beneficiary, tokenValue, "", "")
+  self.fair.mint(_to, self.beneficiary, tokenValue, "", "")
   self._applyBurnThreshold() # must mint before this call
 
 #endregion
@@ -369,15 +369,15 @@ def buy(
   if(self.state == STATE_INIT):
     if(self.initDeadline == 0 or self.initDeadline > block.timestamp):
       tokenValue = 2 * _currencyValue * self.buySlopeDen / (self.initGoal * self.buySlopeNum)
-    self.fse.mint(msg.sender, _to, tokenValue, "", "")
+    self.fair.mint(msg.sender, _to, tokenValue, "", "")
 
     self.initInvestors[_to] += tokenValue
 
-    if(self.fse.totalSupply() - self.initReserve >= self.initGoal):
+    if(self.fair.totalSupply() - self.initReserve >= self.initGoal):
       self.state = STATE_RUN
       self._distributeInvestment(self.buybackReserve())
   elif(self.state == STATE_RUN):
-    supply: uint256 = self.fse.totalSupply() + self.fse.burnedSupply()
+    supply: uint256 = self.fair.totalSupply() + self.fair.burnedSupply()
     tokenValue = 2 * _currencyValue
     tokenValue *= self.buySlopeDen
     tokenValue /= self.buySlopeNum
@@ -400,7 +400,7 @@ def buy(
     tokenValue -= supply
 
     assert tokenValue >= _minTokensBought, "PRICE_SLIPPAGE"
-    self.fse.mint(msg.sender, _to, tokenValue, "", "")
+    self.fair.mint(msg.sender, _to, tokenValue, "", "")
 
     if(_to == self.beneficiary):
       self._applyBurnThreshold() # must mint before this call
@@ -416,7 +416,7 @@ def sell(
  _quantityToSell: uint256,
  _minCurrencyReturned: uint256
 ):
-  totalSupply: uint256 = self.fse.totalSupply()
+  totalSupply: uint256 = self.fair.totalSupply()
   currencyValue: uint256
 
   if(self.state == STATE_RUN):
@@ -426,7 +426,7 @@ def sell(
     # amount = a
     # source: (t+b)*a*(2*r)/((t+b)^2)-(((2*r)/((t+b)^2)*a^2)/2)+((2*r)/((t+b)^2)*a*b^2)/(2*(t)) 
     # imp: (a b^2 r)/(t (b + t)^2) + (2 a r)/(b + t) - (a^2 r)/(b + t)^2
-    burnedSupply: uint256 = self.fse.burnedSupply()
+    burnedSupply: uint256 = self.fair.burnedSupply()
     supply: uint256 = totalSupply + burnedSupply
     buybackReserve: uint256 = self.buybackReserve()
     quantityToSell: uint256 = _quantityToSell
@@ -453,7 +453,7 @@ def sell(
 
   self._sendCurrency(msg.sender, currencyValue)
   # Set an operator flag to differentiate a sell vs burn
-  self.fse.operatorBurn(msg.sender, _quantityToSell, "", SELL_FLAG)
+  self.fair.operatorBurn(msg.sender, _quantityToSell, "", SELL_FLAG)
 
 @public
 @payable
@@ -490,7 +490,7 @@ def close():
     self.state = STATE_CANCEL
   elif(self.state == STATE_RUN):
     self.state = STATE_CLOSE
-    supply: uint256 = self.fse.totalSupply()
+    supply: uint256 = self.fair.totalSupply()
     exitFee: uint256 = supply * supply
     exitFee *= self.buySlopeNum
     exitFee /= self.buySlopeDen * 2
@@ -520,13 +520,13 @@ def updateConfig(
 ):
   assert msg.sender == self.control, "CONTROL_ONLY"
 
-  self.fse.updateConfig(_authorizationAddress, _name, _symbol)
+  self.fair.updateConfig(_authorizationAddress, _name, _symbol)
 
   if(self.beneficiary != _beneficiary):
     assert _beneficiary != ZERO_ADDRESS, "INVALID_ADDRESS"
-    tokens: uint256 = self.fse.balanceOf(self.beneficiary)
+    tokens: uint256 = self.fair.balanceOf(self.beneficiary)
     if(tokens > 0):
-      self.fse.operatorSend(self.beneficiary, _beneficiary, self.fse.balanceOf(self.beneficiary), "", "")
+      self.fair.operatorSend(self.beneficiary, _beneficiary, self.fair.balanceOf(self.beneficiary), "", "")
       self.beneficiary = _beneficiary
 
   assert _control != ZERO_ADDRESS, "INVALID_ADDRESS"

@@ -2,34 +2,34 @@ pragma solidity ^0.5.0;
 
 import "./IAuthorization.sol";
 import "./IDAT.sol";
-import "./IFSE.sol";
+import "./IFAIR.sol";
 import "openzeppelin-solidity/contracts/token/ERC777/IERC777.sol";
 
 
 contract Authorization is
   IAuthorization
 {
-  struct LockedFSE
+  struct LockedFAIR
   {
     uint256 lockType;
     uint256 expiration;
     uint256 value;
   }
 
-  address public fse;
+  address public fair;
   address public dat;
   uint256 public initLockup;
-  mapping(address => LockedFSE[]) public lockedTokens; // TODO switch to linked-list
+  mapping(address => LockedFAIR[]) public lockedTokens; // TODO switch to linked-list
 
   // TODO switch to init pattern in order to support zos upgrades
   constructor(
-    address _fse,
+    address _fair,
     uint256 _initLockup
   ) public
   {
-    require(_fse != address(0), "INVALID_ADDRESS");
-    fse = _fse;
-    dat = IFSE(_fse).owner();
+    require(_fair != address(0), "INVALID_ADDRESS");
+    fair = _fair;
+    dat = IFAIR(_fair).owner();
     initLockup = _initLockup;
   }
 
@@ -41,7 +41,7 @@ contract Authorization is
     bytes calldata _operatorData
   ) external
   {
-    require(msg.sender == fse, "ONLY_CALL_VIA_FSE");
+    require(msg.sender == fair, "ONLY_CALL_VIA_FAIR");
     require(isTransferAllowed(_operator, _from, _to, _value, _operatorData), "NOT_AUTHORIZED");
   }
 
@@ -71,6 +71,6 @@ contract Authorization is
       return 0;
     }
     // TODO consider locked tokens
-    return IERC777(fse).balanceOf(_from);
+    return IERC777(fair).balanceOf(_from);
   }
 }

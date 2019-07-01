@@ -1,4 +1,4 @@
-const fseArtifact = artifacts.require("FairSyntheticEquity");
+const fairArtifact = artifacts.require("FAIR");
 const datArtifact = artifacts.require("DecentralizedAutonomousTrust");
 
 module.exports = async function deployDat(options, from) {
@@ -21,11 +21,11 @@ module.exports = async function deployDat(options, from) {
 
   console.log(`Deploy DAT: ${JSON.stringify(callOptions, null, 2)}`);
 
-  const fse = await fseArtifact.new();
+  const fair = await fairArtifact.new();
   return [
     await datArtifact.new(
       callOptions.beneficiary,
-      fse.address,
+      fair.address,
       callOptions.initReserve,
       callOptions.currency,
       callOptions.initGoal,
@@ -38,6 +38,6 @@ module.exports = async function deployDat(options, from) {
       callOptions.revenueCommitementDen,
       { from }
     ),
-    fse
+    fair
   ];
 };

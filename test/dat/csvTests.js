@@ -21,10 +21,10 @@ contract("dat / csvTests", accounts => {
   const TRANSFER_GAS_COST = new BigNumber("22000").times("100000000000");
   const GAS_COST_BUFFER = new BigNumber("2200000").times("100000000000");
 
-  const tokenType = [undefined, daiArtifact]; // TODO ERC-777 (and with fse itself?)
+  const tokenType = [undefined, daiArtifact]; // TODO ERC-777 (and with fair itself?)
 
   let dat;
-  let fse;
+  let fair;
   let currency;
   let currencyString;
 
@@ -92,7 +92,7 @@ contract("dat / csvTests", accounts => {
     const investmentReserve = parsePercent(configJson.investment_reserve);
     const revenueCommitement = parsePercent(configJson.revenue_commitment);
     const fee = parsePercent(configJson.fee);
-    [dat, fse] = await deployDat(
+    [dat, fair] = await deployDat(
       {
         beneficiary,
         buySlopeNum: new BigNumber(buySlope[0]).toFixed(),
@@ -113,7 +113,7 @@ contract("dat / csvTests", accounts => {
     );
     await updateDatConfig(
       dat,
-      fse,
+      fair,
       {
         feeCollector,
         feeNum: new BigNumber(fee[0]).toFixed(),
@@ -179,7 +179,7 @@ contract("dat / csvTests", accounts => {
       id,
       address,
       eth: new BigNumber(await web3.eth.getBalance(address)),
-      fse: new BigNumber(await fse.balanceOf(address)),
+      fair: new BigNumber(await fair.balanceOf(address)),
       currency: new BigNumber(currency ? await currency.balanceOf(address) : 0)
     };
 
@@ -205,9 +205,9 @@ contract("dat / csvTests", accounts => {
         : row.account.eth
       )
         .shiftedBy(-18)
-        .toFormat()} ${currencyString} and ${row.account.fse
+        .toFormat()} ${currencyString} and ${row.account.fair
         .shiftedBy(-18)
-        .toFormat()} FSE`
+        .toFormat()} FAIR`
     );
   }
 
@@ -221,7 +221,7 @@ contract("dat / csvTests", accounts => {
       case "sell":
         if (
           (!row.SellQty || parseNumber(row.SellQty).eq(0)) &&
-          row.account.fse.eq(0)
+          row.account.fair.eq(0)
         ) {
           row.skip = true;
           log = `with nothing to sell (SKIP)`;
@@ -231,11 +231,11 @@ contract("dat / csvTests", accounts => {
             parseNumber(row.SellQty)
               .plus(new BigNumber(1))
               .shiftedBy(18)
-              .gt(row.account.fse)
+              .gt(row.account.fair)
           ) {
-            row.SellQty = row.account.fse.shiftedBy(-18);
+            row.SellQty = row.account.fair.shiftedBy(-18);
           }
-          log = `${parseNumber(row.SellQty).toFormat()} FSE`;
+          log = `${parseNumber(row.SellQty).toFormat()} FAIR`;
         }
         break;
       case "close":
@@ -246,7 +246,7 @@ contract("dat / csvTests", accounts => {
         break;
       case "xfer":
         log = `${parseNumber(row.BuyQty || row.SellQty).toFormat()} ${
-          row.BuyQty ? "dia" : "fse"
+          row.BuyQty ? "dia" : "fair"
         } to #${parseInt(row.xferTargetAcc)}`;
         break;
       default:
@@ -322,7 +322,7 @@ contract("dat / csvTests", accounts => {
             });
           }
         } else {
-          tx = await fse.transfer(targetAddress, quantity.toFixed(), {
+          tx = await fair.transfer(targetAddress, quantity.toFixed(), {
             from: row.account.address
           });
         }
@@ -335,21 +335,21 @@ contract("dat / csvTests", accounts => {
   }
 
   async function checkPreConditions(row) {
-    await assertBalance(fse, row.account.address, row.PreviousFSEBal);
+    await assertBalance(fair, row.account.address, row.PreviousFAIRBal);
     await assertBalance(currency, row.account.address, row.PreviousDAIBal);
   }
 
   async function checkPostConiditons(row) {
-    await assertBalance(fse, row.account.address, row.FSEBalanceOfAcct);
+    await assertBalance(fair, row.account.address, row.FAIRBalanceOfAcct);
     await assertBalance(currency, row.account.address, row.DAIBalanceOfAcct);
     await assertBalance(currency, feeCollector, row.TotalDAISentToFeeCollector);
     assertAlmostEqual(
-      new BigNumber(await fse.totalSupply()),
-      parseNumber(row.FSETotalSupply).shiftedBy(18)
+      new BigNumber(await fair.totalSupply()),
+      parseNumber(row.FAIRTotalSupply).shiftedBy(18)
     );
     assertAlmostEqual(
-      new BigNumber(await fse.burnedSupply()),
-      parseNumber(row.FSEBurnedSupply).shiftedBy(18)
+      new BigNumber(await fair.burnedSupply()),
+      parseNumber(row.FAIRBurnedSupply).shiftedBy(18)
     );
     assertAlmostEqual(
       new BigNumber(await dat.buybackReserve()),
@@ -371,40 +371,40 @@ contract("dat / csvTests", accounts => {
     } else {
       throw new Error(`Missing state: ${state}`);
     }
-    const totalSupply = new BigNumber(await fse.totalSupply());
-    const burnedSupply = new BigNumber(await fse.burnedSupply());
+    const totalSupply = new BigNumber(await fair.totalSupply());
+    const burnedSupply = new BigNumber(await fair.burnedSupply());
     const buybackReserve = new BigNumber(await dat.buybackReserve());
     const beneficiaryDaiBalance = new BigNumber(
       currency
         ? await currency.balanceOf(beneficiary)
         : await web3.eth.getBalance(beneficiary)
     );
-    const beneficiaryFseBalance = new BigNumber(
-      await fse.balanceOf(beneficiary)
+    const beneficiaryFairBalance = new BigNumber(
+      await fair.balanceOf(beneficiary)
     );
     const feeCollectorDaiBalance = new BigNumber(
       currency
         ? await currency.balanceOf(feeCollector)
         : await web3.eth.getBalance(feeCollector)
     );
-    const feeCollectorFseBalance = new BigNumber(
-      await fse.balanceOf(feeCollector)
+    const feeCollectorFairBalance = new BigNumber(
+      await fair.balanceOf(feeCollector)
     );
     console.log(`\tState: ${state}
 \tSupply: ${totalSupply
       .shiftedBy(-18)
-      .toFormat()} FSE + ${burnedSupply.shiftedBy(-18).toFormat()} burned
+      .toFormat()} FAIR + ${burnedSupply.shiftedBy(-18).toFormat()} burned
 \tReserve: ${buybackReserve.shiftedBy(-18).toFormat()} ${currencyString}
 \tBeneficiary: ${beneficiaryDaiBalance
       .shiftedBy(-18)
-      .toFormat()} ${currencyString} and ${beneficiaryFseBalance
+      .toFormat()} ${currencyString} and ${beneficiaryFairBalance
       .shiftedBy(-18)
-      .toFormat()} FSE
+      .toFormat()} FAIR
 \tFee Collector: ${feeCollectorDaiBalance
       .shiftedBy(-18)
-      .toFormat()} ${currencyString} and ${feeCollectorFseBalance
+      .toFormat()} ${currencyString} and ${feeCollectorFairBalance
       .shiftedBy(-18)
-      .toFormat()} FSE`);
+      .toFormat()} FAIR`);
   }
 
   function parseState(state) {

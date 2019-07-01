@@ -1,3 +1,3 @@
-contract("fse / erc777 / operator", () => {
+contract("fair / erc777 / operator", () => {
   it("todo");
 });

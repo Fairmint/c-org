@@ -8,20 +8,20 @@ const authArtifact = artifacts.require("Authorization_Pausable");
 
 contract("dat / auth / canBlockBuy", accounts => {
   let dat;
-  let fse;
+  let fair;
   let auth;
 
   before(async () => {
-    [dat, fse] = await deployDat(
+    [dat, fair] = await deployDat(
       {
         initGoal: "1000000000000000000000"
       },
       accounts[0]
     );
-    auth = await authArtifact.new(fse.address);
+    auth = await authArtifact.new(fair.address);
     await updateDatConfig(
       dat,
-      fse,
+      fair,
       {
         authorizationAddress: auth.address
       },
@@ -30,7 +30,7 @@ contract("dat / auth / canBlockBuy", accounts => {
   });
 
   it("balanceOf should be 0 by default", async () => {
-    const balance = await fse.balanceOf(accounts[1]);
+    const balance = await fair.balanceOf(accounts[1]);
 
     assert.equal(balance, 0);
   });
@@ -44,7 +44,7 @@ contract("dat / auth / canBlockBuy", accounts => {
     });
 
     it("balanceOf should have increased", async () => {
-      const balance = await fse.balanceOf(accounts[1]);
+      const balance = await fair.balanceOf(accounts[1]);
 
       assert.equal(balance.toString(), "20000");
     });
@@ -64,7 +64,7 @@ contract("dat / auth / canBlockBuy", accounts => {
       });
 
       it("balanceOf should not have changed", async () => {
-        const balance = await fse.balanceOf(accounts[1]);
+        const balance = await fair.balanceOf(accounts[1]);
 
         assert.equal(balance.toString(), "20000");
       });
@@ -79,7 +79,7 @@ contract("dat / auth / canBlockBuy", accounts => {
         });
 
         it("balanceOf should have increased", async () => {
-          const balance = await fse.balanceOf(accounts[1]);
+          const balance = await fair.balanceOf(accounts[1]);
 
           assert.equal(balance.toString(), "40000");
         });

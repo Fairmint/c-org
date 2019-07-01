@@ -6,10 +6,10 @@ const { deployDat } = require("../helpers");
 
 contract("dat / buy", accounts => {
   let dat;
-  let fse;
+  let fair;
 
   before(async () => {
-    [dat, fse] = await deployDat(
+    [dat, fair] = await deployDat(
       {
         initGoal: "1000000000000000000000"
       },
@@ -18,7 +18,7 @@ contract("dat / buy", accounts => {
   });
 
   it("balanceOf should be 0 by default", async () => {
-    const balance = await fse.balanceOf(accounts[1]);
+    const balance = await fair.balanceOf(accounts[1]);
 
     assert.equal(balance, 0);
   });
@@ -32,7 +32,7 @@ contract("dat / buy", accounts => {
     });
 
     it("balanceOf should have increased", async () => {
-      const balance = await fse.balanceOf(accounts[1]);
+      const balance = await fair.balanceOf(accounts[1]);
 
       assert.equal(balance.toString(), "20000");
     });
