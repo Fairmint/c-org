@@ -41,11 +41,11 @@ module.exports = async function deployAndConfigure(
 
   // Deploy auth
   const auth = await deployer.deploy(
-    authArtifact, 
-    fair.address, 
-    tpl.address, 
-    [], 
-    [], 
+    authArtifact,
+    fair.address,
+    tpl.address,
+    [],
+    [],
     []
   );
 

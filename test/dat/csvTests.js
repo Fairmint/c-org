@@ -23,7 +23,7 @@ contract("dat / csvTests", accounts => {
 
   // TODO ERC-777 (and with fair itself?)
   // Blocked on Vyper b11
-  const tokenType = [undefined, daiArtifact]; 
+  const tokenType = [undefined, daiArtifact];
 
   let dat;
   let fair;
