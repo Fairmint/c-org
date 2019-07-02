@@ -27,13 +27,14 @@ contract Authorization_Pausable is
     address _from,
     address _to,
     uint256 _value,
+    bytes memory _userData,
     bytes memory _operatorData
   ) public view
     returns (bool)
   {
     if(authorized)
     {
-      return super.isTransferAllowed(_operator, _from, _to, _value, _operatorData);
+      return super.isTransferAllowed(_operator, _from, _to, _value, _userData, _operatorData);
     }
     return false;
   }
