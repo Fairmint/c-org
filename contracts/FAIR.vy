@@ -10,7 +10,7 @@ from vyper.interfaces import ERC20
 # TODO: switch to interface files (currently non-native imports fail to compile)
 # Depends on https://github.com/ethereum/vyper/issues/1367
 contract IAuthorization:
-  def authorizeTransfer( # TODO how to burn vs sell?
+  def authorizeTransfer(
     _operator: address,
     _from: address,
     _to: address,
@@ -143,6 +143,7 @@ operators: map(address, map(address, bool)) # not public: exposed via `isOperato
 #region Constructor
 ##################################################
 
+# TODO switch to init pattern in order to support zos upgrades (??)
 @public
 def __init__():
   self.ERC1820Registry = IERC1820Registry(0x1820a4B7618BdE71Dce8cdc73aAB6C95905faD24) # constant for all networks

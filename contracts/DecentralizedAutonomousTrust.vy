@@ -63,6 +63,7 @@ contract IFAIR:
     _account: address
   ) -> uint256: constant
   def initialize(): modifying
+  def authorizationAddress() -> address: constant
   def burn(
     _amount: uint256,
     _userData: bytes[256]
@@ -92,6 +93,14 @@ contract IFAIR:
     _name: string[64],
     _symbol: string[32]
   ): modifying
+contract IAuthorization:
+  def isTransferAllowed(
+    _operator: address,
+    _from: address,
+    _to: address,
+    _value: uint256,
+    _operatorData: bytes[256]
+  ) -> bool: constant
 
 # Events triggered when updating the DAT's configuration
 UpdateConfig: event({
@@ -113,7 +122,7 @@ UpdateConfig: event({
 ##################################################
 
 # Constants
-SELL_FLAG: constant(bytes[256]) = b"\x01"
+SELL_FLAG: constant(bytes[256]) = b"\x01" # TODO is this overkill?
 STATE_INIT: constant(uint256(stateMachine)) = 0
 STATE_RUN: constant(uint256(stateMachine)) = 1
 STATE_CLOSE: constant(uint256(stateMachine)) = 2
@@ -153,6 +162,7 @@ state: public(uint256(stateMachine))
 #region Constructor
 ##################################################
 
+# TODO switch to init pattern in order to support zos upgrades
 @public
 def __init__(
   _beneficiary: address,
@@ -298,6 +308,7 @@ def _distributeInvestment(
 
 @private
 def _pay(
+  _operator: address,
   _to: address,
   _currencyValue: uint256
 ):
@@ -334,7 +345,14 @@ def _pay(
 
   tokenValue -= supply
 
-  self.fair.mint(_to, self.beneficiary, tokenValue, "", "")
+  to: address = _to
+  if(to == ZERO_ADDRESS):
+    to = self.beneficiary
+  elif(self.fair.authorizationAddress() != ZERO_ADDRESS):
+    if(not IAuthorization(self.fair.authorizationAddress()).isTransferAllowed(self, ZERO_ADDRESS, _to, tokenValue, "")):
+      to = self.beneficiary
+
+  self.fair.mint(_operator, to, tokenValue, "", "")
   self._applyBurnThreshold() # must mint before this call
 
 #endregion
@@ -458,16 +476,17 @@ def sell(
 @public
 @payable
 def pay(
-  _currencyValue: uint256
+  _currencyValue: uint256,
+  _to: address
 ):
   self._collectInvestment(msg.sender, _currencyValue, msg.value, False)
-  self._pay(msg.sender, _currencyValue)
+  self._pay(msg.sender, _to, _currencyValue)
 
 @public
 @payable
 def __default__():
   self._collectInvestment(msg.sender, as_unitless_number(msg.value), msg.value, False)
-  self._pay(msg.sender, as_unitless_number(msg.value))
+  self._pay(msg.sender, msg.sender, as_unitless_number(msg.value))
 
 @public
 def tokensReceived(
@@ -479,7 +498,7 @@ def tokensReceived(
   _operatorData: bytes[256]
 ):
   assert msg.sender == self.currency, "INVALID_CURRENCY"
-  self._pay(msg.sender, _amount)
+  self._pay(msg.sender, _from, _amount)
 
 @public
 @payable

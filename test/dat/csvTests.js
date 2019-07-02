@@ -21,7 +21,9 @@ contract("dat / csvTests", accounts => {
   const TRANSFER_GAS_COST = new BigNumber("22000").times("100000000000");
   const GAS_COST_BUFFER = new BigNumber("2200000").times("100000000000");
 
-  const tokenType = [undefined, daiArtifact]; // TODO ERC-777 (and with fair itself?)
+  // TODO ERC-777 (and with fair itself?)
+  // Blocked on Vyper b11
+  const tokenType = [undefined, daiArtifact];
 
   let dat;
   let fair;
@@ -291,7 +293,7 @@ contract("dat / csvTests", accounts => {
         });
         break;
       case "pay":
-        tx = await dat.pay(quantity.toFixed(), {
+        tx = await dat.pay(quantity.toFixed(), constants.ZERO_ADDRESS, {
           from: row.account.address,
           value: currency ? 0 : quantity.toFixed()
         });
@@ -543,7 +545,7 @@ contract("dat / csvTests", accounts => {
       console.log("Reset ETH balances:");
     }
     for (let i = 0; i < accounts.length; i++) {
-      await setBalanceTo(undefined, i, new BigNumber(10000));
+      await setBalanceTo(undefined, i, new BigNumber(100000));
     }
   }
 
