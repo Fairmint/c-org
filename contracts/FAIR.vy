@@ -1,6 +1,7 @@
 # FAIR tokens
 # ERC-777 and ERC-20 compliance token
 # Allows the owner to mint tokens and uses IAuthorization to validate transfers
+# "Owned" by the DAT contract which is also an approved operator for accounts.
 
 #region Types
 ##################################################
@@ -15,11 +16,9 @@ contract IAuthorization:
     _from: address,
     _to: address,
     _value: uint256,
+    _userData: bytes[256],
     _operatorData: bytes[256]
   ): modifying
-  def availableBalanceOf(
-    _from: address
-  ) -> uint256: constant
 contract IERC1820Registry:
   def setInterfaceImplementer(
     _account: address,
@@ -108,10 +107,12 @@ UpdateConfig: event({
 ##################################################
 
 # Constants
-# TODO test gas of using hex directly (this is not cached in Solidity)
+# TODO test gas of using hex directly
 TOKENS_SENDER_INTERFACE_HASH: constant(bytes32) = keccak256("ERC777TokensSender")
 TOKENS_RECIPIENT_INTERFACE_HASH: constant(bytes32) = keccak256("ERC777TokensRecipient")
-ERC1820Registry: IERC1820Registry # not public: constant data
+ERC1820Registry: IERC1820Registry # not public: constant data (but initialized in __init__)
+
+# TODO test Vyper comment format with b11 (does not seem to work on data with b10)
 
 # Data specific to our business logic
 authorizationAddress: public(address)
@@ -222,7 +223,7 @@ def _burn(
 ):
   assert _from != ZERO_ADDRESS, "ERC777: burn from the zero address"
   if(self.authorization != ZERO_ADDRESS):
-    self.authorization.authorizeTransfer(_operator, _from, ZERO_ADDRESS, _amount, _operatorData)
+    self.authorization.authorizeTransfer(_operator, _from, ZERO_ADDRESS, _amount, _userData, _operatorData)
 
   self._callTokensToSend(_operator, _from, ZERO_ADDRESS, _amount) # TODO _userData, _operatorData
   self.totalSupply -= _amount
@@ -243,7 +244,7 @@ def _send(
   assert _from != ZERO_ADDRESS, "ERC777: send from the zero address"
   assert _to != ZERO_ADDRESS, "ERC777: send to the zero address"
   if(self.authorization != ZERO_ADDRESS):
-    self.authorization.authorizeTransfer(_operator, _from, _to, _amount, _operatorData)
+    self.authorization.authorizeTransfer(_operator, _from, _to, _amount, _userData, _operatorData)
 
   self._callTokensToSend(_operator, _from, _to, _amount) # TODO _userData _operatorData stack underflow
   self.balanceOf[_from] -= _amount
@@ -397,16 +398,6 @@ def send(
 ##################################################
 
 @public
-@constant
-def availableBalanceOf(
-  _from: address
-) -> uint256:
-  if(self.authorization != ZERO_ADDRESS):
-    return self.authorization.availableBalanceOf(_from)
-  else:
-    return self.balanceOf[_from]
-
-@public
 @payable
 def mint(
   _operator: address,
@@ -420,7 +411,7 @@ def mint(
   assert _quantity > 0, "INVALID_QUANTITY"
 
   if(self.authorization != ZERO_ADDRESS):
-    self.authorization.authorizeTransfer(_operator, ZERO_ADDRESS, _to, _quantity, _operatorData)
+    self.authorization.authorizeTransfer(_operator, ZERO_ADDRESS, _to, _quantity, _userData, _operatorData)
 
   self.totalSupply += _quantity
   self.balanceOf[_to] += _quantity

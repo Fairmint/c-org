@@ -15,25 +15,7 @@ contract TestTPLAttributeRegistry
   {
     return authorized;
   }
-
-  function getAttributeValue(
-    address account,
-    uint256 attributeTypeID
-  ) external view returns (uint256)
-  {
-    return 1;
-  }
-
-  function countAttributeTypes() external view returns (uint256) 
-  {
-    return 1;
-  }
-
-  function getAttributeTypeID(uint256 index) external view returns (uint256) 
-  {
-    return 1;
-  }
-
+  
   function setAuthorized(
     bool _authorized
   ) public

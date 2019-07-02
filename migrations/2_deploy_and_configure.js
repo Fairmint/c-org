@@ -44,9 +44,9 @@ module.exports = async function deployAndConfigure(
     authArtifact,
     fair.address,
     tpl.address,
-    [],
-    [],
-    []
+    [42],
+    [0, 0],
+    [0, 0, 0]
   );
 
   // Update dat with auth (and other settings)
