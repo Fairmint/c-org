@@ -4,6 +4,7 @@
 
 const { deployDat, shouldFail, updateDatConfig } = require("../../helpers");
 
+const tplArtifact = artifacts.require("TestTPLAttributeRegistry");
 const authArtifact = artifacts.require("Authorization_Pausable");
 
 contract("dat / auth / canBlockBuy", accounts => {
@@ -18,7 +19,8 @@ contract("dat / auth / canBlockBuy", accounts => {
       },
       accounts[0]
     );
-    auth = await authArtifact.new(fair.address);
+    const tpl = await tplArtifact.new();
+    auth = await authArtifact.new(fair.address, tpl.address, [], [], []);
     await updateDatConfig(
       dat,
       fair,

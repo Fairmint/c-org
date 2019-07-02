@@ -1,6 +1,7 @@
 const erc1820 = require("erc1820");
 const { updateDatConfig } = require("../helpers");
 
+const tplArtifact = artifacts.require("TestTPLAttributeRegistry");
 const authArtifact = artifacts.require("Authorization");
 const fairArtifact = artifacts.require("FAIR");
 const datArtifact = artifacts.require("DecentralizedAutonomousTrust");
@@ -35,11 +36,17 @@ module.exports = async function deployAndConfigure(
     "10" // revenueCommitementDen
   );
 
+  // Deploy TPL
+  const tpl = await deployer.deploy(tplArtifact);
+
   // Deploy auth
   const auth = await deployer.deploy(
-    authArtifact,
-    fair.address,
-    0 // initLockup
+    authArtifact, 
+    fair.address, 
+    tpl.address, 
+    [], 
+    [], 
+    []
   );
 
   // Update dat with auth (and other settings)

@@ -13,9 +13,9 @@ interface IAuthorization {
   function authorizeTransfer(
     address _operator,
     address _from,
-    address _to, // TODO how to burn vs sell?
+    address _to,
     uint256 _amount,
-    bytes calldata _operatorData
+    bytes calldata _operatorData // TODO overkill?
   ) external;
 
   /**
@@ -31,7 +31,7 @@ interface IAuthorization {
     address _from,
     address _to,
     uint256 _amount,
-    bytes calldata _operatorData
+    bytes calldata _operatorData // TODO overkill?
   ) external view
     returns (bool);
 

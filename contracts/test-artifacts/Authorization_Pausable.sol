@@ -13,9 +13,13 @@ contract Authorization_Pausable is
   bool public authorized = true;
 
   constructor(
-    address _dat
+    address _dat,
+    address _tpl,
+    uint[] memory _attributeTypeIDs,
+    uint[] memory _authorizedTransfers,
+    uint[] memory _lockupPeriods
   ) public
-    Authorization(_dat, 0)
+    Authorization(_dat, _tpl, _attributeTypeIDs, _authorizedTransfers, _lockupPeriods)
   {}
 
   function isTransferAllowed(
