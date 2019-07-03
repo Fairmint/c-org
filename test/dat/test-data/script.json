@@ -39,6 +39,11 @@
       "id": 10,
       "name": "buy_pay_burn-no-premint",
       "disabled": true
+    },
+    {
+      "id": 11,
+      "name": "buy_pay_burn_sell_close-premint",
+      "disabled": true
     }
   ]
 
