@@ -10,8 +10,8 @@ const {
 const sheets = require("./test-data/script.json");
 
 const daiArtifact = artifacts.require("TestDai");
-//const erc777Artifact = artifacts.require("ERC777Only");
-//const zosTokenArtifact = artifacts.require("ZOSERC777");
+//const erc777Artifact = artifacts.require("TestERC777Only");
+//const zosTokenArtifact = artifacts.require("TestERC777ERC20");
 
 contract("dat / csvTests", accounts => {
   const beneficiary = accounts[0];

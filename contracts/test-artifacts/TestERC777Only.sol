@@ -9,7 +9,7 @@ import "openzeppelin-solidity/contracts/token/ERC777/IERC777Sender.sol";
 import "erc1820/contracts/ERC1820Client.sol";
 
 
-contract ERC777Only is
+contract TestERC777Only is
     IERC777,
     Ownable,
     ERC1820Client
@@ -25,7 +25,7 @@ contract ERC777Only is
     mapping(address => mapping(address => bool)) private userToOperatorEnabled;
 
     constructor() public {
-        name = "ERC777Only";
+        name = "TestERC777Only";
         symbol = "E7O";
         setInterfaceImplementation("ERC777Token", address(this));
     }

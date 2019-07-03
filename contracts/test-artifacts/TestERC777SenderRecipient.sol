@@ -1,4 +1,4 @@
-// Source https://github.com/OpenZeppelin/openzeppelin-solidity/blob/master/contracts/mocks/ERC777SenderRecipientMock.sol
+// Source https://github.com/OpenZeppelin/openzeppelin-solidity/blob/master/contracts/mocks/TestERC777SenderRecipient.sol
 
 pragma solidity ^0.5.0;
 
@@ -8,7 +8,7 @@ import "openzeppelin-solidity/contracts/token/ERC777/IERC777Recipient.sol";
 import "openzeppelin-solidity/contracts/introspection/IERC1820Registry.sol";
 import "openzeppelin-solidity/contracts/introspection/ERC1820Implementer.sol";
 
-contract ERC777SenderRecipientMock is IERC777Sender, IERC777Recipient, ERC1820Implementer {
+contract TestERC777SenderRecipient is IERC777Sender, IERC777Recipient, ERC1820Implementer {
     event TokensToSendCalled(
         address operator,
         address from,
