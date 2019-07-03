@@ -333,7 +333,7 @@ contract("dat / csvTests", accounts => {
         }
         break;
       case "burn":
-        tx = await fair.burn(quantity.toFixed(), web3.utils.asciiToHex(''), {
+        tx = await fair.burn(quantity.toFixed(), web3.utils.asciiToHex(""), {
           from: row.account.address
         });
         break;
