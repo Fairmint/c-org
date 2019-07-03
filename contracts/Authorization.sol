@@ -2,7 +2,7 @@ pragma solidity ^0.5.0;
 
 import "./IDAT.sol";
 import "./IFAIR.sol";
-import "./AttributeRegistryInterface.sol";
+import "tpl-contracts/contracts/AttributeRegistryInterface.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 
