@@ -248,8 +248,11 @@ contract("dat / csvTests", accounts => {
         break;
       case "xfer":
         log = `${parseNumber(row.BuyQty || row.SellQty).toFormat()} ${
-          row.BuyQty ? "dia" : "fair"
+          row.BuyQty ? "DAI" : "FAIR"
         } to #${parseInt(row.xferTargetAcc)}`;
+        break;
+      case "burn":
+        log = `${parseNumber(row.BurnQty).toFormat()} FAIR`;
         break;
       default:
         throw new Error(`Missing action ${row.Action}`);
@@ -260,7 +263,7 @@ contract("dat / csvTests", accounts => {
 
   async function executeAction(row) {
     const quantity = new BigNumber(
-      parseNumber(row.BuyQty || row.SellQty)
+      parseNumber(row.BuyQty || row.SellQty || row.BurnQty)
     ).shiftedBy(18);
 
     // for xfer
@@ -328,6 +331,11 @@ contract("dat / csvTests", accounts => {
             from: row.account.address
           });
         }
+        break;
+      case "burn":
+        tx = await fair.burn(quantity.toFixed(), web3.utils.asciiToHex(''), {
+          from: row.account.address
+        });
         break;
       default:
         throw new Error(`Missing action ${row.Action}`);

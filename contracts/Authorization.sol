@@ -342,7 +342,7 @@ contract Authorization
     Investor storage investor = investors[_from];
     for(uint i = 0; i < _maxDepth; i++)
     {
-      if(investor.firstExpiration > block.timestamp) return;
+      if(investor.firstExpiration == 0 || investor.firstExpiration > block.timestamp) return;
 
       LockedFAIR storage lockedFair = investor.lockedFair[investor.firstExpiration];
       investor.totalLocked = investor.totalLocked.sub(lockedFair.lockedValue);
