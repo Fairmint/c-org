@@ -20,8 +20,8 @@ module.exports = async function deployAndConfigure(
   const fair = await deployer.deploy(fairArtifact);
 
   // Deploy Dat
-  const dat = await deployer.deploy(
-    datArtifact,
+  const dat = await deployer.deploy(datArtifact);
+  await dat.initialize(
     accounts[0],
     fairArtifact.address,
     "42000000000000000000", // initReserve

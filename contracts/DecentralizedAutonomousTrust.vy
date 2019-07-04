@@ -273,9 +273,8 @@ state: public(uint256(stateMachine))
 #region Constructor
 ##################################################
 
-# TODO switch to init pattern in order to support zos upgrades
 @public
-def __init__(
+def initialize(
   _beneficiary: address,
   _fairAddress: address,
   _initReserve: uint256,
@@ -288,6 +287,11 @@ def __init__(
   _revenueCommitmentNum: uint256,
   _revenueCommitmentDen: uint256
 ):
+  """
+  @dev using the init pattern in order to support zos upgrades
+  """
+  assert self.beneficiary == ZERO_ADDRESS, "ALREADY_INITIALIZED"
+
   # Set initGoal, which in turn defines the initial state
   if(_initGoal == 0):
     self.state = STATE_RUN

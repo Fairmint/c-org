@@ -21,21 +21,20 @@ module.exports = async function deployDat(options, from) {
   console.log(`Deploy DAT: ${JSON.stringify(callOptions, null, 2)}`);
 
   const fair = await fairArtifact.new();
-  return [
-    await datArtifact.new(
-      callOptions.beneficiary,
-      fair.address,
-      callOptions.initReserve,
-      callOptions.currency,
-      callOptions.initGoal,
-      callOptions.buySlopeNum,
-      callOptions.buySlopeDen,
-      callOptions.investmentReserveNum,
-      callOptions.investmentReserveDen,
-      callOptions.revenueCommitementNum,
-      callOptions.revenueCommitementDen,
-      { from }
-    ),
-    fair
-  ];
+  const dat = await datArtifact.new();
+  await dat.initialize(
+    callOptions.beneficiary,
+    fair.address,
+    callOptions.initReserve,
+    callOptions.currency,
+    callOptions.initGoal,
+    callOptions.buySlopeNum,
+    callOptions.buySlopeDen,
+    callOptions.investmentReserveNum,
+    callOptions.investmentReserveDen,
+    callOptions.revenueCommitementNum,
+    callOptions.revenueCommitementDen,
+    { from }
+  );
+  return [dat, fair];
 };
