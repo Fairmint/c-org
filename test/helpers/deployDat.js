@@ -4,7 +4,6 @@ const datArtifact = artifacts.require("DecentralizedAutonomousTrust");
 module.exports = async function deployDat(options, from) {
   const callOptions = Object.assign(
     {
-      beneficiary: from,
       initReserve: "42000000000000000000",
       currency: "0x0000000000000000000000000000000000000000",
       initGoal: "0",
@@ -23,7 +22,6 @@ module.exports = async function deployDat(options, from) {
   const fair = await fairArtifact.new();
   const dat = await datArtifact.new();
   await dat.initialize(
-    callOptions.beneficiary,
     fair.address,
     callOptions.initReserve,
     callOptions.currency,

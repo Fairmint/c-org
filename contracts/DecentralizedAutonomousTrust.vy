@@ -270,12 +270,11 @@ state: public(uint256(stateMachine))
 
 #endregion
 
-#region Constructor
+#region Init
 ##################################################
 
 @public
 def initialize(
-  _beneficiary: address,
   _fairAddress: address,
   _initReserve: uint256,
   _currencyAddress: address,
@@ -288,15 +287,19 @@ def initialize(
   _revenueCommitmentDen: uint256
 ):
   """
+  @notice Called once after deploy to set the initial configuration.
+  None of the values provided here may change once initially set.
   @dev using the init pattern in order to support zos upgrades
   """
-  assert self.beneficiary == ZERO_ADDRESS, "ALREADY_INITIALIZED"
+  assert self.control == ZERO_ADDRESS, "ALREADY_INITIALIZED"
 
   # Set initGoal, which in turn defines the initial state
   if(_initGoal == 0):
     self.state = STATE_RUN
   else:
     self.initGoal = _initGoal
+
+  # TODO consider restricting the supported range of values for all fractions
 
   assert _buySlopeNum > 0, "INVALID_SLOPE_NUM" # 0 not supported
   assert _buySlopeDen > 0, "INVALID_SLOPE_DEN"
@@ -311,14 +314,12 @@ def initialize(
   self.revenueCommitmentNum = _revenueCommitmentNum # 0 means all renvue goes to the beneficiary
   self.revenueCommitmentDen = _revenueCommitmentDen
 
+  # Set default values (which may be updated using `updateConfig`)
   self.burnThresholdNum = 1
   self.burnThresholdDen = 1
   self.feeDen = 1
   self.minInvestment = as_unitless_number(as_wei_value(100, "ether"))
-
-  assert _beneficiary != ZERO_ADDRESS, "INVALID_ADDRESS"
-  self.beneficiary = _beneficiary
-
+  self.beneficiary = msg.sender
   self.control = msg.sender
   self.feeCollector = msg.sender
 
@@ -326,6 +327,7 @@ def initialize(
   # the 1820 address is constant for all networks
   IERC1820Registry(0x1820a4B7618BdE71Dce8cdc73aAB6C95905faD24).setInterfaceImplementer(self, keccak256("ERC777TokensRecipient"), self)
 
+  # Check if the currency is an ERC-777 token
   self.currencyAddress = _currencyAddress
   implementer: address = IERC1820Registry(0x1820a4B7618BdE71Dce8cdc73aAB6C95905faD24).getInterfaceImplementer(_currencyAddress, keccak256("ERC777"))
   if(implementer == ZERO_ADDRESS):
@@ -334,10 +336,12 @@ def initialize(
   else:
     self.currency = IERC777_20_Token(implementer)
 
+  # Initialize the FAIR token
   self.fairAddress = _fairAddress
   self.fair = IFAIR(_fairAddress)
   self.fair.initialize()
 
+  # Mint the initial reserve
   if(_initReserve > 0):
     self.initReserve = _initReserve
     self.fair.mint(msg.sender, self.beneficiary, self.initReserve, "", "")
@@ -658,6 +662,7 @@ def updateConfig(
   _name: string[64],
   _symbol: string[32]
 ):
+  # This assert also confirms that initialize has been called.
   assert msg.sender == self.control, "CONTROL_ONLY"
 
   self.fair.updateConfig(_authorizationAddress, _name, _symbol)
@@ -666,8 +671,8 @@ def updateConfig(
     assert _beneficiary != ZERO_ADDRESS, "INVALID_ADDRESS"
     tokens: uint256 = self.fair.balanceOf(self.beneficiary)
     if(tokens > 0):
-      self.fair.operatorSend(self.beneficiary, _beneficiary, self.fair.balanceOf(self.beneficiary), "", "")
-      self.beneficiary = _beneficiary
+      self.fair.operatorSend(self.beneficiary, _beneficiary, tokens, "", "")
+    self.beneficiary = _beneficiary
 
   assert _control != ZERO_ADDRESS, "INVALID_ADDRESS"
   self.control = _control

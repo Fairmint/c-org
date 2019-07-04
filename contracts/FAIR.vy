@@ -472,7 +472,7 @@ def operatorSend(
   @notice Send the amount of tokens on behalf of the address from to the address to.
   """
   assert self.isOperatorFor(msg.sender, _from), "ERC777: caller is not an operator for holder"
-  self._send(msg.sender, _from, _to, _amount, True, _userData, _operatorData)
+  self._send(msg.sender, _from, _to, _amount, True) # TODO _userData, _operatorData)
 
 #endregion
 

@@ -96,7 +96,6 @@ contract("dat / csvTests", accounts => {
     const fee = parsePercent(configJson.fee);
     [dat, fair] = await deployDat(
       {
-        beneficiary,
         buySlopeNum: new BigNumber(buySlope[0]).toFixed(),
         buySlopeDen: new BigNumber(buySlope[1]).shiftedBy(18).toFixed(),
         investmentReserveNum: new BigNumber(investmentReserve[0]).toFixed(),
@@ -117,6 +116,7 @@ contract("dat / csvTests", accounts => {
       dat,
       fair,
       {
+        beneficiary,
         feeCollector,
         feeNum: new BigNumber(fee[0]).toFixed(),
         feeDen: new BigNumber(fee[1]).toFixed()
