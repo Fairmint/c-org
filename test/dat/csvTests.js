@@ -296,7 +296,7 @@ contract("dat / csvTests", accounts => {
         });
         break;
       case "pay":
-        tx = await dat.pay(quantity.toFixed(), constants.ZERO_ADDRESS, {
+        tx = await dat.pay(constants.ZERO_ADDRESS, quantity.toFixed(), {
           from: row.account.address,
           value: currency ? 0 : quantity.toFixed()
         });
