@@ -27,7 +27,6 @@ module.exports = async function deployAndConfigure(
     "42000000000000000000", // initReserve
     "0x0000000000000000000000000000000000000000", // currencyAddress
     "0", // initGoal
-    "0", // initDeadline
     "1", // buySlopeNum
     "100000", // buySlopeDen
     "1", // investmentReserveNum
