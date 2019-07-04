@@ -386,7 +386,8 @@ def buy(
 
   if(self.state == STATE_INIT):
     if(self.initDeadline == 0 or self.initDeadline > block.timestamp):
-      tokenValue = 2 * _currencyValue * self.buySlopeDen / (self.initGoal * self.buySlopeNum)
+      tokenValue = 2 * _currencyValue * self.buySlopeDen
+      tokenValue /= self.initGoal * self.buySlopeNum
     self.fair.mint(msg.sender, _to, tokenValue, "", "")
 
     self.initInvestors[_to] += tokenValue
@@ -456,12 +457,18 @@ def sell(
       supply /= multiple
       buybackReserve /= multiple
     
-    currencyValue = quantityToSell * burnedSupply * burnedSupply * buybackReserve
+    currencyValue = quantityToSell * buybackReserve
+    currencyValue *= burnedSupply * burnedSupply
     currencyValue /= totalSupply * supply * supply
-    currencyValue += (2 * quantityToSell * buybackReserve) / supply
-    currencyValue -= (quantityToSell * quantityToSell * buybackReserve) / (supply * supply * multiple)
+    temp: uint256 = 2 * quantityToSell * buybackReserve
+    temp /= supply
+    currencyValue += temp
+    temp = quantityToSell * quantityToSell * buybackReserve
+    temp /= supply * supply * multiple
+    currencyValue -= temp
   elif(self.state == STATE_CLOSE):
-    currencyValue = _quantityToSell * self.buybackReserve() / totalSupply
+    currencyValue = _quantityToSell * self.buybackReserve() 
+    currencyValue /= totalSupply
   else:
     self.initInvestors[msg.sender] -= _quantityToSell
     currencyValue = _quantityToSell * self.buybackReserve()

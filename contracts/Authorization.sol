@@ -2,7 +2,7 @@ pragma solidity ^0.5.0;
 
 import "./IDAT.sol";
 import "./IFAIR.sol";
-import "./AttributeRegistryInterface.sol";
+import "tpl-contracts/contracts/AttributeRegistryInterface.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 
@@ -194,7 +194,7 @@ contract Authorization
     uint256 _value,
     bytes memory _userData,
     bytes memory _operatorData 
-  ) public
+  ) public view
     returns (uint)
   {
     return lockupPeriods[getInvestorTypeOf(_from)][getInvestorTypeOf(_to)];

@@ -5,7 +5,7 @@
 const { deployDat, shouldFail, updateDatConfig } = require("../../helpers");
 
 const tplArtifact = artifacts.require("TestTPLAttributeRegistry");
-const authArtifact = artifacts.require("Authorization_Pausable");
+const authArtifact = artifacts.require("TestAuthorization");
 
 contract("dat / auth / canBlockBuy", accounts => {
   let dat;

@@ -7,7 +7,7 @@ pragma solidity ^0.5.0;
 
 import "../Authorization.sol";
 
-contract Authorization_Pausable is
+contract TestAuthorization is
   Authorization
 {
   bool public authorized = true;

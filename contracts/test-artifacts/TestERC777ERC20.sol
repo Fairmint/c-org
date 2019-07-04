@@ -4,7 +4,7 @@ import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import "openzeppelin-solidity/contracts/token/ERC777/ERC777.sol";
 
 
-contract ZOSERC777 is
+contract TestERC777ERC20 is
   Ownable,
   ERC777
 {
