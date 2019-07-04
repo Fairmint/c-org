@@ -194,7 +194,7 @@ contract Authorization
     uint256 _value,
     bytes memory _userData,
     bytes memory _operatorData 
-  ) public
+  ) public view
     returns (uint)
   {
     return lockupPeriods[getInvestorTypeOf(_from)][getInvestorTypeOf(_to)];
