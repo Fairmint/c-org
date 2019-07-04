@@ -25,6 +25,7 @@ module.exports = {
   },
   rules: {
     "no-underscore-dangle": 0,
-    "no-console": 0
+    "no-console": 0,
+    "require-atomic-updates": 0
   }
 };
