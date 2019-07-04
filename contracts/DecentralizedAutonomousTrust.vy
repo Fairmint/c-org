@@ -270,7 +270,37 @@ state: public(uint256(stateMachine))
 
 #endregion
 
-#region Init
+#region Read-only
+##################################################
+
+@private
+@constant
+def _toDecimalWithPlaces(
+  _value: uint256
+) -> decimal:
+  """
+  @dev Converts a uint token value into its decimal value, dropping the last 8 digits.
+  e.g. 1 token is _value 1000000000000000000 and returns 1.0000000000
+  """
+  temp: uint256 = _value / DIGITS_UINT
+  decimalValue: decimal = convert(_value - temp * DIGITS_UINT, decimal)
+  decimalValue /= DIGITS_DECIMAL
+  decimalValue += convert(temp, decimal)
+  return decimalValue
+
+@public
+@constant
+def buybackReserve() -> uint256:
+  """
+  @notice The total amount of currency value currently locked in the contract and available to sellers.
+  """
+  if(self.currency == ZERO_ADDRESS):
+    return as_unitless_number(self.balance)
+  return self.currency.balanceOf(self)
+
+#endregion
+
+#region Config / Control
 ##################################################
 
 @public
@@ -346,21 +376,68 @@ def initialize(
     self.initReserve = _initReserve
     self.fair.mint(msg.sender, self.beneficiary, self.initReserve, "", "")
 
+@public
+def updateConfig(
+  _authorizationAddress: address,
+  _beneficiary: address,
+  _control: address,
+  _feeCollector: address,
+  _feeNum: uint256,
+  _feeDen: uint256,
+  _burnThresholdNum: uint256,
+  _burnThresholdDen: uint256,
+  _minInvestment: uint256,
+  _name: string[64],
+  _symbol: string[32]
+):
+  # This assert also confirms that initialize has been called.
+  assert msg.sender == self.control, "CONTROL_ONLY"
+
+  self.fair.updateConfig(_authorizationAddress, _name, _symbol)
+
+  if(self.beneficiary != _beneficiary):
+    assert _beneficiary != ZERO_ADDRESS, "INVALID_ADDRESS"
+    tokens: uint256 = self.fair.balanceOf(self.beneficiary)
+    if(tokens > 0):
+      self.fair.operatorSend(self.beneficiary, _beneficiary, tokens, "", "")
+    self.beneficiary = _beneficiary
+
+  assert _control != ZERO_ADDRESS, "INVALID_ADDRESS"
+  self.control = _control
+
+  assert _feeCollector != ZERO_ADDRESS, "INVALID_ADDRESS"
+  self.feeCollector = _feeCollector
+
+  # TODO consider restricting the supported range of values for all fractions
+
+  assert _burnThresholdDen > 0, "INVALID_THRESHOLD_DEN"
+  assert _burnThresholdNum <= _burnThresholdDen, "INVALID_THRESHOLD" # 100% or less
+  self.burnThresholdNum = _burnThresholdNum # 0 means burn all of beneficiary's holdings
+  self.burnThresholdDen = _burnThresholdDen
+
+  assert _feeDen > 0, "INVALID_FEE_DEM"
+  assert _feeNum <= _feeDen, "INVALID_FEE" # 100% or less
+  self.feeNum = _feeNum # 0 means no fee
+  self.feeDen = _feeDen
+
+  assert _minInvestment > 0, "INVALID_MIN_INVESTMENT"
+  self.minInvestment = _minInvestment
+
+  log.UpdateConfig(_authorizationAddress, _beneficiary, _control, _feeCollector, _burnThresholdNum, _burnThresholdDen, _feeNum, _feeDen, _minInvestment, _name, _symbol)
+
 #endregion
 
-#region Private helper functions
-##################################################
+#region Transaction Helpers
 
 @private
-@constant
-def _toDecimalWithPlaces(
-  _value: uint256
-) -> decimal:
-  temp: uint256 = _value / DIGITS_UINT
-  decimalValue: decimal = convert(_value - temp * DIGITS_UINT, decimal)
-  decimalValue /= DIGITS_DECIMAL
-  decimalValue += convert(temp, decimal)
-  return decimalValue
+def _applyBurnThreshold():
+  balanceBefore: uint256 = self.fair.balanceOf(self.beneficiary)
+  maxHoldings: uint256 = self.fair.totalSupply() + self.fair.burnedSupply()
+  maxHoldings *= self.burnThresholdNum
+  maxHoldings /= self.burnThresholdDen
+
+  if(balanceBefore > maxHoldings):
+    self.fair.operatorBurn(self.beneficiary, balanceBefore - maxHoldings, "", "")
 
 @private
 def _collectInvestment(
@@ -387,16 +464,6 @@ def _collectInvestment(
     assert self.currency.balanceOf(self) > balanceBefore, "TOKEN_TRANSFER_FAILED"
 
 @private
-def _applyBurnThreshold():
-  balanceBefore: uint256 = self.fair.balanceOf(self.beneficiary)
-  maxHoldings: uint256 = self.fair.totalSupply() + self.fair.burnedSupply()
-  maxHoldings *= self.burnThresholdNum
-  maxHoldings /= self.burnThresholdDen
-
-  if(balanceBefore > maxHoldings):
-    self.fair.operatorBurn(self.beneficiary, balanceBefore - maxHoldings, "", "")
-
-@private
 def _sendCurrency(
   _to: address,
   _amount: uint256
@@ -414,6 +481,10 @@ def _sendCurrency(
 
       assert self.currency.balanceOf(_to) > balanceBefore, "ERC20_TRANSFER_FAILED"
 
+#endregion
+
+#region Buy
+
 @private
 def _distributeInvestment(
   _value: uint256
@@ -426,69 +497,6 @@ def _distributeInvestment(
   self._sendCurrency(self.feeCollector, fee)
   self._sendCurrency(self.beneficiary, reserve - fee)
 
-@private
-def _pay(
-  _operator: address,
-  _to: address,
-  _currencyValue: uint256
-):
-  assert self.state == STATE_RUN, "INVALID_STATE"
-  self._sendCurrency(self.beneficiary, _currencyValue - _currencyValue * self.investmentReserveNum / self.investmentReserveDen)
-
-  # buy_slope = n/d
-  # revenue_commitment = c/g
-  # sqrt(
-  #  (2 a c d)
-  #  /
-  #  (g n)
-  #  + s^2
-  # ) - s
-
-  supply: uint256 = self.fair.totalSupply() + self.fair.burnedSupply()
-  tokenValue: uint256 = 2 * _currencyValue * self.revenueCommitmentNum * self.buySlopeDen
-  tokenValue /= self.revenueCommitmentDen * self.buySlopeNum
-  tokenValue += supply * supply
-  # Max total tokenValue of 2**256 - 1 (else tx reverts)
-
-  tokenValue /= DIGITS_UINT # Truncates last 18 digits from tokenValue here
-
-  decimalValue: decimal = self._toDecimalWithPlaces(tokenValue) # Truncates another 8 digits from tokenValue (losing 26 digits in total)
-  # Max total decimalValue of 2**127 - 1 (else tx reverts)
-
-  decimalValue = sqrt(decimalValue)
-
-  # Unshift results
-  decimalValue *= DIGITS_DECIMAL
-  # Max total decimalValue of 2**127 - 1 (else tx reverts)
-
-  tokenValue = convert(decimalValue, uint256)
-
-  tokenValue -= supply
-
-  to: address = _to
-  if(to == ZERO_ADDRESS):
-    to = self.beneficiary
-  elif(self.fair.authorizationAddress() != ZERO_ADDRESS):
-    if(not IAuthorization(self.fair.authorizationAddress()).isTransferAllowed(self, ZERO_ADDRESS, _to, tokenValue, "")):
-      to = self.beneficiary
-
-  self.fair.mint(_operator, to, tokenValue, "", "")
-  self._applyBurnThreshold() # must mint before this call
-
-#endregion
-
-#region Functions for DAT business logic
-##################################################
-
-@public
-@constant
-def buybackReserve() -> uint256:
-  reserve: uint256
-  if(self.currency == ZERO_ADDRESS):
-    reserve = as_unitless_number(self.balance)
-  else:
-    reserve = self.currency.balanceOf(self)
-  return reserve
 
 @public
 @payable
@@ -549,6 +557,11 @@ def buy(
 
   assert tokenValue > 0, "NOT_ENOUGH_FUNDS_OR_DEADLINE_PASSED"
 
+#endregion
+
+#region Sell
+
+
 @public
 def sell(
  _quantityToSell: uint256,
@@ -598,6 +611,60 @@ def sell(
   self._sendCurrency(msg.sender, currencyValue)
   self.fair.operatorBurn(msg.sender, _quantityToSell, "", "")
 
+#endregion
+
+#region Pay
+
+@private
+def _pay(
+  _operator: address,
+  _to: address,
+  _currencyValue: uint256
+):
+  assert self.state == STATE_RUN, "INVALID_STATE"
+  self._sendCurrency(self.beneficiary, _currencyValue - _currencyValue * self.investmentReserveNum / self.investmentReserveDen)
+
+  # buy_slope = n/d
+  # revenue_commitment = c/g
+  # sqrt(
+  #  (2 a c d)
+  #  /
+  #  (g n)
+  #  + s^2
+  # ) - s
+
+  supply: uint256 = self.fair.totalSupply() + self.fair.burnedSupply()
+  tokenValue: uint256 = 2 * _currencyValue * self.revenueCommitmentNum * self.buySlopeDen
+  tokenValue /= self.revenueCommitmentDen * self.buySlopeNum
+  tokenValue += supply * supply
+  # Max total tokenValue of 2**256 - 1 (else tx reverts)
+
+  tokenValue /= DIGITS_UINT # Truncates last 18 digits from tokenValue here
+
+  decimalValue: decimal = self._toDecimalWithPlaces(tokenValue) # Truncates another 8 digits from tokenValue (losing 26 digits in total)
+  # Max total decimalValue of 2**127 - 1 (else tx reverts)
+
+  decimalValue = sqrt(decimalValue)
+
+  # Unshift results
+  decimalValue *= DIGITS_DECIMAL
+  # Max total decimalValue of 2**127 - 1 (else tx reverts)
+
+  tokenValue = convert(decimalValue, uint256)
+
+  tokenValue -= supply
+
+  to: address = _to
+  if(to == ZERO_ADDRESS):
+    to = self.beneficiary
+  elif(self.fair.authorizationAddress() != ZERO_ADDRESS):
+    if(not IAuthorization(self.fair.authorizationAddress()).isTransferAllowed(self, ZERO_ADDRESS, _to, tokenValue, "")):
+      to = self.beneficiary
+
+  self.fair.mint(_operator, to, tokenValue, "", "")
+  self._applyBurnThreshold() # must mint before this call
+
+
 @public
 @payable
 def pay(
@@ -625,6 +692,10 @@ def tokensReceived(
   assert msg.sender == self.currency, "INVALID_CURRENCY"
   self._pay(msg.sender, _from, _amount)
 
+#endregion
+
+#region Close
+
 @public
 @payable
 def close():
@@ -645,53 +716,3 @@ def close():
 
 #endregion
 
-#region Function to update DAT configuration
-##################################################
-
-@public
-def updateConfig(
-  _authorizationAddress: address,
-  _beneficiary: address,
-  _control: address,
-  _feeCollector: address,
-  _feeNum: uint256,
-  _feeDen: uint256,
-  _burnThresholdNum: uint256,
-  _burnThresholdDen: uint256,
-  _minInvestment: uint256,
-  _name: string[64],
-  _symbol: string[32]
-):
-  # This assert also confirms that initialize has been called.
-  assert msg.sender == self.control, "CONTROL_ONLY"
-
-  self.fair.updateConfig(_authorizationAddress, _name, _symbol)
-
-  if(self.beneficiary != _beneficiary):
-    assert _beneficiary != ZERO_ADDRESS, "INVALID_ADDRESS"
-    tokens: uint256 = self.fair.balanceOf(self.beneficiary)
-    if(tokens > 0):
-      self.fair.operatorSend(self.beneficiary, _beneficiary, tokens, "", "")
-    self.beneficiary = _beneficiary
-
-  assert _control != ZERO_ADDRESS, "INVALID_ADDRESS"
-  self.control = _control
-
-  assert _feeCollector != ZERO_ADDRESS, "INVALID_ADDRESS"
-  self.feeCollector = _feeCollector
-
-  assert _burnThresholdDen > 0, "INVALID_THRESHOLD_DEN"
-  assert _burnThresholdNum <= _burnThresholdDen, "INVALID_THRESHOLD" # 100% or less
-  self.burnThresholdNum = _burnThresholdNum # 0 means burn all of beneficiary's holdings
-  self.burnThresholdDen = _burnThresholdDen
-
-  assert _feeDen > 0, "INVALID_FEE_DEM"
-  assert _feeNum <= _feeDen, "INVALID_FEE" # 100% or less
-  self.feeNum = _feeNum # 0 means no fee
-  self.feeDen = _feeDen
-
-  assert _minInvestment > 0, "INVALID_MIN_INVESTMENT"
-  self.minInvestment = _minInvestment
-
-  log.UpdateConfig(_authorizationAddress, _beneficiary, _control, _feeCollector, _burnThresholdNum, _burnThresholdDen, _feeNum, _feeDen, _minInvestment, _name, _symbol)
-#endregion
