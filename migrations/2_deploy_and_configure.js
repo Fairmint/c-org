@@ -22,7 +22,6 @@ module.exports = async function deployAndConfigure(
   // Deploy Dat
   const dat = await deployer.deploy(datArtifact);
   await dat.initialize(
-    accounts[0],
     fairArtifact.address,
     "42000000000000000000", // initReserve
     "0x0000000000000000000000000000000000000000", // currencyAddress
@@ -53,6 +52,7 @@ module.exports = async function deployAndConfigure(
     dat,
     fair,
     {
+      beneficiary: accounts[0],
       authorizationAddress: auth.address,
       name: "Fairmint Fair Synthetic Equity",
       symbol: "FAIR"
