@@ -187,6 +187,7 @@ def initialize():
   @notice Called once to complete contract setup.
   @dev Called by the DAT contract when it is deployed. No tokens can be minted until this is called.
   If someone front-runs this call the DAT deployment will fail and we can deploy a new FAIR token.
+  1820 registration is here instead of in __init__ in order to support upgrades.
   """
   assert self.owner == ZERO_ADDRESS, "ALREADY_INITIALIZED"
   self.ERC1820Registry = IERC1820Registry(0x1820a4B7618BdE71Dce8cdc73aAB6C95905faD24) # constant for all networks
