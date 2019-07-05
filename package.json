@@ -17,7 +17,7 @@
   "dependencies": {
     "bignumber.js": "9.0.0",
     "erc1820": "0.0.2",
-    "eth-gas-reporter": "^0.2.2",
+    "eth-gas-reporter": "^0.2.3",
     "ganache-cli": "6.4.4",
     "openzeppelin-solidity": "2.3.0",
     "openzeppelin-test-helpers": "0.4.0",
