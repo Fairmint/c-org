@@ -601,9 +601,11 @@ def sell(
   @dev _minCurrencyReturned is necessary as the price will change if some elses transaction mines after 
   yours was submitted.
   """
+  buybackReserve: uint256 = self.buybackReserve()
   totalSupply: uint256 = self.fair.totalSupply()
-  currencyValue: uint256
 
+  # Calculate currencyValue for this sale
+  currencyValue: uint256
   if(self.state == STATE_RUN):
     # buyback_reserve = r
     # total_supply = t
@@ -613,8 +615,8 @@ def sell(
     # imp: (a b^2 r)/(t (b + t)^2) + (2 a r)/(b + t) - (a^2 r)/(b + t)^2
     burnedSupply: uint256 = self.fair.burnedSupply()
     supply: uint256 = totalSupply + burnedSupply
-    buybackReserve: uint256 = self.buybackReserve()
-    quantityToSell: uint256 = _quantityToSell
+
+    # Reduce large numbers to avoid overflow
     multiple: uint256 = 1
     if(supply + buybackReserve > 10000000 * DIGITS_UINT):
       multiple = DIGITS_ROUND_UINT
@@ -623,28 +625,36 @@ def sell(
       supply /= multiple
       buybackReserve /= multiple
     
-    currencyValue = quantityToSell * buybackReserve
+    currencyValue = _quantityToSell * buybackReserve
     currencyValue *= burnedSupply * burnedSupply
+    # TODO to avoid overflow supply and buybackReserve needs to be capped (?)
     currencyValue /= totalSupply * supply * supply
-    temp: uint256 = 2 * quantityToSell * buybackReserve
+    # TODO cap supply to avoid overflow
+
+    temp: uint256 = 2 * _quantityToSell * buybackReserve
     temp /= supply
     currencyValue += temp
-    temp = quantityToSell * quantityToSell * buybackReserve
+    temp = _quantityToSell * _quantityToSell * buybackReserve
+    # TODO cap supply and buybackReserve to avoid overflow (?)
     temp /= supply * supply * multiple
+    # TODO cap supply to avoid overflow
     currencyValue -= temp
   elif(self.state == STATE_CLOSE):
-    currencyValue = _quantityToSell * self.buybackReserve() 
+    currencyValue = _quantityToSell * buybackReserve
+    # TODO cap supply and backbackReserve
     currencyValue /= totalSupply
   else:
     self.initInvestors[msg.sender] -= _quantityToSell
-    currencyValue = _quantityToSell * self.buybackReserve()
+    currencyValue = _quantityToSell * buybackReserve
+    # TODO cap supply and backbay reserve
     currencyValue /= totalSupply - self.initReserve
+    # TODO if initReserve is burned this may underflow
 
   assert currencyValue > 0, "INSUFFICIENT_FUNDS"
 
-  self._sendCurrency(_to, currencyValue)
+  # Distribute funds
   self.fair.operatorBurn(msg.sender, _quantityToSell, "", "")
-
+  self._sendCurrency(_to, currencyValue)
   log.Sell(msg.sender, _to, currencyValue, _quantityToSell)
 
 #endregion
