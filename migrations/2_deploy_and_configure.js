@@ -1,6 +1,7 @@
 const erc1820 = require("erc1820");
 const { updateDatConfig } = require("../helpers");
 
+// TODO: replace with real TPL artifact
 const tplArtifact = artifacts.require("TestTPLAttributeRegistry");
 const authArtifact = artifacts.require("Authorization");
 const fairArtifact = artifacts.require("FAIR");
@@ -17,9 +18,11 @@ module.exports = async function deployAndConfigure(
   }
 
   // Deploy token
+  // TODO upgradable?
   const fair = await deployer.deploy(fairArtifact);
 
   // Deploy Dat
+  // TODO upgradable
   const dat = await deployer.deploy(datArtifact);
   await dat.initialize(
     fairArtifact.address,
@@ -38,6 +41,7 @@ module.exports = async function deployAndConfigure(
   const tpl = await deployer.deploy(tplArtifact);
 
   // Deploy auth
+  // TODO upgradable
   const auth = await deployer.deploy(
     authArtifact,
     fair.address,
@@ -59,4 +63,6 @@ module.exports = async function deployAndConfigure(
     },
     accounts[0]
   );
+
+  // TODO move beneficiary funds to tokenVesting contract(s)
 };

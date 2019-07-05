@@ -20,6 +20,7 @@ jobs:
           keys:
             - v2-{{ checksum "package.json" }}
       - run: rm -Rf node_modules/websocket
+      - run: rm -Rf node_modules/eth-gas-reporter
       - run: npm i
       - save_cache:
           paths:

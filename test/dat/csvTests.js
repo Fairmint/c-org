@@ -281,7 +281,7 @@ contract("dat / csvTests", accounts => {
         });
         break;
       case "sell":
-        tx = await dat.sell(quantity.toFixed(), 1, {
+        tx = await dat.sell(row.account.address, quantity.toFixed(), 1, {
           from: row.account.address
         });
         break;
