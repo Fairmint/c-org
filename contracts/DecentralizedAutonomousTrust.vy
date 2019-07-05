@@ -108,6 +108,7 @@ Buy: event({
 })
 Sell: event({
   _from: address,
+  _to: address,
   _currencyValue: uint256,
   _fairValue: uint256
 })
@@ -504,6 +505,7 @@ def _distributeInvestment(
   reserve: uint256 = self.investmentReserveNum * _value
   reserve /= self.investmentReserveDen
   reserve = _value - reserve
+  # TODO max feeNum to prevent overflow
   fee: uint256 = reserve * self.feeNum
   fee /= self.feeDen
 
@@ -522,6 +524,8 @@ def buy(
   @param _to The account to receive the FAIR tokens from this purchase.
   @param _currencyValue How much currency to spend in order to buy FAIR.
   @param _minTokensBought Buy at least this many FAIR tokens or the transaction reverts.
+  @dev _minTokensBought is necessary as the price will change if some elses transaction mines after 
+  yours was submitted.
   """
   assert _to != ZERO_ADDRESS, "INVALID_ADDRESS"
   assert _currencyValue >= self.minInvestment, "SEND_AT_LEAST_MIN_INVESTMENT"
@@ -585,9 +589,18 @@ def buy(
 
 @public
 def sell(
- _quantityToSell: uint256,
- _minCurrencyReturned: uint256
+  _to: address,
+  _quantityToSell: uint256,
+  _minCurrencyReturned: uint256
 ):
+  """
+  @notice Sell FAIR tokens for at least the given amount of currency.
+  @param _to The account to receive the currency from this sale.
+  @param _quantityToSell How many FAIR tokens to sell for currency value.
+  @param _minCurrencyReturned Get at least this many currency tokens or the transaction reverts.
+  @dev _minCurrencyReturned is necessary as the price will change if some elses transaction mines after 
+  yours was submitted.
+  """
   totalSupply: uint256 = self.fair.totalSupply()
   currencyValue: uint256
 
@@ -629,8 +642,10 @@ def sell(
 
   assert currencyValue > 0, "INSUFFICIENT_FUNDS"
 
-  self._sendCurrency(msg.sender, currencyValue)
+  self._sendCurrency(_to, currencyValue)
   self.fair.operatorBurn(msg.sender, _quantityToSell, "", "")
+
+  log.Sell(msg.sender, _to, currencyValue, _quantityToSell)
 
 #endregion
 
