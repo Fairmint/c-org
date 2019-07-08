@@ -187,6 +187,8 @@ burnThresholdDen: public(uint256)
 # organmization are automatically burnt.
 # @dev This is the denominator component of the fractional value.
 
+#TODO set max buySlope to lowest 1 / 10,000,000
+
 buySlopeNum: public(uint256)
 # @notice The buy slope of the bonding curve. 
 # Does not affect the financial model, only the granularity of FSE.
@@ -503,10 +505,10 @@ def _distributeInvestment(
   # Rounding favors buybackReserve, then beneficiary, and feeCollector is last priority.
   # TODO max investmentReserveNum to prevent overflow
   reserve: uint256 = self.investmentReserveNum * _value
-  reserve /= self.investmentReserveDen
+  reserve /= self.investmentReserveDen # TODO maybe den is hardcoded to 100
   reserve = _value - reserve
   # TODO max feeNum to prevent overflow
-  fee: uint256 = reserve * self.feeNum
+  fee: uint256 = reserve * self.feeNum # TODO maybe den is 10000. maybe use this approach for all factions
   fee /= self.feeDen
 
   self._sendCurrency(self.feeCollector, fee)
@@ -628,7 +630,8 @@ def sell(
     currencyValue = _quantityToSell * buybackReserve
     currencyValue *= burnedSupply * burnedSupply
     # TODO to avoid overflow supply and buybackReserve needs to be capped (?)
-    currencyValue /= totalSupply * supply * supply
+    currencyValue /= totalSupply 
+    currencyValue /= supply * supply
     # TODO cap supply to avoid overflow
 
     temp: uint256 = 2 * _quantityToSell * buybackReserve
@@ -648,7 +651,7 @@ def sell(
     currencyValue = _quantityToSell * buybackReserve
     # TODO cap supply and backbay reserve
     currencyValue /= totalSupply - self.initReserve
-    # TODO if initReserve is burned this may underflow
+    # TODO if initReserve is burned this may underflow - maybe block burn during init/cancel
 
   assert currencyValue > 0, "INSUFFICIENT_FUNDS"
 
@@ -663,12 +666,26 @@ def sell(
 
 @private
 def _pay(
-  _operator: address,
+  _from: address,
   _to: address,
   _currencyValue: uint256
 ):
+  """
+  @dev Pay the organization on-chain.
+  @param _from The account which issued the transaction and paid the currencyValue.
+  @param _to The account which receives tokens for the contribution.
+  @param _currencyValue How much currency which was paid.
+  """
+  assert _from != ZERO_ADDRESS, "INVALID_ADDRESS"
+  assert _to != ZERO_ADDRESS, "INVALID_ADDRESS"
+  assert _currencyValue > 0, "MISSING_CURRENCY"
   assert self.state == STATE_RUN, "INVALID_STATE"
-  self._sendCurrency(self.beneficiary, _currencyValue - _currencyValue * self.investmentReserveNum / self.investmentReserveDen)
+
+  # Send a portion of the funds to the beneficiary, the rest is added to the buybackReserve
+  reserve: uint256 = _currencyValue * self.investmentReserveNum
+  # TODO max investment reserve num
+  reserve /= self.investmentReserveDen
+  self._sendCurrency(self.beneficiary, _currencyValue - reserve)
 
   # buy_slope = n/d
   # revenue_commitment = c/g
@@ -681,8 +698,11 @@ def _pay(
 
   supply: uint256 = self.fair.totalSupply() + self.fair.burnedSupply()
   tokenValue: uint256 = 2 * _currencyValue * self.revenueCommitmentNum * self.buySlopeDen
+  # TODO overflow
   tokenValue /= self.revenueCommitmentDen * self.buySlopeNum
+  # TODO max dem and num
   tokenValue += supply * supply
+  # TODO supply^2 overflow
   # Max total tokenValue of 2**256 - 1 (else tx reverts)
 
   tokenValue /= DIGITS_UINT # Truncates last 18 digits from tokenValue here
@@ -700,16 +720,18 @@ def _pay(
 
   tokenValue -= supply
 
+  # Update the to address to the beneficiary if the currency value would fail
   to: address = _to
   if(to == ZERO_ADDRESS):
     to = self.beneficiary
   elif(self.fair.authorizationAddress() != ZERO_ADDRESS):
-    if(not IAuthorization(self.fair.authorizationAddress()).isTransferAllowed(self, ZERO_ADDRESS, _to, tokenValue, "")):
+    if(not IAuthorization(self.fair.authorizationAddress())
+      .isTransferAllowed(self, ZERO_ADDRESS, _to, tokenValue, "")):
       to = self.beneficiary
 
-  self.fair.mint(_operator, to, tokenValue, "", "")
+  # Distribute tokens
+  self.fair.mint(_from, to, tokenValue, "", "")
   self._applyBurnThreshold() # must mint before this call
-
 
 @public
 @payable
@@ -717,12 +739,20 @@ def pay(
   _to: address,
   _currencyValue: uint256
 ):
+  """
+  @dev Pay the organization on-chain.
+  @param _to The account which receives tokens for the contribution.
+  @param _currencyValue How much currency which was paid.
+  """
   self._collectInvestment(msg.sender, _currencyValue, msg.value, False)
   self._pay(msg.sender, _to, _currencyValue)
 
 @public
 @payable
 def __default__():
+  """
+  @dev Pay the organization on-chain with ETH (only works when currency is ETH)
+  """
   self._collectInvestment(msg.sender, as_unitless_number(msg.value), msg.value, False)
   self._pay(msg.sender, msg.sender, as_unitless_number(msg.value))
 
@@ -735,6 +765,10 @@ def tokensReceived(
   _userData: bytes[256],
   _operatorData: bytes[256]
 ):
+  """
+  @dev Pay the organization on-chain with ERC-777 tokens (only works when currency is ERC-777)
+  Params are from the ERC-777 token standard
+  """
   assert msg.sender == self.currency, "INVALID_CURRENCY"
   self._pay(msg.sender, _from, _amount)
 
@@ -745,11 +779,21 @@ def tokensReceived(
 @public
 @payable
 def close():
+  """
+  @notice Called by the beneficiary account to STATE_CLOSE or STATE_CANCEL the c-org, 
+  preventing any more tokens from being minted.
+  @dev Requires an `exitFee` to be paid.  If the currency is ETH, include a little more than
+  what appears to be required and any remainder will be returned to your account.  This is 
+  because another user may have a transaction mined which changes the exitFee required.
+  For other `currency` types, the beneficiary account will be billed the exact amount required.
+  """
   assert msg.sender == self.beneficiary, "BENEFICIARY_ONLY"
 
   if(self.state == STATE_INIT):
+    # Allow the org to cancel anytime if the initGoal was not reached.
     self.state = STATE_CANCEL
   elif(self.state == STATE_RUN):
+    # Collect the exitFee and close the c-org.
     self.state = STATE_CLOSE
     supply: uint256 = self.fair.totalSupply()
     exitFee: uint256 = supply * supply
