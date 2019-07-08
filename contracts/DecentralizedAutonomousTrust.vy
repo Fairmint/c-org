@@ -741,7 +741,8 @@ def pay(
 ):
   """
   @dev Pay the organization on-chain.
-  @param _to The account which receives tokens for the contribution.
+  @param _to The account which receives tokens for the contribution. If this address
+  is not authorized to receive tokens then they will be sent to the beneficiary account instead.
   @param _currencyValue How much currency which was paid.
   """
   self._collectInvestment(msg.sender, _currencyValue, msg.value, False)
@@ -770,7 +771,7 @@ def tokensReceived(
   Params are from the ERC-777 token standard
   """
   assert msg.sender == self.currency, "INVALID_CURRENCY"
-  self._pay(msg.sender, _from, _amount)
+  self._pay(_operator, _from, _amount)
 
 #endregion
 
