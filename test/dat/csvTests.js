@@ -91,17 +91,19 @@ contract("dat / csvTests", accounts => {
     ).data[0];
 
     const buySlope = parseFraction(configJson.buy_slope);
-    const investmentReserve = parsePercent(configJson.investment_reserve);
-    const revenueCommitement = parsePercent(configJson.revenue_commitment);
-    const fee = parsePercent(configJson.fee);
+    const investmentReserve = parseBasisPoints(configJson.investment_reserve);
+    const revenueCommitement = parseBasisPoints(configJson.revenue_commitment);
+    const fee = parseBasisPoints(configJson.fee);
     [dat, fair] = await deployDat(
       {
         buySlopeNum: new BigNumber(buySlope[0]).toFixed(),
         buySlopeDen: new BigNumber(buySlope[1]).shiftedBy(18).toFixed(),
-        investmentReserveNum: new BigNumber(investmentReserve[0]).toFixed(),
-        investmentReserveDen: new BigNumber(investmentReserve[1]).toFixed(),
-        revenueCommitementNum: new BigNumber(revenueCommitement[0]).toFixed(),
-        revenueCommitementDen: new BigNumber(revenueCommitement[1]).toFixed(),
+        investmentReserveBasisPoints: new BigNumber(
+          investmentReserve
+        ).toFixed(),
+        revenueCommitementBasisPoints: new BigNumber(
+          revenueCommitement
+        ).toFixed(),
         initGoal: parseNumber(configJson.init_goal)
           .shiftedBy(18)
           .toFixed(),
@@ -118,8 +120,7 @@ contract("dat / csvTests", accounts => {
       {
         beneficiary,
         feeCollector,
-        feeNum: new BigNumber(fee[0]).toFixed(),
-        feeDen: new BigNumber(fee[1]).toFixed()
+        feeBasisPoints: new BigNumber(fee).toFixed()
       },
       control
     );
@@ -166,8 +167,8 @@ contract("dat / csvTests", accounts => {
       await checkPreConditions(row);
       await executeAction(row);
       await loadAccount(row);
-      await checkPostConiditons(row);
       await logState();
+      await checkPostConiditons(row);
     } else {
       console.log("\t(skipping no-op)");
     }
@@ -446,10 +447,8 @@ contract("dat / csvTests", accounts => {
     return parseNumber(percentString).toFraction();
   }
 
-  function parsePercent(percentString) {
-    return parseNumber(percentString.replace("%", ""))
-      .div(100)
-      .toFraction();
+  function parseBasisPoints(percentString) {
+    return parseNumber(percentString.replace("%", "")).times(100);
   }
 
   function assertAlmostEqual(a, b) {
