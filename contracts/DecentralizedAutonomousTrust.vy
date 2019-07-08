@@ -418,7 +418,7 @@ def updateConfig(
   self.burnThresholdNum = _burnThresholdNum # 0 means burn all of beneficiary's holdings
   self.burnThresholdDen = _burnThresholdDen
 
-  assert _feeDen > 0, "INVALID_FEE_DEM"
+  assert _feeDen > 0, "INVALID_FEE_DEN"
   assert _feeNum <= _feeDen, "INVALID_FEE" # 100% or less
   self.feeNum = _feeNum # 0 means no fee
   self.feeDen = _feeDen
@@ -677,7 +677,6 @@ def _pay(
   @param _currencyValue How much currency which was paid.
   """
   assert _from != ZERO_ADDRESS, "INVALID_ADDRESS"
-  assert _to != ZERO_ADDRESS, "INVALID_ADDRESS"
   assert _currencyValue > 0, "MISSING_CURRENCY"
   assert self.state == STATE_RUN, "INVALID_STATE"
 
@@ -700,7 +699,7 @@ def _pay(
   tokenValue: uint256 = 2 * _currencyValue * self.revenueCommitmentNum * self.buySlopeDen
   # TODO overflow
   tokenValue /= self.revenueCommitmentDen * self.buySlopeNum
-  # TODO max dem and num
+  # TODO max den and num
   tokenValue += supply * supply
   # TODO supply^2 overflow
   # Max total tokenValue of 2**256 - 1 (else tx reverts)
