@@ -179,19 +179,19 @@ beneficiary: public(address)
 # Points to the wallet of the organization. 
 
 burnThresholdBasisPoints: public(uint256)
-# @notice The percentage of the total supply of FSE above which the FSEs minted by the
+# @notice The percentage of the total supply of FAIR above which the FAIRs minted by the
 # organization are automatically burnt expressed in basis points.
 
 #TODO set max buySlope to lowest 1 / 10,000,000
 
 buySlopeNum: public(uint256)
 # @notice The buy slope of the bonding curve. 
-# Does not affect the financial model, only the granularity of FSE.
+# Does not affect the financial model, only the granularity of FAIR.
 # @dev This is the numerator component of the fractional value.
 
 buySlopeDen: public(uint256)
 # @notice The buy slope of the bonding curve. 
-# Does not affect the financial model, only the granularity of FSE.
+# Does not affect the financial model, only the granularity of FAIR.
 # @dev This is the denominator component of the fractional value.
 
 control: public(address)
@@ -210,7 +210,7 @@ feeCollector: public(address)
 # @notice The address where fees are sent.
 
 feeBasisPoints: public(uint256)
-# @notice The percent fee collected each time new FSE are issued expressed in basis points.
+# @notice The percent fee collected each time new FAIR are issued expressed in basis points.
 
 fairAddress: public(address)
 # @notice The FAIR token contract address
@@ -220,7 +220,7 @@ fair: IFAIR
 # @dev redundant w/ fairAddress, for convenience
 
 initGoal: public(uint256)
-# @notice The initial fundraising goal (expressed in FSE) to start the c-org. 
+# @notice The initial fundraising goal (expressed in FAIR) to start the c-org. 
 # `0` means that there is no initial fundraising and the c-org immediately moves to run state.
 
 initInvestors: public(map(address, uint256))
@@ -228,7 +228,7 @@ initInvestors: public(map(address, uint256))
 # @dev This structure's purpose is to make sure that only investors can withdraw their money if init_goal is not reached.
 
 initReserve: public(uint256)
-# @notice The initial number of FSE created at initialization for the beneficiary.
+# @notice The initial number of FAIR created at initialization for the beneficiary.
 # @dev Most organizations will move these tokens into vesting contract(s)
 
 investmentReserveBasisPoints: public(uint256)
@@ -312,6 +312,8 @@ def initialize(
 
   assert _buySlopeNum > 0, "INVALID_SLOPE_NUM" # 0 not supported
   assert _buySlopeDen > 0, "INVALID_SLOPE_DEN"
+  assert _buySlopeDen <= 10000000000000000000000000, "SLOPE_DEN_OUT_OF_RANGE" # 10m full tokens to 1
+  assert _buySlopeNum <= 10000000000000000000000000, "SLOPE_NUM_OUT_OF_RANGE" # an extreme value
   self.buySlopeNum = _buySlopeNum # Fraction may be > 1
   self.buySlopeDen = _buySlopeDen
   assert _investmentReserveBasisPoints <= BASIS_POINTS_DEN, "INVALID_RESERVE" # 100% or less
@@ -583,39 +585,50 @@ def sell(
   # Calculate currencyValue for this sale
   currencyValue: uint256
   if(self.state == STATE_RUN):
+    burnedSupply: uint256 = self.fair.burnedSupply()
+    supply: uint256 = totalSupply + burnedSupply
+    quantityToSell: uint256 = _quantityToSell
+
     # buyback_reserve = r
     # total_supply = t
     # burnt_supply = b
     # amount = a
     # source: (t+b)*a*(2*r)/((t+b)^2)-(((2*r)/((t+b)^2)*a^2)/2)+((2*r)/((t+b)^2)*a*b^2)/(2*(t)) 
     # imp: (a b^2 r)/(t (b + t)^2) + (2 a r)/(b + t) - (a^2 r)/(b + t)^2
-    burnedSupply: uint256 = self.fair.burnedSupply()
-    supply: uint256 = totalSupply + burnedSupply
 
-    # Reduce large numbers to avoid overflow
-    multiple: uint256 = 1
-    if(supply + buybackReserve > 10000000 * DIGITS_UINT):
-      multiple = DIGITS_ROUND_UINT
+    # Math: worst case approaches supply ^ 4.  Safe up to about 10 tokens max.
+    
+    maxValue: uint256 = _quantityToSell
+    if(maxValue < buybackReserve):
+      maxValue = buybackReserve
+    if(maxValue < burnedSupply):
+      maxValue = burnedSupply
+    multiple: uint256 = maxValue / (DIGITS_UINT * 10)
+    if(multiple < 1):
+      multiple = 1
+    else:
+      quantityToSell /= multiple
+      buybackReserve /= multiple
       burnedSupply /= multiple
       totalSupply /= multiple
       supply /= multiple
-      buybackReserve /= multiple
-    
-    currencyValue = _quantityToSell * buybackReserve
+
+    currencyValue = quantityToSell * buybackReserve
     currencyValue *= burnedSupply * burnedSupply
     # TODO to avoid overflow supply and buybackReserve needs to be capped (?)
     currencyValue /= totalSupply 
     currencyValue /= supply * supply
     # TODO cap supply to avoid overflow
 
-    temp: uint256 = 2 * _quantityToSell * buybackReserve
+    temp: uint256 = 2 * quantityToSell * buybackReserve
     temp /= supply
     currencyValue += temp
-    temp = _quantityToSell * _quantityToSell * buybackReserve
+    temp = quantityToSell * quantityToSell * buybackReserve
     # TODO cap supply and buybackReserve to avoid overflow (?)
-    temp /= supply * supply * multiple
+    temp /= supply * supply
     # TODO cap supply to avoid overflow
     currencyValue -= temp
+    currencyValue *= multiple
   elif(self.state == STATE_CLOSE):
     currencyValue = _quantityToSell * buybackReserve
     # TODO cap supply and backbackReserve
@@ -768,11 +781,16 @@ def close():
   elif(self.state == STATE_RUN):
     # Collect the exitFee and close the c-org.
     self.state = STATE_CLOSE
-    supply: uint256 = self.fair.totalSupply()
-    exitFee: uint256 = supply * supply
+
+    # Source: (t^2 * (n/d))/2 + b*(n/d)*t - r
+    # Implementation: (2 b n t + n t^2 - 2 d r)/(2 d)
+    exitFee: uint256 = 2 * self.fair.burnedSupply()
     exitFee *= self.buySlopeNum
-    exitFee /= self.buySlopeDen * 2
-    exitFee -= self.buybackReserve() - as_unitless_number(msg.value)
+    exitFee *= self.fair.totalSupply()
+    exitFee += self.buySlopeNum * self.fair.totalSupply() * self.fair.totalSupply()
+    exitFee -= 2 * self.buySlopeDen * (self.buybackReserve() - as_unitless_number(msg.value))
+    exitFee /= 2 * self.buySlopeDen
+
     self._collectInvestment(msg.sender, exitFee, msg.value, True)
   else:
     assert False, "INVALID_STATE"
