@@ -31,10 +31,8 @@ module.exports = async function deployAndConfigure(
     "0", // initGoal
     "1", // buySlopeNum
     "100000", // buySlopeDen
-    "1", // investmentReserveNum
-    "10", // investmentReserveDen
-    "1", // revenueCommitementNum
-    "10" // revenueCommitementDen
+    "1000", // investmentReserveBasisPoints
+    "1000" // revenueCommitementBasisPoints
   );
 
   // Deploy TPL

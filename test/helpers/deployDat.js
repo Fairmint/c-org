@@ -9,10 +9,8 @@ module.exports = async function deployDat(options, from) {
       initGoal: "0",
       buySlopeNum: "1",
       buySlopeDen: "100000",
-      investmentReserveNum: "1",
-      investmentReserveDen: "10",
-      revenueCommitementNum: "1",
-      revenueCommitementDen: "10"
+      investmentReserveBasisPoints: "1000",
+      revenueCommitementBasisPoints: "1000"
     },
     options
   );
@@ -28,10 +26,8 @@ module.exports = async function deployDat(options, from) {
     callOptions.initGoal,
     callOptions.buySlopeNum,
     callOptions.buySlopeDen,
-    callOptions.investmentReserveNum,
-    callOptions.investmentReserveDen,
-    callOptions.revenueCommitementNum,
-    callOptions.revenueCommitementDen,
+    callOptions.investmentReserveBasisPoints,
+    callOptions.revenueCommitementBasisPoints,
     { from }
   );
   return [dat, fair];

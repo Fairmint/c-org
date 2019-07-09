@@ -130,10 +130,8 @@ UpdateConfig: event({
   _beneficiary: indexed(address),
   _control: indexed(address),
   _feeCollector: indexed(address),
-  _burnThresholdNum: uint256,
-  _burnThresholdDen: uint256,
-  _feeNum: uint256,
-  _feeDen: uint256,
+  _burnThresholdBasisPoints: uint256,
+  _feeBasisPoints: uint256,
   _minInvestment: uint256,
   _name: string[64],
   _symbol: string[32]
@@ -170,6 +168,9 @@ DIGITS_UINT: constant(uint256) = 10 ** 18
 DIGITS_DECIMAL: constant(decimal) = convert(DIGITS_UINT, decimal)
 # @notice Represents 1 full token (with 18 decimals)
 
+BASIS_POINTS_DEN: constant(uint256) = 10000
+# @notice The denominator component for values specified in basis points.
+
 # Data for DAT business logic
 ###########
 
@@ -177,15 +178,11 @@ beneficiary: public(address)
 # @notice The address of the beneficiary organization which receives the investments. 
 # Points to the wallet of the organization. 
 
-burnThresholdNum: public(uint256)
+burnThresholdBasisPoints: public(uint256)
 # @notice The percentage of the total supply of FSE above which the FSEs minted by the
-# organization are automatically burnt.
-# @dev This is the numerator component of the fractional value.
+# organization are automatically burnt expressed in basis points.
 
-burnThresholdDen: public(uint256)
-# @notice The percentage of the total supply of FSE above which the FSEs minted by the
-# organmization are automatically burnt.
-# @dev This is the denominator component of the fractional value.
+#TODO set max buySlope to lowest 1 / 10,000,000
 
 buySlopeNum: public(uint256)
 # @notice The buy slope of the bonding curve. 
@@ -212,13 +209,8 @@ currency: IERC777_20_Token
 feeCollector: public(address)
 # @notice The address where fees are sent.
 
-feeNum: public(uint256)
-# @notice The percent fee collected each time new FSE are issued.
-# @dev This is the numerator component of the fractional value.
-
-feeDen: public(uint256)
-# @notice The percent fee collected each time new FSE are issued.
-# @dev This is the denominator component of the fractional value.
+feeBasisPoints: public(uint256)
+# @notice The percent fee collected each time new FSE are issued expressed in basis points.
 
 fairAddress: public(address)
 # @notice The FAIR token contract address
@@ -239,15 +231,9 @@ initReserve: public(uint256)
 # @notice The initial number of FSE created at initialization for the beneficiary.
 # @dev Most organizations will move these tokens into vesting contract(s)
 
-investmentReserveNum: public(uint256)
+investmentReserveBasisPoints: public(uint256)
 # @notice The investment reserve of the c-org. Defines the percentage of the value invested that is 
-# automatically funneled and held into the buyback_reserve.
-# @dev This is the numerator component of the fractional value.
-
-investmentReserveDen: public(uint256)
-# @notice The investment reserve of the c-org. Defines the percentage of the value invested that is 
-# automatically funneled and held into the buyback_reserve.
-# @dev This is the denominator component of the fractional value.
+# automatically funneled and held into the buyback_reserve expressed in basis points.
 
 isCurrencyERC20: public(bool)
 # @notice A cache of the currency type, if `True` use ERC-20 otherwise use ETH or ERC-777.
@@ -255,15 +241,9 @@ isCurrencyERC20: public(bool)
 minInvestment: public(uint256)
 # @notice The minimum amount of `currency` investment accepted.
 
-revenueCommitmentNum: public(uint256)
+revenueCommitmentBasisPoints: public(uint256)
 # @notice The revenue commitment of the organization. Defines the percentage of the value paid through the contract
-# that is automatically funneled and held into the buyback_reserve.
-# @dev This is the numerator component of the fractional value.
-
-revenueCommitmentDen: public(uint256)
-# @notice The revenue commitment of the organization. Defines the percentage of the value paid through the contract
-# that is automatically funneled and held into the buyback_reserve.
-# @dev This is the denominator component of the fractional value.
+# that is automatically funneled and held into the buyback_reserve expressed in basis points.
 
 state: public(uint256(stateMachine))
 # @notice The current state of the contract.
@@ -312,10 +292,8 @@ def initialize(
   _initGoal: uint256,
   _buySlopeNum: uint256,
   _buySlopeDen: uint256,
-  _investmentReserveNum: uint256,
-  _investmentReserveDen: uint256,
-  _revenueCommitmentNum: uint256,
-  _revenueCommitmentDen: uint256
+  _investmentReserveBasisPoints: uint256,
+  _revenueCommitmentBasisPoints: uint256
 ):
   """
   @notice Called once after deploy to set the initial configuration.
@@ -336,19 +314,13 @@ def initialize(
   assert _buySlopeDen > 0, "INVALID_SLOPE_DEN"
   self.buySlopeNum = _buySlopeNum # Fraction may be > 1
   self.buySlopeDen = _buySlopeDen
-  assert _investmentReserveDen > 0, "INVALID_RESERVE_DEN"
-  assert _investmentReserveNum <= _investmentReserveDen, "INVALID_RESERVE" # 100% or less
-  self.investmentReserveNum = _investmentReserveNum # 0 means all investments go to the beneficiary
-  self.investmentReserveDen = _investmentReserveDen
-  assert _revenueCommitmentDen > 0, "INVALID_COMMITMENT_DEN"
-  assert _revenueCommitmentNum <= _revenueCommitmentDen, "INVALID_COMMITMENT" # 100% or less
-  self.revenueCommitmentNum = _revenueCommitmentNum # 0 means all renvue goes to the beneficiary
-  self.revenueCommitmentDen = _revenueCommitmentDen
+  assert _investmentReserveBasisPoints <= BASIS_POINTS_DEN, "INVALID_RESERVE" # 100% or less
+  self.investmentReserveBasisPoints = _investmentReserveBasisPoints # 0 means all investments go to the beneficiary
+  assert _revenueCommitmentBasisPoints <= BASIS_POINTS_DEN, "INVALID_COMMITMENT" # 100% or less
+  self.revenueCommitmentBasisPoints = _revenueCommitmentBasisPoints # 0 means all renvue goes to the beneficiary
 
   # Set default values (which may be updated using `updateConfig`)
-  self.burnThresholdNum = 1
-  self.burnThresholdDen = 1
-  self.feeDen = 1
+  self.burnThresholdBasisPoints = BASIS_POINTS_DEN
   self.minInvestment = as_unitless_number(as_wei_value(100, "ether"))
   self.beneficiary = msg.sender
   self.control = msg.sender
@@ -383,10 +355,8 @@ def updateConfig(
   _beneficiary: address,
   _control: address,
   _feeCollector: address,
-  _feeNum: uint256,
-  _feeDen: uint256,
-  _burnThresholdNum: uint256,
-  _burnThresholdDen: uint256,
+  _feeBasisPoints: uint256,
+  _burnThresholdBasisPoints: uint256,
   _minInvestment: uint256,
   _name: string[64],
   _symbol: string[32]
@@ -411,20 +381,26 @@ def updateConfig(
 
   # TODO consider restricting the supported range of values for all fractions
 
-  assert _burnThresholdDen > 0, "INVALID_THRESHOLD_DEN"
-  assert _burnThresholdNum <= _burnThresholdDen, "INVALID_THRESHOLD" # 100% or less
-  self.burnThresholdNum = _burnThresholdNum # 0 means burn all of beneficiary's holdings
-  self.burnThresholdDen = _burnThresholdDen
+  assert _burnThresholdBasisPoints <= BASIS_POINTS_DEN, "INVALID_THRESHOLD" # 100% or less
+  self.burnThresholdBasisPoints = _burnThresholdBasisPoints # 0 means burn all of beneficiary's holdings
 
-  assert _feeDen > 0, "INVALID_FEE_DEM"
-  assert _feeNum <= _feeDen, "INVALID_FEE" # 100% or less
-  self.feeNum = _feeNum # 0 means no fee
-  self.feeDen = _feeDen
+  assert _feeBasisPoints <= BASIS_POINTS_DEN, "INVALID_FEE" # 100% or less
+  self.feeBasisPoints = _feeBasisPoints # 0 means no fee
 
   assert _minInvestment > 0, "INVALID_MIN_INVESTMENT"
   self.minInvestment = _minInvestment
 
-  log.UpdateConfig(_authorizationAddress, _beneficiary, _control, _feeCollector, _burnThresholdNum, _burnThresholdDen, _feeNum, _feeDen, _minInvestment, _name, _symbol)
+  log.UpdateConfig(
+    _authorizationAddress,
+    _beneficiary,
+    _control,
+    _feeCollector,
+    _burnThresholdBasisPoints,
+    _feeBasisPoints,
+    _minInvestment,
+    _name,
+    _symbol
+  )
 
 #endregion
 
@@ -437,9 +413,9 @@ def _applyBurnThreshold():
   """
   balanceBefore: uint256 = self.fair.balanceOf(self.beneficiary)
   maxHoldings: uint256 = self.fair.totalSupply() + self.fair.burnedSupply()
-  # TODO if totalSupply is < x and burnThresholdNum is < y this will never overflow.
-  maxHoldings *= self.burnThresholdNum
-  maxHoldings /= self.burnThresholdDen
+  # Math: if totalSupply is < (2^256 - 1) / 10000 this will never overflow
+  maxHoldings *= self.burnThresholdBasisPoints
+  maxHoldings /= BASIS_POINTS_DEN
 
   if(balanceBefore > maxHoldings):
     self.fair.operatorBurn(self.beneficiary, balanceBefore - maxHoldings, "", "")
@@ -501,13 +477,13 @@ def _distributeInvestment(
   @dev Distributes _value currency between the buybackReserve, beneficiary, and feeCollector.
   """
   # Rounding favors buybackReserve, then beneficiary, and feeCollector is last priority.
-  # TODO max investmentReserveNum to prevent overflow
-  reserve: uint256 = self.investmentReserveNum * _value
-  reserve /= self.investmentReserveDen
+  # Math: if investment value is < (2^256 - 1) / 10000 this will never overflow
+  reserve: uint256 = self.investmentReserveBasisPoints * _value
+  reserve /= BASIS_POINTS_DEN
   reserve = _value - reserve
-  # TODO max feeNum to prevent overflow
-  fee: uint256 = reserve * self.feeNum
-  fee /= self.feeDen
+  # Math: if investment value is < (2^256 - 1) / 10000 this will never overflow
+  fee: uint256 = reserve * self.feeBasisPoints
+  fee /= BASIS_POINTS_DEN
 
   self._sendCurrency(self.feeCollector, fee)
   self._sendCurrency(self.beneficiary, reserve - fee)
@@ -628,7 +604,8 @@ def sell(
     currencyValue = _quantityToSell * buybackReserve
     currencyValue *= burnedSupply * burnedSupply
     # TODO to avoid overflow supply and buybackReserve needs to be capped (?)
-    currencyValue /= totalSupply * supply * supply
+    currencyValue /= totalSupply 
+    currencyValue /= supply * supply
     # TODO cap supply to avoid overflow
 
     temp: uint256 = 2 * _quantityToSell * buybackReserve
@@ -648,7 +625,7 @@ def sell(
     currencyValue = _quantityToSell * buybackReserve
     # TODO cap supply and backbay reserve
     currencyValue /= totalSupply - self.initReserve
-    # TODO if initReserve is burned this may underflow
+    # TODO if initReserve is burned this may underflow - maybe block burn during init/cancel
 
   assert currencyValue > 0, "INSUFFICIENT_FUNDS"
 
@@ -663,12 +640,25 @@ def sell(
 
 @private
 def _pay(
-  _operator: address,
+  _from: address,
   _to: address,
   _currencyValue: uint256
 ):
+  """
+  @dev Pay the organization on-chain.
+  @param _from The account which issued the transaction and paid the currencyValue.
+  @param _to The account which receives tokens for the contribution.
+  @param _currencyValue How much currency which was paid.
+  """
+  assert _from != ZERO_ADDRESS, "INVALID_ADDRESS"
+  assert _currencyValue > 0, "MISSING_CURRENCY"
   assert self.state == STATE_RUN, "INVALID_STATE"
-  self._sendCurrency(self.beneficiary, _currencyValue - _currencyValue * self.investmentReserveNum / self.investmentReserveDen)
+
+  # Send a portion of the funds to the beneficiary, the rest is added to the buybackReserve
+  # Math: if _currencyValue is < (2^256 - 1) / 10000 this will never overflow
+  reserve: uint256 = _currencyValue * self.investmentReserveBasisPoints
+  reserve /= BASIS_POINTS_DEN
+  self._sendCurrency(self.beneficiary, _currencyValue - reserve)
 
   # buy_slope = n/d
   # revenue_commitment = c/g
@@ -680,15 +670,17 @@ def _pay(
   # ) - s
 
   supply: uint256 = self.fair.totalSupply() + self.fair.burnedSupply()
-  tokenValue: uint256 = 2 * _currencyValue * self.revenueCommitmentNum * self.buySlopeDen
-  tokenValue /= self.revenueCommitmentDen * self.buySlopeNum
+  tokenValue: uint256 = 2 * _currencyValue * self.revenueCommitmentBasisPoints * self.buySlopeDen
+  # Math: TODO overflow buySlope
+  tokenValue /= BASIS_POINTS_DEN * self.buySlopeNum
   tokenValue += supply * supply
-  # Max total tokenValue of 2**256 - 1 (else tx reverts)
+  # Math: TODO supply^2 overflow
+  # Math: Max total tokenValue of 2**256 - 1 (else tx reverts)
 
-  tokenValue /= DIGITS_UINT # Truncates last 18 digits from tokenValue here
+  tokenValue /= DIGITS_UINT # Math: Truncates last 18 digits from tokenValue here
 
-  decimalValue: decimal = self._toDecimalWithPlaces(tokenValue) # Truncates another 8 digits from tokenValue (losing 26 digits in total)
-  # Max total decimalValue of 2**127 - 1 (else tx reverts)
+  decimalValue: decimal = self._toDecimalWithPlaces(tokenValue) # Math: Truncates another 8 digits from tokenValue (losing 26 digits in total)
+  # Math: Max total decimalValue of 2**127 - 1 (else tx reverts)
 
   decimalValue = sqrt(decimalValue)
 
@@ -700,16 +692,18 @@ def _pay(
 
   tokenValue -= supply
 
+  # Update the to address to the beneficiary if the currency value would fail
   to: address = _to
   if(to == ZERO_ADDRESS):
     to = self.beneficiary
   elif(self.fair.authorizationAddress() != ZERO_ADDRESS):
-    if(not IAuthorization(self.fair.authorizationAddress()).isTransferAllowed(self, ZERO_ADDRESS, _to, tokenValue, "")):
+    if(not IAuthorization(self.fair.authorizationAddress())
+      .isTransferAllowed(self, ZERO_ADDRESS, _to, tokenValue, "")):
       to = self.beneficiary
 
-  self.fair.mint(_operator, to, tokenValue, "", "")
+  # Distribute tokens
+  self.fair.mint(_from, to, tokenValue, "", "")
   self._applyBurnThreshold() # must mint before this call
-
 
 @public
 @payable
@@ -717,12 +711,21 @@ def pay(
   _to: address,
   _currencyValue: uint256
 ):
+  """
+  @dev Pay the organization on-chain.
+  @param _to The account which receives tokens for the contribution. If this address
+  is not authorized to receive tokens then they will be sent to the beneficiary account instead.
+  @param _currencyValue How much currency which was paid.
+  """
   self._collectInvestment(msg.sender, _currencyValue, msg.value, False)
   self._pay(msg.sender, _to, _currencyValue)
 
 @public
 @payable
 def __default__():
+  """
+  @dev Pay the organization on-chain with ETH (only works when currency is ETH)
+  """
   self._collectInvestment(msg.sender, as_unitless_number(msg.value), msg.value, False)
   self._pay(msg.sender, msg.sender, as_unitless_number(msg.value))
 
@@ -735,8 +738,12 @@ def tokensReceived(
   _userData: bytes[256],
   _operatorData: bytes[256]
 ):
+  """
+  @dev Pay the organization on-chain with ERC-777 tokens (only works when currency is ERC-777)
+  Params are from the ERC-777 token standard
+  """
   assert msg.sender == self.currency, "INVALID_CURRENCY"
-  self._pay(msg.sender, _from, _amount)
+  self._pay(_operator, _from, _amount)
 
 #endregion
 
@@ -745,11 +752,21 @@ def tokensReceived(
 @public
 @payable
 def close():
+  """
+  @notice Called by the beneficiary account to STATE_CLOSE or STATE_CANCEL the c-org, 
+  preventing any more tokens from being minted.
+  @dev Requires an `exitFee` to be paid.  If the currency is ETH, include a little more than
+  what appears to be required and any remainder will be returned to your account.  This is 
+  because another user may have a transaction mined which changes the exitFee required.
+  For other `currency` types, the beneficiary account will be billed the exact amount required.
+  """
   assert msg.sender == self.beneficiary, "BENEFICIARY_ONLY"
 
   if(self.state == STATE_INIT):
+    # Allow the org to cancel anytime if the initGoal was not reached.
     self.state = STATE_CANCEL
   elif(self.state == STATE_RUN):
+    # Collect the exitFee and close the c-org.
     self.state = STATE_CLOSE
     supply: uint256 = self.fair.totalSupply()
     exitFee: uint256 = supply * supply
