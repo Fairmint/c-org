@@ -9,6 +9,9 @@ const {
 } = require("../helpers");
 const sheets = require("./test-data/script.json");
 
+const tplArtifact = artifacts.require("TestTPLAttributeRegistry");
+const authArtifact = artifacts.require("TestAuthorization");
+
 const daiArtifact = artifacts.require("TestDai");
 //const erc777Artifact = artifacts.require("TestERC777Only");
 //const zosTokenArtifact = artifacts.require("TestERC777ERC20");
@@ -114,10 +117,19 @@ contract("dat / csvTests", accounts => {
       },
       control
     );
+    const tpl = await tplArtifact.new();
+    auth = await authArtifact.new(
+      fair.address,
+      tpl.address,
+      [42],
+      [0, 0],
+      [0, 0, 0]
+    );
     await updateDatConfig(
       dat,
       fair,
       {
+        authorizationAddress: auth.address,
         beneficiary,
         feeCollector,
         feeBasisPoints: new BigNumber(fee).toFixed()

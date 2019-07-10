@@ -222,14 +222,32 @@ contract Authorization
     { // Mint/Buy
       return true;
     }
+    if(_to == address(0))
+    { // This is burn or sell
+      if(_operator != address(dat))
+      { // This is burn
+        if(dat.state() != 1)
+        { // Burn is only allowed during RUN
+          return false;
+        }
+      }
+      else
+      { // This is sell
+        if(_from == dat.beneficiary() && dat.state() < 2)
+        { // The beneficiary may not sell until CLOSE or CANCEL
+          return false;
+        }
+      }
+    }
     else
-    {
-      if(_to == address(0) && _operator != address(dat) && dat.state() != 1)
-      { // Burn is only allowed during RUN
+    { // This is a transfer
+      if(dat.state() == 0 && _from != dat.beneficiary())
+      { // Only beneficiary can make transfers during DAT state `init`
         return false;
       }
-      return availableBalanceOf(_from) >= _value;
     }
+
+    return availableBalanceOf(_from) >= _value;
   }
 
   /**
@@ -240,18 +258,12 @@ contract Authorization
   ) public view
     returns (uint)
   {
-    if(dat.state() == 0 && _from != dat.beneficiary())
-    {
-      // Only beneficiary can make transfers during DAT state `init`
-      return 0;
-    }
-
     Investor storage investor = investors[_from];
     // Get the current unlocked balance
     uint balance = fair.balanceOf(_from).sub(investor.totalLocked);
     // and add in any locked entries which are ready to be unlocked
     uint head = investor.firstExpiration;
-    while (head <= block.timestamp)
+    while (head <= block.timestamp && head != 0)
     {
       LockedFAIR storage lockedFair = investor.lockedFair[head];
       balance = balance.add(lockedFair.lockedValue);
