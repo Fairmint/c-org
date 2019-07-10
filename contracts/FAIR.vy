@@ -393,7 +393,7 @@ def granularity() -> uint256:
     NOTE: Most tokens SHOULD be fully partition-able. I.e., this function SHOULD
     return 1 unless there is a good reason for not allowing any fraction of the token.
   """
-  return 1 # TODO maybe switch to 100000000 to simplify math in the DAT
+  return 1
 
 @public
 @constant

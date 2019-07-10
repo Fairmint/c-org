@@ -650,7 +650,6 @@ def sell(
 
   # Distribute funds
   self.fair.operatorBurn(msg.sender, _quantityToSell, "", "")
-  assert currencyValue <= self.buybackReserve(), "too much" # todo remove
   self._sendCurrency(_to, currencyValue)
   log.Sell(msg.sender, _to, currencyValue, _quantityToSell)
 
