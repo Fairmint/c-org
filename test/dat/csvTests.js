@@ -119,13 +119,8 @@ contract("dat / csvTests", accounts => {
     );
     const tpl = await tplArtifact.new();
     const auth = await authArtifact.new();
-    await auth.initialize(fair.address)
-    await auth.updateAuth(
-      tpl.address,
-      [42],
-      [0, 0],
-      [0, 0, 0]
-    )
+    await auth.initialize(fair.address);
+    await auth.updateAuth(tpl.address, [42], [0, 0], [0, 0, 0]);
     await updateDatConfig(
       dat,
       fair,

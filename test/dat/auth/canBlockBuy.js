@@ -21,13 +21,8 @@ contract("dat / auth / canBlockBuy", accounts => {
     );
     const tpl = await tplArtifact.new();
     auth = await authArtifact.new();
-    await auth.initialize(fair.address)
-    await auth.updateAuth(
-      tpl.address,
-      [42],
-      [0, 0],
-      [0, 0, 0]
-    )
+    await auth.initialize(fair.address);
+    await auth.updateAuth(tpl.address, [42], [0, 0], [0, 0, 0]);
     console.log((await auth.getInvestorTypeOf(accounts[1])).toString());
     await updateDatConfig(
       dat,
