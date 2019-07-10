@@ -40,14 +40,14 @@ contract IERC777_20_Token:
   def send(
     _recipient: address,
     _amount: uint256,
-    _userData: bytes[256]
+    _userData: bytes[128] # TODO maybe larger array (out of gas)
   ): modifying
   def operatorSend(
     _sender: address,
     _recipient: address,
     _amount: uint256,
-    _userData: bytes[256],
-    _operatorData: bytes[256]
+    _userData: bytes[128],
+    _operatorData: bytes[128]
   ): modifying
 contract IFAIR:
   # @title The interface for our FAIR tokens.
@@ -60,27 +60,27 @@ contract IFAIR:
   def authorizationAddress() -> address: constant
   def burn(
     _amount: uint256,
-    _userData: bytes[256]
+    _userData: bytes[128]
   ): modifying
   def operatorBurn(
     _account: address,
     _amount: uint256,
-    _userData: bytes[256],
-    _operatorData: bytes[256]
+    _userData: bytes[128],
+    _operatorData: bytes[128]
   ): modifying
   def operatorSend(
     _sender: address,
     _recipient: address,
     _amount: uint256,
-    _userData: bytes[256],
-    _operatorData: bytes[256]
+    _userData: bytes[128],
+    _operatorData: bytes[128]
   ): modifying
   def mint(
     _operator: address,
     _to: address,
     _quantity: uint256,
-    _userData: bytes[256],
-    _operatorData: bytes[256]
+    _userData: bytes[128],
+    _operatorData: bytes[128]
   ): modifying
   def updateConfig(
     _authorizationAddress: address,
@@ -94,8 +94,18 @@ contract IAuthorization:
     _from: address,
     _to: address,
     _value: uint256,
-    _operatorData: bytes[256]
+    _operatorData: bytes[128]
   ) -> bool: constant
+contract IBigDiv:
+  def bigDiv3x3(
+    _numA: uint256,
+    _numB: uint256,
+    _numC: uint256,
+    _denA: uint256,
+    _denB: uint256,
+    _denC: uint256,
+    _roundUp: bool
+  ) -> uint256: constant
 
 # Events
 ###########
@@ -177,6 +187,9 @@ BASIS_POINTS_DEN: constant(uint256) = 10000
 beneficiary: public(address)
 # @notice The address of the beneficiary organization which receives the investments. 
 # Points to the wallet of the organization. 
+
+bigDiv: IBigDiv
+# @notice The BigDiv library we use for BigNumber math
 
 burnThresholdBasisPoints: public(uint256)
 # @notice The percentage of the total supply of FAIR above which the FAIRs minted by the
@@ -286,6 +299,7 @@ def buybackReserve() -> uint256:
 
 @public
 def initialize(
+  _bigDiv: address,
   _fairAddress: address,
   _initReserve: uint256,
   _currencyAddress: address,
@@ -308,7 +322,8 @@ def initialize(
   else:
     self.initGoal = _initGoal
 
-  # TODO consider restricting the supported range of values for all fractions
+  assert _bigDiv != ZERO_ADDRESS, "INVALID_ADDRESS"
+  self.bigDiv = IBigDiv(_bigDiv)
 
   assert _buySlopeNum > 0, "INVALID_SLOPE_NUM" # 0 not supported
   assert _buySlopeDen > 0, "INVALID_SLOPE_DEN"
@@ -380,8 +395,6 @@ def updateConfig(
 
   assert _feeCollector != ZERO_ADDRESS, "INVALID_ADDRESS"
   self.feeCollector = _feeCollector
-
-  # TODO consider restricting the supported range of values for all fractions
 
   assert _burnThresholdBasisPoints <= BASIS_POINTS_DEN, "INVALID_THRESHOLD" # 100% or less
   self.burnThresholdBasisPoints = _burnThresholdBasisPoints # 0 means burn all of beneficiary's holdings
@@ -596,39 +609,21 @@ def sell(
     # source: (t+b)*a*(2*r)/((t+b)^2)-(((2*r)/((t+b)^2)*a^2)/2)+((2*r)/((t+b)^2)*a*b^2)/(2*(t)) 
     # imp: (a b^2 r)/(t (b + t)^2) + (2 a r)/(b + t) - (a^2 r)/(b + t)^2
 
-    # Math: worst case approaches supply ^ 4.  Safe up to about 10 tokens max.
+    currencyValue = self.bigDiv.bigDiv3x3(
+      quantityToSell, buybackReserve, burnedSupply * burnedSupply,
+      totalSupply, supply, supply,
+      False
+    )
     
-    maxValue: uint256 = _quantityToSell
-    if(maxValue < buybackReserve):
-      maxValue = buybackReserve
-    if(maxValue < burnedSupply):
-      maxValue = burnedSupply
-    multiple: uint256 = maxValue / (DIGITS_UINT * 10)
-    if(multiple < 1):
-      multiple = 1
-    else:
-      quantityToSell /= multiple
-      buybackReserve /= multiple
-      burnedSupply /= multiple
-      totalSupply /= multiple
-      supply /= multiple
-
-    currencyValue = quantityToSell * buybackReserve
-    currencyValue *= burnedSupply * burnedSupply
-    # TODO to avoid overflow supply and buybackReserve needs to be capped (?)
-    currencyValue /= totalSupply 
-    currencyValue /= supply * supply
-    # TODO cap supply to avoid overflow
-
     temp: uint256 = 2 * quantityToSell * buybackReserve
     temp /= supply
     currencyValue += temp
-    temp = quantityToSell * quantityToSell * buybackReserve
-    # TODO cap supply and buybackReserve to avoid overflow (?)
-    temp /= supply * supply
-    # TODO cap supply to avoid overflow
-    currencyValue -= temp
-    currencyValue *= multiple
+
+    currencyValue -= self.bigDiv.bigDiv3x3(
+      quantityToSell, quantityToSell, buybackReserve, 
+      supply, supply, 1,
+      True
+    )
   elif(self.state == STATE_CLOSE):
     currencyValue = _quantityToSell * buybackReserve
     # TODO cap supply and backbackReserve
@@ -644,6 +639,7 @@ def sell(
 
   # Distribute funds
   self.fair.operatorBurn(msg.sender, _quantityToSell, "", "")
+  assert currencyValue <= self.buybackReserve(), "too much" # todo remove
   self._sendCurrency(_to, currencyValue)
   log.Sell(msg.sender, _to, currencyValue, _quantityToSell)
 
@@ -733,30 +729,30 @@ def pay(
   self._collectInvestment(msg.sender, _currencyValue, msg.value, False)
   self._pay(msg.sender, _to, _currencyValue)
 
-@public
-@payable
-def __default__():
-  """
-  @dev Pay the organization on-chain with ETH (only works when currency is ETH)
-  """
-  self._collectInvestment(msg.sender, as_unitless_number(msg.value), msg.value, False)
-  self._pay(msg.sender, msg.sender, as_unitless_number(msg.value))
+# @public
+# @payable
+# def __default__():
+#   """
+#   @dev Pay the organization on-chain with ETH (only works when currency is ETH)
+#   """
+#   self._collectInvestment(msg.sender, as_unitless_number(msg.value), msg.value, False)
+#   self._pay(msg.sender, msg.sender, as_unitless_number(msg.value))
 
-@public
-def tokensReceived(
-  _operator: address,
-  _from: address,
-  _to: address,
-  _amount: uint256,
-  _userData: bytes[256],
-  _operatorData: bytes[256]
-):
-  """
-  @dev Pay the organization on-chain with ERC-777 tokens (only works when currency is ERC-777)
-  Params are from the ERC-777 token standard
-  """
-  assert msg.sender == self.currency, "INVALID_CURRENCY"
-  self._pay(_operator, _from, _amount)
+# @public
+# def tokensReceived(
+#   _operator: address,
+#   _from: address,
+#   _to: address,
+#   _amount: uint256,
+#   _userData: bytes[128],
+#   _operatorData: bytes[128]
+# ):
+#   """
+#   @dev Pay the organization on-chain with ERC-777 tokens (only works when currency is ERC-777)
+#   Params are from the ERC-777 token standard
+#   """
+#   assert msg.sender == self.currency, "INVALID_CURRENCY"
+#   self._pay(_operator, _from, _amount)
 
 #endregion
 

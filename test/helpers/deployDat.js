@@ -1,5 +1,6 @@
 const fairArtifact = artifacts.require("FAIR");
 const datArtifact = artifacts.require("DecentralizedAutonomousTrust");
+const bigDivArtifact = artifacts.require("BigDiv");
 
 module.exports = async function deployDat(options, from) {
   const callOptions = Object.assign(
@@ -18,8 +19,10 @@ module.exports = async function deployDat(options, from) {
   console.log(`Deploy DAT: ${JSON.stringify(callOptions, null, 2)}`);
 
   const fair = await fairArtifact.new();
+  const library = await bigDivArtifact.new();
   const dat = await datArtifact.new();
   await dat.initialize(
+    library.address,
     fair.address,
     callOptions.initReserve,
     callOptions.currency,
