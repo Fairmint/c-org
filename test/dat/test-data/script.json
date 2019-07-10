@@ -9,7 +9,7 @@
     },
     {
       "id": 3,
-      "name": "buy_sell_large_numbers"
+      "name": "buy_sell_large_numbers_minBuySlope"
     },
     {
       "id": 4,
@@ -37,13 +37,11 @@
     },
     {
       "id": 10,
-      "name": "buy_pay_burn-no-premint",
-      "disabled": true
+      "name": "buy_pay_burn-no-premint"
     },
     {
       "id": 11,
-      "name": "buy_pay_burn_sell_close-premint",
-      "disabled": true
+      "name": "buy_pay_burn_sell_close-premint"
     }
   ]
 

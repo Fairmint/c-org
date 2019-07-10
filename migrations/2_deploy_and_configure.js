@@ -6,6 +6,7 @@ const tplArtifact = artifacts.require("TestTPLAttributeRegistry");
 const authArtifact = artifacts.require("Authorization");
 const fairArtifact = artifacts.require("FAIR");
 const datArtifact = artifacts.require("DecentralizedAutonomousTrust");
+const bigDivArtifact = artifacts.require("BigDiv");
 
 module.exports = async function deployAndConfigure(
   deployer,
@@ -21,10 +22,14 @@ module.exports = async function deployAndConfigure(
   // TODO upgradable?
   const fair = await deployer.deploy(fairArtifact);
 
+  // Deploy Library
+  const bigDiv = await deployer.deploy(bigDivArtifact);
+
   // Deploy Dat
   // TODO upgradable
   const dat = await deployer.deploy(datArtifact);
   await dat.initialize(
+    bigDiv.address,
     fairArtifact.address,
     "42000000000000000000", // initReserve
     "0x0000000000000000000000000000000000000000", // currencyAddress

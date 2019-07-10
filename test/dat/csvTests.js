@@ -519,7 +519,7 @@ contract("dat / csvTests", accounts => {
         amount = amount.times(-1);
         action = "mint";
       }
-      if (amount.lte(0)) {
+      if (amount.lte(0.000001)) {
         return; // value is very close already
       }
       let from, to;
@@ -529,6 +529,13 @@ contract("dat / csvTests", accounts => {
       } else {
         from = account;
         to = ethBank;
+      }
+      if (initComplete) {
+        console.log(
+          `${from} ${new BigNumber(
+            web3.utils.fromWei(await web3.eth.getBalance(from), "ether")
+          ).toFormat()} -> ${to}: ${amount.toFormat()}`
+        );
       }
       await web3.eth.sendTransaction({
         from,
