@@ -4,6 +4,7 @@ import "./IDAT.sol";
 import "./IFAIR.sol";
 import "tpl-contracts/contracts/AttributeRegistryInterface.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import "openzeppelin-eth/contracts/ownership/Ownable.sol";
 
 
 /**
@@ -11,7 +12,8 @@ import "openzeppelin-solidity/contracts/math/SafeMath.sol";
  * @dev This is consumed by FAIR and DAT contracts directly and may be useful for the frontend/end-users.
  * It interfaces with TPL in order to confirm KYC and to check the investor's status.
  */
-contract Authorization
+contract Authorization is
+  Ownable
 {
 //region Types
 
@@ -58,6 +60,8 @@ contract Authorization
      */
     uint firstExpiration;
   }
+
+  event AuthUpdated();
 //endregion
 
 //region Data
@@ -109,28 +113,29 @@ contract Authorization
 //region Init
 
   /**
-   * TODO switch to init pattern in order to support zos upgrades
-   * Set `fair` and `owner` on init, then move the others to an `updateByOwner` function.
+   * Using the init pattern in order to support zos upgrades
+   * TODO comments
    */ 
-  constructor(
-    address _fair,
+  function initialize(
+    address _fair
+  ) public
+  {
+    Ownable.initialize(msg.sender);
+    require(_fair != address(0), "INVALID_FAIR_ADDRESS");
+    fair = IFAIR(_fair);
+    dat = IDAT(fair.owner());
+    require(address(dat) != address(0), "INVALID_DAT_ADDRESS");
+  }
+
+  // TODO comments
+  function updateAuth(
     address _attributeRegistry,
     uint[] memory _attributeTypeIDs,
     uint[] memory _authorizedTransfers,
     uint[] memory _lockupPeriods
   ) public
+    onlyOwner
   {
-    require(address(_fair) != address(0), "INVALID_FAIR_ADDRESS");
-    fair = IFAIR(_fair);
-    dat = IDAT(fair.owner());
-    require(address(dat) != address(0), "INVALID_DAT_ADDRESS");
-
-    /**
-     * TODO move below to update function
-     * ...but what if it's not set yet? I think everything fails and that's okay. Double check.
-     * Add comments on the input format.
-     */
-
     require(_attributeRegistry != address(0), "INVALID_REGISTRY_ADDRESS");
     attributeRegistry = AttributeRegistryInterface(_attributeRegistry);
     require(_attributeTypeIDs.length > 0, "MISSING_ATTRIBUTE_TYPES");
@@ -154,6 +159,8 @@ contract Authorization
         _lockupPeriods[i + 1]
       ] = _lockupPeriods[i + 2];
     }
+
+    emit AuthUpdated();
   } 
 
 //endregion
@@ -222,10 +229,32 @@ contract Authorization
     { // Mint/Buy
       return true;
     }
-    else
-    {
-      return availableBalanceOf(_from) >= _value;
+    if(_to == address(0))
+    { // This is burn or sell
+      if(_operator != address(dat))
+      { // This is burn
+        if(dat.state() != 1)
+        { // Burn is only allowed during RUN
+          return false;
+        }
+      }
+      else
+      { // This is sell
+        if(_from == dat.beneficiary() && dat.state() < 2)
+        { // The beneficiary may not sell until CLOSE or CANCEL
+          return false;
+        }
+      }
     }
+    else
+    { // This is a transfer
+      if(dat.state() == 0 && _from != dat.beneficiary())
+      { // Only beneficiary can make transfers during DAT state `init`
+        return false;
+      }
+    }
+
+    return availableBalanceOf(_from) >= _value;
   }
 
   /**
@@ -236,18 +265,12 @@ contract Authorization
   ) public view
     returns (uint)
   {
-    if(dat.state() == 0 && _from != dat.beneficiary())
-    {
-      // Only beneficiary can make transfers during DAT state `init`
-      return 0;
-    }
-
     Investor storage investor = investors[_from];
     // Get the current unlocked balance
     uint balance = fair.balanceOf(_from).sub(investor.totalLocked);
     // and add in any locked entries which are ready to be unlocked
     uint head = investor.firstExpiration;
-    while (head <= block.timestamp)
+    while (head <= block.timestamp && head != 0)
     {
       LockedFAIR storage lockedFair = investor.lockedFair[head];
       balance = balance.add(lockedFair.lockedValue);

@@ -8,6 +8,7 @@ module.exports = async function updateDatConfig(dat, fair, options, from) {
       feeBasisPoints: await dat.feeBasisPoints(),
       burnThresholdBasisPoints: await dat.burnThresholdBasisPoints(),
       minInvestment: await dat.minInvestment(),
+      openUntilAtLeast: await dat.openUntilAtLeast(),
       name: await fair.name(),
       symbol: await fair.symbol()
     },
@@ -24,6 +25,7 @@ module.exports = async function updateDatConfig(dat, fair, options, from) {
     callOptions.feeBasisPoints,
     callOptions.burnThresholdBasisPoints,
     callOptions.minInvestment,
+    callOptions.openUntilAtLeast,
     callOptions.name,
     callOptions.symbol,
     { from }

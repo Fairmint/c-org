@@ -1,15 +1,18 @@
 [
     {
       "id": 1,
-      "name": "buy_sell_no-pre-mint"
+      "name": "buy_sell_no-pre-mint",
+      "disabled": true
     },
     {
       "id": 2,
-      "name": "buy_sell-premint"
+      "name": "buy_sell-premint",
+      "disabled": true
     },
     {
       "id": 3,
-      "name": "buy_sell_large_numbers_minBuySlope"
+      "name": "buy_sell_large_numbers_minBuySlope",
+      "disabled": true
     },
     {
       "id": 4,
@@ -25,7 +28,8 @@
     },
     {
       "id": 7,
-      "name": "buy_sell_xfer_pay_close-nopremint"
+      "name": "buy_sell_xfer_pay_close-nopremint",
+      "disabled": true
     },
     {
       "id": 8,
@@ -37,7 +41,8 @@
     },
     {
       "id": 10,
-      "name": "buy_pay_burn-no-premint"
+      "name": "buy_pay_burn-no-premint",
+      "disabled": true
     },
     {
       "id": 11,
