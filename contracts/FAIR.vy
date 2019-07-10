@@ -112,8 +112,9 @@ UpdateConfig: event({
 # Constants
 ##############
 
-MAX_BEFORE_SQUARE: constant(uint256)  = 340282366920938425684442744474606501888
-# @notice When multiplying 2 terms, the max value is sqrt(2^256-1) 
+MAX_SUPPLY: constant(uint256)  = 10 ** 28
+# @notice The max `totalSupply + burnedSupply`
+# @dev This limit ensures that the DAT's formulas do not overflow
 
 # TODO test gas of using hex directly instead
 TOKENS_SENDER_INTERFACE_HASH: constant(bytes32) = keccak256("ERC777TokensSender")
@@ -271,8 +272,6 @@ def _burn(
   # Only increase the burnedSupply if a `burn` vs a `sell` via the DAT.
   if(_operator != self.owner):
     self.burnedSupply += _amount
-    # If this value got too large, the DAT would overflow on sell
-    assert self.burnedSupply < MAX_BEFORE_SQUARE, "EXCESSIVE_BURN"
 
   log.Burned(_operator, _from, _amount, _userData, _operatorData)
   log.Transfer(_from, ZERO_ADDRESS, _amount)
@@ -504,6 +503,8 @@ def mint(
     self.authorization.authorizeTransfer(_operator, ZERO_ADDRESS, _to, _quantity, _userData, _operatorData)
 
   self.totalSupply += _quantity
+  # Math: If this value got too large, the DAT would overflow on sell
+  assert self.totalSupply + self.burnedSupply <= MAX_SUPPLY, "EXCESSIVE_SUPPLY"
   self.balanceOf[_to] += _quantity
   
   self._callTokensReceived(_operator, ZERO_ADDRESS, _to, _quantity, True) # TODO _userData, _operatorData causes `stack underflow`
