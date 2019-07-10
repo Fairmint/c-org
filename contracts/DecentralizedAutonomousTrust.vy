@@ -143,6 +143,7 @@ UpdateConfig: event({
   _burnThresholdBasisPoints: uint256,
   _feeBasisPoints: uint256,
   _minInvestment: uint256,
+  _openUntilAtLeast: uint256,
   _name: string[64],
   _symbol: string[32]
 })
@@ -250,6 +251,11 @@ investmentReserveBasisPoints: public(uint256)
 
 isCurrencyERC20: public(bool)
 # @notice A cache of the currency type, if `True` use ERC-20 otherwise use ETH or ERC-777.
+
+openUntilAtLeast: public(uint256)
+# @notice The earliest date/time (in seconds) that the DAT may enter the `CLOSE` state, ensuring
+# that if the DAT reaches the `RUN` state it will remain running for at least this period of time.
+# @dev This value may be increased anytime by the 
 
 minInvestment: public(uint256)
 # @notice The minimum amount of `currency` investment accepted.
@@ -375,6 +381,7 @@ def updateConfig(
   _feeBasisPoints: uint256,
   _burnThresholdBasisPoints: uint256,
   _minInvestment: uint256,
+  _openUntilAtLeast: uint256,
   _name: string[64],
   _symbol: string[32]
 ):
@@ -405,6 +412,9 @@ def updateConfig(
   assert _minInvestment > 0, "INVALID_MIN_INVESTMENT"
   self.minInvestment = _minInvestment
 
+  assert _openUntilAtLeast >= self.openUntilAtLeast, "OPEN_UNTIL_MAY_NOT_BE_REDUCED"
+  self.openUntilAtLeast = _openUntilAtLeast
+
   log.UpdateConfig(
     _authorizationAddress,
     _beneficiary,
@@ -413,6 +423,7 @@ def updateConfig(
     _burnThresholdBasisPoints,
     _feeBasisPoints,
     _minInvestment,
+    _openUntilAtLeast,
     _name,
     _symbol
   )
@@ -777,6 +788,7 @@ def close():
   elif(self.state == STATE_RUN):
     # Collect the exitFee and close the c-org.
     self.state = STATE_CLOSE
+    assert self.openUntilAtLeast <= block.timestamp, "TOO_EARLY"
 
     # Source: (t^2 * (n/d))/2 + b*(n/d)*t - r
     # Implementation: (2 b n t + n t^2 - 2 d r)/(2 d)

@@ -112,6 +112,9 @@ UpdateConfig: event({
 # Constants
 ##############
 
+MAX_BEFORE_SQUARE: constant(uint256)  = 340282366920938425684442744474606501888
+# @notice When multiplying 2 terms, the max value is sqrt(2^256-1) 
+
 # TODO test gas of using hex directly instead
 TOKENS_SENDER_INTERFACE_HASH: constant(bytes32) = keccak256("ERC777TokensSender")
 # @notice The ERC-1820 ID for the ERC-777 sender hook
@@ -268,6 +271,8 @@ def _burn(
   # Only increase the burnedSupply if a `burn` vs a `sell` via the DAT.
   if(_operator != self.owner):
     self.burnedSupply += _amount
+    # If this value got too large, the DAT would overflow on sell
+    assert self.burnedSupply < MAX_BEFORE_SQUARE, "EXCESSIVE_BURN"
 
   log.Burned(_operator, _from, _amount, _userData, _operatorData)
   log.Transfer(_from, ZERO_ADDRESS, _amount)

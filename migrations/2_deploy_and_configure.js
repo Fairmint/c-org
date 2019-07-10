@@ -45,14 +45,14 @@ module.exports = async function deployAndConfigure(
 
   // Deploy auth
   // TODO upgradable
-  const auth = await deployer.deploy(
-    authArtifact,
-    fair.address,
+  const auth = await deployer.deploy(authArtifact);
+  await auth.initialize(fair.address)
+  await auth.updateAuth(
     tpl.address,
     [42],
     [0, 0],
     [0, 0, 0]
-  );
+  )
 
   // Update dat with auth (and other settings)
   await updateDatConfig(

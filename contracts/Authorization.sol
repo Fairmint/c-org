@@ -4,6 +4,7 @@ import "./IDAT.sol";
 import "./IFAIR.sol";
 import "tpl-contracts/contracts/AttributeRegistryInterface.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import "openzeppelin-eth/contracts/ownership/Ownable.sol";
 
 
 /**
@@ -11,7 +12,8 @@ import "openzeppelin-solidity/contracts/math/SafeMath.sol";
  * @dev This is consumed by FAIR and DAT contracts directly and may be useful for the frontend/end-users.
  * It interfaces with TPL in order to confirm KYC and to check the investor's status.
  */
-contract Authorization
+contract Authorization is
+  Ownable
 {
 //region Types
 
@@ -58,6 +60,8 @@ contract Authorization
      */
     uint firstExpiration;
   }
+
+  event AuthUpdated();
 //endregion
 
 //region Data
@@ -109,28 +113,29 @@ contract Authorization
 //region Init
 
   /**
-   * TODO switch to init pattern in order to support zos upgrades
-   * Set `fair` and `owner` on init, then move the others to an `updateByOwner` function.
+   * Using the init pattern in order to support zos upgrades
+   * TODO comments
    */ 
-  constructor(
-    address _fair,
+  function initialize(
+    address _fair
+  ) public
+  {
+    Ownable.initialize(msg.sender);
+    require(_fair != address(0), "INVALID_FAIR_ADDRESS");
+    fair = IFAIR(_fair);
+    dat = IDAT(fair.owner());
+    require(address(dat) != address(0), "INVALID_DAT_ADDRESS");
+  }
+
+  // TODO comments
+  function updateAuth(
     address _attributeRegistry,
     uint[] memory _attributeTypeIDs,
     uint[] memory _authorizedTransfers,
     uint[] memory _lockupPeriods
   ) public
+    onlyOwner
   {
-    require(address(_fair) != address(0), "INVALID_FAIR_ADDRESS");
-    fair = IFAIR(_fair);
-    dat = IDAT(fair.owner());
-    require(address(dat) != address(0), "INVALID_DAT_ADDRESS");
-
-    /**
-     * TODO move below to update function
-     * ...but what if it's not set yet? I think everything fails and that's okay. Double check.
-     * Add comments on the input format.
-     */
-
     require(_attributeRegistry != address(0), "INVALID_REGISTRY_ADDRESS");
     attributeRegistry = AttributeRegistryInterface(_attributeRegistry);
     require(_attributeTypeIDs.length > 0, "MISSING_ATTRIBUTE_TYPES");
@@ -154,6 +159,8 @@ contract Authorization
         _lockupPeriods[i + 1]
       ] = _lockupPeriods[i + 2];
     }
+
+    emit AuthUpdated();
   } 
 
 //endregion
