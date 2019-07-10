@@ -633,7 +633,7 @@ def sell(
     currencyValue = _quantityToSell * buybackReserve
     # TODO cap supply and backbay reserve
     currencyValue /= totalSupply - self.initReserve
-    # TODO if initReserve is burned this may underflow - maybe block burn during init/cancel
+    # auth blocks initReserve from being burned unless we reach the RUN state
 
   assert currencyValue > 0, "INSUFFICIENT_FUNDS"
 

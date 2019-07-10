@@ -224,6 +224,10 @@ contract Authorization
     }
     else
     {
+      if(_to == address(0) && _operator != address(dat) && dat.state() != 1)
+      { // Burn is only allowed during RUN
+        return false;
+      }
       return availableBalanceOf(_from) >= _value;
     }
   }
