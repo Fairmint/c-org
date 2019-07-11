@@ -1,18 +1,21 @@
-const fairArtifact = artifacts.require("FAIR");
+const { deployDat } = require("../../helpers");
 
 contract("fair / erc20 / burn", accounts => {
+  let dat;
   let fair;
 
   before(async () => {
-    fair = await fairArtifact.new();
-    await fair.initialize();
-    await fair.mint(
-      accounts[0],
-      accounts[0],
-      42,
-      web3.utils.asciiToHex(""),
-      web3.utils.asciiToHex("")
+    [dat, fair] = await deployDat(
+      {
+        initGoal: 0
+      },
+      accounts[0]
     );
+
+    await dat.buy(accounts[1], "4200000000000000000000", 1, {
+      value: "4200000000000000000000",
+      from: accounts[1]
+    });
   });
 
   describe("can burn", () => {

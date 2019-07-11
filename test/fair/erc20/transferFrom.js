@@ -1,18 +1,17 @@
-const fairArtifact = artifacts.require("FAIR");
+const { deployDat } = require("../../helpers");
 
-contract("fair / erc20 / transfer", accounts => {
+contract("fair / erc20 / transferFrom", accounts => {
+  let dat;
   let fair;
   const initReserve = 1000;
 
   before(async () => {
-    fair = await fairArtifact.new();
-    await fair.initialize();
-    await fair.mint(
-      accounts[0],
-      accounts[0],
-      initReserve,
-      web3.utils.asciiToHex(""),
-      web3.utils.asciiToHex("")
+    [dat, fair] = await deployDat(
+      {
+        initReserve,
+        initGoal: 0
+      },
+      accounts[0]
     );
   });
 
@@ -25,7 +24,10 @@ contract("fair / erc20 / transfer", accounts => {
     const transferAmount = 42;
 
     before(async () => {
-      await fair.transfer(accounts[1], transferAmount);
+      await fair.approve(accounts[2], -1);
+      await fair.transferFrom(accounts[0], accounts[1], transferAmount, {
+        from: accounts[2]
+      });
     });
 
     it("has expected after after transfer", async () => {

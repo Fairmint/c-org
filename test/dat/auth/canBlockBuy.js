@@ -2,10 +2,7 @@
  * Tests buying when not authorized.
  */
 
-const { deployDat, shouldFail, updateDatConfig } = require("../../helpers");
-
-const tplArtifact = artifacts.require("TestTPLAttributeRegistry");
-const authArtifact = artifacts.require("TestAuthorization");
+const { deployDat, shouldFail } = require("../../helpers");
 
 contract("dat / auth / canBlockBuy", accounts => {
   let dat;
@@ -13,25 +10,7 @@ contract("dat / auth / canBlockBuy", accounts => {
   let auth;
 
   before(async () => {
-    [dat, fair] = await deployDat(
-      {
-        initGoal: "1000000000000000000000"
-      },
-      accounts[0]
-    );
-    const tpl = await tplArtifact.new();
-    auth = await authArtifact.new();
-    await auth.initialize(fair.address);
-    await auth.updateAuth(tpl.address, [42], [0, 0], [0, 0, 0]);
-    console.log((await auth.getInvestorTypeOf(accounts[1])).toString());
-    await updateDatConfig(
-      dat,
-      fair,
-      {
-        authorizationAddress: auth.address
-      },
-      accounts[0]
-    );
+    [dat, fair, auth] = await deployDat({}, accounts[0]);
   });
 
   it("balanceOf should be 0 by default", async () => {
@@ -51,7 +30,7 @@ contract("dat / auth / canBlockBuy", accounts => {
     it("balanceOf should have increased", async () => {
       const balance = await fair.balanceOf(accounts[1]);
 
-      assert.equal(balance.toString(), "20000");
+      assert.equal(balance.toString(), "105526268847200000000");
     });
 
     describe("when blocked", () => {
@@ -71,7 +50,7 @@ contract("dat / auth / canBlockBuy", accounts => {
       it("balanceOf should not have changed", async () => {
         const balance = await fair.balanceOf(accounts[1]);
 
-        assert.equal(balance.toString(), "20000");
+        assert.equal(balance.toString(), "105526268847200000000");
       });
 
       describe("can buy tokens on the 3rd attempt", () => {
@@ -86,7 +65,7 @@ contract("dat / auth / canBlockBuy", accounts => {
         it("balanceOf should have increased", async () => {
           const balance = await fair.balanceOf(accounts[1]);
 
-          assert.equal(balance.toString(), "40000");
+          assert.equal(balance.toString(), "162362423160300000000");
         });
       });
     });

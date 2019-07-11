@@ -2,51 +2,64 @@
     {
       "id": 1,
       "name": "buy_sell_no-pre-mint",
-      "disabled": true
+      "disabled": false
     },
     {
       "id": 2,
       "name": "buy_sell-premint",
-      "disabled": true
+      "disabled": false
     },
     {
-      "id": 3,
+      "id": "3-original",
+      "name": "buy_sell_large_numbers",
+      "disabled": true,
+      "reason": "Buy slope is 10x out of range"
+    },
+    {
+      "id": "3-new",
       "name": "buy_sell_large_numbers_minBuySlope",
-      "disabled": true
+      "disabled": false
     },
     {
       "id": 4,
-      "name": "buy_close_sell-no-pre-mint"
+      "name": "buy_close_sell-no-pre-mint",
+      "disabled": false
     },
     {
       "id": 5,
-      "name": "buy_close_sell_pre-mint"
+      "name": "buy_close_sell_pre-mint",
+      "disabled": false
     },
     {
       "id": 6,
-      "name": "buy_pay_close-pre-mint"
+      "name": "buy_pay_close-pre-mint",
+      "disabled": false
     },
     {
       "id": 7,
       "name": "buy_sell_xfer_pay_close-nopremint",
-      "disabled": true
+      "disabled": true,
+      "reason": "attempts an invalid transfer during init"
     },
     {
       "id": 8,
-      "name": "buy_sell_xfer_pay_close-premint"
+      "name": "buy_sell_xfer_pay_close-premint",
+      "disabled": false
     },
     {
       "id": 9,
-      "name": "buy_sell_pay_xfer_close-pre-mint-large-numbers"
+      "name": "buy_sell_pay_xfer_close-pre-mint-large-numbers",
+      "disabled": false
     },
     {
       "id": 10,
       "name": "buy_pay_burn-no-premint",
-      "disabled": true
+      "disabled": false
     },
     {
       "id": 11,
-      "name": "buy_pay_burn_sell_close-premint"
+      "name": "buy_pay_burn_sell_close-premint",
+      "disabled": false
     }
   ]
 

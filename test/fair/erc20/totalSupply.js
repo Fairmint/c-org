@@ -1,11 +1,10 @@
-const fairArtifact = artifacts.require("FAIR");
+const { deployDat } = require("../../helpers");
 
-contract("fair / erc20 / totalSupply", () => {
+contract("fair / erc20 / totalSupply", accounts => {
   let fair;
 
   before(async () => {
-    fair = await fairArtifact.new();
-    await fair.initialize();
+    fair = (await deployDat({ initReserve: 0 }, accounts[0]))[1];
   });
 
   it("defaults to 0", async () => {

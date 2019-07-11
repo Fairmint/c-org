@@ -1,15 +1,13 @@
-const { shouldFail, updateFairConfig } = require("../../helpers");
-
-const fairArtifact = artifacts.require("FAIR");
+const { shouldFail, deployDat, updateDatConfig } = require("../../helpers");
 
 contract("fair / erc20 / symbol", accounts => {
   const maxLengthSymbol = "Symbols are 32 characters max...";
+  let dat;
   let fair;
   let tx;
 
   before(async () => {
-    fair = await fairArtifact.new();
-    await fair.initialize();
+    [dat, fair] = await deployDat({}, accounts[0]);
   });
 
   it("should have an empty symbol by default", async () => {
@@ -21,7 +19,12 @@ contract("fair / erc20 / symbol", accounts => {
       const newSymbol = "NSYM";
 
       before(async () => {
-        tx = await updateFairConfig(fair, { symbol: newSymbol }, accounts[0]);
+        tx = await updateDatConfig(
+          dat,
+          fair,
+          { symbol: newSymbol },
+          accounts[0]
+        );
       });
 
       it("should have the new symbol", async () => {
@@ -39,7 +42,8 @@ contract("fair / erc20 / symbol", accounts => {
 
       describe("max length", () => {
         before(async () => {
-          tx = await updateFairConfig(
+          tx = await updateDatConfig(
+            dat,
             fair,
             { symbol: maxLengthSymbol },
             accounts[0]
@@ -52,7 +56,8 @@ contract("fair / erc20 / symbol", accounts => {
 
         it("should fail to update longer than the max", async () => {
           await shouldFail(
-            updateFairConfig(
+            updateDatConfig(
+              dat,
               fair,
               { symbol: `${maxLengthSymbol} more characters` },
               accounts[0]
@@ -64,8 +69,8 @@ contract("fair / erc20 / symbol", accounts => {
 
     it("should fail to change symbol from a different account", async () => {
       await shouldFail(
-        updateFairConfig(fair, { symbol: "Test" }, accounts[2]),
-        "OWNER_ONLY"
+        updateDatConfig(dat, fair, { symbol: "Test" }, accounts[2]),
+        "CONTROL_ONLY"
       );
     });
   });

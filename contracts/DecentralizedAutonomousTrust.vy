@@ -97,6 +97,13 @@ contract IAuthorization:
     _operatorData: bytes[128]
   ) -> bool: constant
 contract IBigDiv:
+  def bigDiv2x2(
+    _numA: uint256,
+    _numB: uint256,
+    _denA: uint256,
+    _denB: uint256,
+    _roundUp: bool
+  ) -> uint256: constant
   def bigDiv3x3(
     _numA: uint256,
     _numB: uint256,
@@ -132,8 +139,8 @@ Close: event({
   _exitFee: uint256
 })
 StateChange: event({
-  _previousState: uint256,
-  _newState: uint256
+  _previousState: uint256(stateMachine),
+  _newState: uint256(stateMachine)
 })
 UpdateConfig: event({
   _authorizationAddress: address,
@@ -168,10 +175,8 @@ STATE_CLOSE: constant(uint256(stateMachine)) = 2
 STATE_CANCEL: constant(uint256(stateMachine)) = 3
 # @notice The state after closed by the `beneficiary` account from STATE_INIT
 
-# TODO rename these:
-
-DIGITS_ROUND_UINT: constant(uint256) = 10 ** 8
-# @dev Used to avoid overflow errors
+MAX_BEFORE_SQUARE: constant(uint256)  = 340282366920938425684442744474606501888
+# @notice When multiplying 2 terms, the max value is sqrt(2^256-1) 
 
 DIGITS_UINT: constant(uint256) = 10 ** 18
 # @notice Represents 1 full token (with 18 decimals)
@@ -189,8 +194,12 @@ beneficiary: public(address)
 # @notice The address of the beneficiary organization which receives the investments. 
 # Points to the wallet of the organization. 
 
+bigDivAddress: public(address)
+# @notice The BigDiv library we use for BigNumber math
+
 bigDiv: IBigDiv
 # @notice The BigDiv library we use for BigNumber math
+# @dev redundant w/ currencyAddress, for convenience
 
 burnThresholdBasisPoints: public(uint256)
 # @notice The percentage of the total supply of FAIR above which the FAIRs minted by the
@@ -281,6 +290,7 @@ def _toDecimalWithPlaces(
   """
   @dev Converts a uint token value into its decimal value, dropping the last 8 digits.
   e.g. 1 token is _value 1000000000000000000 and returns 1.0000000000
+  Math: Max supported value is 2^127-1 * 10^18 == 1.7e+56
   """
   temp: uint256 = _value / DIGITS_UINT
   decimalValue: decimal = convert(_value - temp * DIGITS_UINT, decimal)
@@ -294,9 +304,17 @@ def buybackReserve() -> uint256:
   """
   @notice The total amount of currency value currently locked in the contract and available to sellers.
   """
+  reserve: uint256
   if(self.currency == ZERO_ADDRESS):
-    return as_unitless_number(self.balance)
-  return self.currency.balanceOf(self)
+    reserve = as_unitless_number(self.balance)
+  else:
+    reserve = self.currency.balanceOf(self)
+  
+  if(reserve > MAX_BEFORE_SQUARE):
+    # Math: If the reserve becomes excessive, cap the value to prevent overflowing in other formulas
+    return MAX_BEFORE_SQUARE
+
+  return reserve
 
 #endregion
 
@@ -324,8 +342,11 @@ def initialize(
 
   # Set initGoal, which in turn defines the initial state
   if(_initGoal == 0):
+    log.StateChange(self.state, STATE_RUN)
     self.state = STATE_RUN
   else:
+    # Math: If this value got too large, the DAT would overflow on sell
+    assert _initGoal < MAX_BEFORE_SQUARE, "EXCESSIVE_GOAL"
     self.initGoal = _initGoal
 
   assert _bigDiv != ZERO_ADDRESS, "INVALID_ADDRESS"
@@ -333,9 +354,9 @@ def initialize(
 
   assert _buySlopeNum > 0, "INVALID_SLOPE_NUM" # 0 not supported
   assert _buySlopeDen > 0, "INVALID_SLOPE_DEN"
-  assert _buySlopeDen <= 10000000000000000000000000, "SLOPE_DEN_OUT_OF_RANGE" # 10m full tokens to 1
-  assert _buySlopeNum <= 10000000000000000000000000, "SLOPE_NUM_OUT_OF_RANGE" # an extreme value
-  self.buySlopeNum = _buySlopeNum # Fraction may be > 1
+  assert _buySlopeDen <= 1000000000000000000000000000, "SLOPE_DEN_OUT_OF_RANGE" # 1b full tokens to 1
+  assert _buySlopeNum <= 1000000000000000000000000000, "SLOPE_NUM_OUT_OF_RANGE" # Fraction may be > 1; an extreme value
+  self.buySlopeNum = _buySlopeNum
   self.buySlopeDen = _buySlopeDen
   assert _investmentReserveBasisPoints <= BASIS_POINTS_DEN, "INVALID_RESERVE" # 100% or less
   self.investmentReserveBasisPoints = _investmentReserveBasisPoints # 0 means all investments go to the beneficiary
@@ -438,12 +459,15 @@ def _applyBurnThreshold():
   @dev Burn tokens from the beneficiary account if they have too much of the total share.
   """
   balanceBefore: uint256 = self.fair.balanceOf(self.beneficiary)
-  maxHoldings: uint256 = self.fair.totalSupply() + self.fair.burnedSupply()
   # Math: if totalSupply is < (2^256 - 1) / 10000 this will never overflow
+  # totalSupply and burnedSupply are capped to MAX_BEFORE_SQUARE
+  maxHoldings: uint256 = self.fair.totalSupply() + self.fair.burnedSupply()
+  # burnThresholdBasisPoints is capped to BASIS_POINTS_DEN
   maxHoldings *= self.burnThresholdBasisPoints
   maxHoldings /= BASIS_POINTS_DEN
 
   if(balanceBefore > maxHoldings):
+    # Math: the if condition prevents an underflow
     self.fair.operatorBurn(self.beneficiary, balanceBefore - maxHoldings, "", "")
 
 @private
@@ -456,19 +480,20 @@ def _collectInvestment(
   """
   @notice Confirms the transfer of `_quantityToInvest` currency to the contract.
   """
-  if(self.currency == ZERO_ADDRESS):
+  if(self.currency == ZERO_ADDRESS): # currency is ETH
     if(_refundRemainder):
+      # Math: if _msgValue was not sufficient then revert
       send(_from, _msgValue - _quantityToInvest)
     else:
       assert as_wei_value(_quantityToInvest, "wei") == _msgValue, "INCORRECT_MSG_VALUE"
-  else:
+  else: # currency is ERC20 or ERC777
     assert _msgValue == 0, "DO_NOT_SEND_ETH"
 
     if(self.isCurrencyERC20):
-      success: bool = self.currency.transferFrom(_from, self, as_unitless_number(_quantityToInvest))
+      success: bool = self.currency.transferFrom(_from, self, _quantityToInvest)
       assert success, "ERC20_TRANSFER_FAILED"
     else:
-      self.currency.operatorSend(_from, self, as_unitless_number(_quantityToInvest), "", "")
+      self.currency.operatorSend(_from, self, _quantityToInvest, "", "")
 
 @private
 def _sendCurrency(
@@ -482,14 +507,11 @@ def _sendCurrency(
     if(self.currency == ZERO_ADDRESS):
       send(_to, as_wei_value(_amount, "wei"))
     else:
-      balanceBefore: uint256 = self.currency.balanceOf(_to)
-      
       if(self.isCurrencyERC20):
-        self.currency.transfer(_to, as_unitless_number(_amount))
+        success: bool = self.currency.transfer(_to, as_unitless_number(_amount))
+        assert success, "ERC20_TRANSFER_FAILED"
       else:
         self.currency.send(_to, as_unitless_number(_amount), "")
-
-      assert self.currency.balanceOf(_to) > balanceBefore, "ERC20_TRANSFER_FAILED"
 
 #endregion
 
@@ -503,16 +525,20 @@ def _distributeInvestment(
   @dev Distributes _value currency between the buybackReserve, beneficiary, and feeCollector.
   """
   # Rounding favors buybackReserve, then beneficiary, and feeCollector is last priority.
-  # Math: if investment value is < (2^256 - 1) / 10000 this will never overflow
+
+  # Math: if investment value is < (2^256 - 1) / 10000 this will never overflow.
+  # With buybackReserve capped this could only fail with a huge single investment, but they can
+  # try again with multiple smaller investments.
   reserve: uint256 = self.investmentReserveBasisPoints * _value
   reserve /= BASIS_POINTS_DEN
   reserve = _value - reserve
-  # Math: if investment value is < (2^256 - 1) / 10000 this will never overflow
+  # Math: since reserve is <= the investment value, this will never overflow.
   fee: uint256 = reserve * self.feeBasisPoints
   fee /= BASIS_POINTS_DEN
 
-  self._sendCurrency(self.feeCollector, fee)
+  # Math: since feeBasisPoints is <= BASIS_POINTS_DEN, this will never underflow.
   self._sendCurrency(self.beneficiary, reserve - fee)
+  self._sendCurrency(self.feeCollector, fee)
 
 @public
 @payable
@@ -538,45 +564,57 @@ def buy(
   # Calculate the tokenValue for this investment
   tokenValue: uint256
   if(self.state == STATE_INIT):
+    # Math: initGoal and buySlopeNum/Den are capped such that overflow is not possible unless
+    # a huge _currencyValue is provided, but they can retry with a smaller value
     tokenValue = 2 * _currencyValue * self.buySlopeDen
     tokenValue /= self.initGoal * self.buySlopeNum
   elif(self.state == STATE_RUN):
+    # Math: supply's max value is 10e28 as enfored in FAIR.vy
     supply: uint256 = self.fair.totalSupply() + self.fair.burnedSupply()
     tokenValue = 2 * _currencyValue
-    # TODO max buySlopeDen (and max supply) to prevent an overflow
+    # Math: buySlopeDen is capped such that this only overflows with a huge _currencyValue, 
+    # but they can retry with a smaller value
+    # There is always room for at least (3e27)^2, or 9e56
+    # buySlope is capped to 26 digits, leaving the worst case to limiting purchases to 30e-18 tokens
     tokenValue *= self.buySlopeDen
     tokenValue /= self.buySlopeNum
+    # Math: to avoid overflow in _toDecimalWithPlaces, supply must be <= 1.3e28.  Then large 
+    # _currencyValues may overflow, but they can retry with a smaller value
     tokenValue += supply * supply
-    # TODO max supply such that total tokenValue <= 2**256 - 1 
 
     tokenValue /= DIGITS_UINT
 
+    # Math: supports a max value of 1.7e+56 which is in-range given the comments above
     decimalValue: decimal = self._toDecimalWithPlaces(tokenValue) 
-    # TODO max total decimalValue of 2**127 - 1 (else tx reverts)
 
     decimalValue = sqrt(decimalValue)
 
     # Unshift results
+    # Math: decimalValue has a max value of 2^127 - 1 which after sqrt can always be multiplied
+    # here without overflow
     decimalValue *= DIGITS_DECIMAL
-    # No overflow concern, any large decimalValue will be small enough after a sqrt
 
     tokenValue = convert(decimalValue, uint256)
 
+    # Math: No underflow concern, as the value is at least supply^2 before the sqrt
     tokenValue -= supply
-    # No underflow concern, as the value is at least supply^2 before the sqrt
   else:
     assert False, "INVALID_STATE"
 
   assert tokenValue >= _minTokensBought, "PRICE_SLIPPAGE"
 
   # Mint purchased tokens
+  # Math: mint will fail if the supply exceeds the limit
   self.fair.mint(msg.sender, _to, tokenValue, "", "")
   log.Buy(msg.sender, _to, _currencyValue, tokenValue)
 
   # Update state, initInvestors, and distribute the investment when appropriate
   if(self.state == STATE_INIT):
+    # Math: the hard-cap in mint ensures that this line could never overflow
     self.initInvestors[_to] += tokenValue
+    # Math: this would only overflow if initReserve was burned, but auth blocks burning durning init
     if(self.fair.totalSupply() - self.initReserve >= self.initGoal):
+      log.StateChange(self.state, STATE_RUN)
       self.state = STATE_RUN
       self._distributeInvestment(self.buybackReserve())
   elif(self.state == STATE_RUN):
@@ -589,20 +627,14 @@ def buy(
 
 #region Sell
 
-@public
-def sell(
+@private
+def _sell(
+  _from: address,
   _to: address,
   _quantityToSell: uint256,
-  _minCurrencyReturned: uint256
+  _minCurrencyReturned: uint256,
+  _hasReceivedFunds: bool
 ):
-  """
-  @notice Sell FAIR tokens for at least the given amount of currency.
-  @param _to The account to receive the currency from this sale.
-  @param _quantityToSell How many FAIR tokens to sell for currency value.
-  @param _minCurrencyReturned Get at least this many currency tokens or the transaction reverts.
-  @dev _minCurrencyReturned is necessary as the price will change if some elses transaction mines after 
-  yours was submitted.
-  """
   buybackReserve: uint256 = self.buybackReserve()
   totalSupply: uint256 = self.fair.totalSupply()
 
@@ -620,39 +652,67 @@ def sell(
     # source: (t+b)*a*(2*r)/((t+b)^2)-(((2*r)/((t+b)^2)*a^2)/2)+((2*r)/((t+b)^2)*a*b^2)/(2*(t)) 
     # imp: (a b^2 r)/(t (b + t)^2) + (2 a r)/(b + t) - (a^2 r)/(b + t)^2
 
+    # Math: burnedSupply is capped in FAIR such that the square will never overflow
     currencyValue = self.bigDiv.bigDiv3x3(
       quantityToSell, buybackReserve, burnedSupply * burnedSupply,
       totalSupply, supply, supply,
       False
     )
+    # Math: worst-case currencyValue is MAX_BEFORE_SQUARE (max reserve, 1 supply)
     
+    # Math: buybackReserve is capped such that this will not overflow for any value of 
+    # quantityToSell (up to the supply's hard-cap)
     temp: uint256 = 2 * quantityToSell * buybackReserve
     temp /= supply
+    # Math: worst-case temp is MAX_BEFORE_SQUARE (max reserve, 1 supply)
+
+    # Math: considering the worst-case for currencyValue and temp, this can never overflow
     currencyValue += temp
 
-    currencyValue -= self.bigDiv.bigDiv3x3(
-      quantityToSell, quantityToSell, buybackReserve, 
-      supply, supply, 1,
+    # Math: quantityToSell has to be less than the supply's hard-cap, which means squaring will never overflow
+    # Math: this will not underflow as the terms before it will sum to a greater value
+    currencyValue -= self.bigDiv.bigDiv2x2(
+      quantityToSell * quantityToSell, buybackReserve, 
+      supply, supply,
       True
     )
   elif(self.state == STATE_CLOSE):
+    # Math: _quantityToSell and buybackReserve are both capped such that this can never overflow
     currencyValue = _quantityToSell * buybackReserve
-    # TODO cap supply and backbackReserve
     currencyValue /= totalSupply
-  else:
-    self.initInvestors[msg.sender] -= _quantityToSell
+  else: # STATE_INIT or STATE_CANCEL
+    self.initInvestors[_from] -= _quantityToSell
+    # Math: _quantityToSell and buybackReserve are both capped such that this can never overflow
     currencyValue = _quantityToSell * buybackReserve
-    # TODO cap supply and backbay reserve
+    # Math: auth blocks initReserve from being burned unless we reach the RUN state which prevents an underflow
     currencyValue /= totalSupply - self.initReserve
-    # auth blocks initReserve from being burned unless we reach the RUN state
 
   assert currencyValue > 0, "INSUFFICIENT_FUNDS"
 
   # Distribute funds
-  self.fair.operatorBurn(msg.sender, _quantityToSell, "", "")
+  if(_hasReceivedFunds):
+    self.fair.burn(_quantityToSell, "")
+  else:
+    self.fair.operatorBurn(_from, _quantityToSell, "", "")
+  
   self._sendCurrency(_to, currencyValue)
-  log.Sell(msg.sender, _to, currencyValue, _quantityToSell)
+  log.Sell(_from, _to, currencyValue, _quantityToSell)
 
+@public
+def sell(
+  _to: address,
+  _quantityToSell: uint256,
+  _minCurrencyReturned: uint256
+):
+  """
+  @notice Sell FAIR tokens for at least the given amount of currency.
+  @param _to The account to receive the currency from this sale.
+  @param _quantityToSell How many FAIR tokens to sell for currency value.
+  @param _minCurrencyReturned Get at least this many currency tokens or the transaction reverts.
+  @dev _minCurrencyReturned is necessary as the price will change if some elses transaction mines after 
+  yours was submitted.
+  """
+  self._sell(msg.sender, _to, _quantityToSell, _minCurrencyReturned, False)
 #endregion
 
 #region Pay
@@ -677,6 +737,7 @@ def _pay(
   # Math: if _currencyValue is < (2^256 - 1) / 10000 this will never overflow
   reserve: uint256 = _currencyValue * self.investmentReserveBasisPoints
   reserve /= BASIS_POINTS_DEN
+  # Math: this will never underflow since investmentReserveBasisPoints is capped to BASIS_POINTS_DEN
   self._sendCurrency(self.beneficiary, _currencyValue - reserve)
 
   # buy_slope = n/d
@@ -689,40 +750,48 @@ def _pay(
   # ) - s
 
   supply: uint256 = self.fair.totalSupply() + self.fair.burnedSupply()
+  # Math: max _currencyValue of (2^256 - 1) / 2e31 == 5.7e45
   tokenValue: uint256 = 2 * _currencyValue * self.revenueCommitmentBasisPoints * self.buySlopeDen
-  # Math: TODO overflow buySlope
+  # Math: buySlopeNum is capped to prevent an overflow
   tokenValue /= BASIS_POINTS_DEN * self.buySlopeNum
+  # Math: max supply^2 given the hard-cap is 1e56 leaving room for the max tokenValue (equal to the FAIR hard-cap)
   tokenValue += supply * supply
-  # Math: TODO supply^2 overflow
-  # Math: Max total tokenValue of 2**256 - 1 (else tx reverts)
 
-  tokenValue /= DIGITS_UINT # Math: Truncates last 18 digits from tokenValue here
+  # Math: Truncates last 18 digits from tokenValue here
+  tokenValue /= DIGITS_UINT 
 
-  decimalValue: decimal = self._toDecimalWithPlaces(tokenValue) # Math: Truncates another 8 digits from tokenValue (losing 26 digits in total)
-  # Math: Max total decimalValue of 2**127 - 1 (else tx reverts)
+  # Math: Truncates another 8 digits from tokenValue (losing 26 digits in total)
+  # This will cause small values to round to 0 tokens for the payment (the payment is still accepted)
+  # Math: Max supported tokenValue is 1.7e+56. If supply is at the hard-cap tokenValue would be 1e38, leaving room
+  # for a _currencyValue up to 1.7e33 (or 1.7e15 after decimals)
+  decimalValue: decimal = self._toDecimalWithPlaces(tokenValue) 
 
   decimalValue = sqrt(decimalValue)
 
   # Unshift results
+  # Math: decimalValue has a max value of 2^127 - 1 which after sqrt can always be multiplied
+  # here without overflow
   decimalValue *= DIGITS_DECIMAL
-  # Max total decimalValue of 2**127 - 1 (else tx reverts)
 
   tokenValue = convert(decimalValue, uint256)
 
+  # Math: No underflow concern, as the value is at least supply^2 before the sqrt
   tokenValue -= supply
 
   # Update the to address to the beneficiary if the currency value would fail
   to: address = _to
   if(to == ZERO_ADDRESS):
     to = self.beneficiary
-  elif(self.fair.authorizationAddress() != ZERO_ADDRESS):
-    if(not IAuthorization(self.fair.authorizationAddress())
-      .isTransferAllowed(self, ZERO_ADDRESS, _to, tokenValue, "")):
-      to = self.beneficiary
+  elif(not IAuthorization(self.fair.authorizationAddress())
+    .isTransferAllowed(self, ZERO_ADDRESS, _to, tokenValue, "")):
+    to = self.beneficiary
 
   # Distribute tokens
-  self.fair.mint(_from, to, tokenValue, "", "")
-  self._applyBurnThreshold() # must mint before this call
+  if(tokenValue > 0):
+    self.fair.mint(_from, to, tokenValue, "", "")
+    self._applyBurnThreshold() # must mint before this call
+
+  log.Pay(_from, _to, _currencyValue, tokenValue)
 
 @public
 @payable
@@ -739,30 +808,14 @@ def pay(
   self._collectInvestment(msg.sender, _currencyValue, msg.value, False)
   self._pay(msg.sender, _to, _currencyValue)
 
-# @public
-# @payable
-# def __default__():
-#   """
-#   @dev Pay the organization on-chain with ETH (only works when currency is ETH)
-#   """
-#   self._collectInvestment(msg.sender, as_unitless_number(msg.value), msg.value, False)
-#   self._pay(msg.sender, msg.sender, as_unitless_number(msg.value))
-
-# @public
-# def tokensReceived(
-#   _operator: address,
-#   _from: address,
-#   _to: address,
-#   _amount: uint256,
-#   _userData: bytes[128],
-#   _operatorData: bytes[128]
-# ):
-#   """
-#   @dev Pay the organization on-chain with ERC-777 tokens (only works when currency is ERC-777)
-#   Params are from the ERC-777 token standard
-#   """
-#   assert msg.sender == self.currency, "INVALID_CURRENCY"
-#   self._pay(_operator, _from, _amount)
+@public
+@payable
+def __default__():
+  """
+  @dev Pay the organization on-chain with ETH (only works when currency is ETH)
+  """
+  self._collectInvestment(msg.sender, as_unitless_number(msg.value), msg.value, False)
+  self._pay(msg.sender, msg.sender, as_unitless_number(msg.value))
 
 #endregion
 
@@ -781,25 +834,61 @@ def close():
   """
   assert msg.sender == self.beneficiary, "BENEFICIARY_ONLY"
 
+  exitFee: uint256 = 0
+
   if(self.state == STATE_INIT):
     # Allow the org to cancel anytime if the initGoal was not reached.
+    log.StateChange(self.state, STATE_CANCEL)
     self.state = STATE_CANCEL
   elif(self.state == STATE_RUN):
     # Collect the exitFee and close the c-org.
+    log.StateChange(self.state, STATE_CLOSE)
     self.state = STATE_CLOSE
     assert self.openUntilAtLeast <= block.timestamp, "TOO_EARLY"
 
     # Source: (t^2 * (n/d))/2 + b*(n/d)*t - r
-    # Implementation: (2 b n t + n t^2 - 2 d r)/(2 d)
-    exitFee: uint256 = 2 * self.fair.burnedSupply()
-    exitFee *= self.buySlopeNum
-    exitFee *= self.fair.totalSupply()
-    exitFee += self.buySlopeNum * self.fair.totalSupply() * self.fair.totalSupply()
-    exitFee -= 2 * self.buySlopeDen * (self.buybackReserve() - as_unitless_number(msg.value))
-    exitFee /= 2 * self.buySlopeDen
+    # Implementation: (n t (2 b + t))/(2 d) - r
+
+    exitFee = 2 * self.fair.burnedSupply()
+    # Math: the supply hard-cap ensures this does not overflow
+    exitFee += self.fair.totalSupply()
+    # Math: buySlopeNum and self.totalSupply caps of makes the worst case: 10 ** 28 * 10 ** 28 which does not overflow
+    exitFee = self.bigDiv.bigDiv2x2(
+      exitFee, self.buySlopeNum * self.fair.totalSupply(),
+      2, self.buySlopeDen,
+      False
+    )
+    # Math: this if condition avoids a potential overflow
+    if(exitFee <= self.buybackReserve()):
+      exitFee = 0
+    else:
+      exitFee -= self.buybackReserve()
 
     self._collectInvestment(msg.sender, exitFee, msg.value, True)
   else:
     assert False, "INVALID_STATE"
+  
+  log.Close(exitFee)
 
 #endregion
+
+@public
+def tokensReceived(
+  _operator: address,
+  _from: address,
+  _to: address,
+  _amount: uint256,
+  _userData: bytes[128],
+  _operatorData: bytes[128]
+):
+  """
+  @dev If FAIR: Sell tokens
+  If currency: Pay the organization on-chain with ERC-777 tokens (only works when currency is ERC-777)
+  Params are from the ERC-777 token standard
+  """
+  if(msg.sender == self.currency):
+    self._pay(_operator, _from, _amount)
+  elif(msg.sender == self.fairAddress):
+    self._sell(_from, _to, _amount, 1, True)
+  else:
+    assert False, "INVALID_TOKEN_TYPE"
