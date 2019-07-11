@@ -564,6 +564,7 @@ def buy(
   # Calculate the tokenValue for this investment
   tokenValue: uint256
   if(self.state == STATE_INIT):
+    assert _currencyValue <= self.initGoal, "MAX_INIT_GOAL"
     # Math: initGoal and buySlopeNum/Den are capped such that overflow is not possible unless
     # a huge _currencyValue is provided, but they can retry with a smaller value
     tokenValue = 2 * _currencyValue * self.buySlopeDen
