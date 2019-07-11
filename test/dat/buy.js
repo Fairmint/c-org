@@ -11,7 +11,6 @@ contract("dat / buy", accounts => {
   before(async () => {
     [dat, fair] = await deployDat(
       {
-        initGoal: "1000000000000000000000"
       },
       accounts[0]
     );
@@ -34,7 +33,7 @@ contract("dat / buy", accounts => {
     it("balanceOf should have increased", async () => {
       const balance = await fair.balanceOf(accounts[1]);
 
-      assert.equal(balance.toString(), "20000");
+      assert.equal(balance.toString(), "105526268847200000000");
     });
   });
 });

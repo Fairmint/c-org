@@ -261,8 +261,7 @@ def _burn(
   params from the ERC-777 token standard
   """
   assert _from != ZERO_ADDRESS, "ERC777: burn from the zero address"
-  if(self.authorization != ZERO_ADDRESS):
-    self.authorization.authorizeTransfer(_operator, _from, ZERO_ADDRESS, _amount, _userData, _operatorData)
+  self.authorization.authorizeTransfer(_operator, _from, ZERO_ADDRESS, _amount, _userData, _operatorData)
 
   self._callTokensToSend(_operator, _from, ZERO_ADDRESS, _amount) # TODO _userData, _operatorData
 
@@ -291,8 +290,7 @@ def _send(
   """
   assert _from != ZERO_ADDRESS, "ERC777: send from the zero address"
   assert _to != ZERO_ADDRESS, "ERC777: send to the zero address"
-  if(self.authorization != ZERO_ADDRESS):
-    self.authorization.authorizeTransfer(_operator, _from, _to, _amount, _userData, _operatorData)
+  self.authorization.authorizeTransfer(_operator, _from, _to, _amount, _userData, _operatorData)
 
   self._callTokensToSend(_operator, _from, _to, _amount) # TODO _userData _operatorData stack underflow
   self.balanceOf[_from] -= _amount
@@ -499,7 +497,7 @@ def mint(
   assert _to != ZERO_ADDRESS, "INVALID_ADDRESS"
   assert _quantity > 0, "INVALID_QUANTITY"
 
-  if(self.authorization != ZERO_ADDRESS):
+  if(self.authorization != ZERO_ADDRESS): # This is not set for the minting of initialReserve
     self.authorization.authorizeTransfer(_operator, ZERO_ADDRESS, _to, _quantity, _userData, _operatorData)
 
   self.totalSupply += _quantity
@@ -527,6 +525,7 @@ def updateConfig(
   self.name = _name
   self.symbol = _symbol
 
+  assert _authorizationAddress != ZERO_ADDRESS, "INVALID_ADDRESS"
   self.authorizationAddress = _authorizationAddress
   self.authorization = IAuthorization(_authorizationAddress)
 

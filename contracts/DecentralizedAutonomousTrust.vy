@@ -354,8 +354,8 @@ def initialize(
 
   assert _buySlopeNum > 0, "INVALID_SLOPE_NUM" # 0 not supported
   assert _buySlopeDen > 0, "INVALID_SLOPE_DEN"
-  assert _buySlopeDen <= 100000000000000000000000000, "SLOPE_DEN_OUT_OF_RANGE" # 100m full tokens to 1
-  assert _buySlopeNum <= 100000000000000000000000000, "SLOPE_NUM_OUT_OF_RANGE" # Fraction may be > 1; an extreme value
+  assert _buySlopeDen <= 1000000000000000000000000000, "SLOPE_DEN_OUT_OF_RANGE" # 1b full tokens to 1
+  assert _buySlopeNum <= 1000000000000000000000000000, "SLOPE_NUM_OUT_OF_RANGE" # Fraction may be > 1; an extreme value
   self.buySlopeNum = _buySlopeNum
   self.buySlopeDen = _buySlopeDen
   assert _investmentReserveBasisPoints <= BASIS_POINTS_DEN, "INVALID_RESERVE" # 100% or less
@@ -627,20 +627,14 @@ def buy(
 
 #region Sell
 
-@public
-def sell(
+@private
+def _sell(
+  _from: address,
   _to: address,
   _quantityToSell: uint256,
-  _minCurrencyReturned: uint256
+  _minCurrencyReturned: uint256,
+  _hasReceivedFunds: bool
 ):
-  """
-  @notice Sell FAIR tokens for at least the given amount of currency.
-  @param _to The account to receive the currency from this sale.
-  @param _quantityToSell How many FAIR tokens to sell for currency value.
-  @param _minCurrencyReturned Get at least this many currency tokens or the transaction reverts.
-  @dev _minCurrencyReturned is necessary as the price will change if some elses transaction mines after 
-  yours was submitted.
-  """
   buybackReserve: uint256 = self.buybackReserve()
   totalSupply: uint256 = self.fair.totalSupply()
 
@@ -687,7 +681,7 @@ def sell(
     currencyValue = _quantityToSell * buybackReserve
     currencyValue /= totalSupply
   else: # STATE_INIT or STATE_CANCEL
-    self.initInvestors[msg.sender] -= _quantityToSell
+    self.initInvestors[_from] -= _quantityToSell
     # Math: _quantityToSell and buybackReserve are both capped such that this can never overflow
     currencyValue = _quantityToSell * buybackReserve
     # Math: auth blocks initReserve from being burned unless we reach the RUN state which prevents an underflow
@@ -696,10 +690,29 @@ def sell(
   assert currencyValue > 0, "INSUFFICIENT_FUNDS"
 
   # Distribute funds
-  self.fair.operatorBurn(msg.sender, _quantityToSell, "", "")
+  if(_hasReceivedFunds):
+    self.fair.burn(_quantityToSell, "")
+  else:
+    self.fair.operatorBurn(_from, _quantityToSell, "", "")
+  
   self._sendCurrency(_to, currencyValue)
-  log.Sell(msg.sender, _to, currencyValue, _quantityToSell)
+  log.Sell(_from, _to, currencyValue, _quantityToSell)
 
+@public
+def sell(
+  _to: address,
+  _quantityToSell: uint256,
+  _minCurrencyReturned: uint256
+):
+  """
+  @notice Sell FAIR tokens for at least the given amount of currency.
+  @param _to The account to receive the currency from this sale.
+  @param _quantityToSell How many FAIR tokens to sell for currency value.
+  @param _minCurrencyReturned Get at least this many currency tokens or the transaction reverts.
+  @dev _minCurrencyReturned is necessary as the price will change if some elses transaction mines after 
+  yours was submitted.
+  """
+  self._sell(msg.sender, _to, _quantityToSell, _minCurrencyReturned, False)
 #endregion
 
 #region Pay
@@ -769,10 +782,9 @@ def _pay(
   to: address = _to
   if(to == ZERO_ADDRESS):
     to = self.beneficiary
-  elif(self.fair.authorizationAddress() != ZERO_ADDRESS):
-    if(not IAuthorization(self.fair.authorizationAddress())
-      .isTransferAllowed(self, ZERO_ADDRESS, _to, tokenValue, "")):
-      to = self.beneficiary
+  elif(not IAuthorization(self.fair.authorizationAddress())
+    .isTransferAllowed(self, ZERO_ADDRESS, _to, tokenValue, "")):
+    to = self.beneficiary
 
   # Distribute tokens
   if(tokenValue > 0):
@@ -804,22 +816,6 @@ def __default__():
   """
   self._collectInvestment(msg.sender, as_unitless_number(msg.value), msg.value, False)
   self._pay(msg.sender, msg.sender, as_unitless_number(msg.value))
-
-@public
-def tokensReceived(
-  _operator: address,
-  _from: address,
-  _to: address,
-  _amount: uint256,
-  _userData: bytes[128],
-  _operatorData: bytes[128]
-):
-  """
-  @dev Pay the organization on-chain with ERC-777 tokens (only works when currency is ERC-777)
-  Params are from the ERC-777 token standard
-  """
-  assert msg.sender == self.currency, "INVALID_CURRENCY"
-  self._pay(_operator, _from, _amount)
 
 #endregion
 
@@ -856,7 +852,7 @@ def close():
     exitFee = 2 * self.fair.burnedSupply()
     # Math: the supply hard-cap ensures this does not overflow
     exitFee += self.fair.totalSupply()
-    # Math: buySlopeNum and self.totalSupply caps of makes the worst case: 10 ** 28 * 10 ** 27 which does not overflow
+    # Math: buySlopeNum and self.totalSupply caps of makes the worst case: 10 ** 28 * 10 ** 28 which does not overflow
     exitFee = self.bigDiv.bigDiv2x2(
       exitFee, self.buySlopeNum * self.fair.totalSupply(),
       2, self.buySlopeDen,
@@ -875,3 +871,24 @@ def close():
   log.Close(exitFee)
 
 #endregion
+
+@public
+def tokensReceived(
+  _operator: address,
+  _from: address,
+  _to: address,
+  _amount: uint256,
+  _userData: bytes[128],
+  _operatorData: bytes[128]
+):
+  """
+  @dev If FAIR: Sell tokens
+  If currency: Pay the organization on-chain with ERC-777 tokens (only works when currency is ERC-777)
+  Params are from the ERC-777 token standard
+  """
+  if(msg.sender == self.currency):
+    self._pay(_operator, _from, _amount)
+  elif(msg.sender == self.fairAddress):
+    self._sell(_from, _to, _amount, 1, True)
+  else:
+    assert False, "INVALID_TOKEN_TYPE"

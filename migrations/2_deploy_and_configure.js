@@ -7,6 +7,7 @@ const authArtifact = artifacts.require("Authorization");
 const fairArtifact = artifacts.require("FAIR");
 const datArtifact = artifacts.require("DecentralizedAutonomousTrust");
 const bigDivArtifact = artifacts.require("BigDiv");
+const vestingArtifact = artifacts.require("Vesting");
 
 module.exports = async function deployAndConfigure(
   deployer,
@@ -62,5 +63,23 @@ module.exports = async function deployAndConfigure(
     accounts[0]
   );
 
-  // TODO move beneficiary funds to tokenVesting contract(s)
+  // Move the initReserve to vesting contracts
+  const vestingBeneficiary = await deployer.deploy(
+    vestingArtifact,
+    accounts[0], // beneficiary
+    Math.round(Date.now() / 1000) + 100, // startTime is seconds
+    120, // cliffDuration in seconds
+    200, // duration in seconds
+    false // non-revocable
+  );
+  const vestingAccount1 = await deployer.deploy(
+    vestingArtifact,
+    accounts[1], // beneficiary
+    Math.round(Date.now() / 1000) + 100, // startTime is seconds
+    120, // cliffDuration in seconds
+    200, // duration in seconds
+    false // non-revocable
+  );
+  await fair.transfer(vestingBeneficiary.address, "40000000000000000000");
+  await fair.transfer(vestingAccount1.address, "2000000000000000000");
 };
