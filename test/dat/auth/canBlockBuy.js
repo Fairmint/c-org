@@ -10,11 +10,7 @@ contract("dat / auth / canBlockBuy", accounts => {
   let auth;
 
   before(async () => {
-    [dat, fair, auth] = await deployDat(
-      {
-      },
-      accounts[0]
-    );
+    [dat, fair, auth] = await deployDat({}, accounts[0]);
   });
 
   it("balanceOf should be 0 by default", async () => {

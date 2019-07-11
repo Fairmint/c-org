@@ -9,11 +9,7 @@ contract("dat / buy", accounts => {
   let fair;
 
   before(async () => {
-    [dat, fair] = await deployDat(
-      {
-      },
-      accounts[0]
-    );
+    [dat, fair] = await deployDat({}, accounts[0]);
   });
 
   it("balanceOf should be 0 by default", async () => {
