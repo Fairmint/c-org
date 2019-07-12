@@ -14,7 +14,11 @@ jobs:
           command: |
             curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
             sudo apt-get install -y nodejs
-            sudo pip install vyper
+            cd ..
+            git clone https://github.com/ethereum/vyper.git
+            cd vyper
+            sudo pip3 install . 
+            export PATH=$PATH:$PWD/bin
 
       - restore_cache:
           keys:
