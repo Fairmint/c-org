@@ -16,8 +16,8 @@ contract IAuthorization:
     _from: address,
     _to: address,
     _value: uint256,
-    _userData: bytes[256],
-    _operatorData: bytes[256]
+    _userData: bytes[1024],
+    _operatorData: bytes[1024]
   ): modifying
 contract IERC1820Registry:
   def setInterfaceImplementer(
@@ -35,8 +35,8 @@ contract IERC777Recipient:
     _from: address,
     _to: address,
     _amount: uint256,
-    _userData: bytes[256],
-    _operatorData: bytes[256]
+    _userData: bytes[1024],
+    _operatorData: bytes[1024]
   ): modifying
 contract IERC777Sender:
   def tokensToSend(
@@ -44,8 +44,8 @@ contract IERC777Sender:
     _from: address,
     _to: address,
     _amount: uint256,
-    _userData: bytes[256],
-    _operatorData: bytes[256]
+    _userData: bytes[1024],
+    _operatorData: bytes[1024]
   ): modifying
 
 implements: ERC20
@@ -71,15 +71,15 @@ Burned: event({
   _operator: indexed(address),
   _from: indexed(address),
   _amount: uint256,
-  _userData: bytes[256],
-  _operatorData: bytes[256]
+  _userData: bytes[1024],
+  _operatorData: bytes[1024]
 })
 Minted: event({
   _operator: indexed(address),
   _to: indexed(address),
   _amount: uint256,
-  _userData: bytes[256],
-  _operatorData: bytes[256]
+  _userData: bytes[1024],
+  _operatorData: bytes[1024]
 })
 RevokedOperator: event({
   _operator: indexed(address),
@@ -90,8 +90,8 @@ Sent: event({
   _from: indexed(address),
   _to: indexed(address),
   _amount: uint256,
-  _userData: bytes[256],
-  _operatorData: bytes[256]
+  _userData: bytes[1024],
+  _operatorData: bytes[1024]
 })
 
 # Events triggered when updating the tokens's configuration
@@ -215,8 +215,8 @@ def _callTokensToSend(
   _from: address,
   _to: address,
   _amount: uint256,
-  _userData: bytes[256]="", # TODO remove default(?)
-  _operatorData: bytes[256]=""
+  _userData: bytes[1024],
+  _operatorData: bytes[1024]
 ):
   """
   @dev Call from.tokensToSend() if the interface is registered
@@ -233,8 +233,8 @@ def _callTokensReceived(
   _to: address,
   _amount: uint256,
   _requireReceptionAck: bool,
-  _userData: bytes[256]="", # TODO remove default(?)
-  _operatorData: bytes[256]=""
+  _userData: bytes[1024],
+  _operatorData: bytes[1024]
 ):
   """
   @dev Call to.tokensReceived() if the interface is registered. Reverts if the recipient is a contract but
@@ -253,8 +253,8 @@ def _burn(
   _operator: address,
   _from: address,
   _amount: uint256,
-  _userData: bytes[256]="",
-  _operatorData: bytes[256]=""
+  _userData: bytes[1024],
+  _operatorData: bytes[1024]
 ):
   """
   @dev Confirms auth and then removes tokens from the circulating supply.
@@ -263,7 +263,7 @@ def _burn(
   assert _from != ZERO_ADDRESS, "ERC777: burn from the zero address"
   self.authorization.authorizeTransfer(_operator, _from, ZERO_ADDRESS, _amount, _userData, _operatorData)
 
-  self._callTokensToSend(_operator, _from, ZERO_ADDRESS, _amount) # TODO _userData, _operatorData
+  self._callTokensToSend(_operator, _from, ZERO_ADDRESS, _amount, _userData, _operatorData)
 
   self.balanceOf[_from] -= _amount
   self.totalSupply -= _amount
@@ -282,8 +282,8 @@ def _send(
   _to: address,
   _amount: uint256,
   _requireReceptionAck: bool,
-  _userData: bytes[256]="",
-  _operatorData: bytes[256]=""
+  _userData: bytes[1024],
+  _operatorData: bytes[1024]
 ):
   """
   @dev Confirms auth and then moves tokens from one account to another.
@@ -292,10 +292,10 @@ def _send(
   assert _to != ZERO_ADDRESS, "ERC777: send to the zero address"
   self.authorization.authorizeTransfer(_operator, _from, _to, _amount, _userData, _operatorData)
 
-  self._callTokensToSend(_operator, _from, _to, _amount) # TODO _userData _operatorData stack underflow
+  self._callTokensToSend(_operator, _from, _to, _amount, _userData, _operatorData)
   self.balanceOf[_from] -= _amount
   self.balanceOf[_to] += _amount
-  self._callTokensReceived(_operator, _from, _to, _amount, _requireReceptionAck) # TODO _userData _operatorData stack underflow
+  self._callTokensReceived(_operator, _from, _to, _amount, _requireReceptionAck, _userData, _operatorData)
 
   log.Sent(_operator, _from, _to, _amount, _userData, _operatorData)
   log.Transfer(_from, _to, _amount)
@@ -347,7 +347,7 @@ def transfer(
   """
   @notice Transfers `_value` amount of tokens to address `_to` if authorized.
   """
-  self._send(msg.sender, msg.sender, _to, _value, False)
+  self._send(msg.sender, msg.sender, _to, _value, False, "", "")
   return True
 
 @public
@@ -359,7 +359,7 @@ def transferFrom(
   """
   @notice Transfers `_value` amount of tokens from address `_from` to address `_to` if authorized.
   """
-  self._send(msg.sender, _from, _to, _value, False)
+  self._send(msg.sender, _from, _to, _value, False, "", "")
   self.allowances[_from][msg.sender] -= _value
   return True
 
@@ -429,52 +429,52 @@ def revokeOperator(
 @public
 def burn(
   _amount: uint256,
-  _userData: bytes[256]
+  _userData: bytes[1024]
 ):
   """
   @notice Burn the amount of tokens from the address msg.sender if authorized.
   @dev Note that this is not the same as a `sell` via the DAT.
   """
-  self._burn(msg.sender, msg.sender, _amount) # TODO _userData, ""
+  self._burn(msg.sender, msg.sender, _amount, _userData, "")
 
 @public
 def operatorBurn(
   _from: address,
   _amount: uint256,
-  _userData: bytes[256],
-  _operatorData: bytes[256]
+  _userData: bytes[1024],
+  _operatorData: bytes[1024]
 ):
   """
   @notice Burn the amount of tokens on behalf of the address from if authorized.
   @dev In addition to the standard ERC-777 use case, this is used by the DAT to `sell` tokens.
   """
   assert self.isOperatorFor(msg.sender, _from), "ERC777: caller is not an operator for holder"
-  self._burn(msg.sender, _from, _amount) # TODO _userData, _operatorData
+  self._burn(msg.sender, _from, _amount, _userData, _operatorData)
 
 @public
 def send(
   _to: address,
   _amount: uint256,
-  _userData: bytes[256]
+  _userData: bytes[1024]
 ):
   """
   @notice Send the amount of tokens from the address msg.sender to the address to.
   """
-  self._send(msg.sender, msg.sender, _to, _amount, True, _userData)
+  self._send(msg.sender, msg.sender, _to, _amount, True, _userData, "")
 
 @public
 def operatorSend(
   _from: address,
   _to: address,
   _amount: uint256,
-  _userData: bytes[256],
-  _operatorData: bytes[256]
+  _userData: bytes[1024],
+  _operatorData: bytes[1024]
 ):
   """
   @notice Send the amount of tokens on behalf of the address from to the address to.
   """
   assert self.isOperatorFor(msg.sender, _from), "ERC777: caller is not an operator for holder"
-  self._send(msg.sender, _from, _to, _amount, True) # TODO _userData, _operatorData)
+  self._send(msg.sender, _from, _to, _amount, True, _userData, _operatorData)
 
 #endregion
 
@@ -487,8 +487,8 @@ def mint(
   _operator: address,
   _to: address,
   _quantity: uint256,
-  _userData: bytes[256],
-  _operatorData: bytes[256]
+  _userData: bytes[1024],
+  _operatorData: bytes[1024]
 ):
   """
   @notice Called by the owner, which is the DAT contract, in order to mint tokens on `buy`.
@@ -505,7 +505,7 @@ def mint(
   assert self.totalSupply + self.burnedSupply <= MAX_SUPPLY, "EXCESSIVE_SUPPLY"
   self.balanceOf[_to] += _quantity
   
-  self._callTokensReceived(_operator, ZERO_ADDRESS, _to, _quantity, True) # TODO _userData, _operatorData causes `stack underflow`
+  self._callTokensReceived(_operator, ZERO_ADDRESS, _to, _quantity, True, _userData, _operatorData)
   
   log.Transfer(ZERO_ADDRESS, _to, _quantity)
   log.Minted(_operator, _to, _quantity, _userData, _operatorData)
