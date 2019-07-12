@@ -40,14 +40,14 @@ contract IERC777_20_Token:
   def send(
     _recipient: address,
     _amount: uint256,
-    _userData: bytes[128] # TODO maybe larger array (out of gas)
+    _userData: bytes[1024]
   ): modifying
   def operatorSend(
     _sender: address,
     _recipient: address,
     _amount: uint256,
-    _userData: bytes[128],
-    _operatorData: bytes[128]
+    _userData: bytes[1024],
+    _operatorData: bytes[1024]
   ): modifying
 contract IFAIR:
   # @title The interface for our FAIR tokens.
@@ -60,27 +60,27 @@ contract IFAIR:
   def authorizationAddress() -> address: constant
   def burn(
     _amount: uint256,
-    _userData: bytes[128]
+    _userData: bytes[1024]
   ): modifying
   def operatorBurn(
     _account: address,
     _amount: uint256,
-    _userData: bytes[128],
-    _operatorData: bytes[128]
+    _userData: bytes[1024],
+    _operatorData: bytes[1024]
   ): modifying
   def operatorSend(
     _sender: address,
     _recipient: address,
     _amount: uint256,
-    _userData: bytes[128],
-    _operatorData: bytes[128]
+    _userData: bytes[1024],
+    _operatorData: bytes[1024]
   ): modifying
   def mint(
     _operator: address,
     _to: address,
     _quantity: uint256,
-    _userData: bytes[128],
-    _operatorData: bytes[128]
+    _userData: bytes[1024],
+    _operatorData: bytes[1024]
   ): modifying
   def updateConfig(
     _authorizationAddress: address,
@@ -94,7 +94,7 @@ contract IAuthorization:
     _from: address,
     _to: address,
     _value: uint256,
-    _operatorData: bytes[128]
+    _operatorData: bytes[1024]
   ) -> bool: constant
 contract IBigDiv:
   def bigDiv2x2(
@@ -204,8 +204,6 @@ bigDiv: IBigDiv
 burnThresholdBasisPoints: public(uint256)
 # @notice The percentage of the total supply of FAIR above which the FAIRs minted by the
 # organization are automatically burnt expressed in basis points.
-
-#TODO set max buySlope to lowest 1 / 10,000,000
 
 buySlopeNum: public(uint256)
 # @notice The buy slope of the bonding curve. 
@@ -879,8 +877,8 @@ def tokensReceived(
   _from: address,
   _to: address,
   _amount: uint256,
-  _userData: bytes[128],
-  _operatorData: bytes[128]
+  _userData: bytes[1024],
+  _operatorData: bytes[1024]
 ):
   """
   @dev If FAIR: Sell tokens
