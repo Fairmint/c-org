@@ -615,7 +615,13 @@ def buy(
     if(self.fair.totalSupply() - self.initReserve >= self.initGoal):
       log.StateChange(self.state, STATE_RUN)
       self.state = STATE_RUN
-      self._distributeInvestment(self.buybackReserve())
+      # Math: worst case is 1000000000000000000000000000 * MAX_BEFORE_SQUARE which won't overflow
+      beneficiaryContribution: uint256 = self.bigDiv.bigDiv2x2(
+        self.initInvestors[self.beneficiary] * self.buySlopeNum, self.initGoal,
+        self.buySlopeDen, 2,
+        False
+      )
+      self._distributeInvestment(self.buybackReserve() - beneficiaryContribution)
   elif(self.state == STATE_RUN):
     if(_to == self.beneficiary):
       self._applyBurnThreshold() # must mint before this call
