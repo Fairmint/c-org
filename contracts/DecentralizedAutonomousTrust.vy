@@ -414,6 +414,8 @@ def updateConfig(
     tokens: uint256 = self.fair.balanceOf(self.beneficiary)
     if(tokens > 0):
       self.fair.operatorSend(self.beneficiary, _beneficiary, tokens, "", "")
+    self.initInvestors[_beneficiary] += self.initInvestors[self.beneficiary]
+    self.initInvestors[self.beneficiary] = 0
     self.beneficiary = _beneficiary
 
   assert _control != ZERO_ADDRESS, "INVALID_ADDRESS"
