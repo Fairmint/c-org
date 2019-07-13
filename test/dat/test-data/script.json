@@ -12,8 +12,7 @@
     {
       "id": "3-original",
       "name": "buy_sell_large_numbers",
-      "disabled": true,
-      "reason": "Buy slope is 10x out of range"
+      "disabled": false
     },
     {
       "id": "3-new",
@@ -37,9 +36,8 @@
     },
     {
       "id": 7,
-      "name": "buy_sell_xfer_pay_close-nopremint",
-      "disabled": true,
-      "reason": "attempts an invalid transfer during init"
+      "name": "buy_sell_xfer_pay_close-no-pre-mint",
+      "disabled": false
     },
     {
       "id": 8,
@@ -60,6 +58,12 @@
       "id": 11,
       "name": "buy_pay_burn_sell_close-premint",
       "disabled": false
+    },
+    {
+      "id": 12,
+      "name": "no-init-goal",
+      "disabled": true,
+      "reason": "burn for more than current holdings"
     }
   ]
 
