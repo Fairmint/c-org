@@ -1263,7 +1263,703 @@
   },
   "dat": {
     "address": "0x8013737093Bcf53eD3F60eF7b0C60D31CDCE4A4f",
-    "implementation": "0xEfd2A91d76B13142fB07bfEBC69858c18E52DbB1"
+    "implementation": "0xEfd2A91d76B13142fB07bfEBC69858c18E52DbB1",
+    "abi": [
+      {
+        "name": "Buy",
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_from",
+            "indexed": false
+          },
+          {
+            "type": "address",
+            "name": "_to",
+            "indexed": false
+          },
+          {
+            "type": "uint256",
+            "name": "_currencyValue",
+            "indexed": false
+          },
+          {
+            "type": "uint256",
+            "name": "_fairValue",
+            "indexed": false
+          }
+        ],
+        "anonymous": false,
+        "type": "event",
+        "signature": "0x89f5adc174562e07c9c9b1cae7109bbecb21cf9d1b2847e550042b8653c54a0e"
+      },
+      {
+        "name": "Sell",
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_from",
+            "indexed": false
+          },
+          {
+            "type": "address",
+            "name": "_to",
+            "indexed": false
+          },
+          {
+            "type": "uint256",
+            "name": "_currencyValue",
+            "indexed": false
+          },
+          {
+            "type": "uint256",
+            "name": "_fairValue",
+            "indexed": false
+          }
+        ],
+        "anonymous": false,
+        "type": "event",
+        "signature": "0xa082022e93cfcd9f1da5f9236718053910f7e840da080c789c7845698dc032ff"
+      },
+      {
+        "name": "Pay",
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_from",
+            "indexed": false
+          },
+          {
+            "type": "address",
+            "name": "_to",
+            "indexed": false
+          },
+          {
+            "type": "uint256",
+            "name": "_currencyValue",
+            "indexed": false
+          },
+          {
+            "type": "uint256",
+            "name": "_fairValue",
+            "indexed": false
+          }
+        ],
+        "anonymous": false,
+        "type": "event",
+        "signature": "0x0849372be021f4dce74a8a4cc15fcfaa23fdcfa92ae99fa045f6cdf0c0836436"
+      },
+      {
+        "name": "Close",
+        "inputs": [
+          {
+            "type": "uint256",
+            "name": "_exitFee",
+            "indexed": false
+          }
+        ],
+        "anonymous": false,
+        "type": "event",
+        "signature": "0xbf67515a38ee520223d32c1266d52101c30d936ed1f3e436c8caeb0a43cb06bf"
+      },
+      {
+        "name": "StateChange",
+        "inputs": [
+          {
+            "type": "uint256",
+            "name": "_previousState",
+            "indexed": false,
+            "unit": "The DAT's internal state machine"
+          },
+          {
+            "type": "uint256",
+            "name": "_newState",
+            "indexed": false,
+            "unit": "The DAT's internal state machine"
+          }
+        ],
+        "anonymous": false,
+        "type": "event",
+        "signature": "0x107dddb4541735557564238389eccfc9979bfdde5e57e24e9777b6fe79b4d22f"
+      },
+      {
+        "name": "UpdateConfig",
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_authorizationAddress",
+            "indexed": false
+          },
+          {
+            "type": "address",
+            "name": "_beneficiary",
+            "indexed": true
+          },
+          {
+            "type": "address",
+            "name": "_control",
+            "indexed": true
+          },
+          {
+            "type": "address",
+            "name": "_feeCollector",
+            "indexed": true
+          },
+          {
+            "type": "uint256",
+            "name": "_burnThresholdBasisPoints",
+            "indexed": false
+          },
+          {
+            "type": "uint256",
+            "name": "_feeBasisPoints",
+            "indexed": false
+          },
+          {
+            "type": "uint256",
+            "name": "_minInvestment",
+            "indexed": false
+          },
+          {
+            "type": "uint256",
+            "name": "_openUntilAtLeast",
+            "indexed": false
+          },
+          {
+            "type": "string",
+            "name": "_name",
+            "indexed": false
+          },
+          {
+            "type": "string",
+            "name": "_symbol",
+            "indexed": false
+          }
+        ],
+        "anonymous": false,
+        "type": "event",
+        "signature": "0xb6b0738b4d09a8f93db3f073526fe7a7e19925cf17776b60f49618564fa5e42f"
+      },
+      {
+        "name": "buybackReserve",
+        "outputs": [
+          {
+            "type": "uint256",
+            "name": "out"
+          }
+        ],
+        "inputs": [],
+        "constant": true,
+        "payable": false,
+        "type": "function",
+        "gas": 2368,
+        "signature": "0xff909560"
+      },
+      {
+        "name": "initialize",
+        "outputs": [],
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_bigDiv"
+          },
+          {
+            "type": "address",
+            "name": "_fairAddress"
+          },
+          {
+            "type": "uint256",
+            "name": "_initReserve"
+          },
+          {
+            "type": "address",
+            "name": "_currencyAddress"
+          },
+          {
+            "type": "uint256",
+            "name": "_initGoal"
+          },
+          {
+            "type": "uint256",
+            "name": "_buySlopeNum"
+          },
+          {
+            "type": "uint256",
+            "name": "_buySlopeDen"
+          },
+          {
+            "type": "uint256",
+            "name": "_investmentReserveBasisPoints"
+          },
+          {
+            "type": "uint256",
+            "name": "_revenueCommitmentBasisPoints"
+          }
+        ],
+        "constant": false,
+        "payable": false,
+        "type": "function",
+        "gas": 609732,
+        "signature": "0x40940123"
+      },
+      {
+        "name": "updateConfig",
+        "outputs": [],
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_authorizationAddress"
+          },
+          {
+            "type": "address",
+            "name": "_beneficiary"
+          },
+          {
+            "type": "address",
+            "name": "_control"
+          },
+          {
+            "type": "address",
+            "name": "_feeCollector"
+          },
+          {
+            "type": "uint256",
+            "name": "_feeBasisPoints"
+          },
+          {
+            "type": "uint256",
+            "name": "_burnThresholdBasisPoints"
+          },
+          {
+            "type": "uint256",
+            "name": "_minInvestment"
+          },
+          {
+            "type": "uint256",
+            "name": "_openUntilAtLeast"
+          },
+          {
+            "type": "string",
+            "name": "_name"
+          },
+          {
+            "type": "string",
+            "name": "_symbol"
+          }
+        ],
+        "constant": false,
+        "payable": false,
+        "type": "function",
+        "gas": 339988,
+        "signature": "0xbf330d6b"
+      },
+      {
+        "name": "buy",
+        "outputs": [],
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_to"
+          },
+          {
+            "type": "uint256",
+            "name": "_currencyValue"
+          },
+          {
+            "type": "uint256",
+            "name": "_minTokensBought"
+          }
+        ],
+        "constant": false,
+        "payable": true,
+        "type": "function",
+        "gas": 452280,
+        "signature": "0xa59ac6dd"
+      },
+      {
+        "name": "sell",
+        "outputs": [],
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_to"
+          },
+          {
+            "type": "uint256",
+            "name": "_quantityToSell"
+          },
+          {
+            "type": "uint256",
+            "name": "_minCurrencyReturned"
+          }
+        ],
+        "constant": false,
+        "payable": false,
+        "type": "function",
+        "gas": 127087,
+        "signature": "0x6a272462"
+      },
+      {
+        "name": "pay",
+        "outputs": [],
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_to"
+          },
+          {
+            "type": "uint256",
+            "name": "_currencyValue"
+          }
+        ],
+        "constant": false,
+        "payable": true,
+        "type": "function",
+        "gas": 348251,
+        "signature": "0xc4076876"
+      },
+      {
+        "constant": false,
+        "payable": true,
+        "type": "fallback"
+      },
+      {
+        "name": "close",
+        "outputs": [],
+        "inputs": [],
+        "constant": false,
+        "payable": true,
+        "type": "function",
+        "gas": 97307,
+        "signature": "0x43d726d6"
+      },
+      {
+        "name": "tokensReceived",
+        "outputs": [],
+        "inputs": [
+          {
+            "type": "address",
+            "name": "_operator"
+          },
+          {
+            "type": "address",
+            "name": "_from"
+          },
+          {
+            "type": "address",
+            "name": "_to"
+          },
+          {
+            "type": "uint256",
+            "name": "_amount"
+          },
+          {
+            "type": "bytes",
+            "name": "_userData"
+          },
+          {
+            "type": "bytes",
+            "name": "_operatorData"
+          }
+        ],
+        "constant": false,
+        "payable": false,
+        "type": "function",
+        "gas": 313293,
+        "signature": "0x0023de29"
+      },
+      {
+        "name": "beneficiary",
+        "outputs": [
+          {
+            "type": "address",
+            "name": "out"
+          }
+        ],
+        "inputs": [],
+        "constant": true,
+        "payable": false,
+        "type": "function",
+        "gas": 933,
+        "signature": "0x38af3eed"
+      },
+      {
+        "name": "bigDivAddress",
+        "outputs": [
+          {
+            "type": "address",
+            "name": "out"
+          }
+        ],
+        "inputs": [],
+        "constant": true,
+        "payable": false,
+        "type": "function",
+        "gas": 963,
+        "signature": "0x8a2cb6d4"
+      },
+      {
+        "name": "burnThresholdBasisPoints",
+        "outputs": [
+          {
+            "type": "uint256",
+            "name": "out"
+          }
+        ],
+        "inputs": [],
+        "constant": true,
+        "payable": false,
+        "type": "function",
+        "gas": 993,
+        "signature": "0x3d16cc0b"
+      },
+      {
+        "name": "buySlopeNum",
+        "outputs": [
+          {
+            "type": "uint256",
+            "name": "out"
+          }
+        ],
+        "inputs": [],
+        "constant": true,
+        "payable": false,
+        "type": "function",
+        "gas": 1023,
+        "signature": "0x35e5cc31"
+      },
+      {
+        "name": "buySlopeDen",
+        "outputs": [
+          {
+            "type": "uint256",
+            "name": "out"
+          }
+        ],
+        "inputs": [],
+        "constant": true,
+        "payable": false,
+        "type": "function",
+        "gas": 1053,
+        "signature": "0x58439fa5"
+      },
+      {
+        "name": "control",
+        "outputs": [
+          {
+            "type": "address",
+            "name": "out"
+          }
+        ],
+        "inputs": [],
+        "constant": true,
+        "payable": false,
+        "type": "function",
+        "gas": 1083,
+        "signature": "0xd8de6587"
+      },
+      {
+        "name": "currencyAddress",
+        "outputs": [
+          {
+            "type": "address",
+            "name": "out"
+          }
+        ],
+        "inputs": [],
+        "constant": true,
+        "payable": false,
+        "type": "function",
+        "gas": 1113,
+        "signature": "0x1c1cb323"
+      },
+      {
+        "name": "feeCollector",
+        "outputs": [
+          {
+            "type": "address",
+            "name": "out"
+          }
+        ],
+        "inputs": [],
+        "constant": true,
+        "payable": false,
+        "type": "function",
+        "gas": 1143,
+        "signature": "0xc415b95c"
+      },
+      {
+        "name": "feeBasisPoints",
+        "outputs": [
+          {
+            "type": "uint256",
+            "name": "out"
+          }
+        ],
+        "inputs": [],
+        "constant": true,
+        "payable": false,
+        "type": "function",
+        "gas": 1173,
+        "signature": "0xb8606eef"
+      },
+      {
+        "name": "fairAddress",
+        "outputs": [
+          {
+            "type": "address",
+            "name": "out"
+          }
+        ],
+        "inputs": [],
+        "constant": true,
+        "payable": false,
+        "type": "function",
+        "gas": 1203,
+        "signature": "0xb1f50f38"
+      },
+      {
+        "name": "initGoal",
+        "outputs": [
+          {
+            "type": "uint256",
+            "name": "out"
+          }
+        ],
+        "inputs": [],
+        "constant": true,
+        "payable": false,
+        "type": "function",
+        "gas": 1233,
+        "signature": "0x26315438"
+      },
+      {
+        "name": "initInvestors",
+        "outputs": [
+          {
+            "type": "uint256",
+            "name": "out"
+          }
+        ],
+        "inputs": [
+          {
+            "type": "address",
+            "name": "arg0"
+          }
+        ],
+        "constant": true,
+        "payable": false,
+        "type": "function",
+        "gas": 1417,
+        "signature": "0x736dcb1f"
+      },
+      {
+        "name": "initReserve",
+        "outputs": [
+          {
+            "type": "uint256",
+            "name": "out"
+          }
+        ],
+        "inputs": [],
+        "constant": true,
+        "payable": false,
+        "type": "function",
+        "gas": 1293,
+        "signature": "0xa71ddd25"
+      },
+      {
+        "name": "investmentReserveBasisPoints",
+        "outputs": [
+          {
+            "type": "uint256",
+            "name": "out"
+          }
+        ],
+        "inputs": [],
+        "constant": true,
+        "payable": false,
+        "type": "function",
+        "gas": 1323,
+        "signature": "0x9df3f4f6"
+      },
+      {
+        "name": "isCurrencyERC20",
+        "outputs": [
+          {
+            "type": "bool",
+            "name": "out"
+          }
+        ],
+        "inputs": [],
+        "constant": true,
+        "payable": false,
+        "type": "function",
+        "gas": 1353,
+        "signature": "0x434b536c"
+      },
+      {
+        "name": "openUntilAtLeast",
+        "outputs": [
+          {
+            "type": "uint256",
+            "name": "out"
+          }
+        ],
+        "inputs": [],
+        "constant": true,
+        "payable": false,
+        "type": "function",
+        "gas": 1383,
+        "signature": "0xdcf81d17"
+      },
+      {
+        "name": "minInvestment",
+        "outputs": [
+          {
+            "type": "uint256",
+            "name": "out"
+          }
+        ],
+        "inputs": [],
+        "constant": true,
+        "payable": false,
+        "type": "function",
+        "gas": 1413,
+        "signature": "0x8ac2c680"
+      },
+      {
+        "name": "revenueCommitmentBasisPoints",
+        "outputs": [
+          {
+            "type": "uint256",
+            "name": "out"
+          }
+        ],
+        "inputs": [],
+        "constant": true,
+        "payable": false,
+        "type": "function",
+        "gas": 1443,
+        "signature": "0x6177e37c"
+      },
+      {
+        "name": "state",
+        "outputs": [
+          {
+            "type": "uint256",
+            "unit": "The DAT's internal state machine",
+            "name": "out"
+          }
+        ],
+        "inputs": [],
+        "constant": true,
+        "payable": false,
+        "type": "function",
+        "gas": 1473,
+        "signature": "0xc19d93fb"
+      }
+    ]
   },
   "tpl": {
     "address": "0x6F2B42123C0b92C99ffB7D361a870d55398aaa90",

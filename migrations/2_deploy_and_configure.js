@@ -83,7 +83,8 @@ module.exports = async function deployAndConfigure(
   );
   json.dat = {
     address: dat.address,
-    implementation: datContract.address
+    implementation: datContract.address,
+    abi: dat.abi
   };
 
   // Deploy TPL
