@@ -2,14 +2,12 @@
     {
       "id": 1,
       "name": "buy_sell_no-pre-mint",
-      "disabled": true,
-      "reason": "Sell > initGoal during init"
+      "disabled": false
     },
     {
       "id": 2,
       "name": "buy_sell-premint",
-      "disabled": true,
-      "reason": "Sell > initGoal during init"
+      "disabled": false
     },
     {
       "id": "3-original",
@@ -20,26 +18,22 @@
     {
       "id": "3-new",
       "name": "buy_sell_large_numbers_minBuySlope",
-      "disabled": true,
-      "reason": "Sell > initGoal during init"
+      "disabled": false
     },
     {
       "id": 4,
       "name": "buy_close_sell-no-pre-mint",
-      "disabled": true,
-      "reason": "Sell > initGoal during init"
+      "disabled": false
     },
     {
       "id": 5,
       "name": "buy_close_sell_pre-mint",
-      "disabled": true,
-      "reason": "Sell > initGoal during init"
+      "disabled": false
     },
     {
       "id": 6,
       "name": "buy_pay_close-pre-mint",
-      "disabled": true,
-      "reason": "Sell > initGoal during init"
+      "disabled": false
     },
     {
       "id": 7,
@@ -50,8 +44,7 @@
     {
       "id": 8,
       "name": "buy_sell_xfer_pay_close-premint",
-      "disabled": true,
-      "reason": "Sell > initGoal during init"
+      "disabled": false
     },
     {
       "id": 9,
@@ -61,14 +54,12 @@
     {
       "id": 10,
       "name": "buy_pay_burn-no-premint",
-      "disabled": true,
-      "reason": "Sell > initGoal during init"
+      "disabled": false
     },
     {
       "id": 11,
       "name": "buy_pay_burn_sell_close-premint",
-      "disabled": true,
-      "reason": "Sell > initGoal during init"
+      "disabled": false
     }
   ]
 
