@@ -24,6 +24,7 @@ jobs:
           keys:
             - v2-{{ checksum "package.json" }}
       - run: rm -Rf node_modules/websocket
+      - run: rm -Rf node_modules/truffle-hdwallet-provider
       - run: npm i
       - save_cache:
           paths:
