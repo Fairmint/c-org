@@ -60,7 +60,7 @@ module.exports = async function deployAndConfigure(
   json.dai = {
     address: dai.address,
     abi: dai.abi
-  }
+  };
 
   // Deploy Dat
   const datContract = await deployer.deploy(datArtifact);
@@ -154,5 +154,9 @@ module.exports = async function deployAndConfigure(
   // Test the upgrade process
   //await proxyAdmin.upgrade(fairProxy.address, fairContract.address);
 
-  fs.writeFile(`contracts_${network}.json`, JSON.stringify(json, null, 2), () => {});
+  fs.writeFile(
+    `contracts_${network}.json`,
+    JSON.stringify(json, null, 2),
+    () => {}
+  );
 };
