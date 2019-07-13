@@ -564,11 +564,11 @@ def buy(
   # Calculate the tokenValue for this investment
   tokenValue: uint256
   if(self.state == STATE_INIT):
-    assert _currencyValue <= self.initGoal, "MAX_INIT_GOAL"
     # Math: initGoal and buySlopeNum/Den are capped such that overflow is not possible unless
     # a huge _currencyValue is provided, but they can retry with a smaller value
     tokenValue = 2 * _currencyValue * self.buySlopeDen
     tokenValue /= self.initGoal * self.buySlopeNum
+    assert tokenValue <= self.initGoal, "MAX_INIT_GOAL"
   elif(self.state == STATE_RUN):
     # Math: supply's max value is 10e28 as enfored in FAIR.vy
     supply: uint256 = self.fair.totalSupply() + self.fair.burnedSupply()
