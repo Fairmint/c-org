@@ -1,19 +1,15 @@
 const { deployDat } = require("../../helpers");
 
 contract("fair / erc20 / burn", accounts => {
-  let dat;
-  let fair;
+  let contracts;
 
   before(async () => {
-    [dat, fair] = await deployDat(
-      {
-        initGoal: 0
-      },
-      accounts[0]
-    );
+    contracts = await deployDat(accounts, {
+      initGoal: 0
+    });
 
-    await dat.buy(accounts[1], "4200000000000000000000", 1, {
-      value: "4200000000000000000000",
+    await contracts.dat.buy(accounts[1], "420000000000000000000", 1, {
+      value: "420000000000000000000",
       from: accounts[1]
     });
   });
@@ -23,13 +19,13 @@ contract("fair / erc20 / burn", accounts => {
     let accountBalanceBefore;
 
     before(async () => {
-      accountBalanceBefore = await fair.balanceOf(accounts[0]);
-      await fair.burn(burnAmount, web3.utils.asciiToHex(""));
+      accountBalanceBefore = await contracts.fair.balanceOf(accounts[0]);
+      await contracts.fair.burn(burnAmount, web3.utils.asciiToHex(""));
     });
 
     it("account balance went down", async () => {
       assert.equal(
-        (await fair.balanceOf(accounts[0])).toString(),
+        (await contracts.fair.balanceOf(accounts[0])).toString(),
         accountBalanceBefore.subn(burnAmount).toString()
       );
     });

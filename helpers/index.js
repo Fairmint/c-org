@@ -1,3 +1,4 @@
 const updateDatConfig = require("./updateDatConfig");
+const deployDat = require("./deployDat");
 
-module.exports = { updateDatConfig };
+module.exports = { deployDat, updateDatConfig };

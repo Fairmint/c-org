@@ -1,14 +1,14 @@
 const { deployDat } = require("../../helpers");
 
 contract("fair / erc20 / totalSupply", accounts => {
-  let fair;
+  let contracts;
 
   before(async () => {
-    fair = (await deployDat({ initReserve: 0 }, accounts[0]))[1];
+    contracts = await deployDat(accounts, { initReserve: 0 });
   });
 
   it("defaults to 0", async () => {
-    assert.equal((await fair.totalSupply()).toString(), 0);
+    assert.equal((await contracts.fair.totalSupply()).toString(), 0);
   });
 
   it("goes up on mint");
