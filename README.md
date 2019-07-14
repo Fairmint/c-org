@@ -12,7 +12,7 @@ This repository contains the reference implementation for smart-contracts implem
 ```
 # Install
 npm i
-sudo pip install vyper
+sudo pip3 install vyper
 
 # Test
 npm run ganache
