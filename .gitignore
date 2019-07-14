@@ -3,3 +3,5 @@ node_modules
 /package-lock.json
 
 .zos.session
+contracts_development.json
+.directory
