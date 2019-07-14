@@ -1,42 +1,46 @@
 const { deployDat } = require("../../helpers");
 
 contract("fair / erc20 / transferFrom", accounts => {
-  let dat;
-  let fair;
+  let contracts;
   const initReserve = 1000;
 
   before(async () => {
-    [dat, fair] = await deployDat(
-      {
-        initReserve,
-        initGoal: 0
-      },
-      accounts[0]
-    );
+    contracts = await deployDat(accounts, {
+      initReserve,
+      initGoal: 0
+    });
   });
 
   it("has expected balance before transfer", async () => {
-    assert.equal((await fair.balanceOf(accounts[0])).toString(), initReserve);
-    assert.equal(await fair.balanceOf(accounts[1]), 0);
+    assert.equal(
+      (await contracts.fair.balanceOf(accounts[0])).toString(),
+      initReserve
+    );
+    assert.equal(await contracts.fair.balanceOf(accounts[1]), 0);
   });
 
   describe("can transfer funds from initReserve", () => {
     const transferAmount = 42;
 
     before(async () => {
-      await fair.approve(accounts[2], -1);
-      await fair.transferFrom(accounts[0], accounts[1], transferAmount, {
-        from: accounts[2]
-      });
+      await contracts.fair.approve(accounts[2], -1);
+      await contracts.fair.transferFrom(
+        accounts[0],
+        accounts[1],
+        transferAmount,
+        {
+          from: accounts[2]
+        }
+      );
     });
 
     it("has expected after after transfer", async () => {
       assert.equal(
-        (await fair.balanceOf(accounts[0])).toString(),
+        (await contracts.fair.balanceOf(accounts[0])).toString(),
         initReserve - transferAmount
       );
       assert.equal(
-        (await fair.balanceOf(accounts[1])).toString(),
+        (await contracts.fair.balanceOf(accounts[1])).toString(),
         transferAmount
       );
     });

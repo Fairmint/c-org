@@ -1,16 +1,8 @@
 const Papa = require("papaparse");
 const fs = require("fs");
 const BigNumber = require("bignumber.js");
-const {
-  constants,
-  deployDat,
-  getGasCost,
-  updateDatConfig
-} = require("../helpers");
+const { constants, deployDat, getGasCost } = require("../helpers");
 const sheets = require("./test-data/script.json");
-
-const tplArtifact = artifacts.require("TestTPLAttributeRegistry");
-const authArtifact = artifacts.require("TestAuthorization");
 
 const daiArtifact = artifacts.require("TestDai");
 //const erc777Artifact = artifacts.require("TestERC777Only");
@@ -28,8 +20,7 @@ contract("dat / csvTests", accounts => {
   // Blocked on Vyper b11
   const tokenType = [undefined, daiArtifact];
 
-  let dat;
-  let fair;
+  let contracts;
   let currency;
   let currencyString;
 
@@ -97,41 +88,22 @@ contract("dat / csvTests", accounts => {
     const investmentReserve = parseBasisPoints(configJson.investment_reserve);
     const revenueCommitement = parseBasisPoints(configJson.revenue_commitment);
     const fee = parseBasisPoints(configJson.fee);
-    [dat, fair] = await deployDat(
-      {
-        buySlopeNum: new BigNumber(buySlope[0]).toFixed(),
-        buySlopeDen: new BigNumber(buySlope[1]).shiftedBy(18).toFixed(),
-        investmentReserveBasisPoints: new BigNumber(
-          investmentReserve
-        ).toFixed(),
-        revenueCommitementBasisPoints: new BigNumber(
-          revenueCommitement
-        ).toFixed(),
-        initGoal: parseNumber(configJson.init_goal)
-          .shiftedBy(18)
-          .toFixed(),
-        initReserve: parseNumber(configJson.init_reserve)
-          .shiftedBy(18)
-          .toFixed(),
-        currency: currency ? currency.address : constants.ZERO_ADDRESS
-      },
-      control
-    );
-    const tpl = await tplArtifact.new();
-    const auth = await authArtifact.new();
-    await auth.initialize(fair.address);
-    await auth.updateAuth(tpl.address, [42], [0, 0], [0, 0, 0]);
-    await updateDatConfig(
-      dat,
-      fair,
-      {
-        authorizationAddress: auth.address,
-        beneficiary,
-        feeCollector,
-        feeBasisPoints: new BigNumber(fee).toFixed()
-      },
-      control
-    );
+    contracts = await deployDat(accounts, {
+      buySlopeNum: new BigNumber(buySlope[0]).toFixed(),
+      buySlopeDen: new BigNumber(buySlope[1]).shiftedBy(18).toFixed(),
+      investmentReserveBasisPoints: new BigNumber(investmentReserve).toFixed(),
+      revenueCommitementBasisPoints: new BigNumber(
+        revenueCommitement
+      ).toFixed(),
+      initGoal: parseNumber(configJson.init_goal)
+        .shiftedBy(18)
+        .toFixed(),
+      initReserve: parseNumber(configJson.init_reserve)
+        .shiftedBy(18)
+        .toFixed(),
+      currency: currency ? currency.address : constants.ZERO_ADDRESS,
+      feeBasisPoints: new BigNumber(fee).toFixed()
+    });
   }
 
   async function setInitialBalances(sheet) {
@@ -190,23 +162,31 @@ contract("dat / csvTests", accounts => {
       id,
       address,
       eth: new BigNumber(await web3.eth.getBalance(address)),
-      fair: new BigNumber(await fair.balanceOf(address)),
+      fair: new BigNumber(await contracts.fair.balanceOf(address)),
       currency: new BigNumber(currency ? await currency.balanceOf(address) : 0)
     };
 
     if (currency) {
       if (
         currency.isOperatorFor &&
-        !(await currency.isOperatorFor(dat.address, row.account.address))
+        !(await currency.isOperatorFor(
+          contracts.dat.address,
+          row.account.address
+        ))
       ) {
         console.log(`  Set #${row.account.id} to authorize dat`);
-        await currency.authorizeOperator(dat.address);
+        await currency.authorizeOperator(contracts.dat.address);
       } else if (
         currency.allowance &&
-        (await currency.allowance(row.account.address, dat.address)) == 0
+        (await currency.allowance(
+          row.account.address,
+          contracts.dat.address
+        )) == 0
       ) {
         console.log(`  Set #${row.account.id} to approve dat`);
-        await currency.approve(dat.address, -1, { from: row.account.address });
+        await currency.approve(contracts.dat.address, -1, {
+          from: row.account.address
+        });
       }
     }
 
@@ -284,18 +264,28 @@ contract("dat / csvTests", accounts => {
     let tx;
     switch (row.Action) {
       case "buy":
-        tx = await dat.buy(row.account.address, quantity.toFixed(), 1, {
-          from: row.account.address,
-          value: currency ? 0 : quantity.toFixed()
-        });
+        tx = await contracts.dat.buy(
+          row.account.address,
+          quantity.toFixed(),
+          1,
+          {
+            from: row.account.address,
+            value: currency ? 0 : quantity.toFixed()
+          }
+        );
         break;
       case "sell":
-        tx = await dat.sell(row.account.address, quantity.toFixed(), 1, {
-          from: row.account.address
-        });
+        tx = await contracts.dat.sell(
+          row.account.address,
+          quantity.toFixed(),
+          1,
+          {
+            from: row.account.address
+          }
+        );
         break;
       case "close":
-        tx = await dat.close({
+        tx = await contracts.dat.close({
           from: row.account.address,
           value: currency
             ? 0
@@ -305,10 +295,14 @@ contract("dat / csvTests", accounts => {
         });
         break;
       case "pay":
-        tx = await dat.pay(constants.ZERO_ADDRESS, quantity.toFixed(), {
-          from: row.account.address,
-          value: currency ? 0 : quantity.toFixed()
-        });
+        tx = await contracts.dat.pay(
+          constants.ZERO_ADDRESS,
+          quantity.toFixed(),
+          {
+            from: row.account.address,
+            value: currency ? 0 : quantity.toFixed()
+          }
+        );
         break;
       case "xfer":
         if (isCurrency) {
@@ -336,15 +330,23 @@ contract("dat / csvTests", accounts => {
             });
           }
         } else {
-          tx = await fair.transfer(targetAddress, quantity.toFixed(), {
-            from: row.account.address
-          });
+          tx = await contracts.fair.transfer(
+            targetAddress,
+            quantity.toFixed(),
+            {
+              from: row.account.address
+            }
+          );
         }
         break;
       case "burn":
-        tx = await fair.burn(quantity.toFixed(), web3.utils.asciiToHex(""), {
-          from: row.account.address
-        });
+        tx = await contracts.fair.burn(
+          quantity.toFixed(),
+          web3.utils.asciiToHex(""),
+          {
+            from: row.account.address
+          }
+        );
         break;
       default:
         throw new Error(`Missing action ${row.Action}`);
@@ -354,31 +356,42 @@ contract("dat / csvTests", accounts => {
   }
 
   async function checkPreConditions(row) {
-    await assertBalance(fair, row.account.address, row.PreviousFAIRBal);
+    await assertBalance(
+      contracts.fair,
+      row.account.address,
+      row.PreviousFAIRBal
+    );
     await assertBalance(currency, row.account.address, row.PreviousDAIBal);
   }
 
   async function checkPostConiditons(row) {
-    await assertBalance(fair, row.account.address, row.FAIRBalanceOfAcct);
+    await assertBalance(
+      contracts.fair,
+      row.account.address,
+      row.FAIRBalanceOfAcct
+    );
     await assertBalance(currency, row.account.address, row.DAIBalanceOfAcct);
     await assertBalance(currency, feeCollector, row.TotalDAISentToFeeCollector);
     assertAlmostEqual(
-      new BigNumber(await fair.totalSupply()),
+      new BigNumber(await contracts.fair.totalSupply()),
       parseNumber(row.FAIRTotalSupply).shiftedBy(18)
     );
     assertAlmostEqual(
-      new BigNumber(await fair.burnedSupply()),
+      new BigNumber(await contracts.fair.burnedSupply()),
       parseNumber(row.FAIRBurnedSupply).shiftedBy(18)
     );
     assertAlmostEqual(
-      new BigNumber(await dat.buybackReserve()),
+      new BigNumber(await contracts.dat.buybackReserve()),
       parseNumber(row.DAIBuybackReserve).shiftedBy(18)
     );
-    assert.equal((await dat.state()).toString(), parseState(row.State));
+    assert.equal(
+      (await contracts.dat.state()).toString(),
+      parseState(row.State)
+    );
   }
 
   async function logState() {
-    let state = await dat.state();
+    let state = await contracts.dat.state();
     if (state == "0") {
       state = "init";
     } else if (state == "1") {
@@ -390,16 +403,16 @@ contract("dat / csvTests", accounts => {
     } else {
       throw new Error(`Missing state: ${state}`);
     }
-    const totalSupply = new BigNumber(await fair.totalSupply());
-    const burnedSupply = new BigNumber(await fair.burnedSupply());
-    const buybackReserve = new BigNumber(await dat.buybackReserve());
+    const totalSupply = new BigNumber(await contracts.fair.totalSupply());
+    const burnedSupply = new BigNumber(await contracts.fair.burnedSupply());
+    const buybackReserve = new BigNumber(await contracts.dat.buybackReserve());
     const beneficiaryDaiBalance = new BigNumber(
       currency
         ? await currency.balanceOf(beneficiary)
         : await web3.eth.getBalance(beneficiary)
     );
     const beneficiaryFairBalance = new BigNumber(
-      await fair.balanceOf(beneficiary)
+      await contracts.fair.balanceOf(beneficiary)
     );
     const feeCollectorDaiBalance = new BigNumber(
       currency
@@ -407,7 +420,7 @@ contract("dat / csvTests", accounts => {
         : await web3.eth.getBalance(feeCollector)
     );
     const feeCollectorFairBalance = new BigNumber(
-      await fair.balanceOf(feeCollector)
+      await contracts.fair.balanceOf(feeCollector)
     );
     console.log(`\tState: ${state}
 \tSupply: ${totalSupply

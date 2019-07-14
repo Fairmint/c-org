@@ -337,7 +337,7 @@ def initialize(
   @dev using the init pattern in order to support zos upgrades
   """
   assert self.control == ZERO_ADDRESS, "ALREADY_INITIALIZED"
-
+  
   # Set initGoal, which in turn defines the initial state
   if(_initGoal == 0):
     log.StateChange(self.state, STATE_RUN)
