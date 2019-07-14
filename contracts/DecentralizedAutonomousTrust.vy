@@ -190,6 +190,9 @@ BASIS_POINTS_DEN: constant(uint256) = 10000
 # Data for DAT business logic
 ###########
 
+_isTransferFrom: bool
+# @dev An internal variable to differentiate between an ERC-777 transfer vs transferFrom
+
 beneficiary: public(address)
 # @notice The address of the beneficiary organization which receives the investments. 
 # Points to the wallet of the organization. 
@@ -374,7 +377,7 @@ def initialize(
 
   # Check if the currency is an ERC-777 token
   self.currencyAddress = _currencyAddress
-  implementer: address = IERC1820Registry(0x1820a4B7618BdE71Dce8cdc73aAB6C95905faD24).getInterfaceImplementer(_currencyAddress, keccak256("ERC777"))
+  implementer: address = IERC1820Registry(0x1820a4B7618BdE71Dce8cdc73aAB6C95905faD24).getInterfaceImplementer(_currencyAddress, keccak256("ERC777Token"))
   if(implementer == ZERO_ADDRESS):
     self.currency = IERC777_20_Token(_currencyAddress)
     self.isCurrencyERC20 = True
@@ -493,7 +496,9 @@ def _collectInvestment(
       success: bool = self.currency.transferFrom(_from, self, _quantityToInvest)
       assert success, "ERC20_TRANSFER_FAILED"
     else:
+      self._isTransferFrom = True
       self.currency.operatorSend(_from, self, _quantityToInvest, "", "")
+      self._isTransferFrom = False
 
 @private
 def _sendCurrency(
@@ -853,6 +858,9 @@ def close():
     self.state = STATE_CLOSE
     assert self.openUntilAtLeast <= block.timestamp, "TOO_EARLY"
 
+    buybackReserve: uint256 = self.buybackReserve()
+    buybackReserve -= as_unitless_number(msg.value)
+
     # Source: (t^2 * (n/d))/2 + b*(n/d)*t - r
     # Implementation: (n t (2 b + t))/(2 d) - r
 
@@ -866,10 +874,10 @@ def close():
       False
     )
     # Math: this if condition avoids a potential overflow
-    if(exitFee <= self.buybackReserve()):
+    if(exitFee <= buybackReserve):
       exitFee = 0
     else:
-      exitFee -= self.buybackReserve()
+      exitFee -= buybackReserve
 
     self._collectInvestment(msg.sender, exitFee, msg.value, True)
   else:
@@ -893,6 +901,8 @@ def tokensReceived(
   If currency: Pay the organization on-chain with ERC-777 tokens (only works when currency is ERC-777)
   Params are from the ERC-777 token standard
   """
+  if(self._isTransferFrom):
+    return
   if(msg.sender == self.currency):
     self._pay(_operator, _from, _amount)
   elif(msg.sender == self.fairAddress):
