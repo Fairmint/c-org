@@ -96,7 +96,7 @@ contract IAuthorization:
     _value: uint256,
     _operatorData: bytes[1024]
   ) -> bool: constant
-contract IBigDiv:
+contract IBigDiv: # TODO maybe add more versions for optimization
   def bigDiv2x2(
     _numA: uint256,
     _numB: uint256,
@@ -355,8 +355,9 @@ def initialize(
 
   assert _buySlopeNum > 0, "INVALID_SLOPE_NUM" # 0 not supported
   assert _buySlopeDen > 0, "INVALID_SLOPE_DEN"
-  assert _buySlopeDen <= 1000000000000000000000000000, "SLOPE_DEN_OUT_OF_RANGE" # 1b full tokens to 1
-  assert _buySlopeNum <= 1000000000000000000000000000, "SLOPE_NUM_OUT_OF_RANGE" # Fraction may be > 1; an extreme value
+  # TODO add at least 12 decimals to this for USDC, maybe 18 if no decimals on the token.
+  #assert _buySlopeDen <= 1000000000000000000000000000, "SLOPE_DEN_OUT_OF_RANGE" # 1b full tokens to 1
+  #TODOassert _buySlopeNum <= 1000000000000000000000000000, "SLOPE_NUM_OUT_OF_RANGE" # Fraction may be > 1; an extreme value
   self.buySlopeNum = _buySlopeNum
   self.buySlopeDen = _buySlopeDen
   assert _investmentReserveBasisPoints <= BASIS_POINTS_DEN, "INVALID_RESERVE" # 100% or less
@@ -569,21 +570,20 @@ def buy(
   # Calculate the tokenValue for this investment
   tokenValue: uint256
   if(self.state == STATE_INIT):
-    # Math: initGoal and buySlopeNum/Den are capped such that overflow is not possible unless
-    # a huge _currencyValue is provided, but they can retry with a smaller value
-    tokenValue = 2 * _currencyValue * self.buySlopeDen
-    tokenValue /= self.initGoal * self.buySlopeNum
+    tokenValue = self.bigDiv.bigDiv2x2(
+      2 * _currencyValue, self.buySlopeDen,
+      self.initGoal, self.buySlopeNum,
+      False
+    )
     assert tokenValue <= self.initGoal, "MAX_INIT_GOAL"
   elif(self.state == STATE_RUN):
     # Math: supply's max value is 10e28 as enfored in FAIR.vy
     supply: uint256 = self.fair.totalSupply() + self.fair.burnedSupply()
-    tokenValue = 2 * _currencyValue
-    # Math: buySlopeDen is capped such that this only overflows with a huge _currencyValue, 
-    # but they can retry with a smaller value
-    # There is always room for at least (3e27)^2, or 9e56
-    # buySlope is capped to 26 digits, leaving the worst case to limiting purchases to 30e-18 tokens
-    tokenValue *= self.buySlopeDen
-    tokenValue /= self.buySlopeNum
+    tokenValue = self.bigDiv.bigDiv2x2(
+      2 * _currencyValue, self.buySlopeDen,
+      self.buySlopeNum, 1,
+      False
+    )
     # Math: to avoid overflow in _toDecimalWithPlaces, supply must be <= 1.3e28.  Then large 
     # _currencyValues may overflow, but they can retry with a smaller value
     tokenValue += supply * supply
@@ -622,10 +622,9 @@ def buy(
     if(self.fair.totalSupply() - self.initReserve >= self.initGoal):
       log.StateChange(self.state, STATE_RUN)
       self.state = STATE_RUN
-      # Math: worst case is 1000000000000000000000000000 * MAX_BEFORE_SQUARE which won't overflow
-      beneficiaryContribution: uint256 = self.bigDiv.bigDiv2x2(
-        self.initInvestors[self.beneficiary] * self.buySlopeNum, self.initGoal,
-        self.buySlopeDen, 2,
+      beneficiaryContribution: uint256 = self.bigDiv.bigDiv3x3(
+        self.initInvestors[self.beneficiary], self.buySlopeNum, self.initGoal,
+        self.buySlopeDen, 2, 1,
         False
       )
       self._distributeInvestment(self.buybackReserve() - beneficiaryContribution)
@@ -762,10 +761,14 @@ def _pay(
   # ) - s
 
   supply: uint256 = self.fair.totalSupply() + self.fair.burnedSupply()
-  # Math: max _currencyValue of (2^256 - 1) / 2e31 == 5.7e45
-  tokenValue: uint256 = 2 * _currencyValue * self.revenueCommitmentBasisPoints * self.buySlopeDen
-  # Math: buySlopeNum is capped to prevent an overflow
-  tokenValue /= BASIS_POINTS_DEN * self.buySlopeNum
+
+  # Math: max _currencyValue of (2^256 - 1) / 2e31 == 5.7e45 (* 2 * BASIS_POINTS won't overflow)
+  tokenValue: uint256 = self.bigDiv.bigDiv2x2(
+    2 * _currencyValue * self.revenueCommitmentBasisPoints, self.buySlopeDen,
+    BASIS_POINTS_DEN, self.buySlopeNum,
+    False
+  )
+
   # Math: max supply^2 given the hard-cap is 1e56 leaving room for the max tokenValue (equal to the FAIR hard-cap)
   tokenValue += supply * supply
 
@@ -867,9 +870,9 @@ def close():
     exitFee = 2 * self.fair.burnedSupply()
     # Math: the supply hard-cap ensures this does not overflow
     exitFee += self.fair.totalSupply()
-    # Math: buySlopeNum and self.totalSupply caps of makes the worst case: 10 ** 28 * 10 ** 28 which does not overflow
+    # Math: self.totalSupply cap makes the worst case: 10 ** 28 * 10 ** 28 which does not overflow
     exitFee = self.bigDiv.bigDiv2x2(
-      exitFee, self.buySlopeNum * self.fair.totalSupply(),
+      exitFee * self.fair.totalSupply(), self.buySlopeNum,
       2, self.buySlopeDen,
       False
     )

@@ -7,6 +7,7 @@ const sheets = require("./test-data/script.json");
 const daiArtifact = artifacts.require("TestDai");
 const erc777Artifact = artifacts.require("TestERC777Only");
 const zosTokenArtifact = artifacts.require("TestERC777ERC20");
+const usdcArtifact = artifacts.require("TestUsdc");
 
 contract("dat / csvTests", accounts => {
   const beneficiary = accounts[0];
@@ -17,8 +18,7 @@ contract("dat / csvTests", accounts => {
   const GAS_COST_BUFFER = new BigNumber("2200000").times("100000000000");
 
   // TODO test a DAT using another FAIR as currency
-  // TODO test using a currency with only 6 decimals
-  const tokenType = [undefined, daiArtifact, zosTokenArtifact, erc777Artifact];
+  const tokenType = [undefined, daiArtifact, zosTokenArtifact, erc777Artifact, usdcArtifact]; 
 
   let initComplete;
 
@@ -26,14 +26,17 @@ contract("dat / csvTests", accounts => {
     let contracts;
     let currency;
     let currencyString;
+    let currencyDecimals;
 
     beforeEach(async () => {
       if (!tokenArtifact) {
         currency = undefined;
         currencyString = "ETH";
+        currencyDecimals = 18;
       } else {
         currency = await tokenArtifact.new({ from: control });
         currencyString = await currency.symbol();
+        currencyDecimals = parseInt((await currency.decimals()).toString());
       }
 
       await resetEthBalances();
@@ -85,7 +88,7 @@ contract("dat / csvTests", accounts => {
       const fee = parseBasisPoints(configJson.fee);
       contracts = await deployDat(accounts, {
         buySlopeNum: new BigNumber(buySlope[0]).toFixed(),
-        buySlopeDen: new BigNumber(buySlope[1]).shiftedBy(18).toFixed(),
+        buySlopeDen: new BigNumber(buySlope[1]).shiftedBy(18 + (18 - currencyDecimals)).toFixed(),
         investmentReserveBasisPoints: new BigNumber(
           investmentReserve
         ).toFixed(),
@@ -99,7 +102,8 @@ contract("dat / csvTests", accounts => {
           .shiftedBy(18)
           .toFixed(),
         currency: currency ? currency.address : constants.ZERO_ADDRESS,
-        feeBasisPoints: new BigNumber(fee).toFixed()
+        feeBasisPoints: new BigNumber(fee).toFixed(),
+        minInvestment: new BigNumber(100).shiftedBy(currencyDecimals).toFixed()
       });
     }
 
@@ -196,7 +200,7 @@ contract("dat / csvTests", accounts => {
           ? row.account.currency
           : row.account.eth
         )
-          .shiftedBy(-18)
+          .shiftedBy(-1 * currencyDecimals)
           .toFormat()} ${currencyString} and ${row.account.fair
           .shiftedBy(-18)
           .toFormat()} FAIR`
@@ -252,9 +256,14 @@ contract("dat / csvTests", accounts => {
     }
 
     async function executeAction(row) {
-      const quantity = new BigNumber(
+      let quantity = new BigNumber(
         parseNumber(row.BuyQty || row.SellQty || row.BurnQty)
-      ).shiftedBy(18);
+      );
+      if(row.BuyQty) {
+        quantity = quantity.shiftedBy(currencyDecimals)
+      } else {
+        quantity = quantity.shiftedBy(18)
+      }
 
       // for xfer
       const isCurrency = !row.SellQty;
@@ -390,7 +399,7 @@ contract("dat / csvTests", accounts => {
       );
       assertAlmostEqual(
         new BigNumber(await contracts.dat.buybackReserve()),
-        parseNumber(row.DAIBuybackReserve).shiftedBy(18)
+        parseNumber(row.DAIBuybackReserve).shiftedBy(currencyDecimals)
       );
       assert.equal(
         (await contracts.dat.state()).toString(),
@@ -436,14 +445,14 @@ contract("dat / csvTests", accounts => {
 \tSupply: ${totalSupply
         .shiftedBy(-18)
         .toFormat()} FAIR + ${burnedSupply.shiftedBy(-18).toFormat()} burned
-\tReserve: ${buybackReserve.shiftedBy(-18).toFormat()} ${currencyString}
+\tReserve: ${buybackReserve.shiftedBy(-1 * currencyDecimals).toFormat()} ${currencyString}
 \tBeneficiary: ${beneficiaryDaiBalance
-        .shiftedBy(-18)
+        .shiftedBy(-1 * currencyDecimals)
         .toFormat()} ${currencyString} and ${beneficiaryFairBalance
         .shiftedBy(-18)
         .toFormat()} FAIR
 \tFee Collector: ${feeCollectorDaiBalance
-        .shiftedBy(-18)
+        .shiftedBy(-1 * currencyDecimals)
         .toFormat()} ${currencyString} and ${feeCollectorFairBalance
         .shiftedBy(-18)
         .toFormat()} FAIR`);
@@ -506,13 +515,13 @@ contract("dat / csvTests", accounts => {
       throw new Error(
         `Values not equal ${new BigNumber(a)
           .shiftedBy(-18)
-          .toFormat()} vs ${new BigNumber(b).shiftedBy(-18).toFormat()}`
+          .toFormat()} vs ${new BigNumber(b).shiftedBy(-18).toFormat()} (assuming 18 decimals)`
       );
     }
 
     async function assertBalance(token, account, expectedBalance) {
       expectedBalance = parseNumber(expectedBalance);
-      expectedBalance = expectedBalance.shiftedBy(18);
+      expectedBalance = expectedBalance.shiftedBy(token == contracts.fair ? 18 : currencyDecimals);
       const balance = new BigNumber(
         token
           ? await token.balanceOf(account)
@@ -563,7 +572,7 @@ contract("dat / csvTests", accounts => {
       if (token) {
         if (targetBalance.eq(0)) return;
         console.log(`  #${accountId} mint ${targetBalance.toFormat()} DAI`);
-        await token.mint(account, targetBalance.shiftedBy(18).toFixed(), {
+        await token.mint(account, targetBalance.shiftedBy(currencyDecimals).toFixed(), {
           from: control
         });
       } else {
