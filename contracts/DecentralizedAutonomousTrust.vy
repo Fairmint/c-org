@@ -94,6 +94,7 @@ contract IAuthorization:
     _from: address,
     _to: address,
     _value: uint256,
+    _userData: bytes[1024],
     _operatorData: bytes[1024]
   ) -> bool: constant
 contract IBigDiv: # TODO maybe add more versions for optimization
@@ -798,7 +799,7 @@ def _pay(
   if(to == ZERO_ADDRESS):
     to = self.beneficiary
   elif(not IAuthorization(self.fair.authorizationAddress())
-    .isTransferAllowed(self, ZERO_ADDRESS, _to, tokenValue, "")):
+    .isTransferAllowed(self, ZERO_ADDRESS, _to, tokenValue, "", "")):
     to = self.beneficiary
 
   # Distribute tokens
