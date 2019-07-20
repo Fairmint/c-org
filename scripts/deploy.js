@@ -14,8 +14,7 @@ contract("deploy script", (accounts, network) => {
       await erc1820.deploy(web3);
     }
 
-    const currencyToken = await testDaiArtifact.new({from: accounts[0]});
-    const contracts = {};
+    const currencyToken = await testDaiArtifact.new({ from: accounts[0] });
     const contracts = await deployDat(accounts, {
       currency: currencyToken.address,
       name: "Fairmint Fair Synthetic Equity",
@@ -39,7 +38,7 @@ contract("deploy script", (accounts, network) => {
     json.erc1820 = {
       address: "0x1820a4B7618BdE71Dce8cdc73aAB6C95905faD24",
       abi: erc1820Artifact.abi
-    }
+    };
     json.proxyAdmin = {
       address: contracts.proxyAdmin.address,
       abi: contracts.proxyAdmin.abi
@@ -68,7 +67,7 @@ contract("deploy script", (accounts, network) => {
       address: contracts.auth.address,
       abi: contracts.auth.abi
     };
-    if(contracts.vesting) {
+    if (contracts.vesting) {
       json.vesting = {
         abi: contracts.vesting[0].abi, // same for all
         accounts: []

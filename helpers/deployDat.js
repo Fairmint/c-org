@@ -95,9 +95,15 @@ module.exports = async function deployDat(accounts, options) {
     await contracts.auth.initialize(contracts.fair.address, {
       from: callOptions.control
     });
-    await contracts.auth.updateAuth(contracts.tpl.address, [42], [0, 0], [0, 0, 0], {
-      from: callOptions.control
-    });
+    await contracts.auth.updateAuth(
+      contracts.tpl.address,
+      [42],
+      [0, 0],
+      [0, 0, 0],
+      {
+        from: callOptions.control
+      }
+    );
     callOptions.authorizationAddress = contracts.auth.address;
   } else {
     contracts.auth = await authArtifact.at(callOptions.authorizationAddress);
