@@ -18,7 +18,7 @@ contract MintableERC20 is
 
   function mint(address _account, uint256 _amount) public returns (bool) {
     // Stop excessive amounts so we don't overflow
-    require(_amount < 1000000000000000000000000000, "LOWER_AMOUNT");
+    require(_amount < 1000000000000000000000000000000, "LOWER_AMOUNT");
     _mint(_account, _amount);
     return true;
   }
