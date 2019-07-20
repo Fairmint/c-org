@@ -1,5 +1,5 @@
 # FAIR tokens
-# ERC-777 and ERC-20 compliance token
+# ERC-777 and ERC-20 compliant token
 # Allows the owner to mint tokens and uses IAuthorization to validate transfers
 # "Owned" by the DAT contract which is also an approved operator for accounts.
 
