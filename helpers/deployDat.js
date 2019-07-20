@@ -20,9 +20,9 @@ module.exports = async function deployDat(accounts, options) {
       buySlopeDen: "100000000000000000000",
       investmentReserveBasisPoints: "1000",
       revenueCommitementBasisPoints: "1000",
-      control: accounts[1],
+      control: accounts.length > 2 ? accounts[1] : accounts[0],
       beneficiary: accounts[0],
-      feeCollector: accounts[2]
+      feeCollector: accounts.length > 2 ? accounts[2] : accounts[0]
     },
     options
   );
@@ -31,6 +31,7 @@ module.exports = async function deployDat(accounts, options) {
   contracts.proxyAdmin = await proxyAdminArtifact.new({
     from: callOptions.control
   });
+
   // FAIR
   const fairContract = await fairArtifact.new({
     from: callOptions.control
@@ -43,6 +44,7 @@ module.exports = async function deployDat(accounts, options) {
       from: callOptions.control
     }
   );
+
   contracts.fair = await fairArtifact.at(fairProxy.address);
   // BigDiv
   contracts.bigDiv = await bigDivArtifact.new({
@@ -75,7 +77,7 @@ module.exports = async function deployDat(accounts, options) {
   );
   // Auth & TPL
   if (!callOptions.authorizationAddress) {
-    const tpl = await tplArtifact.new({
+    contracts.tpl = await tplArtifact.new({
       from: callOptions.control
     });
     const authContract = await authArtifact.new({
@@ -93,7 +95,7 @@ module.exports = async function deployDat(accounts, options) {
     await contracts.auth.initialize(contracts.fair.address, {
       from: callOptions.control
     });
-    await contracts.auth.updateAuth(tpl.address, [42], [0, 0], [0, 0, 0], {
+    await contracts.auth.updateAuth(contracts.tpl.address, [42], [0, 0], [0, 0, 0], {
       from: callOptions.control
     });
     callOptions.authorizationAddress = contracts.auth.address;
