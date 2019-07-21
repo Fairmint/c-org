@@ -21,10 +21,14 @@
 const HDWalletProvider = require("truffle-hdwallet-provider");
 // const infuraKey = "fj4jll3k.....";
 //
-// const fs = require('fs');
-// const mnemonic = fs.readFileSync(".secret").toString().trim();
-
-const privateKeyOrMnemonic = "todo";
+const fs = require("fs");
+const privateKeyOrMnemonic = fs.existsSync(".privateKey")
+  ? fs
+      .readFileSync(".privateKey")
+      .toString()
+      .trim()
+      .split(",")
+  : undefined;
 
 module.exports = {
   /**
@@ -86,7 +90,8 @@ module.exports = {
 
   // Set default mocha options here, use special reporters etc.
   mocha: {
-    // timeout: 100000
+    // timeout: 100000,
+    enableTimeouts: false
   },
 
   // Configure your compilers

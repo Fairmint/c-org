@@ -8,7 +8,7 @@
     "dev": "npm run compile && npm run test",
     "lint": "eslint . --fix",
     "lintNoFix": "eslint .",
-    "deploy": "truffle exec index.js --network development",
+    "deploy": "truffle test scripts/deploy.js",
     "test": "truffle test"
   },
   "repository": {
@@ -19,16 +19,16 @@
     "bignumber.js": "9.0.0",
     "erc1820": "0.0.2",
     "ganache-cli": "6.4.4",
-    "openzeppelin-eth": "^2.2.0",
+    "openzeppelin-eth": "2.2.0",
     "openzeppelin-solidity": "2.3.0",
     "openzeppelin-test-helpers": "0.4.0",
     "papaparse": "5.0.0",
     "tpl-contracts": "1.1.3",
     "truffle": "5.0.26",
-    "truffle-hdwallet-provider": "^1.0.14",
-    "truffle-require": "^2.0.14",
-    "zos": "^2.4.1",
-    "zos-lib": "^2.4.1"
+    "truffle-hdwallet-provider": "1.0.14",
+    "truffle-require": "2.0.15",
+    "zos": "2.4.2",
+    "zos-lib": "2.4.2"
   },
   "devDependencies": {
     "chai": "4.2.0",
