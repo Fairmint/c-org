@@ -1,7 +1,7 @@
 const Papa = require("papaparse");
 const fs = require("fs");
 const BigNumber = require("bignumber.js");
-const { constants, deployDat, getGasCost } = require("../helpers");
+const { constants, deployDat, getGasCost } = require("../test/helpers");
 const sheets = require("./test-data/script.json");
 
 const daiArtifact = artifacts.require("TestDai");
