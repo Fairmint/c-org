@@ -92,7 +92,7 @@ module.exports = {
   mocha: {
     // timeout: 100000,
     enableTimeouts: false,
-    reporter: 'eth-gas-reporter'
+    reporter: "eth-gas-reporter"
   },
 
   // Configure your compilers
