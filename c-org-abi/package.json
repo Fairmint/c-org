@@ -1,0 +1,15 @@
+{
+  "name": "c-org-abi",
+  "version": "0.0.2",
+  "description": "ABI for c-org contracts including FAIR and DAT.",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/Fairmint/c-org.git"
+  },
+  "author": "Fairmint",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Fairmint/c-org/issues"
+  },
+  "homepage": "https://github.com/Fairmint/c-org"
+}
