@@ -1,16 +1,15 @@
 version: 2
 
 defaults: &defaults
-  context: docker-hub-credentials
-  docker:
-    - image: circleci/python
-    - image: trufflesuite/ganache-cli
-      command: ganache-cli -e 10000000000 -a 100
-  working_directory: ~/repo
 
 jobs:
   test:
-    <<: *defaults
+    context: docker-hub-credentials
+    docker:
+      - image: circleci/python
+      - image: trufflesuite/ganache-cli
+        command: ganache-cli -e 10000000000 -a 100
+    working_directory: ~/repo
     steps:
       - checkout
 
@@ -46,7 +45,12 @@ jobs:
           paths: .
 
   publish:
-    <<: *defaults
+    context: docker-hub-credentials
+    docker:
+      - image: circleci/node:10
+      - image: trufflesuite/ganache-cli
+        command: ganache-cli -e 10000000000 -a 100
+    working_directory: ~/repo
     steps:
       - attach_workspace:
           at: ~/repo
