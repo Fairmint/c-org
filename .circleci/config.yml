@@ -62,6 +62,9 @@ workflows:
   build:
     jobs:
       - test
+          filters:
+            tags:
+              only: /^v.*/
       - publish:
           requires:
             - test
