@@ -56,10 +56,10 @@ jobs:
           at: ~/repo
       - run:
           name: Authenticate with registry
-          command: echo "//registry.npmjs.org/:_authToken=$npm_TOKEN" > ~/repo/.npmrc
+          command: echo "//registry.npmjs.org/:_authToken=$npm_TOKEN" > ~/repo/c-org-abi/.npmrc
       - run:
           name: Publish package
-          command: npm publish
+          command: cd c-org-abi && npm publish
 
 workflows:
   version: 2
