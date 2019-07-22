@@ -42,6 +42,7 @@ contract("deploy script", (accounts, network) => {
     abiJson.proxyAdmin = contracts.proxyAdmin.abi;
     bytecodeJson.proxyAdmin = contracts.proxyAdmin.bytecode;
     //address: contracts.proxyAdmin.address,
+    console.log(`ProxyAdmin: ${contracts.proxyAdmin.address}`);
     abiJson.fair = contracts.fair.abi;
     bytecodeJson.fair = contracts.fair.bytecode;
     console.log(`FAIR token: ${contracts.fair.address}`);
@@ -66,11 +67,17 @@ contract("deploy script", (accounts, network) => {
     // address: contracts.auth.address,
     abiJson.vesting = vestingArtifact.abi;
     bytecodeJson.vesting = vestingArtifact.bytecode;
-    // if (contracts.vesting) {
-    //   for (let i = 0; i < contracts.vesting.length; i++) {
-    //     abiJson.vesting.accounts.push(contracts.vesting[i].address);
-    //   }
-    // }
+    if (contracts.vesting) {
+      for (let i = 0; i < contracts.vesting.length; i++) {
+        //abiJson.vesting.accounts.push(contracts.vesting[i].address);
+
+        console.log(
+          `Vesting: ${
+            contracts.vesting[i].address
+          } for ${await contracts.vesting[i].beneficiary()}`
+        );
+      }
+    }
 
     // Test the upgrade process
     //await proxyAdmin.upgrade(fairProxy.address, fairContract.address);
