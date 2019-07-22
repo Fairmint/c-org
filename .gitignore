@@ -6,3 +6,5 @@ node_modules
 contracts_development.json
 .directory
 .privateKey
+.npmrc
+/c-org-abi/abi.json

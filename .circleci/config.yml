@@ -1,12 +1,16 @@
 version: 2
+
+defaults: &defaults
+  context: docker-hub-credentials
+  docker:
+    - image: circleci/python
+    - image: trufflesuite/ganache-cli
+      command: ganache-cli -e 10000000000 -a 100
+  working_directory: ~/repo
+
 jobs:
   test:
-    context: docker-hub-credentials
-    docker:
-      - image: circleci/python
-      - image: trufflesuite/ganache-cli
-        command: ganache-cli -e 10000000000 -a 100
-    working_directory: ~/repo
+    <<: *defaults
     steps:
       - checkout
 
@@ -20,23 +24,49 @@ jobs:
             sudo pip3 install . 
             export PATH=$PATH:$PWD/bin
 
-      - restore_cache:
-          keys:
-            - v2-{{ checksum "package.json" }}
-      - run: rm -Rf node_modules/websocket
-      - run: rm -Rf node_modules/truffle-hdwallet-provider
+      # Cache disabled as `npm i` occasionally fails on dependancies which use websocket
+      # - restore_cache:
+      #     keys:
+      #       - v2-{{ checksum "package.json" }}
+      # - run: rm -Rf node_modules/websocket
+      # - run: rm -Rf node_modules/truffle-hdwallet-provider
       - run: npm i
-      - save_cache:
-          paths:
-            - node_modules
-            - package-lock.json
-          key: v2-{{ checksum "package.json" }}
+      # - save_cache:
+      #     paths:
+      #       - node_modules
+      #       - package-lock.json
+      #     key: v2-{{ checksum "package.json" }}
 
       - run: npm run test
+      - run: npm run deploy
       - run: npm run lintNoFix
+
+      - persist_to_workspace:
+          root: ~/repo
+          paths: .
+
+  publish:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/repo
+      - run:
+          name: Authenticate with registry
+          command: echo "//registry.npmjs.org/:_authToken=$npm_TOKEN" > ~/repo/.npmrc
+      - run:
+          name: Publish package
+          command: npm publish
 
 workflows:
   version: 2
   build:
     jobs:
       - test
+      - publish:
+          requires:
+            - test
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
