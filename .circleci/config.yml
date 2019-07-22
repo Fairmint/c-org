@@ -26,7 +26,7 @@ jobs:
       # Cache disabled as `npm i` occasionally fails on dependancies which use websocket
       - run: npm i
 
-      - run: num run compile
+      - run: npm run compile
       - run: npm run deploy # Update ABIs
 
       - persist_to_workspace:
