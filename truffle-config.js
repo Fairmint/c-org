@@ -78,6 +78,18 @@ module.exports = {
       gas: 6400000,
       gasPrice: 5000000000, // 5GWEI
       skipDryRun: true
+    },
+    ropsten: {
+      provider: () =>
+        new HDWalletProvider(
+          privateKeyOrMnemonic,
+          `https://ropsten.infura.io/v3/c13019f552f542188c0b0cdfaeb76cc4`
+        ),
+      network_id: "3", // Network Id for Ropsten
+      confirmations: 1,
+      gas: 6400000,
+      gasPrice: 5000000000, // 5GWEI
+      skipDryRun: true
     }
 
     // Useful for private networks

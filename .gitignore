@@ -8,3 +8,4 @@ contracts_development.json
 .privateKey
 .npmrc
 /c-org-abi/abi.json
+/c-org-abi/bytecode.json

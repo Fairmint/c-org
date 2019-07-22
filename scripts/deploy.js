@@ -2,7 +2,8 @@ const erc1820 = require("erc1820");
 const { deployDat } = require("../helpers");
 const fs = require("fs");
 
-const testDaiArtifact = artifacts.require("TestUsdc");
+const testDaiArtifact = artifacts.require("TestDai");
+const testUsdcArtifact = artifacts.require("TestUsdc");
 const erc1820Artifact = artifacts.require("IERC1820Registry");
 const vestingArtifact = artifacts.require("Vesting");
 
@@ -35,20 +36,26 @@ contract("deploy script", (accounts, network) => {
     });
 
     const abiJson = {};
+    const bytecodeJson = {};
     abiJson.erc1820 = erc1820Artifact.abi;
     // TODO address: "0x1820a4B7618BdE71Dce8cdc73aAB6C95905faD24",
     abiJson.proxyAdmin = contracts.proxyAdmin.abi;
+    bytecodeJson.proxyAdmin = contracts.proxyAdmin.bytecode;
     //address: contracts.proxyAdmin.address,
     console.log(`ProxyAdmin: ${contracts.proxyAdmin.address}`);
     abiJson.fair = contracts.fair.abi;
-    console.log(`FAIR: ${contracts.fair.address}`);
+    bytecodeJson.fair = contracts.fair.bytecode;
+    console.log(`FAIR token: ${contracts.fair.address}`);
     //address: contracts.fair.address,
     abiJson.bigDiv = contracts.bigDiv.abi;
-    console.log(`BigDiv: ${contracts.bigDiv.address}`);
+    bytecodeJson.bigDiv = contracts.bigDiv.bytecode;
     //address: contracts.bigDiv.address,
     abiJson.erc20 = currencyToken.abi;
+    bytecodeJson.testDai = testDaiArtifact.bytecode;
+    bytecodeJson.testUsdc = testUsdcArtifact.bytecode;
+
     console.log(
-      `ERC20: ${currencyToken.address} ${await currencyToken.symbol()}`
+      `Currency: ${currencyToken.address} (${await currencyToken.symbol()})`
     );
     // currencyToken.address, // TODO drop addresses for clarity?
     // TODO these contracts will be removed
@@ -59,6 +66,7 @@ contract("deploy script", (accounts, network) => {
     // abiJson.auth = contracts.auth.abi;
     // address: contracts.auth.address,
     abiJson.vesting = vestingArtifact.abi;
+    bytecodeJson.vesting = vestingArtifact.bytecode;
     if (contracts.vesting) {
       for (let i = 0; i < contracts.vesting.length; i++) {
         //abiJson.vesting.accounts.push(contracts.vesting[i].address);
@@ -77,6 +85,11 @@ contract("deploy script", (accounts, network) => {
     fs.writeFile(
       `c-org-abi/abi.json`,
       JSON.stringify(abiJson, null, 2),
+      () => {}
+    );
+    fs.writeFile(
+      `c-org-abi/bytecode.json`,
+      JSON.stringify(bytecodeJson, null, 2),
       () => {}
     );
   });
