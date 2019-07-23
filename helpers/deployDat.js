@@ -1,8 +1,7 @@
 const fairArtifact = artifacts.require("FAIR");
 const datArtifact = artifacts.require("DecentralizedAutonomousTrust");
 const bigDivArtifact = artifacts.require("BigDiv");
-const tplArtifact = artifacts.require("TestTPLAttributeRegistry");
-const authArtifact = artifacts.require("Authorization");
+const erc1404Artifact = artifacts.require("TestERC1404");
 const proxyArtifact = artifacts.require("UpgradeableProxy");
 const proxyAdminArtifact = artifacts.require("UpgradeableProxyAdmin");
 const vestingArtifact = artifacts.require("Vesting");
@@ -75,38 +74,14 @@ module.exports = async function deployDat(accounts, options) {
     callOptions.revenueCommitementBasisPoints,
     { from: callOptions.control }
   );
-  // Auth & TPL
-  if (!callOptions.authorizationAddress) {
-    contracts.tpl = await tplArtifact.new({
+  // ERC1404
+  if (!callOptions.erc1404Address) {
+    contracts.erc1404 = await erc1404Artifact.new({
       from: callOptions.control
     });
-    const authContract = await authArtifact.new({
-      from: callOptions.control
-    });
-    const authProxy = await proxyArtifact.new(
-      authContract.address, // logic
-      contracts.proxyAdmin.address, // admin
-      [], // data
-      {
-        from: callOptions.control
-      }
-    );
-    contracts.auth = await authArtifact.at(authProxy.address);
-    await contracts.auth.initialize(contracts.fair.address, {
-      from: callOptions.control
-    });
-    await contracts.auth.updateAuth(
-      contracts.tpl.address,
-      [42],
-      [0, 0],
-      [0, 0, 0],
-      {
-        from: callOptions.control
-      }
-    );
-    callOptions.authorizationAddress = contracts.auth.address;
+    callOptions.erc1404Address = contracts.erc1404.address;
   } else {
-    contracts.auth = await authArtifact.at(callOptions.authorizationAddress);
+    contracts.erc1404 = await erc1404Artifact.at(callOptions.erc1404Address);
   }
   // Update DAT (with new AUTH and other callOptions)
   await updateDatConfig(contracts, callOptions);
