@@ -319,7 +319,6 @@ def _burn(
   params from the ERC-777 token standard
   """
   assert _from != ZERO_ADDRESS, "ERC777: burn from the zero address"
-  assert self.dat.state() == STATE_RUN, "ONLY_DURING_RUN"
   # No ERC-1404 check required
 
   self._callTokensToSend(_operator, _from, ZERO_ADDRESS, _amount, _userData, _operatorData)
@@ -495,6 +494,8 @@ def burn(
   @notice Burn the amount of tokens from the address msg.sender if authorized.
   @dev Note that this is not the same as a `sell` via the DAT.
   """
+  assert self.dat.state() == STATE_RUN, "ONLY_DURING_RUN"
+
   self._burn(msg.sender, msg.sender, _amount, _userData, "")
 
 @public
@@ -508,6 +509,8 @@ def operatorBurn(
   @notice Burn the amount of tokens on behalf of the address from if authorized.
   @dev In addition to the standard ERC-777 use case, this is used by the DAT to `sell` tokens.
   """
+  assert msg.sender == self.dat() or self.dat.state() == STATE_RUN, "ONLY_BURN_DURING_RUN"
+
   assert self.isOperatorFor(msg.sender, _from), "ERC777: caller is not an operator for holder"
   self._burn(msg.sender, _from, _amount, _userData, _operatorData)
 
