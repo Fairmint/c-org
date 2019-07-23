@@ -11,11 +11,18 @@ const vestingArtifact = artifacts.require("TokenVesting");
 const fairArtifact = artifacts.require("FAIR");
 const datArtifact = artifacts.require("DecentralizedAutonomousTrust");
 const proxyAdminArtifact = artifacts.require("ProxyAdmin");
+const bigDivArtifact = artifacts.require("BigDiv");
 
 contract("deploy script", accounts => {
   it("deploy", async () => {
     const abiJson = {};
     const bytecodeJson = {};
+    const staticBytecodeJson = {
+      bigDiv: bigDivArtifact.bytecode,
+      testDai: testDaiArtifact.bytecode,
+      testUsdc: testUsdcArtifact.bytecode,
+      testErc1404: erc1404Artifact.bytecode
+    };
 
     const network = await web3.eth.net.getNetworkType();
     const addresses =
@@ -98,6 +105,11 @@ contract("deploy script", accounts => {
     fs.writeFile(
       `c-org-abi/bytecode.json`,
       JSON.stringify(bytecodeJson, null, 2),
+      () => {}
+    );
+    fs.writeFile(
+      `c-org-abi/static_bytecode.json`,
+      JSON.stringify(staticBytecode, null, 2),
       () => {}
     );
   });
