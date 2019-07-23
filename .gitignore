@@ -9,3 +9,4 @@ contracts_development.json
 .npmrc
 /c-org-abi/abi.json
 /c-org-abi/bytecode.json
+/c-org-abi/static_bytecode.json
