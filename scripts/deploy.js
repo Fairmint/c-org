@@ -109,7 +109,7 @@ contract("deploy script", accounts => {
     );
     fs.writeFile(
       `c-org-abi/static_bytecode.json`,
-      JSON.stringify(staticBytecode, null, 2),
+      JSON.stringify(staticBytecodeJson, null, 2),
       () => {}
     );
   });
