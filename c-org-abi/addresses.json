@@ -9,14 +9,14 @@
     "dai": "0x25466216Bf9Cfc085A50771075Aa0a4D5fF295CB",
     "usdc": "0xa20072f09b8328cE2f4E5e4D1A84Ae9e25Ad4b9e",
     "bigDiv": "0xA7b84f8c9edc87b1679b8ebe2BC790C4e2Ca203A",
-    "erc1404": "0xBC39177515a3f7E45c3f117a8E5806D420b7a3B6",
+    "erc1404": "0x0bc75456E135Ba6Ba82Cb9bFCf287198a5FaDC79",
     "orgs": [
       { 
         "name": "Fairmint (test w/ DAI)",
-        "token": "0xeAc38B3Ab313fb401541D5aCEf753066E53b05A2"
+        "token": "0x94068c3a815eCd78D6fcF719a3Fed894768f5388"
       },
       { "name": "HardlyDifficult (test w/ USDC)",
-        "token": "0x3591B2cfD6f096fB1cC770E49D225b7a589FC5e3"
+        "token": "0x745F76dFD638ffAB880a4775EC949101407224b9"
       }
     ]
   },
@@ -24,15 +24,15 @@
     "dai": "0x2bC24f6E7c600FE28AFC9d3f82600B9D812fbC1E",
     "usdc": "0xe2620386D660015fb2bBDb79bf45E75A2cBC5de0",
     "bigDiv": "0xC52309170438de31254C757dA469071237e7BB4E",
-    "erc1404": "0xE84D55824Ae314b1F51F98aA9Efd830e8952b351",
+    "erc1404": "0xa60E725857Ba66B9d6755de8c85990e862D1521d",
     "orgs": [
       { 
         "name": "Fairmint (test w/ DAI)",
-        "token": "0x243CEc931402B7c7680F158FBB45325CD322cE15"
+        "token": "0x1bbbc8510882875c25F01e1bE68C4d650F300167"
       },
       { 
         "name": "HardlyDifficult (test w/ USDC)",
-        "token": "0x571B57be3af793Cd910449A7e46CE6CDC641c444"
+        "token": "0x82D4d939f3E08f05E1aa2541eDE71208445BF81C"
       }
     ]
   }
