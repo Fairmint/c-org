@@ -1,6 +1,6 @@
 # FAIR tokens
 # ERC-777 and ERC-20 compliant token
-# Allows the owner to mint tokens and uses IAuthorization to validate transfers
+# Allows the owner to mint tokens and uses ERC-1404 to validate transfers
 # "Owned" by the DAT contract which is also an approved operator for accounts.
 
 #region Types
@@ -10,15 +10,6 @@ from vyper.interfaces import ERC20
 
 # TODO: switch to interface files (currently non-native imports fail to compile)
 # Depends on https://github.com/ethereum/vyper/issues/1367
-contract IAuthorization:
-  def authorizeTransfer(
-    _operator: address,
-    _from: address,
-    _to: address,
-    _value: uint256,
-    _userData: bytes[1024],
-    _operatorData: bytes[1024]
-  ): modifying
 contract IERC1820Registry:
   def setInterfaceImplementer(
     _account: address,
@@ -47,6 +38,15 @@ contract IERC777Sender:
     _userData: bytes[1024],
     _operatorData: bytes[1024]
   ): modifying
+contract ERC1404:
+  def detectTransferRestriction(
+    _from: address,
+    _to: address, 
+    _value: uint256
+  ) -> uint256: constant
+  def messageForTransferRestriction(
+    _restrictionCode: uint256
+  ) -> string[1024]: constant
 
 implements: ERC20
 
@@ -96,7 +96,7 @@ Sent: event({
 
 # Events triggered when updating the tokens's configuration
 UpdateConfig: event({
-  _authorizationAddress: address,
+  _erc1404Address: indexed(address),
   _name: string[64],
   _symbol: string[32]
 })
@@ -131,13 +131,13 @@ ERC1820Registry: IERC1820Registry
 # Data specific to our business logic
 ##############
 
-authorizationAddress: public(address)
+erc1404Address: public(address)
 # @notice The contract address for transfer authorizations, if any.
-# @dev This contract must implement the IAuthorization interface above
+# @dev This contract must implement the ERC1404 interface above
 
-authorization: IAuthorization 
+erc1404: ERC1404 
 # @notice The contract for transfer authorizations, if any.
-# @dev This is redundant w/ authorizationAddress, for convenience
+# @dev This is redundant w/ erc1404Address, for convenience
 
 burnedSupply: public(uint256)
 # @notice The total number of burned FAIR tokens, excluding tokens burned from a `Sell` action in the DAT.
@@ -182,7 +182,7 @@ operators: map(address, map(address, bool))
 
 #endregion
 
-#region Init
+#region Control
 ##################################################
 
 @public
@@ -203,6 +203,52 @@ def initialize():
 
   # Register owner (the DAT contract)
   self.owner = msg.sender
+
+@public
+def updateConfig(
+  _erc1404Address: address,
+  _name: string[64],
+  _symbol: string[32]
+):
+  """
+  @notice Called by the owner, which is the DAT contract, in order to change the token configuration.
+  @dev If a field such as _name is not being changed, simply send the current value when calling this function.
+  """
+  assert msg.sender == self.owner, "OWNER_ONLY"
+
+  self.name = _name
+  self.symbol = _symbol
+
+  assert _erc1404Address != ZERO_ADDRESS, "INVALID_ADDRESS"
+  self.erc1404Address = _erc1404Address
+  self.erc1404 = ERC1404(_erc1404Address)
+
+  log.UpdateConfig(_erc1404Address, _name, _symbol)
+
+#endregion
+
+#region Functions required by the ERC-1404 standard
+##################################################
+
+@public
+@constant
+def detectTransferRestriction(
+  _from: address,
+  _to: address, 
+  _value: uint256
+) -> uint256:
+  if(self.erc1404 != ZERO_ADDRESS): # This is not set for the minting of initialReserve
+    return self.erc1404.detectTransferRestriction(_from, _to, _value)
+  return 0
+
+@public
+@constant
+def messageForTransferRestriction(
+  _restrictionCode: uint256
+) -> string[1024]:
+  if(self.erc1404 != ZERO_ADDRESS):
+    return self.erc1404.messageForTransferRestriction(_restrictionCode)
+  return ""
 
 #endregion
 
@@ -257,11 +303,11 @@ def _burn(
   _operatorData: bytes[1024]
 ):
   """
-  @dev Confirms auth and then removes tokens from the circulating supply.
+  @dev Removes tokens from the circulating supply.
   params from the ERC-777 token standard
   """
   assert _from != ZERO_ADDRESS, "ERC777: burn from the zero address"
-  self.authorization.authorizeTransfer(_operator, _from, ZERO_ADDRESS, _amount, _userData, _operatorData)
+  # No ERC-1404 check required
 
   self._callTokensToSend(_operator, _from, ZERO_ADDRESS, _amount, _userData, _operatorData)
 
@@ -286,11 +332,11 @@ def _send(
   _operatorData: bytes[1024]
 ):
   """
-  @dev Confirms auth and then moves tokens from one account to another.
+  @dev Moves tokens from one account to another if authorized.
   """
   assert _from != ZERO_ADDRESS, "ERC777: send from the zero address"
   assert _to != ZERO_ADDRESS, "ERC777: send to the zero address"
-  self.authorization.authorizeTransfer(_operator, _from, _to, _amount, _userData, _operatorData)
+  assert self.detectTransferRestriction(_from, _to, _amount) == 0, "NOT_AUTHORIZED"
 
   self._callTokensToSend(_operator, _from, _to, _amount, _userData, _operatorData)
   self.balanceOf[_from] -= _amount
@@ -496,12 +542,10 @@ def mint(
   assert msg.sender == self.owner, "OWNER_ONLY"
   assert _to != ZERO_ADDRESS, "INVALID_ADDRESS"
   assert _quantity > 0, "INVALID_QUANTITY"
-
-  if(self.authorization != ZERO_ADDRESS): # This is not set for the minting of initialReserve
-    self.authorization.authorizeTransfer(_operator, ZERO_ADDRESS, _to, _quantity, _userData, _operatorData)
+  assert self.detectTransferRestriction(ZERO_ADDRESS, _to, _quantity) == 0, "NOT_AUTHORIZED"
 
   self.totalSupply += _quantity
-  # Math: If this value got too large, the DAT would overflow on sell
+  # Math: If this value got too large, the DAT may overflow on sell
   assert self.totalSupply + self.burnedSupply <= MAX_SUPPLY, "EXCESSIVE_SUPPLY"
   self.balanceOf[_to] += _quantity
   
@@ -509,26 +553,5 @@ def mint(
   
   log.Transfer(ZERO_ADDRESS, _to, _quantity)
   log.Minted(_operator, _to, _quantity, _userData, _operatorData)
-
-@public
-def updateConfig(
-  _authorizationAddress: address,
-  _name: string[64],
-  _symbol: string[32]
-):
-  """
-  @notice Called by the owner, which is the DAT contract, in order to change the token configuration.
-  @dev If a field such as _name is not being changed, simply send the current value when calling this function.
-  """
-  assert msg.sender == self.owner, "OWNER_ONLY"
-
-  self.name = _name
-  self.symbol = _symbol
-
-  assert _authorizationAddress != ZERO_ADDRESS, "INVALID_ADDRESS"
-  self.authorizationAddress = _authorizationAddress
-  self.authorization = IAuthorization(_authorizationAddress)
-
-  log.UpdateConfig(_authorizationAddress, _name, _symbol)
 
 #endregion

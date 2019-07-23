@@ -57,7 +57,7 @@ contract IFAIR:
     _account: address
   ) -> uint256: constant
   def initialize(): modifying
-  def authorizationAddress() -> address: constant
+  def erc1404Address() -> address: constant
   def burn(
     _amount: uint256,
     _userData: bytes[1024]
@@ -83,20 +83,16 @@ contract IFAIR:
     _operatorData: bytes[1024]
   ): modifying
   def updateConfig(
-    _authorizationAddress: address,
+    _erc1404Address: address,
     _name: string[64],
     _symbol: string[32]
   ): modifying
-contract IAuthorization:
-  # @title The interface for the authorization contract used by our FAIR token.
-  def isTransferAllowed(
-    _operator: address,
+contract ERC1404:
+  def detectTransferRestriction(
     _from: address,
-    _to: address,
-    _value: uint256,
-    _userData: bytes[1024],
-    _operatorData: bytes[1024]
-  ) -> bool: constant
+    _to: address, 
+    _value: uint256
+  ) -> uint256: constant
 contract IBigDiv: # TODO maybe add more versions for optimization
   def bigDiv2x2(
     _numA: uint256,
@@ -144,7 +140,7 @@ StateChange: event({
   _newState: uint256(stateMachine)
 })
 UpdateConfig: event({
-  _authorizationAddress: address,
+  _erc1404Address: address,
   _beneficiary: indexed(address),
   _control: indexed(address),
   _feeCollector: indexed(address),
@@ -398,7 +394,7 @@ def initialize(
 
 @public
 def updateConfig(
-  _authorizationAddress: address,
+  _erc1404Address: address,
   _beneficiary: address,
   _control: address,
   _feeCollector: address,
@@ -412,7 +408,7 @@ def updateConfig(
   # This assert also confirms that initialize has been called.
   assert msg.sender == self.control, "CONTROL_ONLY"
 
-  self.fair.updateConfig(_authorizationAddress, _name, _symbol)
+  self.fair.updateConfig(_erc1404Address, _name, _symbol)
 
   if(self.beneficiary != _beneficiary):
     assert _beneficiary != ZERO_ADDRESS, "INVALID_ADDRESS"
@@ -442,7 +438,7 @@ def updateConfig(
   self.openUntilAtLeast = _openUntilAtLeast
 
   log.UpdateConfig(
-    _authorizationAddress,
+    _erc1404Address,
     _beneficiary,
     _control,
     _feeCollector,
@@ -798,8 +794,8 @@ def _pay(
   to: address = _to
   if(to == ZERO_ADDRESS):
     to = self.beneficiary
-  elif(not IAuthorization(self.fair.authorizationAddress())
-    .isTransferAllowed(self, ZERO_ADDRESS, _to, tokenValue, "", "")):
+  elif(ERC1404(self.fair.erc1404Address())
+    .detectTransferRestriction(ZERO_ADDRESS, _to, tokenValue) != 0):
     to = self.beneficiary
 
   # Distribute tokens
