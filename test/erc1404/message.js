@@ -1,6 +1,6 @@
 const { deployDat } = require("../helpers");
 
-contract("dat / erc1404 / uint8", accounts => {
+contract("dat / erc1404 / message", accounts => {
   let contracts;
 
   before(async () => {

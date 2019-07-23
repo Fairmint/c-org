@@ -9,7 +9,7 @@ contract TestERC1404
     address _from,
     address _to, 
     uint256 _value
-  ) public
+  ) public view
     returns(uint8)
   {
     return restriction;
