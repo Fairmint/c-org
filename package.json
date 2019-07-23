@@ -20,12 +20,12 @@
     "bignumber.js": "9.0.0",
     "erc1820": "0.0.2",
     "eth-gas-reporter": "0.2.6",
-    "ganache-cli": "6.4.4",
+    "ganache-cli": "6.5.0",
     "openzeppelin-eth": "2.2.0",
     "openzeppelin-solidity": "2.3.0",
     "openzeppelin-test-helpers": "0.4.0",
     "papaparse": "5.0.0",
-    "truffle": "5.0.26",
+    "truffle": "5.0.28",
     "truffle-hdwallet-provider": "1.0.14",
     "truffle-require": "2.0.15",
     "zos": "2.4.2",
@@ -33,10 +33,10 @@
   },
   "devDependencies": {
     "chai": "4.2.0",
-    "eslint": "6.0.1",
+    "eslint": "6.1.0",
     "eslint-config-airbnb-base": "13.2.0",
     "eslint-config-prettier": "6.0.0",
-    "eslint-plugin-import": "2.18.0",
+    "eslint-plugin-import": "2.18.2",
     "eslint-plugin-prettier": "3.1.0",
     "prettier": "1.18.2"
   }
