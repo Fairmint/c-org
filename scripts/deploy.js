@@ -8,74 +8,82 @@ const erc1820Artifact = artifacts.require("IERC1820Registry");
 const proxyArtifact = artifacts.require("UpgradeableProxy");
 const erc1404Artifact = artifacts.require("TestERC1404");
 const vestingArtifact = artifacts.require("TokenVesting");
+const fairArtifact = artifacts.require("FAIR");
+const datArtifact = artifacts.require("DecentralizedAutonomousTrust");
+const proxyAdminArtifact = artifacts.require("ProxyAdmin");
 
-contract("deploy script", (accounts, network) => {
+contract("deploy script", accounts => {
   it("deploy", async () => {
-    const addresses = fs.readFileSync("c-org-abi/addresses.json")[network] || {};
-
-    // Deploy 1820 (for local testing only)
-    if (network === "development") {
-      await erc1820.deploy(web3);
-    }
-
-    let currencyToken;
-    if (addresses.dai) {
-      currencyToken = await testDaiArtifact.at(addresses.dai);
-    } else {
-      currencyToken = await testDaiArtifact.new({ from: accounts[0] });
-
-      console.log(
-        `Deployed currency: ${
-          currencyToken.address
-        } (${await currencyToken.symbol()})`
-      );
-    }
-    const contracts = await deployDat(accounts, {
-      bigDivAddress: addresses.bigDiv,
-      erc1404Address: addresses.erc1404,
-      currency: currencyToken.address,
-      name: "Fairmint Fair Synthetic Equity",
-      symbol: "FAIR",
-      vesting: [
-        {
-          address: accounts[0],
-          value: "40000000000000000000"
-        },
-        {
-          address: "0x7a23608a8ebe71868013bda0d900351a83bb4dc2",
-          value: "1000000000000000000"
-        },
-        {
-          address: "0xdb92C096bc5Efa8aDB48F05CD601DDdb75228203",
-          value: "1000000000000000000"
-        }
-      ]
-    });
-
     const abiJson = {};
     const bytecodeJson = {};
-    abiJson.erc1820 = erc1820Artifact.abi;
-    abiJson.erc1404 = contracts.erc1404.abi;
-    abiJson.proxyAdmin = contracts.proxyAdmin.abi;
-    bytecodeJson.proxyAdmin = contracts.proxyAdmin.bytecode;
-    bytecodeJson.proxy = proxyArtifact.bytecode;
-    console.log(`ProxyAdmin: ${contracts.proxyAdmin.address}`);
-    abiJson.fair = contracts.fair.abi;
-    bytecodeJson.fair = contracts.fair.bytecode;
-    bytecodeJson.dat = contracts.dat.bytecode;
-    console.log(`FAIR token: ${contracts.fair.address}`);
-    abiJson.bigDiv = contracts.bigDiv.abi;
-    abiJson.erc20 = currencyToken.abi;
 
-    abiJson.vesting = vestingArtifact.abi;
-    bytecodeJson.vesting = vestingArtifact.bytecode;
-    if (contracts.vesting) {
-      for (let i = 0; i < contracts.vesting.length; i++) {
-        console.log(
-          `Vesting: ${
-            contracts.vesting[i].address
-          } for ${await contracts.vesting[i].beneficiary()}`
+    const network = await web3.eth.net.getNetworkType();
+    const addresses =
+      JSON.parse(fs.readFileSync("c-org-abi/addresses.json", "utf-8"))[
+        network
+      ] || {};
+
+    const orgs = JSON.parse(fs.readFileSync("scripts/testOrgs.json", "utf-8"));
+
+    for (let i = 0; i < orgs.length; i++) {
+      const callOptions = orgs[i];
+      let currencyToken;
+      if (addresses[callOptions.currencyType]) {
+        currencyToken = await testDaiArtifact.at(
+          addresses[callOptions.currencyType]
         );
+      } else {
+        if (callOptions.currencyType === "dai") {
+          currencyToken = await testDaiArtifact.new({ from: accounts[0] });
+        } else if (callOptions.currencyType === "usdc") {
+          currencyToken = await testUsdcArtifact.new({ from: accounts[0] });
+        } else {
+          throw new Error("Missing currency type");
+        }
+
+        console.log(
+          `Deployed currency: ${
+            currencyToken.address
+          } (${await currencyToken.symbol()})`
+        );
+      }
+      const contracts = await deployDat(
+        accounts,
+        Object.assign(
+          {
+            bigDivAddress: addresses.bigDiv,
+            erc1404Address: addresses.erc1404,
+            currency: currencyToken.address
+          },
+          callOptions
+        )
+      );
+
+      abiJson.erc1820 = erc1820Artifact.abi;
+      abiJson.erc1404 = contracts.erc1404.abi;
+      abiJson.proxyAdmin = contracts.proxyAdmin.abi;
+      abiJson.proxy = proxyArtifact.abi;
+      bytecodeJson.proxyAdmin = proxyAdminArtifact.bytecode;
+      bytecodeJson.proxy = proxyArtifact.bytecode;
+      console.log(`ProxyAdmin: ${contracts.proxyAdmin.address}`);
+      abiJson.fair = contracts.fair.abi;
+      abiJson.dat = contracts.dat.abi;
+      bytecodeJson.fair = fairArtifact.bytecode;
+      bytecodeJson.dat = datArtifact.bytecode;
+      console.log(`FAIR token: ${contracts.fair.address}`);
+      abiJson.bigDiv = contracts.bigDiv.abi;
+      abiJson.erc20 = currencyToken.abi;
+
+      abiJson.vesting = vestingArtifact.abi;
+      bytecodeJson.vesting = vestingArtifact.bytecode;
+      if (contracts.vesting) {
+        for (let i = 0; i < contracts.vesting.length; i++) {
+          console.log(
+            `Vesting: ${
+              contracts.vesting[i].address
+            } for ${await contracts.vesting[i].beneficiary()}`
+          );
+        }
       }
     }
 

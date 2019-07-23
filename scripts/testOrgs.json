@@ -1,0 +1,32 @@
+[
+  {
+    "currencyType": "dai",
+    "name": "Fairmint Fair Synthetic Equity",
+    "symbol": "FMT",
+    "vesting": [
+      {
+        "address": "0x9488D097c74d72aeD3D4d6570fb7d359174aDDb0",
+        "value": "40000000000000000000"
+      },
+      {
+        "address": "0x7a23608a8ebe71868013bda0d900351a83bb4dc2",
+        "value": "1000000000000000000"
+      },
+      {
+        "address": "0xdb92C096bc5Efa8aDB48F05CD601DDdb75228203",
+        "value": "1000000000000000000"
+      }
+    ]
+  },
+  {
+    "currencyType": "usdc",
+    "name": "Hardly Difficult",
+    "symbol": "HDY",
+    "vesting": [
+      {
+        "address": "0x9488D097c74d72aeD3D4d6570fb7d359174aDDb0",
+        "value": "42000000000000000000"
+      }
+    ]
+  }
+]
