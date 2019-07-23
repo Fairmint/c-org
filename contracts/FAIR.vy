@@ -8,6 +8,10 @@
 
 from vyper.interfaces import ERC20
 
+units: {
+  stateMachine: "The DAT's internal state machine"
+}
+
 # TODO: switch to interface files (currently non-native imports fail to compile)
 # Depends on https://github.com/ethereum/vyper/issues/1367
 contract IERC1820Registry:
@@ -44,9 +48,9 @@ contract ERC1404:
     _to: address, 
     _value: uint256
   ) -> uint256: constant
-  def messageForTransferRestriction(
-    _restrictionCode: uint256
-  ) -> string[1024]: constant
+contract IDAT:
+  def state() -> uint256(stateMachine): constant
+  def beneficiary() -> address: constant
 
 implements: ERC20
 
@@ -112,6 +116,18 @@ UpdateConfig: event({
 # Constants
 ##############
 
+STATE_INIT: constant(uint256(stateMachine)) = 0
+# @notice The default state
+
+STATE_RUN: constant(uint256(stateMachine)) = 1
+# @notice The state after initGoal has been reached
+
+STATE_CLOSE: constant(uint256(stateMachine)) = 2
+# @notice The state after closed by the `beneficiary` account from STATE_RUN
+
+STATE_CANCEL: constant(uint256(stateMachine)) = 3
+# @notice The state after closed by the `beneficiary` account from STATE_INIT
+
 MAX_SUPPLY: constant(uint256)  = 10 ** 28
 # @notice The max `totalSupply + burnedSupply`
 # @dev This limit ensures that the DAT's formulas do not overflow
@@ -142,8 +158,12 @@ erc1404: ERC1404
 burnedSupply: public(uint256)
 # @notice The total number of burned FAIR tokens, excluding tokens burned from a `Sell` action in the DAT.
 
-owner: public(address)
+datAddress: public(address)
 # @notice The DAT contract for this token, which is authorized to buy/sell tokens.
+
+dat: IDAT
+# @notice The DAT contract for this token, which is authorized to buy/sell tokens.
+# @dev This is redundant w/ datAddress, for convenience
 
 ##############
 # Data storage required by the ERC-20 token standard
@@ -193,7 +213,7 @@ def initialize():
   If someone front-runs this call the DAT deployment will fail and we can deploy a new FAIR token.
   1820 registration is here instead of in __init__ in order to support upgrades.
   """
-  assert self.owner == ZERO_ADDRESS, "ALREADY_INITIALIZED"
+  assert self.dat == ZERO_ADDRESS, "ALREADY_INITIALIZED"
   self.ERC1820Registry = IERC1820Registry(0x1820a4B7618BdE71Dce8cdc73aAB6C95905faD24) # constant for all networks
 
   # Register supported interfaces
@@ -202,7 +222,8 @@ def initialize():
   self.ERC1820Registry.setInterfaceImplementer(self, keccak256("ERC777TokensRecipient"), self)
 
   # Register owner (the DAT contract)
-  self.owner = msg.sender
+  self.datAddress = msg.sender
+  self.dat = IDAT(msg.sender)
 
 @public
 def updateConfig(
@@ -211,10 +232,10 @@ def updateConfig(
   _symbol: string[32]
 ):
   """
-  @notice Called by the owner, which is the DAT contract, in order to change the token configuration.
+  @notice Called by the DAT contract, in order to change the token configuration.
   @dev If a field such as _name is not being changed, simply send the current value when calling this function.
   """
-  assert msg.sender == self.owner, "OWNER_ONLY"
+  assert msg.sender == self.datAddress, "FROM_DAT_ONLY"
 
   self.name = _name
   self.symbol = _symbol
@@ -240,15 +261,6 @@ def detectTransferRestriction(
   if(self.erc1404 != ZERO_ADDRESS): # This is not set for the minting of initialReserve
     return self.erc1404.detectTransferRestriction(_from, _to, _value)
   return 0
-
-@public
-@constant
-def messageForTransferRestriction(
-  _restrictionCode: uint256
-) -> string[1024]:
-  if(self.erc1404 != ZERO_ADDRESS):
-    return self.erc1404.messageForTransferRestriction(_restrictionCode)
-  return ""
 
 #endregion
 
@@ -307,6 +319,7 @@ def _burn(
   params from the ERC-777 token standard
   """
   assert _from != ZERO_ADDRESS, "ERC777: burn from the zero address"
+  assert self.dat.state() == STATE_RUN, "ONLY_DURING_RUN"
   # No ERC-1404 check required
 
   self._callTokensToSend(_operator, _from, ZERO_ADDRESS, _amount, _userData, _operatorData)
@@ -315,7 +328,7 @@ def _burn(
   self.totalSupply -= _amount
 
   # Only increase the burnedSupply if a `burn` vs a `sell` via the DAT.
-  if(_operator != self.owner):
+  if(_operator != self.datAddress):
     self.burnedSupply += _amount
 
   log.Burned(_operator, _from, _amount, _userData, _operatorData)
@@ -337,6 +350,7 @@ def _send(
   assert _from != ZERO_ADDRESS, "ERC777: send from the zero address"
   assert _to != ZERO_ADDRESS, "ERC777: send to the zero address"
   assert self.detectTransferRestriction(_from, _to, _amount) == 0, "NOT_AUTHORIZED"
+  assert _from == self.dat.beneficiary() or self.dat.state() != STATE_INIT, "Only the beneficiary can make transfers during STATE_INIT"
 
   self._callTokensToSend(_operator, _from, _to, _amount, _userData, _operatorData)
   self.balanceOf[_from] -= _amount
@@ -424,7 +438,7 @@ def isOperatorFor(
   @notice Indicates whether the operator address is an approved operator for the token holder.
   @dev The owner, which is the DAT contract, is always an approved operator.
   """
-  return _operator == _tokenHolder or _operator == self.owner or self.operators[_tokenHolder][_operator]
+  return _operator == _tokenHolder or _operator == self.datAddress or self.operators[_tokenHolder][_operator]
 
 @public
 @constant
@@ -445,7 +459,7 @@ def defaultOperators() -> address[1]:
   @notice Get the list of default operators as defined by the token contract.
   @dev Hard-coded to include just the owner, which is the DAT contract.
   """
-  return [self.owner]
+  return [self.datAddress]
 
 @public
 def authorizeOperator(
@@ -539,7 +553,7 @@ def mint(
   """
   @notice Called by the owner, which is the DAT contract, in order to mint tokens on `buy`.
   """
-  assert msg.sender == self.owner, "OWNER_ONLY"
+  assert msg.sender == self.datAddress, "FROM_DAT_ONLY"
   assert _to != ZERO_ADDRESS, "INVALID_ADDRESS"
   assert _quantity > 0, "INVALID_QUANTITY"
   assert self.detectTransferRestriction(ZERO_ADDRESS, _to, _quantity) == 0, "NOT_AUTHORIZED"
