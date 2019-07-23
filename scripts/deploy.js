@@ -5,7 +5,7 @@ const fs = require("fs");
 const testDaiArtifact = artifacts.require("TestDai");
 const testUsdcArtifact = artifacts.require("TestUsdc");
 const erc1820Artifact = artifacts.require("IERC1820Registry");
-const vestingArtifact = artifacts.require("Vesting");
+const vestingArtifact = artifacts.require("TokenVesting");
 
 contract("deploy script", (accounts, network) => {
   it("deploy", async () => {

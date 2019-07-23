@@ -2,9 +2,9 @@ const fairArtifact = artifacts.require("FAIR");
 const datArtifact = artifacts.require("DecentralizedAutonomousTrust");
 const bigDivArtifact = artifacts.require("BigDiv");
 const erc1404Artifact = artifacts.require("TestERC1404");
-const proxyArtifact = artifacts.require("UpgradeableProxy");
-const proxyAdminArtifact = artifacts.require("UpgradeableProxyAdmin");
-const vestingArtifact = artifacts.require("Vesting");
+const proxyArtifact = artifacts.require("AdminUpgradeabilityProxy");
+const proxyAdminArtifact = artifacts.require("ProxyAdmin");
+const vestingArtifact = artifacts.require("TokenVesting");
 
 const updateDatConfig = require("./updateDatConfig");
 
