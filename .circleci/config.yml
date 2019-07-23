@@ -17,11 +17,14 @@ jobs:
           command: |
             curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
             sudo apt-get install -y nodejs
-            cd ..
-            git clone https://github.com/ethereum/vyper.git
-            cd vyper
-            sudo pip3 install . 
-            export PATH=$PATH:$PWD/bin
+            sudo apt-get update
+            sudo pip3 install vyper
+            # For custom Vyper builds
+            # cd ..
+            # git clone https://github.com/ethereum/vyper.git
+            # cd vyper
+            # sudo pip3 install . 
+            # export PATH=$PATH:$PWD/bin
 
       # Cache disabled as `npm i` occasionally fails on dependancies which use websocket
       - run: npm i
