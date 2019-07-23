@@ -46,9 +46,15 @@ module.exports = async function deployDat(accounts, options) {
 
   contracts.fair = await fairArtifact.at(fairProxy.address);
   // BigDiv
-  contracts.bigDiv = await bigDivArtifact.new({
-    from: callOptions.control
-  });
+  if (callOptions.bigDivAddress) {
+    contracts.bigDiv = await bigDivArtifact.at(callOptions.bigDivAddress);
+  } else {
+    contracts.bigDiv = await bigDivArtifact.new({
+      from: callOptions.control
+    });
+    callOptions.bigDivAddress = contracts.bigDiv.address;
+    console.log(`Deployed bigDiv: ${contracts.bigDiv.address}`);
+  }
   // DAT
   const datContract = await datArtifact.new({
     from: callOptions.control
@@ -63,7 +69,7 @@ module.exports = async function deployDat(accounts, options) {
   );
   contracts.dat = await datArtifact.at(datProxy.address);
   await contracts.dat.initialize(
-    contracts.bigDiv.address,
+    callOptions.bigDivAddress,
     contracts.fair.address,
     callOptions.initReserve,
     callOptions.currency,
@@ -80,6 +86,7 @@ module.exports = async function deployDat(accounts, options) {
       from: callOptions.control
     });
     callOptions.erc1404Address = contracts.erc1404.address;
+    console.log(`Deployed erc1404: ${contracts.erc1404.address}`);
   } else {
     contracts.erc1404 = await erc1404Artifact.at(callOptions.erc1404Address);
   }

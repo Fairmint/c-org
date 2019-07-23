@@ -5,17 +5,34 @@ const fs = require("fs");
 const testDaiArtifact = artifacts.require("TestDai");
 const testUsdcArtifact = artifacts.require("TestUsdc");
 const erc1820Artifact = artifacts.require("IERC1820Registry");
+const proxyArtifact = artifacts.require("UpgradeableProxy");
+const erc1404Artifact = artifacts.require("TestERC1404");
 const vestingArtifact = artifacts.require("TokenVesting");
 
 contract("deploy script", (accounts, network) => {
   it("deploy", async () => {
+    const addresses = fs.readFileSync("c-org-abi/addresses.json")[network] || {};
+
     // Deploy 1820 (for local testing only)
     if (network === "development") {
       await erc1820.deploy(web3);
     }
 
-    const currencyToken = await testDaiArtifact.new({ from: accounts[0] });
+    let currencyToken;
+    if (addresses.dai) {
+      currencyToken = await testDaiArtifact.at(addresses.dai);
+    } else {
+      currencyToken = await testDaiArtifact.new({ from: accounts[0] });
+
+      console.log(
+        `Deployed currency: ${
+          currencyToken.address
+        } (${await currencyToken.symbol()})`
+      );
+    }
     const contracts = await deployDat(accounts, {
+      bigDivAddress: addresses.bigDiv,
+      erc1404Address: addresses.erc1404,
       currency: currencyToken.address,
       name: "Fairmint Fair Synthetic Equity",
       symbol: "FAIR",
@@ -38,21 +55,18 @@ contract("deploy script", (accounts, network) => {
     const abiJson = {};
     const bytecodeJson = {};
     abiJson.erc1820 = erc1820Artifact.abi;
+    abiJson.erc1404 = contracts.erc1404.abi;
     abiJson.proxyAdmin = contracts.proxyAdmin.abi;
     bytecodeJson.proxyAdmin = contracts.proxyAdmin.bytecode;
+    bytecodeJson.proxy = proxyArtifact.bytecode;
     console.log(`ProxyAdmin: ${contracts.proxyAdmin.address}`);
     abiJson.fair = contracts.fair.abi;
     bytecodeJson.fair = contracts.fair.bytecode;
+    bytecodeJson.dat = contracts.dat.bytecode;
     console.log(`FAIR token: ${contracts.fair.address}`);
     abiJson.bigDiv = contracts.bigDiv.abi;
-    bytecodeJson.bigDiv = contracts.bigDiv.bytecode;
     abiJson.erc20 = currencyToken.abi;
-    bytecodeJson.testDai = testDaiArtifact.bytecode;
-    bytecodeJson.testUsdc = testUsdcArtifact.bytecode;
 
-    console.log(
-      `Currency: ${currencyToken.address} (${await currencyToken.symbol()})`
-    );
     abiJson.vesting = vestingArtifact.abi;
     bytecodeJson.vesting = vestingArtifact.bytecode;
     if (contracts.vesting) {
