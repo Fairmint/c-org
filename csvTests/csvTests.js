@@ -3,6 +3,7 @@ const fs = require("fs");
 const BigNumber = require("bignumber.js");
 const { constants, deployDat, getGasCost } = require("../test/helpers");
 const sheets = require("./test-data/script.json");
+const sheet = sheets[process.env.SHEET_ID || 0];
 
 const daiArtifact = artifacts.require("TestDai");
 const erc777Artifact = artifacts.require("TestERC777Only");
@@ -57,26 +58,24 @@ contract("dat / csvTests", accounts => {
       await resetEthBalances();
     });
 
-    sheets.forEach(sheet => {
-      describe("Prep currency", () => {
-        const sheetTitle = `TS ${sheet.id} ${sheet.name} w/ ${
-          tokenArtifact ? tokenArtifact.contractName : "ETH"
-        }`;
+    describe("Prep currency", () => {
+      const sheetTitle = `TS ${sheet.id} ${sheet.name} w/ ${
+        tokenArtifact ? tokenArtifact.contractName : "ETH"
+      }`;
 
-        describe(`Starting ${sheetTitle}`, () => {
-          beforeEach(async () => {
-            if (sheet.disabled) return;
+      describe(`Starting ${sheetTitle}`, () => {
+        beforeEach(async () => {
+          if (sheet.disabled) return;
 
-            await setInitialBalances(sheet);
-          });
+          await setInitialBalances(sheet);
+        });
 
-          it(`${sheetTitle} complete`, async () => {
-            if (sheet.disabled) {
-              return console.log("Test skipped.");
-            }
-            await deployAndConfigDat(sheet);
-            await runTestScript(sheet);
-          });
+        it(`${sheetTitle} complete`, async () => {
+          if (sheet.disabled) {
+            return console.log("Test skipped.");
+          }
+          await deployAndConfigDat(sheet);
+          await runTestScript(sheet);
         });
       });
     });
