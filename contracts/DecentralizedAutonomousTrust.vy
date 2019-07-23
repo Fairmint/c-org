@@ -643,6 +643,7 @@ def _sell(
   _minCurrencyReturned: uint256,
   _hasReceivedFunds: bool
 ):
+  assert _from != self.beneficiary or self.state >= STATE_CLOSE, "BENEFICIARY_ONLY_SELL_IN_CLOSE_OR_CANCEL"
   buybackReserve: uint256 = self.buybackReserve()
   totalSupply: uint256 = self.fair.totalSupply()
 
