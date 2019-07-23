@@ -509,7 +509,7 @@ def operatorBurn(
   @notice Burn the amount of tokens on behalf of the address from if authorized.
   @dev In addition to the standard ERC-777 use case, this is used by the DAT to `sell` tokens.
   """
-  assert msg.sender == self.dat() or self.dat.state() == STATE_RUN, "ONLY_BURN_DURING_RUN"
+  assert msg.sender == self.dat or self.dat.state() == STATE_RUN, "ONLY_BURN_DURING_RUN"
 
   assert self.isOperatorFor(msg.sender, _from), "ERC777: caller is not an operator for holder"
   self._burn(msg.sender, _from, _amount, _userData, _operatorData)
