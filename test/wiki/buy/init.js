@@ -352,26 +352,23 @@ contract("wiki / buy / init", accounts => {
       assert.equal(balance.toFixed(), expected.toFixed());
     });
 
-    it(
-      "send (buyback_reserve-y)*(1-investment_reserve)*fee to the fee_collector", async () => {
-        const balance = new BigNumber(
-          await web3.eth.getBalance(await contracts.dat.feeCollector())
-        );
-        const expected = buybackReserveBefore
-          .minus(y)
-          .times(new BigNumber(1).minus(investmentReserve))
-          .times(fee)
-          .plus(feeCollectorBalanceBefore);
-        assert.equal(balance.toFixed(), expected.toFixed());
-      }
-    );
+    it("send (buyback_reserve-y)*(1-investment_reserve)*fee to the fee_collector", async () => {
+      const balance = new BigNumber(
+        await web3.eth.getBalance(await contracts.dat.feeCollector())
+      );
+      const expected = buybackReserveBefore
+        .minus(y)
+        .times(new BigNumber(1).minus(investmentReserve))
+        .times(fee)
+        .plus(feeCollectorBalanceBefore);
+      assert.equal(balance.toFixed(), expected.toFixed());
+    });
 
     it("update buyback_reserve = investment_reserve * (buyback_reserve-y) + y", async () => {
       const buybackReserve = new BigNumber(
         await contracts.dat.buybackReserve()
       );
-      const expected = investmentReserve
-        .times(buybackReserveBefore.minus(y));
+      const expected = investmentReserve.times(buybackReserveBefore.minus(y));
       assert.equal(buybackReserve.toFixed(), expected.toFixed());
     });
   });
@@ -449,25 +446,26 @@ contract("wiki / buy / init", accounts => {
       assert.equal(balance.toFixed(), expected.toFixed());
     });
 
-    it(
-      "send (buyback_reserve-y)*(1-investment_reserve)*fee to the fee_collector", async () => {
-        const balance = new BigNumber(
-          await web3.eth.getBalance(await contracts.dat.feeCollector())
-        );
-        const expected = buybackReserveBefore
-          .minus(y)
-          .times(new BigNumber(1).minus(investmentReserve))
-          .times(fee)
-          .plus(feeCollectorBalanceBefore);
-        assert.equal(balance.toFixed(), expected.toFixed());
-      }
-    );
+    it("send (buyback_reserve-y)*(1-investment_reserve)*fee to the fee_collector", async () => {
+      const balance = new BigNumber(
+        await web3.eth.getBalance(await contracts.dat.feeCollector())
+      );
+      const expected = buybackReserveBefore
+        .minus(y)
+        .times(new BigNumber(1).minus(investmentReserve))
+        .times(fee)
+        .plus(feeCollectorBalanceBefore);
+      assert.equal(balance.toFixed(), expected.toFixed());
+    });
 
     it("update buyback_reserve = investment_reserve * (buyback_reserve-y) + y", async () => {
       const buybackReserve = new BigNumber(
         await contracts.dat.buybackReserve()
       );
-      const expected = buybackReserveBefore.minus(y).times(investmentReserve).plus(y);
+      const expected = buybackReserveBefore
+        .minus(y)
+        .times(investmentReserve)
+        .plus(y);
       assert.equal(buybackReserve.toFixed(), expected.toFixed());
     });
   });
