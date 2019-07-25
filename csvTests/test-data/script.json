@@ -62,8 +62,7 @@
     {
       "id": 12,
       "name": "no-init-goal",
-      "disabled": true,
-      "reason": "burn for more than current holdings"
+      "disabled": false
     }
   ]
 
