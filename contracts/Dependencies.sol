@@ -8,7 +8,7 @@ import "zos-lib/contracts/upgradeability/ProxyAdmin.sol";
 /**
  * This creates the artifacts allowing us to use these 3rd party contracts directly
  */
-contract ForceCompile is TokenVesting, AdminUpgradeabilityProxy, ProxyAdmin
+contract Dependencies is TokenVesting, AdminUpgradeabilityProxy, ProxyAdmin
 {
   constructor() internal
     TokenVesting(address(0), 0, 0, 0, false)
