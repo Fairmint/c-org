@@ -304,7 +304,7 @@ def _callTokensReceived(
   if(implementer != ZERO_ADDRESS):
     IERC777Recipient(implementer).tokensReceived(_operator, _from, _to, _amount, _userData, _operatorData)
   elif(_requireReceptionAck):
-    assert not implementer.is_contract, "ERC777: token recipient contract has no implementer for ERC777TokensRecipient"
+    assert not _to.is_contract, "ERC777: token recipient contract has no implementer for ERC777TokensRecipient"
 
 @private
 def _burn(
@@ -394,6 +394,8 @@ def approve(
   @notice Allows `_spender` to withdraw from your account multiple times, up to the `_value` amount. 
   @dev If this function is called again it overwrites the current allowance with `_value`.
   """
+  assert _spender != ZERO_ADDRESS, "ERC777: approve to the zero address"
+
   self.allowances[msg.sender][_spender] = _value
   log.Approval(msg.sender, _spender, _value)
   return True
@@ -420,6 +422,7 @@ def transferFrom(
   """
   self._send(msg.sender, _from, _to, _value, False, "", "")
   self.allowances[_from][msg.sender] -= _value
+  log.Approval(_from, msg.sender, self.allowances[_from][msg.sender])
   return True
 
 #endregion
@@ -510,7 +513,6 @@ def operatorBurn(
   @dev In addition to the standard ERC-777 use case, this is used by the DAT to `sell` tokens.
   """
   assert msg.sender == self.dat or self.dat.state() == STATE_RUN, "ONLY_BURN_DURING_RUN"
-
   assert self.isOperatorFor(msg.sender, _from), "ERC777: caller is not an operator for holder"
   self._burn(msg.sender, _from, _amount, _userData, _operatorData)
 
