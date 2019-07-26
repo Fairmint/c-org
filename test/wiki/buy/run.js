@@ -44,10 +44,11 @@ contract("wiki / buy / run", accounts => {
     let x;
 
     before(async () => {
-      await contracts.dat.buy(accounts[5], "100000000000000000000", 1, {
-        from: accounts[5],
-        value: "100000000000000000000"
-      });
+      // TODO
+      // await contracts.dat.buy(accounts[5], "100000000000000000000", 1, {
+      //   from: accounts[5],
+      //   value: "100000000000000000000"
+      // });
     });
 
     // x=sqrt((2*amount/buy_slope)+(total_supply+burnt_supply)^2)-(total_supply+burnt_supply)
