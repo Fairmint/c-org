@@ -13,7 +13,7 @@ module.exports = async function deployDat(accounts, options) {
   const callOptions = Object.assign(
     {
       initReserve: "42000000000000000000",
-      currency: "0x0000000000000000000000000000000000000000",
+      currency: web3.utils.padLeft(0, 40),
       initGoal: "0",
       buySlopeNum: "1",
       buySlopeDen: "100000000000000000000",
