@@ -544,25 +544,15 @@ def _distributeInvestment(
   self._sendCurrency(self.feeCollector, fee)
 
 @public
-@payable
-def buy(
-  _to: address,
-  _currencyValue: uint256,
-  _minTokensBought: uint256
-):
+@constant
+def estimateBuyValue(
+  _currencyValue: uint256
+) -> uint256:
   """
-  @notice Purchase FAIR tokens with the given amount of currency.
-  @param _to The account to receive the FAIR tokens from this purchase.
+  @notice Calculate how many FAIR tokens you would buy with the given amount of currency if `buy` was called now.
   @param _currencyValue How much currency to spend in order to buy FAIR.
-  @param _minTokensBought Buy at least this many FAIR tokens or the transaction reverts.
-  @dev _minTokensBought is necessary as the price will change if some elses transaction mines after 
-  yours was submitted.
   """
-  assert _to != ZERO_ADDRESS, "INVALID_ADDRESS"
   assert _currencyValue >= self.minInvestment, "SEND_AT_LEAST_MIN_INVESTMENT"
-  assert _minTokensBought > 0, "MUST_BUY_AT_LEAST_1"
-
-  self._collectInvestment(msg.sender, _currencyValue, msg.value, False)
 
   # Calculate the tokenValue for this investment
   tokenValue: uint256
@@ -604,6 +594,30 @@ def buy(
   else:
     assert False, "INVALID_STATE"
 
+  return tokenValue
+
+@public
+@payable
+def buy(
+  _to: address,
+  _currencyValue: uint256,
+  _minTokensBought: uint256
+):
+  """
+  @notice Purchase FAIR tokens with the given amount of currency.
+  @param _to The account to receive the FAIR tokens from this purchase.
+  @param _currencyValue How much currency to spend in order to buy FAIR.
+  @param _minTokensBought Buy at least this many FAIR tokens or the transaction reverts.
+  @dev _minTokensBought is necessary as the price will change if some elses transaction mines after 
+  yours was submitted.
+  """
+  assert _to != ZERO_ADDRESS, "INVALID_ADDRESS"
+  assert _minTokensBought > 0, "MUST_BUY_AT_LEAST_1"
+
+  self._collectInvestment(msg.sender, _currencyValue, msg.value, False)
+
+  # Calculate the tokenValue for this investment
+  tokenValue: uint256 = self.estimateBuyValue(_currencyValue)
   assert tokenValue >= _minTokensBought, "PRICE_SLIPPAGE"
 
   # Mint purchased tokens
@@ -635,15 +649,11 @@ def buy(
 
 #region Sell
 
-@private
-def _sell(
-  _from: address,
-  _to: address,
-  _quantityToSell: uint256,
-  _minCurrencyReturned: uint256,
-  _hasReceivedFunds: bool
-):
-  assert _from != self.beneficiary or self.state >= STATE_CLOSE, "BENEFICIARY_ONLY_SELL_IN_CLOSE_OR_CANCEL"
+@public
+@constant
+def estimateSellValue(
+  _quantityToSell: uint256
+) -> uint256:
   buybackReserve: uint256 = self.buybackReserve()
   totalSupply: uint256 = self.fair.totalSupply()
 
@@ -652,7 +662,6 @@ def _sell(
   if(self.state == STATE_RUN):
     burnedSupply: uint256 = self.fair.burnedSupply()
     supply: uint256 = totalSupply + burnedSupply
-    quantityToSell: uint256 = _quantityToSell
 
     # buyback_reserve = r
     # total_supply = t
@@ -663,7 +672,7 @@ def _sell(
 
     # Math: burnedSupply is capped in FAIR such that the square will never overflow
     currencyValue = self.bigDiv.bigDiv3x3(
-      quantityToSell, buybackReserve, burnedSupply * burnedSupply,
+      _quantityToSell, buybackReserve, burnedSupply * burnedSupply,
       totalSupply, supply, supply,
       False
     )
@@ -671,7 +680,7 @@ def _sell(
     
     # Math: buybackReserve is capped such that this will not overflow for any value of 
     # quantityToSell (up to the supply's hard-cap)
-    temp: uint256 = 2 * quantityToSell * buybackReserve
+    temp: uint256 = 2 * _quantityToSell * buybackReserve
     temp /= supply
     # Math: worst-case temp is MAX_BEFORE_SQUARE (max reserve, 1 supply)
 
@@ -681,7 +690,7 @@ def _sell(
     # Math: quantityToSell has to be less than the supply's hard-cap, which means squaring will never overflow
     # Math: this will not underflow as the terms before it will sum to a greater value
     currencyValue -= self.bigDiv.bigDiv2x2(
-      quantityToSell * quantityToSell, buybackReserve, 
+      _quantityToSell * _quantityToSell, buybackReserve, 
       supply, supply,
       True
     )
@@ -690,13 +699,29 @@ def _sell(
     currencyValue = _quantityToSell * buybackReserve
     currencyValue /= totalSupply
   else: # STATE_INIT or STATE_CANCEL
-    self.initInvestors[_from] -= _quantityToSell
     # Math: _quantityToSell and buybackReserve are both capped such that this can never overflow
     currencyValue = _quantityToSell * buybackReserve
     # Math: auth blocks initReserve from being burned unless we reach the RUN state which prevents an underflow
     currencyValue /= totalSupply - self.initReserve
 
   assert currencyValue > 0, "INSUFFICIENT_FUNDS"
+
+  return currencyValue
+
+@private
+def _sell(
+  _from: address,
+  _to: address,
+  _quantityToSell: uint256,
+  _minCurrencyReturned: uint256,
+  _hasReceivedFunds: bool
+):
+  assert _from != self.beneficiary or self.state >= STATE_CLOSE, "BENEFICIARY_ONLY_SELL_IN_CLOSE_OR_CANCEL"
+
+  currencyValue: uint256 = self.estimateSellValue(_quantityToSell)
+
+  if(self.state == STATE_INIT or self.state == STATE_CANCEL):
+    self.initInvestors[_from] -= _quantityToSell
 
   # Distribute funds
   if(_hasReceivedFunds):
@@ -726,29 +751,11 @@ def sell(
 
 #region Pay
 
-@private
-def _pay(
-  _from: address,
-  _to: address,
+@public
+@constant
+def estimatePayValue(
   _currencyValue: uint256
-):
-  """
-  @dev Pay the organization on-chain.
-  @param _from The account which issued the transaction and paid the currencyValue.
-  @param _to The account which receives tokens for the contribution.
-  @param _currencyValue How much currency which was paid.
-  """
-  assert _from != ZERO_ADDRESS, "INVALID_ADDRESS"
-  assert _currencyValue > 0, "MISSING_CURRENCY"
-  assert self.state == STATE_RUN, "INVALID_STATE"
-
-  # Send a portion of the funds to the beneficiary, the rest is added to the buybackReserve
-  # Math: if _currencyValue is < (2^256 - 1) / 10000 this will never overflow
-  reserve: uint256 = _currencyValue * self.investmentReserveBasisPoints
-  reserve /= BASIS_POINTS_DEN
-  # Math: this will never underflow since investmentReserveBasisPoints is capped to BASIS_POINTS_DEN
-  self._sendCurrency(self.beneficiary, _currencyValue - reserve)
-
+) -> uint256:
   # buy_slope = n/d
   # revenue_commitment = c/g
   # sqrt(
@@ -790,6 +797,33 @@ def _pay(
 
   # Math: No underflow concern, as the value is at least supply^2 before the sqrt
   tokenValue -= supply
+
+  return tokenValue
+
+@private
+def _pay(
+  _from: address,
+  _to: address,
+  _currencyValue: uint256
+):
+  """
+  @dev Pay the organization on-chain.
+  @param _from The account which issued the transaction and paid the currencyValue.
+  @param _to The account which receives tokens for the contribution.
+  @param _currencyValue How much currency which was paid.
+  """
+  assert _from != ZERO_ADDRESS, "INVALID_ADDRESS"
+  assert _currencyValue > 0, "MISSING_CURRENCY"
+  assert self.state == STATE_RUN, "INVALID_STATE"
+
+  # Send a portion of the funds to the beneficiary, the rest is added to the buybackReserve
+  # Math: if _currencyValue is < (2^256 - 1) / 10000 this will never overflow
+  reserve: uint256 = _currencyValue * self.investmentReserveBasisPoints
+  reserve /= BASIS_POINTS_DEN
+  # Math: this will never underflow since investmentReserveBasisPoints is capped to BASIS_POINTS_DEN
+  self._sendCurrency(self.beneficiary, _currencyValue - reserve)
+
+  tokenValue: uint256 = self.estimatePayValue(_currencyValue)
 
   # Update the to address to the beneficiary if the currency value would fail
   to: address = _to
@@ -835,6 +869,39 @@ def __default__():
 #region Close
 
 @public
+@constant
+def estimateExitFee(
+  _msgValue: uint256(wei)
+) -> uint256:
+  exitFee: uint256 = 0
+
+  if(self.state == STATE_RUN):
+    assert self.openUntilAtLeast <= block.timestamp, "TOO_EARLY"
+
+    buybackReserve: uint256 = self.buybackReserve()
+    buybackReserve -= as_unitless_number(_msgValue)
+
+    # Source: (t^2 * (n/d))/2 + b*(n/d)*t - r
+    # Implementation: (n t (2 b + t))/(2 d) - r
+
+    exitFee = 2 * self.fair.burnedSupply()
+    # Math: the supply hard-cap ensures this does not overflow
+    exitFee += self.fair.totalSupply()
+    # Math: self.totalSupply cap makes the worst case: 10 ** 28 * 10 ** 28 which does not overflow
+    exitFee = self.bigDiv.bigDiv2x2(
+      exitFee * self.fair.totalSupply(), self.buySlopeNum,
+      2, self.buySlopeDen,
+      False
+    )
+    # Math: this if condition avoids a potential overflow
+    if(exitFee <= buybackReserve):
+      exitFee = 0
+    else:
+      exitFee -= buybackReserve
+
+  return exitFee
+
+@public
 @payable
 def close():
   """
@@ -857,29 +924,7 @@ def close():
     # Collect the exitFee and close the c-org.
     log.StateChange(self.state, STATE_CLOSE)
     self.state = STATE_CLOSE
-    assert self.openUntilAtLeast <= block.timestamp, "TOO_EARLY"
-
-    buybackReserve: uint256 = self.buybackReserve()
-    buybackReserve -= as_unitless_number(msg.value)
-
-    # Source: (t^2 * (n/d))/2 + b*(n/d)*t - r
-    # Implementation: (n t (2 b + t))/(2 d) - r
-
-    exitFee = 2 * self.fair.burnedSupply()
-    # Math: the supply hard-cap ensures this does not overflow
-    exitFee += self.fair.totalSupply()
-    # Math: self.totalSupply cap makes the worst case: 10 ** 28 * 10 ** 28 which does not overflow
-    exitFee = self.bigDiv.bigDiv2x2(
-      exitFee * self.fair.totalSupply(), self.buySlopeNum,
-      2, self.buySlopeDen,
-      False
-    )
-    # Math: this if condition avoids a potential overflow
-    if(exitFee <= buybackReserve):
-      exitFee = 0
-    else:
-      exitFee -= buybackReserve
-
+    exitFee = self.estimateExitFee(msg.value)
     self._collectInvestment(msg.sender, exitFee, msg.value, True)
   else:
     assert False, "INVALID_STATE"
