@@ -868,7 +868,6 @@ def __default__():
 
 #region Close
 
-# TODO
 @public
 @constant
 def estimateExitFee(
@@ -921,13 +920,13 @@ def close():
     self.state = STATE_CANCEL
   elif(self.state == STATE_RUN):
     # Collect the exitFee and close the c-org.
-    log.StateChange(self.state, STATE_CLOSE)
-    self.state = STATE_CLOSE
     assert self.openUntilAtLeast <= block.timestamp, "TOO_EARLY"
 
     exitFee = self.estimateExitFee(msg.value)
-
     self._collectInvestment(msg.sender, exitFee, msg.value, True)
+
+    log.StateChange(self.state, STATE_CLOSE)
+    self.state = STATE_CLOSE
   else:
     assert False, "INVALID_STATE"
   
