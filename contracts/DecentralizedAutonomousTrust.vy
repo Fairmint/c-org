@@ -868,6 +868,7 @@ def __default__():
 
 #region Close
 
+# TODO
 @public
 @constant
 def estimateExitFee(
@@ -876,8 +877,6 @@ def estimateExitFee(
   exitFee: uint256 = 0
 
   if(self.state == STATE_RUN):
-    assert self.openUntilAtLeast <= block.timestamp, "TOO_EARLY"
-
     buybackReserve: uint256 = self.buybackReserve()
     buybackReserve -= as_unitless_number(_msgValue)
 
@@ -924,7 +923,10 @@ def close():
     # Collect the exitFee and close the c-org.
     log.StateChange(self.state, STATE_CLOSE)
     self.state = STATE_CLOSE
+    assert self.openUntilAtLeast <= block.timestamp, "TOO_EARLY"
+
     exitFee = self.estimateExitFee(msg.value)
+
     self._collectInvestment(msg.sender, exitFee, msg.value, True)
   else:
     assert False, "INVALID_STATE"
