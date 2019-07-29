@@ -47,17 +47,7 @@ contract("wiki / buy / run", accounts => {
     let x;
 
     beforeEach(async () => {
-      const supply = new BigNumber(await contracts.fair.totalSupply()).plus(
-        await contracts.fair.burnedSupply()
-      );
-      x = new BigNumber(2)
-        .times(amount)
-        .times(await contracts.dat.buySlopeNum())
-        .div(await contracts.dat.buySlopeDen())
-        .plus(supply.pow(2))
-        .sqrt()
-        .minus(supply);
-      //.dp(0, BigNumber.ROUND_DOWN);
+      x = new BigNumber(await contracts.dat.estimateBuyValue(amount));
     });
 
     it("buying with min+1 should fail", async () => {
