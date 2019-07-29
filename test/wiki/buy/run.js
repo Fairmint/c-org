@@ -69,16 +69,7 @@ contract("wiki / buy / run", accounts => {
       );
     });
 
-    it.only("Sanity check buying x works", async () => {
-      await contracts.dat.buy(accounts[5], amount, 1, {
-        from: accounts[5],
-        value: amount
-      });
-      console.log(x.toFixed());
-      // 1763999999999999999958000000000000000002
-      // 41999999999999999999
-      // 105526268847200000000
-      throw new Error();
+    it("Sanity check buying x works", async () => {
       await contracts.dat.buy(accounts[5], amount, x.minus(2).toFixed(), {
         from: accounts[5],
         value: amount
