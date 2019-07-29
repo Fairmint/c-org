@@ -16,5 +16,8 @@ sudo pip3 install vyper
 
 # Test
 npm run ganache
-npm run test # in a second prompt
+
+# in a second prompt
+npm run compile
+npm run test 
 ```
