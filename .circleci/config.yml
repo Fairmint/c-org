@@ -49,7 +49,7 @@ jobs:
       - run: npm run test
       - run: npm run lintNoFix
 
-  TS1:
+  TS1-3:
     context: docker-hub-credentials
     docker:
       - image: circleci/node:10
@@ -60,56 +60,12 @@ jobs:
       - attach_workspace:
           at: ~/repo
       - run: export SHEET_ID=0 && npm run csvTests
-
-  TS2:
-    context: docker-hub-credentials
-    docker:
-      - image: circleci/node:10
-      - image: trufflesuite/ganache-cli
-        command: ganache-cli -e 10000000000 -a 100
-    working_directory: ~/repo
-    steps:
-      - attach_workspace:
-          at: ~/repo
       - run: export SHEET_ID=1 && npm run csvTests
-
-  TS3a:
-    context: docker-hub-credentials
-    docker:
-      - image: circleci/node:10
-      - image: trufflesuite/ganache-cli
-        command: ganache-cli -e 10000000000 -a 100
-    working_directory: ~/repo
-    steps:
-      - attach_workspace:
-          at: ~/repo
       - run: export SHEET_ID=2 && npm run csvTests
-
-  TS3b:
-    context: docker-hub-credentials
-    docker:
-      - image: circleci/node:10
-      - image: trufflesuite/ganache-cli
-        command: ganache-cli -e 10000000000 -a 100
-    working_directory: ~/repo
-    steps:
-      - attach_workspace:
-          at: ~/repo
       - run: export SHEET_ID=3 && npm run csvTests
-
-  TS4:
-    context: docker-hub-credentials
-    docker:
-      - image: circleci/node:10
-      - image: trufflesuite/ganache-cli
-        command: ganache-cli -e 10000000000 -a 100
-    working_directory: ~/repo
-    steps:
-      - attach_workspace:
-          at: ~/repo
       - run: export SHEET_ID=4 && npm run csvTests
-
-  TS5:
+      
+  TS4-7:
     context: docker-hub-credentials
     docker:
       - image: circleci/node:10
@@ -120,44 +76,11 @@ jobs:
       - attach_workspace:
           at: ~/repo
       - run: export SHEET_ID=5 && npm run csvTests
-
-  TS6:
-    context: docker-hub-credentials
-    docker:
-      - image: circleci/node:10
-      - image: trufflesuite/ganache-cli
-        command: ganache-cli -e 10000000000 -a 100
-    working_directory: ~/repo
-    steps:
-      - attach_workspace:
-          at: ~/repo
       - run: export SHEET_ID=6 && npm run csvTests
-
-  TS7:
-    context: docker-hub-credentials
-    docker:
-      - image: circleci/node:10
-      - image: trufflesuite/ganache-cli
-        command: ganache-cli -e 10000000000 -a 100
-    working_directory: ~/repo
-    steps:
-      - attach_workspace:
-          at: ~/repo
       - run: export SHEET_ID=7 && npm run csvTests
-
-  TS8:
-    context: docker-hub-credentials
-    docker:
-      - image: circleci/node:10
-      - image: trufflesuite/ganache-cli
-        command: ganache-cli -e 10000000000 -a 100
-    working_directory: ~/repo
-    steps:
-      - attach_workspace:
-          at: ~/repo
       - run: export SHEET_ID=8 && npm run csvTests
 
-  TS9:
+  TS8-12:
     context: docker-hub-credentials
     docker:
       - image: circleci/node:10
@@ -168,41 +91,8 @@ jobs:
       - attach_workspace:
           at: ~/repo
       - run: export SHEET_ID=9 && npm run csvTests
-
-  TS10:
-    context: docker-hub-credentials
-    docker:
-      - image: circleci/node:10
-      - image: trufflesuite/ganache-cli
-        command: ganache-cli -e 10000000000 -a 100
-    working_directory: ~/repo
-    steps:
-      - attach_workspace:
-          at: ~/repo
       - run: export SHEET_ID=10 && npm run csvTests
-
-  TS11:
-    context: docker-hub-credentials
-    docker:
-      - image: circleci/node:10
-      - image: trufflesuite/ganache-cli
-        command: ganache-cli -e 10000000000 -a 100
-    working_directory: ~/repo
-    steps:
-      - attach_workspace:
-          at: ~/repo
       - run: export SHEET_ID=11 && npm run csvTests
-
-  TS12:
-    context: docker-hub-credentials
-    docker:
-      - image: circleci/node:10
-      - image: trufflesuite/ganache-cli
-        command: ganache-cli -e 10000000000 -a 100
-    working_directory: ~/repo
-    steps:
-      - attach_workspace:
-          at: ~/repo
       - run: export SHEET_ID=12 && npm run csvTests
 
   publish:
@@ -231,43 +121,13 @@ workflows:
       - test:
           requires:
             - build
-      - TS1:
+      - TS1-3:
           requires:
             - build
-      - TS2:
+      - TS4-7:
           requires:
             - build
-      - TS3a:
-          requires:
-            - build
-      - TS3b:
-          requires:
-            - build
-      - TS4:
-          requires:
-            - build
-      - TS5:
-          requires:
-            - build
-      - TS6:
-          requires:
-            - build
-      - TS7:
-          requires:
-            - build
-      - TS8:
-          requires:
-            - build
-      - TS9:
-          requires:
-            - build
-      - TS10:
-          requires:
-            - build
-      - TS11:
-          requires:
-            - build
-      - TS12:
+      - TS8-12:
           requires:
             - build
       - publish:
