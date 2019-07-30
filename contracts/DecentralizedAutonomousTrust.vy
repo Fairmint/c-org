@@ -920,10 +920,11 @@ def close():
     assert self.openUntilAtLeast <= block.timestamp, "TOO_EARLY"
 
     exitFee = self.estimateExitFee(msg.value)
-    self._collectInvestment(msg.sender, exitFee, msg.value, True)
 
     log.StateChange(self.state, STATE_CLOSE)
     self.state = STATE_CLOSE
+
+    self._collectInvestment(msg.sender, exitFee, msg.value, True)
   else:
     assert False, "INVALID_STATE"
   
