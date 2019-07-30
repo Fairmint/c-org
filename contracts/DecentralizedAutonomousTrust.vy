@@ -615,9 +615,6 @@ def buy(
   tokenValue: uint256 = self.estimateBuyValue(_currencyValue)
   assert tokenValue >= _minTokensBought, "PRICE_SLIPPAGE"
 
-  # Mint purchased tokens
-  # Math: mint will fail if the supply exceeds the limit
-  self.fair.mint(msg.sender, _to, tokenValue, "", "")
   log.Buy(msg.sender, _to, _currencyValue, tokenValue)
 
   # Update state, initInvestors, and distribute the investment when appropriate
@@ -625,7 +622,7 @@ def buy(
     # Math: the hard-cap in mint ensures that this line could never overflow
     self.initInvestors[_to] += tokenValue
     # Math: this would only overflow if initReserve was burned, but auth blocks burning durning init
-    if(self.fair.totalSupply() - self.initReserve >= self.initGoal):
+    if(self.fair.totalSupply() + tokenValue - self.initReserve >= self.initGoal):
       log.StateChange(self.state, STATE_RUN)
       self.state = STATE_RUN
       beneficiaryContribution: uint256 = self.bigDiv.bigDiv3x3(
@@ -639,6 +636,10 @@ def buy(
       self._applyBurnThreshold() # must mint before this call
     else:
       self._distributeInvestment(_currencyValue)
+
+  # Mint purchased tokens
+  # Math: mint will fail if the supply exceeds the limit
+  self.fair.mint(msg.sender, _to, tokenValue, "", "")
 
 #endregion
 
