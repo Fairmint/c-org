@@ -354,8 +354,10 @@ def _send(
 
   if(_callHooks):
     self._callTokensToSend(_operator, _from, _to, _amount, _userData, _operatorData)
+
   self.balanceOf[_from] -= _amount
   self.balanceOf[_to] += _amount
+
   if(_callHooks):
     self._callTokensReceived(_operator, _from, _to, _amount, _userData, _operatorData)
 
