@@ -187,9 +187,6 @@ BASIS_POINTS_DEN: constant(uint256) = 10000
 # Data for DAT business logic
 ###########
 
-_isTransferFrom: bool
-# @dev An internal variable to differentiate between an ERC-777 transfer vs transferFrom
-
 beneficiary: public(address)
 # @notice The address of the beneficiary organization which receives the investments. 
 # Points to the wallet of the organization. 
@@ -410,15 +407,6 @@ def updateConfig(
 
   self.fair.updateConfig(_erc1404Address, _name, _symbol)
 
-  if(self.beneficiary != _beneficiary):
-    assert _beneficiary != ZERO_ADDRESS, "INVALID_ADDRESS"
-    tokens: uint256 = self.fair.balanceOf(self.beneficiary)
-    if(tokens > 0):
-      self.fair.operatorSend(self.beneficiary, _beneficiary, tokens, "", "")
-    self.initInvestors[_beneficiary] += self.initInvestors[self.beneficiary]
-    self.initInvestors[self.beneficiary] = 0
-    self.beneficiary = _beneficiary
-
   assert _control != ZERO_ADDRESS, "INVALID_ADDRESS"
   self.control = _control
 
@@ -449,6 +437,15 @@ def updateConfig(
     _name,
     _symbol
   )
+
+  if(self.beneficiary != _beneficiary):
+    assert _beneficiary != ZERO_ADDRESS, "INVALID_ADDRESS"
+    tokens: uint256 = self.fair.balanceOf(self.beneficiary)
+    self.initInvestors[_beneficiary] += self.initInvestors[self.beneficiary]
+    self.initInvestors[self.beneficiary] = 0
+    if(tokens > 0):
+      self.fair.operatorSend(self.beneficiary, _beneficiary, tokens, "", "")
+    self.beneficiary = _beneficiary
 
 #endregion
 
@@ -494,9 +491,7 @@ def _collectInvestment(
       success: bool = self.currency.transferFrom(_from, self, _quantityToInvest)
       assert success, "ERC20_TRANSFER_FAILED"
     else:
-      self._isTransferFrom = True
       self.currency.operatorSend(_from, self, _quantityToInvest, "", "")
-      self._isTransferFrom = False
 
 @private
 def _sendCurrency(
@@ -614,16 +609,9 @@ def buy(
   assert _to != ZERO_ADDRESS, "INVALID_ADDRESS"
   assert _minTokensBought > 0, "MUST_BUY_AT_LEAST_1"
 
-  self._collectInvestment(msg.sender, _currencyValue, msg.value, False)
-
   # Calculate the tokenValue for this investment
   tokenValue: uint256 = self.estimateBuyValue(_currencyValue)
   assert tokenValue >= _minTokensBought, "PRICE_SLIPPAGE"
-
-  # Mint purchased tokens
-  # Math: mint will fail if the supply exceeds the limit
-  self.fair.mint(msg.sender, _to, tokenValue, "", "")
-  log.Buy(msg.sender, _to, _currencyValue, tokenValue)
 
   # Update state, initInvestors, and distribute the investment when appropriate
   if(self.state == STATE_INIT):
@@ -644,6 +632,14 @@ def buy(
       self._applyBurnThreshold() # must mint before this call
     else:
       self._distributeInvestment(_currencyValue)
+
+  log.Buy(msg.sender, _to, _currencyValue, tokenValue)
+
+  self._collectInvestment(msg.sender, _currencyValue, msg.value, False)
+  
+  # Mint purchased tokens
+  # Math: mint will fail if the supply exceeds the limit
+  self.fair.mint(msg.sender, _to, tokenValue, "", "")
 
 #endregion
 
@@ -723,6 +719,8 @@ def _sell(
   if(self.state == STATE_INIT or self.state == STATE_CANCEL):
     self.initInvestors[_from] -= _quantityToSell
 
+  log.Sell(_from, _to, currencyValue, _quantityToSell)
+
   # Distribute funds
   if(_hasReceivedFunds):
     self.fair.burn(_quantityToSell, "")
@@ -730,7 +728,6 @@ def _sell(
     self.fair.operatorBurn(_from, _quantityToSell, "", "")
   
   self._sendCurrency(_to, currencyValue)
-  log.Sell(_from, _to, currencyValue, _quantityToSell)
 
 @public
 def sell(
@@ -820,8 +817,6 @@ def _pay(
   # Math: if _currencyValue is < (2^256 - 1) / 10000 this will never overflow
   reserve: uint256 = _currencyValue * self.investmentReserveBasisPoints
   reserve /= BASIS_POINTS_DEN
-  # Math: this will never underflow since investmentReserveBasisPoints is capped to BASIS_POINTS_DEN
-  self._sendCurrency(self.beneficiary, _currencyValue - reserve)
 
   tokenValue: uint256 = self.estimatePayValue(_currencyValue)
 
@@ -833,13 +828,16 @@ def _pay(
     .detectTransferRestriction(ZERO_ADDRESS, _to, tokenValue) != 0):
     to = self.beneficiary
 
+  log.Pay(_from, _to, _currencyValue, tokenValue)
+
   # Distribute tokens
   if(tokenValue > 0):
     self.fair.mint(_from, to, tokenValue, "", "")
     self._applyBurnThreshold() # must mint before this call
 
-  log.Pay(_from, _to, _currencyValue, tokenValue)
-
+  # Math: this will never underflow since investmentReserveBasisPoints is capped to BASIS_POINTS_DEN
+  self._sendCurrency(self.beneficiary, _currencyValue - reserve)
+  
 @public
 @payable
 def pay(
@@ -852,8 +850,8 @@ def pay(
   is not authorized to receive tokens then they will be sent to the beneficiary account instead.
   @param _currencyValue How much currency which was paid.
   """
-  self._collectInvestment(msg.sender, _currencyValue, msg.value, False)
   self._pay(msg.sender, _to, _currencyValue)
+  self._collectInvestment(msg.sender, _currencyValue, msg.value, False)
 
 @public
 @payable
@@ -861,8 +859,8 @@ def __default__():
   """
   @dev Pay the organization on-chain with ETH (only works when currency is ETH)
   """
-  self._collectInvestment(msg.sender, as_unitless_number(msg.value), msg.value, False)
   self._pay(msg.sender, msg.sender, as_unitless_number(msg.value))
+  self._collectInvestment(msg.sender, as_unitless_number(msg.value), msg.value, False)
 
 #endregion
 
@@ -922,11 +920,11 @@ def close():
     # Collect the exitFee and close the c-org.
     assert self.openUntilAtLeast <= block.timestamp, "TOO_EARLY"
 
-    exitFee = self.estimateExitFee(msg.value)
-    self._collectInvestment(msg.sender, exitFee, msg.value, True)
-
     log.StateChange(self.state, STATE_CLOSE)
     self.state = STATE_CLOSE
+
+    exitFee = self.estimateExitFee(msg.value)
+    self._collectInvestment(msg.sender, exitFee, msg.value, True)
   else:
     assert False, "INVALID_STATE"
   
@@ -948,7 +946,7 @@ def tokensReceived(
   If currency: Pay the organization on-chain with ERC-777 tokens (only works when currency is ERC-777)
   Params are from the ERC-777 token standard
   """
-  if(self._isTransferFrom):
+  if(_operator == self):
     return
   if(msg.sender == self.currency):
     self._pay(_operator, _from, _amount)
