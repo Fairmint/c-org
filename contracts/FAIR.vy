@@ -290,7 +290,6 @@ def _callTokensReceived(
   _from: address,
   _to: address,
   _amount: uint256,
-  _requireReceptionAck: bool,
   _userData: bytes[1024],
   _operatorData: bytes[1024]
 ):
@@ -303,7 +302,7 @@ def _callTokensReceived(
   implementer: address = self.ERC1820Registry.getInterfaceImplementer(_to, TOKENS_RECIPIENT_INTERFACE_HASH)
   if(implementer != ZERO_ADDRESS):
     IERC777Recipient(implementer).tokensReceived(_operator, _from, _to, _amount, _userData, _operatorData)
-  elif(_requireReceptionAck):
+  else:
     assert not _to.is_contract, "ERC777: token recipient contract has no implementer for ERC777TokensRecipient"
 
 @private
@@ -339,22 +338,26 @@ def _send(
   _from: address,
   _to: address,
   _amount: uint256,
-  _requireReceptionAck: bool,
+  _callHooks: bool,
   _userData: bytes[1024],
   _operatorData: bytes[1024]
 ):
   """
   @dev Moves tokens from one account to another if authorized.
+  We have disabled the call hooks for ERC-20 style transfers in order to ensure other contracts interfacing with
+  FAIR tokens (e.g. Uniswap) remain secure.
   """
   assert _from != ZERO_ADDRESS, "ERC777: send from the zero address"
   assert _to != ZERO_ADDRESS, "ERC777: send to the zero address"
   assert self.detectTransferRestriction(_from, _to, _amount) == 0, "NOT_AUTHORIZED"
   assert _from == self.dat.beneficiary() or self.dat.state() != STATE_INIT, "Only the beneficiary can make transfers during STATE_INIT"
 
-  self._callTokensToSend(_operator, _from, _to, _amount, _userData, _operatorData)
+  if(_callHooks):
+    self._callTokensToSend(_operator, _from, _to, _amount, _userData, _operatorData)
   self.balanceOf[_from] -= _amount
   self.balanceOf[_to] += _amount
-  self._callTokensReceived(_operator, _from, _to, _amount, _requireReceptionAck, _userData, _operatorData)
+  if(_callHooks):
+    self._callTokensReceived(_operator, _from, _to, _amount, _userData, _operatorData)
 
   log.Sent(_operator, _from, _to, _amount, _userData, _operatorData)
   log.Transfer(_from, _to, _amount)
@@ -568,7 +571,7 @@ def mint(
   assert self.totalSupply + self.burnedSupply <= MAX_SUPPLY, "EXCESSIVE_SUPPLY"
   self.balanceOf[_to] += _quantity
   
-  self._callTokensReceived(_operator, ZERO_ADDRESS, _to, _quantity, True, _userData, _operatorData)
+  self._callTokensReceived(_operator, ZERO_ADDRESS, _to, _quantity, _userData, _operatorData)
   
   log.Transfer(ZERO_ADDRESS, _to, _quantity)
   log.Minted(_operator, _to, _quantity, _userData, _operatorData)
