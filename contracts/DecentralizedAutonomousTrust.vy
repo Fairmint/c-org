@@ -609,13 +609,13 @@ def buy(
   assert _to != ZERO_ADDRESS, "INVALID_ADDRESS"
   assert _minTokensBought > 0, "MUST_BUY_AT_LEAST_1"
 
-  self._collectInvestment(msg.sender, _currencyValue, msg.value, False)
-
   # Calculate the tokenValue for this investment
   tokenValue: uint256 = self.estimateBuyValue(_currencyValue)
   assert tokenValue >= _minTokensBought, "PRICE_SLIPPAGE"
 
   log.Buy(msg.sender, _to, _currencyValue, tokenValue)
+
+  self._collectInvestment(msg.sender, _currencyValue, msg.value, False)
 
   # Update state, initInvestors, and distribute the investment when appropriate
   if(self.state == STATE_INIT):
@@ -816,8 +816,6 @@ def _pay(
   # Math: if _currencyValue is < (2^256 - 1) / 10000 this will never overflow
   reserve: uint256 = _currencyValue * self.investmentReserveBasisPoints
   reserve /= BASIS_POINTS_DEN
-  # Math: this will never underflow since investmentReserveBasisPoints is capped to BASIS_POINTS_DEN
-  self._sendCurrency(self.beneficiary, _currencyValue - reserve)
 
   tokenValue: uint256 = self.estimatePayValue(_currencyValue)
 
@@ -829,6 +827,9 @@ def _pay(
     .detectTransferRestriction(ZERO_ADDRESS, _to, tokenValue) != 0):
     to = self.beneficiary
 
+  # Math: this will never underflow since investmentReserveBasisPoints is capped to BASIS_POINTS_DEN
+  self._sendCurrency(self.beneficiary, _currencyValue - reserve)
+  
   # Distribute tokens
   if(tokenValue > 0):
     self.fair.mint(_from, to, tokenValue, "", "")
