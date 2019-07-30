@@ -407,15 +407,6 @@ def updateConfig(
 
   self.fair.updateConfig(_erc1404Address, _name, _symbol)
 
-  if(self.beneficiary != _beneficiary):
-    assert _beneficiary != ZERO_ADDRESS, "INVALID_ADDRESS"
-    tokens: uint256 = self.fair.balanceOf(self.beneficiary)
-    if(tokens > 0):
-      self.fair.operatorSend(self.beneficiary, _beneficiary, tokens, "", "")
-    self.initInvestors[_beneficiary] += self.initInvestors[self.beneficiary]
-    self.initInvestors[self.beneficiary] = 0
-    self.beneficiary = _beneficiary
-
   assert _control != ZERO_ADDRESS, "INVALID_ADDRESS"
   self.control = _control
 
@@ -433,6 +424,15 @@ def updateConfig(
 
   assert _openUntilAtLeast >= self.openUntilAtLeast, "OPEN_UNTIL_MAY_NOT_BE_REDUCED"
   self.openUntilAtLeast = _openUntilAtLeast
+
+  if(self.beneficiary != _beneficiary):
+    assert _beneficiary != ZERO_ADDRESS, "INVALID_ADDRESS"
+    tokens: uint256 = self.fair.balanceOf(self.beneficiary)
+    self.initInvestors[_beneficiary] += self.initInvestors[self.beneficiary]
+    self.initInvestors[self.beneficiary] = 0
+    if(tokens > 0):
+      self.fair.operatorSend(self.beneficiary, _beneficiary, tokens, "", "")
+    self.beneficiary = _beneficiary
 
   log.UpdateConfig(
     _erc1404Address,
