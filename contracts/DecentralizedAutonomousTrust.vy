@@ -613,6 +613,12 @@ def buy(
   tokenValue: uint256 = self.estimateBuyValue(_currencyValue)
   assert tokenValue >= _minTokensBought, "PRICE_SLIPPAGE"
 
+  self._collectInvestment(msg.sender, _currencyValue, msg.value, False)
+
+  # Mint purchased tokens
+  # Math: mint will fail if the supply exceeds the limit
+  self.fair.mint(msg.sender, _to, tokenValue, "", "")
+  
   # Update state, initInvestors, and distribute the investment when appropriate
   if(self.state == STATE_INIT):
     # Math: the hard-cap in mint ensures that this line could never overflow
@@ -634,12 +640,6 @@ def buy(
       self._distributeInvestment(_currencyValue)
 
   log.Buy(msg.sender, _to, _currencyValue, tokenValue)
-
-  self._collectInvestment(msg.sender, _currencyValue, msg.value, False)
-  
-  # Mint purchased tokens
-  # Math: mint will fail if the supply exceeds the limit
-  self.fair.mint(msg.sender, _to, tokenValue, "", "")
 
 #endregion
 
@@ -850,8 +850,8 @@ def pay(
   is not authorized to receive tokens then they will be sent to the beneficiary account instead.
   @param _currencyValue How much currency which was paid.
   """
-  self._pay(msg.sender, _to, _currencyValue)
   self._collectInvestment(msg.sender, _currencyValue, msg.value, False)
+  self._pay(msg.sender, _to, _currencyValue)
 
 @public
 @payable
@@ -859,8 +859,8 @@ def __default__():
   """
   @dev Pay the organization on-chain with ETH (only works when currency is ETH)
   """
-  self._pay(msg.sender, msg.sender, as_unitless_number(msg.value))
   self._collectInvestment(msg.sender, as_unitless_number(msg.value), msg.value, False)
+  self._pay(msg.sender, msg.sender, as_unitless_number(msg.value))
 
 #endregion
 
