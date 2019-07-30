@@ -187,9 +187,6 @@ BASIS_POINTS_DEN: constant(uint256) = 10000
 # Data for DAT business logic
 ###########
 
-_isTransferFrom: bool
-# @dev An internal variable to differentiate between an ERC-777 transfer vs transferFrom
-
 beneficiary: public(address)
 # @notice The address of the beneficiary organization which receives the investments. 
 # Points to the wallet of the organization. 
@@ -494,9 +491,7 @@ def _collectInvestment(
       success: bool = self.currency.transferFrom(_from, self, _quantityToInvest)
       assert success, "ERC20_TRANSFER_FAILED"
     else:
-      self._isTransferFrom = True
       self.currency.operatorSend(_from, self, _quantityToInvest, "", "")
-      self._isTransferFrom = False
 
 @private
 def _sendCurrency(
@@ -948,7 +943,7 @@ def tokensReceived(
   If currency: Pay the organization on-chain with ERC-777 tokens (only works when currency is ERC-777)
   Params are from the ERC-777 token standard
   """
-  if(self._isTransferFrom):
+  if(_operator == self):
     return
   if(msg.sender == self.currency):
     self._pay(_operator, _from, _amount)
