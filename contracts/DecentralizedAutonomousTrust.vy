@@ -918,11 +918,11 @@ def close():
     # Collect the exitFee and close the c-org.
     assert self.openUntilAtLeast <= block.timestamp, "TOO_EARLY"
 
-    exitFee = self.estimateExitFee(msg.value)
-    self._collectInvestment(msg.sender, exitFee, msg.value, True)
-
     log.StateChange(self.state, STATE_CLOSE)
     self.state = STATE_CLOSE
+
+    exitFee = self.estimateExitFee(msg.value)
+    self._collectInvestment(msg.sender, exitFee, msg.value, True)
   else:
     assert False, "INVALID_STATE"
   
