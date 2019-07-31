@@ -221,7 +221,8 @@ def initialize():
 
   # Register supported interfaces
   self.ERC1820Registry.setInterfaceImplementer(self, keccak256("ERC20Token"), self)
-  self.ERC1820Registry.setInterfaceImplementer(self, keccak256("ERC777Token"), self)
+  # We do not follow the ERC-777 spec exactly as we don't use the hooks with ERC-20 style calls
+  # self.ERC1820Registry.setInterfaceImplementer(self, keccak256("ERC777Token"), self)
   self.ERC1820Registry.setInterfaceImplementer(self, keccak256("ERC777TokensRecipient"), self)
 
   # Register owner (the DAT contract)
