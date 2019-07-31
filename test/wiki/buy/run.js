@@ -6,7 +6,9 @@ contract("wiki / buy / run", accounts => {
 
   beforeEach(async () => {
     contracts = await deployDat(accounts, {
-      initGoal: 0
+      initGoal: 0,
+      feeBasisPoints: 10,
+      burnThresholdBasisPoints: 8000
     });
   });
 
@@ -141,11 +143,6 @@ contract("wiki / buy / run", accounts => {
 
     describe("if (x+investor_balance)/(total_supply+burnt_supply) >= burn_threshold", () => {
       beforeEach(async () => {
-        contracts = await deployDat(accounts, {
-          initGoal: 0,
-          burnThresholdBasisPoints: 8000 // 80%
-        });
-
         x = new BigNumber(await contracts.dat.estimateBuyValue(amount));
         const investorBalance = new BigNumber(
           await contracts.fair.balanceOf(from)
@@ -251,10 +248,68 @@ contract("wiki / buy / run", accounts => {
   });
 
   describe("If the investor is not the beneficiary", () => {
-    it("investment_reserve*amount is being added to the buyback_reserve");
-    it(
-      "(1-investment_reserve)*amount*(1-fee) is being transfered to beneficiary"
-    );
-    it("(1-investment_reserve)*amount*fee is being sent to fee_collector");
+    const from = accounts[3];
+    let beneficiary;
+    let feeCollector;
+    const amount = "100000000000000000000";
+    let investmentReserve, fee;
+    let buybackReserveBefore, beneficiaryBefore, feeCollectorBefore;
+
+    beforeEach(async () => {
+      investmentReserve = new BigNumber(
+        await contracts.dat.investmentReserveBasisPoints()
+      ).div(constants.BASIS_POINTS_DEN);
+      fee = new BigNumber(await contracts.dat.feeBasisPoints()).div(
+        constants.BASIS_POINTS_DEN
+      );
+      buybackReserveBefore = new BigNumber(
+        await contracts.dat.buybackReserve()
+      );
+      beneficiary = await contracts.dat.beneficiary();
+      beneficiaryBefore = new BigNumber(await web3.eth.getBalance(beneficiary));
+      feeCollector = await contracts.dat.feeCollector();
+      feeCollectorBefore = new BigNumber(
+        await web3.eth.getBalance(feeCollector)
+      );
+
+      await contracts.dat.buy(from, amount, 1, {
+        from: from,
+        value: amount
+      });
+    });
+
+    it("investment_reserve*amount is being added to the buyback_reserve", async () => {
+      const buybackReserve = new BigNumber(
+        await contracts.dat.buybackReserve()
+      );
+      const delta = investmentReserve.times(amount);
+      assert.equal(
+        buybackReserve.toFixed(),
+        buybackReserveBefore.plus(delta).toFixed()
+      );
+      assert(delta.gt(0));
+    });
+
+    it("(1-investment_reserve)*amount*(1-fee) is being transfered to beneficiary", async () => {
+      const balance = new BigNumber(await web3.eth.getBalance(beneficiary));
+
+      const delta = new BigNumber(1)
+        .minus(investmentReserve)
+        .times(amount)
+        .times(new BigNumber(1).minus(fee));
+      console.log(delta.toFixed());
+      assert.equal(balance.toFixed(), beneficiaryBefore.plus(delta).toFixed());
+      assert(delta.gt(0));
+    });
+
+    it("(1-investment_reserve)*amount*fee is being sent to fee_collector", async () => {
+      const balance = new BigNumber(await web3.eth.getBalance(feeCollector));
+      const delta = new BigNumber(1)
+        .minus(investmentReserve)
+        .times(amount)
+        .times(fee);
+      assert.equal(balance.toFixed(), feeCollectorBefore.plus(delta).toFixed());
+      assert(delta.gt(0));
+    });
   });
 });
