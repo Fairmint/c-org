@@ -128,6 +128,9 @@ STATE_CLOSE: constant(uint256(stateMachine)) = 2
 STATE_CANCEL: constant(uint256(stateMachine)) = 3
 # @notice The state after closed by the `beneficiary` account from STATE_INIT
 
+SELL_FLAG: constant(bytes[1024]) =  b"\x01"
+# @notice Send as `operatorData` for a burn via the burn threshold, to differentiate from selling.
+
 MAX_SUPPLY: constant(uint256)  = 10 ** 28
 # @notice The max `totalSupply + burnedSupply`
 # @dev This limit ensures that the DAT's formulas do not overflow
@@ -326,7 +329,7 @@ def _burn(
   self.totalSupply -= _amount
 
   # Only increase the burnedSupply if a `burn` vs a `sell` via the DAT.
-  if(_operator != self.datAddress):
+  if(_operator != self.datAddress or _operatorData != SELL_FLAG):
     self.burnedSupply += _amount
 
   log.Burned(_operator, _from, _amount, _userData, _operatorData)
