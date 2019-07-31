@@ -184,6 +184,9 @@ DIGITS_DECIMAL: constant(decimal) = convert(DIGITS_UINT, decimal)
 BASIS_POINTS_DEN: constant(uint256) = 10000
 # @notice The denominator component for values specified in basis points.
 
+SELL_FLAG: constant(bytes[1024]) =  b"\x01"
+# @notice Send as `operatorData` for a burn via the burn threshold, to differentiate from selling.
+
 # Data for DAT business logic
 ###########
 
@@ -632,14 +635,14 @@ def buy(
       )
       self._distributeInvestment(self.buybackReserve() - beneficiaryContribution)
   elif(self.state == STATE_RUN):
-    if(_to == self.beneficiary):
-      self._applyBurnThreshold() # must mint before this call
-    else:
+    if(_to != self.beneficiary):
       self._distributeInvestment(_currencyValue)
 
-  # Mint purchased tokens
-  # Math: mint will fail if the supply exceeds the limit
   self.fair.mint(msg.sender, _to, tokenValue, "", "")
+  
+  if(self.state == STATE_RUN):
+    if(_to == self.beneficiary):
+      self._applyBurnThreshold() # must mint before this call
 
 #endregion
 
@@ -723,7 +726,7 @@ def _sell(
   if(_hasReceivedFunds):
     self.fair.burn(_quantityToSell, "")
   else:
-    self.fair.operatorBurn(_from, _quantityToSell, "", "")
+    self.fair.operatorBurn(_from, _quantityToSell, "", SELL_FLAG)
   
   self._sendCurrency(_to, currencyValue)
   log.Sell(_from, _to, currencyValue, _quantityToSell)
