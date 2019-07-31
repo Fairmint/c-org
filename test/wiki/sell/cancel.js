@@ -1,0 +1,154 @@
+const BigNumber = require("bignumber.js");
+const {
+  constants,
+  deployDat,
+  getGasCost,
+  shouldFail
+} = require("../../helpers");
+
+contract("wiki / sell / cancel", accounts => {
+  const initReserve = "1000000000000000000000";
+  const buyAmount = "100000000000000000000";
+  const sellAmount = "1000000000000000000";
+  let beneficiary;
+  const investor = accounts[3];
+  let contracts;
+
+  beforeEach(async () => {
+    contracts = await deployDat(accounts, {
+      initGoal: "10000000000000000000000",
+      initReserve,
+      feeBasisPoints: "10"
+    });
+    beneficiary = await contracts.dat.beneficiary();
+
+    // Buy with various accounts including the beneficiary account
+    for (let i = 0; i < 5; i++) {
+      await contracts.dat.buy(accounts[i], buyAmount, 1, {
+        from: accounts[i],
+        value: buyAmount
+      });
+    }
+
+    // Cancel the DAT
+    await contracts.dat.close({
+      from: beneficiary,
+      value: "100000000000000000000000"
+    });
+  });
+
+  it("state is cancel", async () => {
+    const state = await contracts.dat.state();
+    assert.equal(state, constants.STATE.CANCEL);
+  });
+
+  it("the beneficiary can sell", async () => {
+    await contracts.dat.sell(beneficiary, sellAmount, 1, { from: beneficiary });
+  });
+
+  describe("On a successful sell", () => {
+    let investorFairBalanceBefore;
+    let investorCurrencyBalanceBefore;
+    let totalSupplyBefore;
+    let initInvestmentBefore;
+    let x;
+    let gasCost;
+
+    beforeEach(async () => {
+      investorFairBalanceBefore = new BigNumber(
+        await contracts.fair.balanceOf(investor)
+      );
+      investorCurrencyBalanceBefore = new BigNumber(
+        await web3.eth.getBalance(investor)
+      );
+      initInvestmentBefore = new BigNumber(
+        await contracts.dat.initInvestors(investor)
+      );
+      totalSupplyBefore = new BigNumber(await contracts.fair.totalSupply());
+
+      x = new BigNumber(await contracts.dat.estimateSellValue(sellAmount));
+
+      const tx = await contracts.dat.sell(investor, sellAmount, 1, {
+        from: investor
+      });
+      gasCost = await getGasCost(tx);
+    });
+
+    it("amount is being substracted from the investor's balance.", async () => {
+      const balance = new BigNumber(await contracts.fair.balanceOf(investor));
+      assert.equal(
+        balance.toFixed(),
+        investorFairBalanceBefore.minus(sellAmount).toFixed()
+      );
+    });
+
+    it("The investor receives x collateral value from the buyback_reserve.", async () => {
+      const balance = new BigNumber(await web3.eth.getBalance(investor));
+      assert.equal(
+        balance.toFixed(),
+        investorCurrencyBalanceBefore
+          .plus(x)
+          .minus(gasCost)
+          .toFixed()
+      );
+      assert.notEqual(x.toFixed(), 0);
+    });
+
+    it("The total_supply is decreased of amount FAIRs.", async () => {
+      const totalSupply = new BigNumber(await contracts.fair.totalSupply());
+      assert.equal(
+        totalSupply.toFixed(),
+        totalSupplyBefore.minus(sellAmount).toFixed()
+      );
+    });
+
+    it("Save investor's total withdrawal in init_investors[address]-=amount.", async () => {
+      const initInvestment = new BigNumber(
+        await contracts.dat.initInvestors(investor)
+      );
+      assert.equal(
+        initInvestment.toFixed(),
+        initInvestmentBefore.minus(sellAmount).toFixed()
+      );
+    });
+  });
+
+  it("if the value is less than the min specified then sell fails", async () => {
+    const x = new BigNumber(await contracts.dat.estimateSellValue(sellAmount));
+
+    await shouldFail(
+      contracts.dat.sell(investor, sellAmount, x.plus(1).toFixed(), {
+        from: investor
+      })
+    );
+  });
+
+  it("If the min is exact, the call works", async () => {
+    const x = new BigNumber(await contracts.dat.estimateSellValue(sellAmount));
+
+    await contracts.dat.sell(investor, sellAmount, x.toFixed(), {
+      from: investor
+    });
+  });
+
+  describe("if the investor was awarded tokens from the initReserve", () => {
+    beforeEach(async () => {
+      await contracts.fair.transfer(investor, initReserve, {
+        from: beneficiary
+      });
+    });
+
+    it("If init_investors[address]<amount then the call fails.", async () => {
+      await shouldFail(
+        contracts.dat.sell(investor, initReserve, 1, { from: investor })
+      );
+    });
+
+    it("The call works if amount==init_investors[address]", async () => {
+      const initInvestment = await contracts.dat.initInvestors(investor);
+      await contracts.dat.sell(investor, initInvestment, 1, { from: investor });
+      assert.notEqual(initInvestment.toString(), 0);
+      assert.equal((await contracts.dat.initInvestors(investor)).toString(), 0);
+    });
+  });
+});
