@@ -718,6 +718,7 @@ def _sell(
   assert _from != self.beneficiary or self.state >= STATE_CLOSE, "BENEFICIARY_ONLY_SELL_IN_CLOSE_OR_CANCEL"
 
   currencyValue: uint256 = self.estimateSellValue(_quantityToSell)
+  assert currencyValue >= _minCurrencyReturned, "PRICE_SLIPPAGE"
 
   if(self.state == STATE_INIT or self.state == STATE_CANCEL):
     self.initInvestors[_from] -= _quantityToSell
