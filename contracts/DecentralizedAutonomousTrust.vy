@@ -87,7 +87,6 @@ contract IFAIR:
     _name: string[64],
     _symbol: string[32]
   ): modifying
-contract ERC1404:
   def detectTransferRestriction(
     _from: address,
     _to: address, 
@@ -795,8 +794,10 @@ def estimatePayValue(
 
   tokenValue = convert(decimalValue, uint256)
 
-  # Math: No underflow concern, as the value is at least supply^2 before the sqrt
-  tokenValue -= supply
+  if(tokenValue > supply):
+    tokenValue -= supply
+  else:
+    tokenValue = 0
 
   return tokenValue
 
@@ -827,8 +828,7 @@ def _pay(
   to: address = _to
   if(to == ZERO_ADDRESS):
     to = self.beneficiary
-  elif(ERC1404(self.fair.erc1404Address())
-    .detectTransferRestriction(ZERO_ADDRESS, _to, tokenValue) != 0):
+  elif(self.fair.detectTransferRestriction(ZERO_ADDRESS, _to, tokenValue) != 0):
     to = self.beneficiary
 
   # Math: this will never underflow since investmentReserveBasisPoints is capped to BASIS_POINTS_DEN
