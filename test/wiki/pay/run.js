@@ -1,5 +1,5 @@
 const BigNumber = require("bignumber.js");
-const { constants, deployDat, shouldFail } = require("../../helpers");
+const { constants, deployDat, getGasCost } = require("../../helpers");
 
 contract("wiki / pay / run", accounts => {
   let contracts;
@@ -7,13 +7,9 @@ contract("wiki / pay / run", accounts => {
   const payAmount = "42000000000000000000";
 
   before(async () => {
-    contracts = await deployDat(
-      accounts,
-      {
-        initGoal: "0" // Start in the run state
-      },
-      false
-    );
+    contracts = await deployDat(accounts, {
+      initGoal: "0" // Start in the run state
+    });
 
     // Buy tokens for various accounts
     for (let i = 0; i < 9; i++) {
@@ -29,53 +25,17 @@ contract("wiki / pay / run", accounts => {
     assert.equal(state.toString(), constants.STATE.RUN);
   });
 
-  describe("on pay", () => {
-    let investorBalanceBefore;
-    let payValue;
-
-    beforeEach(async () => {
-      investorBalanceBefore = new BigNumber(
-        await contracts.fair.balanceOf(investor)
-      );
-      payValue = new BigNumber(await contracts.dat.estimatePayValue(payAmount));
-      console.log(
-        new BigNumber(await contracts.dat.estimatePayValue(payAmount)).toFixed()
-      );
-      console.log(
-        new BigNumber(await contracts.dat.estimatePayValue(1)).toFixed()
-      );
-      await contracts.dat.pay(investor, payAmount, {
-        from: investor,
-        value: payAmount
-      });
-    });
-
-    it("The investor balance went up", async () => {
-      const balance = new BigNumber(await contracts.fair.balanceOf(investor));
-      assert.equal(
-        balance.toFixed(),
-        investorBalanceBefore.plus(payValue).toFixed()
-      );
-    });
-  });
-
-  it("can make a tiny payment", async () => {
-    await contracts.dat.pay(investor, "1", {
-      from: investor,
-      value: "1"
-    });
-  });
-
-  describe("If trades are restricted", () => {
-    beforeEach(async () => {
-      await contracts.erc1404.updateRestriction(1);
-    });
-
-    it("Can pay even if account is restricted", async () => {
-      await contracts.dat.pay(investor, payAmount, {
-        from: investor,
-        value: payAmount
-      });
-    });
-  });
+  it(
+    "revenue_commitment*amount is being added to the buyback_reserve and (1-revenue_commitment)*amount is being transfered to the beneficiary."
+  );
+  it(
+    "Calculate x the number of newly issued FAIRs with x=sqrt((2*revenue_commitment*amount/buy_slope)+(total_supply+burnt_supply)^2)-(total_supply+burnt_supply)."
+  );
+  it(
+    "If to is specified, then if to is allowed to receive FAIRs,x FAIRs are added to the to address specified, otherwise the function fails. If to is not specified, x FAIRs are added to the beneficiary's balance."
+  );
+  it(
+    "If (x+investor_balance)/(total_supply+burnt_supply) >= burn_threshold then burn((x+investor_balance)-(burn_threshold*(total_supply+burnt_supply)) is called."
+  );
+  it("The total_supply is increased with x new FAIRs.");
 });

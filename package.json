@@ -3,7 +3,7 @@
   "description": "Smart-contracts for continuous organizations.",
   "scripts": {
     "build": "npm run compile",
-    "compile": "truffle compile --all",
+    "compile": "truffle compile",
     "ganache": "ganache-cli -e 10000000000 -a 100",
     "dev": "npm run compile && npm run test",
     "lint": "eslint . --fix",
