@@ -1,7 +1,7 @@
 const BigNumber = require("bignumber.js");
-const { constants, deployDat, getGasCost } = require("../../helpers");
+const { constants, deployDat, getGasCost } = require("../helpers");
 
-contract("wiki / pay / run", accounts => {
+contract("dat / pay", accounts => {
   let contracts;
   const investor = accounts[3];
   const payAmount = "42000000000000000000";
