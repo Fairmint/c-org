@@ -8,7 +8,7 @@ const vestingArtifact = artifacts.require("TokenVesting");
 
 const updateDatConfig = require("./updateDatConfig");
 
-module.exports = async function deployDat(accounts, options) {
+module.exports = async function deployDat(accounts, options, useProxy = true) {
   const contracts = {};
   const callOptions = Object.assign(
     {
@@ -26,25 +26,32 @@ module.exports = async function deployDat(accounts, options) {
     options
   );
   console.log(`Deploy DAT: ${JSON.stringify(callOptions, null, 2)}`);
-  // ProxyAdmin
-  contracts.proxyAdmin = await proxyAdminArtifact.new({
-    from: callOptions.control
-  });
+
+  if (useProxy) {
+    // ProxyAdmin
+    contracts.proxyAdmin = await proxyAdminArtifact.new({
+      from: callOptions.control
+    });
+  }
 
   // FAIR
   const fairContract = await fairArtifact.new({
     from: callOptions.control
   });
-  const fairProxy = await proxyArtifact.new(
-    fairContract.address, // logic
-    contracts.proxyAdmin.address, // admin
-    [], // data
-    {
-      from: callOptions.control
-    }
-  );
+  if (useProxy) {
+    const fairProxy = await proxyArtifact.new(
+      fairContract.address, // logic
+      contracts.proxyAdmin.address, // admin
+      [], // data
+      {
+        from: callOptions.control
+      }
+    );
 
-  contracts.fair = await fairArtifact.at(fairProxy.address);
+    contracts.fair = await fairArtifact.at(fairProxy.address);
+  } else {
+    contracts.fair = fairContract;
+  }
   // BigDiv
   if (callOptions.bigDivAddress) {
     contracts.bigDiv = await bigDivArtifact.at(callOptions.bigDivAddress);
@@ -59,15 +66,19 @@ module.exports = async function deployDat(accounts, options) {
   const datContract = await datArtifact.new({
     from: callOptions.control
   });
-  const datProxy = await proxyArtifact.new(
-    datContract.address, // logic
-    contracts.proxyAdmin.address, // admin
-    [], // data
-    {
-      from: callOptions.control
-    }
-  );
-  contracts.dat = await datArtifact.at(datProxy.address);
+  if (useProxy) {
+    const datProxy = await proxyArtifact.new(
+      datContract.address, // logic
+      contracts.proxyAdmin.address, // admin
+      [], // data
+      {
+        from: callOptions.control
+      }
+    );
+    contracts.dat = await datArtifact.at(datProxy.address);
+  } else {
+    contracts.dat = datContract;
+  }
   await contracts.dat.initialize(
     callOptions.bigDivAddress,
     contracts.fair.address,
