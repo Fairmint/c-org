@@ -15,7 +15,7 @@ module.exports = async function updateDatConfig(contracts, options) {
     options
   );
 
-  console.log(`Update DAT: ${JSON.stringify(callOptions, null, 2)}`);
+  //console.log(`Update DAT: ${JSON.stringify(callOptions, null, 2)}`);
 
   return contracts.dat.updateConfig(
     callOptions.erc1404Address,
