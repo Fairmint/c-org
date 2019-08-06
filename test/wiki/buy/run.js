@@ -297,7 +297,6 @@ contract("wiki / buy / run", accounts => {
         .minus(investmentReserve)
         .times(amount)
         .times(new BigNumber(1).minus(fee));
-      console.log(delta.toFixed());
       assert.equal(balance.toFixed(), beneficiaryBefore.plus(delta).toFixed());
       assert(delta.gt(0));
     });

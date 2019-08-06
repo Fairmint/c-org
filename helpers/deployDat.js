@@ -25,7 +25,7 @@ module.exports = async function deployDat(accounts, options, useProxy = true) {
     },
     options
   );
-  console.log(`Deploy DAT: ${JSON.stringify(callOptions, null, 2)}`);
+  // console.log(`Deploy DAT: ${JSON.stringify(callOptions, null, 2)}`);
 
   if (useProxy) {
     // ProxyAdmin
