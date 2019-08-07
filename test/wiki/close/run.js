@@ -58,7 +58,7 @@ contract("wiki / close / run", accounts => {
 
     describe("after the lock expires", () => {
       beforeEach(async () => {
-        sleep.sleep(10);
+        sleep.sleep(11);
       });
 
       it("then close works again", async () => {
