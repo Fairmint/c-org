@@ -24,7 +24,7 @@
     "hardlydifficult-test-helpers": "0.1.2",
     "openzeppelin-eth": "2.2.0",
     "openzeppelin-solidity": "2.3.0",
-    "openzeppelin-test-helpers": "0.4.1",
+    "openzeppelin-test-helpers": "0.4.2",
     "papaparse": "5.0.1",
     "sleep": "^6.1.0",
     "truffle": "5.0.30",
