@@ -322,7 +322,7 @@ def _burn(
   params from the ERC-777 token standard
   """
   assert _from != ZERO_ADDRESS, "ERC777: burn from the zero address"
-  assert _operator == self.datAddress or self.detectTransferRestriction(_from, ZERO_ADDRESS, _amount) == 0, "NOT_AUTHORIZED"
+  assert _operator != self.datAddress or self.detectTransferRestriction(_from, ZERO_ADDRESS, _amount) == 0, "NOT_AUTHORIZED"
 
   self._callTokensToSend(_operator, _from, ZERO_ADDRESS, _amount, _userData, _operatorData)
 
