@@ -724,7 +724,7 @@ def _sell(
 
   # Distribute funds
   if(_hasReceivedFunds):
-    self.fair.burn(_quantityToSell, "")
+    self.fair.burn(_quantityToSell, SELL_FLAG)
   else:
     self.fair.operatorBurn(_from, _quantityToSell, "", SELL_FLAG)
   
@@ -955,6 +955,6 @@ def tokensReceived(
   if(msg.sender == self.currency):
     self._pay(_operator, _from, _amount)
   elif(msg.sender == self.fairAddress):
-    self._sell(_from, _to, _amount, 1, True)
+    self._sell(_from, _from, _amount, 1, True)
   else:
     assert False, "INVALID_TOKEN_TYPE"

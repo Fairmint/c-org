@@ -322,7 +322,7 @@ def _burn(
   params from the ERC-777 token standard
   """
   assert _from != ZERO_ADDRESS, "ERC777: burn from the zero address"
-  # No ERC-1404 check required
+  assert _operator != self.datAddress or self.detectTransferRestriction(_from, ZERO_ADDRESS, _amount) == 0, "NOT_AUTHORIZED"
 
   self._callTokensToSend(_operator, _from, ZERO_ADDRESS, _amount, _userData, _operatorData)
 
@@ -330,7 +330,11 @@ def _burn(
   self.totalSupply -= _amount
 
   # Only increase the burnedSupply if a `burn` vs a `sell` via the DAT.
-  if(_operator != self.datAddress or _operatorData != SELL_FLAG):
+  if(not (
+    (_operator == self.datAddress and _operatorData == SELL_FLAG)
+    or
+    (_from == self.datAddress and _userData == SELL_FLAG))
+  ):
     self.burnedSupply += _amount
 
   log.Burned(_operator, _from, _amount, _userData, _operatorData)
