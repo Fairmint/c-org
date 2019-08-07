@@ -60,7 +60,7 @@ module.exports = async function deployDat(accounts, options, useProxy = true) {
       from: callOptions.control
     });
     callOptions.bigDivAddress = contracts.bigDiv.address;
-    console.log(`Deployed bigDiv: ${contracts.bigDiv.address}`);
+    // console.log(`Deployed bigDiv: ${contracts.bigDiv.address}`);
   }
   // DAT
   const datContract = await datArtifact.new({
@@ -97,7 +97,7 @@ module.exports = async function deployDat(accounts, options, useProxy = true) {
       from: callOptions.control
     });
     callOptions.erc1404Address = contracts.erc1404.address;
-    console.log(`Deployed erc1404: ${contracts.erc1404.address}`);
+    // console.log(`Deployed erc1404: ${contracts.erc1404.address}`);
   } else {
     contracts.erc1404 = await erc1404Artifact.at(callOptions.erc1404Address);
   }
