@@ -8,7 +8,7 @@ contract("dat / erc1404 / restrictionCode", accounts => {
   });
 
   it("Can read status 0", async () => {
-    const restriction = await contracts.erc1404.detectTransferRestriction(
+    const restriction = await contracts.fair.detectTransferRestriction(
       accounts[0],
       accounts[1],
       42
@@ -22,7 +22,7 @@ contract("dat / erc1404 / restrictionCode", accounts => {
     });
 
     it("Can read status 1", async () => {
-      const restriction = await contracts.erc1404.detectTransferRestriction(
+      const restriction = await contracts.fair.detectTransferRestriction(
         accounts[0],
         accounts[1],
         42
