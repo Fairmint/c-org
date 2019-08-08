@@ -10,7 +10,7 @@ contract TestERC1404
     address _from,
     address _to,
     uint256 //_value
-  ) public view
+  ) public
     returns(uint8)
   {
     if(alwaysApproved[_from] || alwaysApproved[_to]) return 0;
