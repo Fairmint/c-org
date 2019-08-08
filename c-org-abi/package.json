@@ -1,6 +1,6 @@
 {
   "name": "c-org-abi",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "ABI for c-org contracts including FAIR and DAT.",
   "repository": {
     "type": "git",
