@@ -255,8 +255,8 @@ investmentReserveBasisPoints: public(uint256)
 # @notice The investment reserve of the c-org. Defines the percentage of the value invested that is 
 # automatically funneled and held into the buyback_reserve expressed in basis points.
 
-isCurrencyERC20: public(bool)
-# @notice A cache of the currency type, if `True` use ERC-20 otherwise use ETH or ERC-777.
+isCurrencyERC777: public(bool)
+# @notice A cache of the currency type, if `True` use ERC-777 otherwise use ETH or ERC-20.
 
 openUntilAtLeast: public(uint256)
 # @notice The earliest date/time (in seconds) that the DAT may enter the `CLOSE` state, ensuring
@@ -377,8 +377,8 @@ def initialize(
   implementer: address = IERC1820Registry(0x1820a4B7618BdE71Dce8cdc73aAB6C95905faD24).getInterfaceImplementer(_currencyAddress, keccak256("ERC777Token"))
   if(implementer == ZERO_ADDRESS):
     self.currency = IERC777_20_Token(_currencyAddress)
-    self.isCurrencyERC20 = True
   else:
+    self.isCurrencyERC777 = True
     self.currency = IERC777_20_Token(implementer)
 
   # Initialize the FAIR token
@@ -489,11 +489,11 @@ def _collectInvestment(
   else: # currency is ERC20 or ERC777
     assert _msgValue == 0, "DO_NOT_SEND_ETH"
 
-    if(self.isCurrencyERC20):
+    if(self.isCurrencyERC777):
+      self.currency.operatorSend(_from, self, _quantityToInvest, "", "")
+    else:
       success: bool = self.currency.transferFrom(_from, self, _quantityToInvest)
       assert success, "ERC20_TRANSFER_FAILED"
-    else:
-      self.currency.operatorSend(_from, self, _quantityToInvest, "", "")
 
 @private
 def _sendCurrency(
@@ -507,11 +507,11 @@ def _sendCurrency(
     if(self.currency == ZERO_ADDRESS):
       send(_to, as_wei_value(_amount, "wei"))
     else:
-      if(self.isCurrencyERC20):
+      if(self.isCurrencyERC777):
+        self.currency.send(_to, as_unitless_number(_amount), "")
+      else:
         success: bool = self.currency.transfer(_to, as_unitless_number(_amount))
         assert success, "ERC20_TRANSFER_FAILED"
-      else:
-        self.currency.send(_to, as_unitless_number(_amount), "")
 
 #endregion
 
