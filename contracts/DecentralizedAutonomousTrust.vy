@@ -261,7 +261,7 @@ isCurrencyERC20: public(bool)
 openUntilAtLeast: public(uint256)
 # @notice The earliest date/time (in seconds) that the DAT may enter the `CLOSE` state, ensuring
 # that if the DAT reaches the `RUN` state it will remain running for at least this period of time.
-# @dev This value may be increased anytime by the 
+# @dev This value may be increased anytime by the control account
 
 minInvestment: public(uint256)
 # @notice The minimum amount of `currency` investment accepted.
@@ -351,9 +351,6 @@ def initialize(
 
   assert _buySlopeNum > 0, "INVALID_SLOPE_NUM" # 0 not supported
   assert _buySlopeDen > 0, "INVALID_SLOPE_DEN"
-  # TODO add at least 12 decimals to this for USDC, maybe 18 if no decimals on the token.
-  #assert _buySlopeDen <= 1000000000000000000000000000, "SLOPE_DEN_OUT_OF_RANGE" # 1b full tokens to 1
-  #TODOassert _buySlopeNum <= 1000000000000000000000000000, "SLOPE_NUM_OUT_OF_RANGE" # Fraction may be > 1; an extreme value
   self.buySlopeNum = _buySlopeNum
   self.buySlopeDen = _buySlopeDen
   assert _investmentReserveBasisPoints <= BASIS_POINTS_DEN, "INVALID_RESERVE" # 100% or less
@@ -527,8 +524,7 @@ def _distributeInvestment(
   # Rounding favors buybackReserve, then beneficiary, and feeCollector is last priority.
 
   # Math: if investment value is < (2^256 - 1) / 10000 this will never overflow.
-  # With buybackReserve capped this could only fail with a huge single investment, but they can
-  # try again with multiple smaller investments.
+  # Except maybe with a huge single investment, but they can try again with multiple smaller investments.
   reserve: uint256 = self.investmentReserveBasisPoints * _value
   reserve /= BASIS_POINTS_DEN
   reserve = _value - reserve
@@ -561,7 +557,7 @@ def estimateBuyValue(
     )
     assert tokenValue <= self.initGoal, "MAX_INIT_GOAL"
   elif(self.state == STATE_RUN):
-    # Math: supply's max value is 10e28 as enfored in FAIR.vy
+    # Math: supply's max value is 10e28 as enforced in FAIR.vy
     supply: uint256 = self.fair.totalSupply() + self.fair.burnedSupply()
     tokenValue = self.bigDiv.bigDiv2x2(
       2 * _currencyValue, self.buySlopeDen,
@@ -586,8 +582,11 @@ def estimateBuyValue(
 
     tokenValue = convert(decimalValue, uint256)
 
-    # Math: No underflow concern, as the value is at least supply^2 before the sqrt
-    tokenValue -= supply
+    # Math: small chance of underflow due to possible rounding in sqrt
+    if(tokenValue > supply):
+      tokenValue -= supply
+    else:
+      tokenValue = 0
   else:
     assert False, "INVALID_STATE"
 
@@ -623,7 +622,7 @@ def buy(
   if(self.state == STATE_INIT):
     # Math: the hard-cap in mint ensures that this line could never overflow
     self.initInvestors[_to] += tokenValue
-    # Math: this would only overflow if initReserve was burned, but auth blocks burning durning init
+    # Math: this would only overflow if initReserve was burned, but FAIR blocks burning durning init
     if(self.fair.totalSupply() + tokenValue - self.initReserve >= self.initGoal):
       log.StateChange(self.state, STATE_RUN)
       self.state = STATE_RUN
@@ -699,7 +698,7 @@ def estimateSellValue(
   else: # STATE_INIT or STATE_CANCEL
     # Math: _quantityToSell and buybackReserve are both capped such that this can never overflow
     currencyValue = _quantityToSell * buybackReserve
-    # Math: auth blocks initReserve from being burned unless we reach the RUN state which prevents an underflow
+    # Math: FAIR blocks initReserve from being burned unless we reach the RUN state which prevents an underflow
     currencyValue /= totalSupply - self.initReserve
 
   assert currencyValue > 0, "INSUFFICIENT_FUNDS"
