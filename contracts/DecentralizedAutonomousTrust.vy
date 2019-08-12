@@ -184,7 +184,7 @@ BASIS_POINTS_DEN: constant(uint256) = 10000
 # @notice The denominator component for values specified in basis points.
 
 SELL_FLAG: constant(bytes[1024]) =  b"\x01"
-# @notice Send as `operatorData` for a burn via the burn threshold, to differentiate from selling.
+# @notice Send as `operatorData` or `data` for a burn via the burn threshold, to differentiate from selling.
 
 # Data for DAT business logic
 ###########

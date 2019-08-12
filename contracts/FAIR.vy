@@ -129,7 +129,7 @@ STATE_CANCEL: constant(uint256(stateMachine)) = 3
 # @notice The state after closed by the `beneficiary` account from STATE_INIT
 
 SELL_FLAG: constant(bytes[1024]) =  b"\x01"
-# @notice Send as `operatorData` for a burn via the burn threshold, to differentiate from selling.
+# @notice Send as `operatorData` or `data` for a burn via the burn threshold, to differentiate from selling.
 
 MAX_SUPPLY: constant(uint256)  = 10 ** 28
 # @notice The max `totalSupply + burnedSupply`
@@ -322,19 +322,20 @@ def _burn(
   params from the ERC-777 token standard
   """
   assert _from != ZERO_ADDRESS, "ERC777: burn from the zero address"
-  assert _operator != self.datAddress or self.detectTransferRestriction(_from, ZERO_ADDRESS, _amount) == 0, "NOT_AUTHORIZED"
 
   self._callTokensToSend(_operator, _from, ZERO_ADDRESS, _amount, _userData, _operatorData)
 
   self.balanceOf[_from] -= _amount
   self.totalSupply -= _amount
 
-  # Only increase the burnedSupply if a `burn` vs a `sell` via the DAT.
   if(not (
     (_operator == self.datAddress and _operatorData == SELL_FLAG)
     or
     (_from == self.datAddress and _userData == SELL_FLAG))
   ):
+    # This is a burn (vs a sell)
+    assert self.dat.state() == STATE_RUN, "ONLY_DURING_RUN"
+    assert _operator != self.datAddress or self.detectTransferRestriction(_from, ZERO_ADDRESS, _amount) == 0, "NOT_AUTHORIZED"
     self.burnedSupply += _amount
 
   log.Burned(_operator, _from, _amount, _userData, _operatorData)
@@ -358,15 +359,15 @@ def _send(
   assert _from != ZERO_ADDRESS, "ERC777: send from the zero address"
   assert _to != ZERO_ADDRESS, "ERC777: send to the zero address"
   assert self.detectTransferRestriction(_from, _to, _amount) == 0, "NOT_AUTHORIZED"
-  assert _from == self.dat.beneficiary() or self.dat.state() != STATE_INIT, "Only the beneficiary can make transfers during STATE_INIT"
+  assert self.dat.state() != STATE_INIT or _from == self.dat.beneficiary(), "Only the beneficiary can make transfers during STATE_INIT"
 
-  if(_callHooks):
+  if(_callHooks): # This intentionally violates ERC-777 in order to support standard ERC-20
     self._callTokensToSend(_operator, _from, _to, _amount, _userData, _operatorData)
 
   self.balanceOf[_from] -= _amount
   self.balanceOf[_to] += _amount
 
-  if(_callHooks):
+  if(_callHooks): # This intentionally violates ERC-777 in order to support standard ERC-20
     self._callTokensReceived(_operator, _from, _to, _amount, _userData, _operatorData)
 
   log.Sent(_operator, _from, _to, _amount, _userData, _operatorData)
@@ -433,8 +434,8 @@ def transferFrom(
   """
   @notice Transfers `_value` amount of tokens from address `_from` to address `_to` if authorized.
   """
-  self._send(msg.sender, _from, _to, _value, False, "", "")
   self.allowances[_from][msg.sender] -= _value
+  self._send(msg.sender, _from, _to, _value, False, "", "")
   log.Approval(_from, msg.sender, self.allowances[_from][msg.sender])
   return True
 
@@ -494,7 +495,7 @@ def revokeOperator(
 ):
   """
   @notice Remove the right of the operator address to be an operator for msg.sender and to send and burn tokens on its behalf.
-  @dev The defaultOperator cannot be revoked.
+  @dev The defaultOperator cannot be revoked, this is non-standard ERC-777 but ensures the DAT always has access.
   """
   assert _operator != msg.sender, "ERC777: revoking self as operator"
 
@@ -510,8 +511,6 @@ def burn(
   @notice Burn the amount of tokens from the address msg.sender if authorized.
   @dev Note that this is not the same as a `sell` via the DAT.
   """
-  assert self.dat.state() == STATE_RUN, "ONLY_DURING_RUN"
-
   self._burn(msg.sender, msg.sender, _amount, _userData, "")
 
 @public
@@ -525,7 +524,6 @@ def operatorBurn(
   @notice Burn the amount of tokens on behalf of the address from if authorized.
   @dev In addition to the standard ERC-777 use case, this is used by the DAT to `sell` tokens.
   """
-  assert msg.sender == self.dat or self.dat.state() == STATE_RUN, "ONLY_BURN_DURING_RUN"
   assert self.isOperatorFor(msg.sender, _from), "ERC777: caller is not an operator for holder"
   self._burn(msg.sender, _from, _amount, _userData, _operatorData)
 
