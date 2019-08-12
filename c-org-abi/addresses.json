@@ -13,11 +13,11 @@
     "orgs": [
       { 
         "name": "Fairmint (test w/ DAI)",
-        "token": "0x4b1dc19D8837A6188D02d1749F2A95dE6eEC1Aa9"
+        "token": "0x5359ee2eedE0f53A8516419Cf92C3b385aEA791d"
       },
       {
         "name": "HardlyDifficult (test w/ USDC)",
-        "token": "0x49a2A93F59fDF1B760791c50fA47210a673AA756"
+        "token": "0x14E37B04E7ca537871E71987476bf4f288275Df9"
       }
     ]
   },
@@ -29,11 +29,11 @@
     "orgs": [
       { 
         "name": "Fairmint (test w/ DAI)",
-        "token": "0x6d9A1C55A73296Aa5F8816CA64bB9c9f5C53e3F9"
+        "token": "0x8bC50fbE8F09749752025138E65B188c9D0c2939"
       },
       { 
         "name": "HardlyDifficult (test w/ USDC)",
-        "token": "0x04C895aCd64C84D85cc94Cf5D2167824Dd531e27"
+        "token": "0x5076bd85224D97FDFA771Ff3E22556ddE62C0144"
       }
     ]
   }
