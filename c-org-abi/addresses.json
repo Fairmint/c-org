@@ -6,34 +6,34 @@
     "erc1404": ""
   },
   "rinkeby": {
-    "dai": "0x25466216Bf9Cfc085A50771075Aa0a4D5fF295CB",
-    "usdc": "0xa20072f09b8328cE2f4E5e4D1A84Ae9e25Ad4b9e",
+    "dai": "0xd8897483e036899750549Fe73cb6e2826cF41726",
+    "usdc": "0xC8190aA0626441AEA5Ae182aEE92A86752Cd67f8",
     "bigDiv": "0xA7b84f8c9edc87b1679b8ebe2BC790C4e2Ca203A",
     "erc1404": "0xc4954A953Cc26330615BF72a12dE54fAe4Bb3E99",
     "orgs": [
       { 
         "name": "Fairmint (test w/ DAI)",
-        "token": "0x5359ee2eedE0f53A8516419Cf92C3b385aEA791d"
+        "token": "0x550C45f63e6c4a2336FCa72B9ed345818F090059"
       },
       {
         "name": "HardlyDifficult (test w/ USDC)",
-        "token": "0x14E37B04E7ca537871E71987476bf4f288275Df9"
+        "token": "0xe92F02EB35f21803e69eD668ce111e9fDe125Ed0"
       }
     ]
   },
   "ropsten": {
-    "dai": "0x2bC24f6E7c600FE28AFC9d3f82600B9D812fbC1E",
-    "usdc": "0xe2620386D660015fb2bBDb79bf45E75A2cBC5de0",
+    "dai": "0x7bfb799EC7B9421cBa80F7e84e8522e849349631",
+    "usdc": "0xCB89Fa45eBE0Ad11AA399e8aB42c3C629C790649",
     "bigDiv": "0xC52309170438de31254C757dA469071237e7BB4E",
     "erc1404": "0x54501Bf1218BbCe05d9399e3478c32273BaE44eF",
     "orgs": [
       { 
         "name": "Fairmint (test w/ DAI)",
-        "token": "0x8bC50fbE8F09749752025138E65B188c9D0c2939"
+        "token": "0x51db0c518aCedBfa9112F8FDE6527f01E74189fd"
       },
       { 
         "name": "HardlyDifficult (test w/ USDC)",
-        "token": "0x5076bd85224D97FDFA771Ff3E22556ddE62C0144"
+        "token": "0x477B5fA40B7ED37D3bdbF43A1dfa0dD2f0BD0212"
       }
     ]
   }

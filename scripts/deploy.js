@@ -35,25 +35,25 @@ contract("deploy script", accounts => {
     for (let i = 0; i < orgs.length; i++) {
       const callOptions = orgs[i];
       let currencyToken;
-      if (addresses[callOptions.currencyType]) {
-        currencyToken = await testDaiArtifact.at(
-          addresses[callOptions.currencyType]
-        );
+      // if (addresses[callOptions.currencyType]) {
+      //   currencyToken = await testDaiArtifact.at(
+      //     addresses[callOptions.currencyType]
+      //   );
+      // } else {
+      if (callOptions.currencyType === "dai") {
+        currencyToken = await testDaiArtifact.new({ from: accounts[0] });
+      } else if (callOptions.currencyType === "usdc") {
+        currencyToken = await testUsdcArtifact.new({ from: accounts[0] });
       } else {
-        if (callOptions.currencyType === "dai") {
-          currencyToken = await testDaiArtifact.new({ from: accounts[0] });
-        } else if (callOptions.currencyType === "usdc") {
-          currencyToken = await testUsdcArtifact.new({ from: accounts[0] });
-        } else {
-          throw new Error("Missing currency type");
-        }
-
-        console.log(
-          `Deployed currency: ${
-            currencyToken.address
-          } (${await currencyToken.symbol()})`
-        );
+        throw new Error("Missing currency type");
       }
+
+      console.log(
+        `Deployed currency: ${
+          currencyToken.address
+        } (${await currencyToken.symbol()})`
+      );
+      // }
       const contracts = await deployDat(
         accounts,
         Object.assign(
