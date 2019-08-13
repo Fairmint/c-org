@@ -60,7 +60,8 @@ contract("deploy script", accounts => {
           {
             bigDivAddress: addresses.bigDiv,
             erc1404Address: addresses.erc1404,
-            currency: currencyToken.address
+            currency: currencyToken.address,
+            minInvestment: "1000000"
           },
           callOptions
         )
