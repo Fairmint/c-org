@@ -35,32 +35,33 @@ contract("deploy script", accounts => {
     for (let i = 0; i < orgs.length; i++) {
       const callOptions = orgs[i];
       let currencyToken;
-      // if (addresses[callOptions.currencyType]) {
-      //   currencyToken = await testDaiArtifact.at(
-      //     addresses[callOptions.currencyType]
-      //   );
-      // } else {
-      if (callOptions.currencyType === "dai") {
-        currencyToken = await testDaiArtifact.new({ from: accounts[0] });
-      } else if (callOptions.currencyType === "usdc") {
-        currencyToken = await testUsdcArtifact.new({ from: accounts[0] });
+      if (addresses[callOptions.currencyType]) {
+        currencyToken = await testDaiArtifact.at(
+          addresses[callOptions.currencyType]
+        );
       } else {
-        throw new Error("Missing currency type");
-      }
+        if (callOptions.currencyType === "dai") {
+          currencyToken = await testDaiArtifact.new({ from: accounts[0] });
+        } else if (callOptions.currencyType === "usdc") {
+          currencyToken = await testUsdcArtifact.new({ from: accounts[0] });
+        } else {
+          throw new Error("Missing currency type");
+        }
 
-      console.log(
-        `Deployed currency: ${
-          currencyToken.address
-        } (${await currencyToken.symbol()})`
-      );
-      // }
+        console.log(
+          `Deployed currency: ${
+            currencyToken.address
+          } (${await currencyToken.symbol()})`
+        );
+      }
       const contracts = await deployDat(
         accounts,
         Object.assign(
           {
             bigDivAddress: addresses.bigDiv,
             erc1404Address: addresses.erc1404,
-            currency: currencyToken.address
+            currency: currencyToken.address,
+            minInvestment: "1000000"
           },
           callOptions
         )
