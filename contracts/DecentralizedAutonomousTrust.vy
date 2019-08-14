@@ -545,7 +545,8 @@ def estimateBuyValue(
   @notice Calculate how many FAIR tokens you would buy with the given amount of currency if `buy` was called now.
   @param _currencyValue How much currency to spend in order to buy FAIR.
   """
-  assert _currencyValue >= self.minInvestment, "SEND_AT_LEAST_MIN_INVESTMENT"
+  if(_currencyValue < self.minInvestment):
+    return 0
 
   # Calculate the tokenValue for this investment
   tokenValue: uint256
@@ -555,7 +556,8 @@ def estimateBuyValue(
       self.initGoal, self.buySlopeNum,
       False
     )
-    assert tokenValue <= self.initGoal, "MAX_INIT_GOAL"
+    if(tokenValue > self.initGoal):
+      return 0
   elif(self.state == STATE_RUN):
     # Math: supply's max value is 10e28 as enforced in FAIR.vy
     supply: uint256 = self.fair.totalSupply() + self.fair.burnedSupply()
@@ -588,7 +590,7 @@ def estimateBuyValue(
     else:
       tokenValue = 0
   else:
-    assert False, "INVALID_STATE"
+    return 0 # invalid state
 
   return tokenValue
 
@@ -701,8 +703,6 @@ def estimateSellValue(
     # Math: FAIR blocks initReserve from being burned unless we reach the RUN state which prevents an underflow
     currencyValue /= totalSupply - self.initReserve
 
-  assert currencyValue > 0, "INSUFFICIENT_FUNDS"
-
   return currencyValue
 
 @private
@@ -714,6 +714,7 @@ def _sell(
   _hasReceivedFunds: bool
 ):
   assert _from != self.beneficiary or self.state >= STATE_CLOSE, "BENEFICIARY_ONLY_SELL_IN_CLOSE_OR_CANCEL"
+  assert _minCurrencyReturned > 0, "MUST_SELL_AT_LEAST_1"
 
   currencyValue: uint256 = self.estimateSellValue(_quantityToSell)
   assert currencyValue >= _minCurrencyReturned, "PRICE_SLIPPAGE"
