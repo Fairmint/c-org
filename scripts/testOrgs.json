@@ -21,12 +21,6 @@
   {
     "currencyType": "usdc",
     "name": "Hardly Difficult",
-    "symbol": "HDY",
-    "vesting": [
-      {
-        "address": "0x9488D097c74d72aeD3D4d6570fb7d359174aDDb0",
-        "value": "42000000000000000000"
-      }
-    ]
+    "symbol": "HDY"
   }
 ]

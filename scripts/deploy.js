@@ -1,4 +1,4 @@
-const erc1820 = require("erc1820");
+const BigNumber = require("bignumber.js");
 const { deployDat } = require("../helpers");
 const fs = require("fs");
 
@@ -35,6 +35,7 @@ contract("deploy script", accounts => {
     for (let i = 0; i < orgs.length; i++) {
       const callOptions = orgs[i];
       let currencyToken;
+      let currencyDecimals = 18;
       if (addresses[callOptions.currencyType]) {
         currencyToken = await testDaiArtifact.at(
           addresses[callOptions.currencyType]
@@ -54,6 +55,9 @@ contract("deploy script", accounts => {
           } (${await currencyToken.symbol()})`
         );
       }
+      if (currencyToken) {
+        currencyDecimals = parseInt(await currencyToken.decimals());
+      }
       const contracts = await deployDat(
         accounts,
         Object.assign(
@@ -61,7 +65,9 @@ contract("deploy script", accounts => {
             bigDivAddress: addresses.bigDiv,
             erc1404Address: addresses.erc1404,
             currency: currencyToken.address,
-            minInvestment: "1000000"
+            minInvestment: new BigNumber("100")
+              .shiftedBy(currencyDecimals)
+              .toFixed()
           },
           callOptions
         )
