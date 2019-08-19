@@ -1,7 +1,7 @@
 const fairArtifact = artifacts.require("FAIR");
 const datArtifact = artifacts.require("DecentralizedAutonomousTrust");
 const bigDivArtifact = artifacts.require("BigDiv");
-const erc1404Artifact = artifacts.require("TestERC1404");
+const erc1404Artifact = artifacts.require("ERC1404");
 const proxyArtifact = artifacts.require("AdminUpgradeabilityProxy");
 const proxyAdminArtifact = artifacts.require("ProxyAdmin");
 const vestingArtifact = artifacts.require("TokenVesting");
@@ -92,15 +92,22 @@ module.exports = async function deployDat(accounts, options, useProxy = true) {
     { from: callOptions.control }
   );
   // ERC1404
-  if (!callOptions.erc1404Address) {
-    contracts.erc1404 = await erc1404Artifact.new({
-      from: callOptions.control
-    });
-    callOptions.erc1404Address = contracts.erc1404.address;
-    // console.log(`Deployed erc1404: ${contracts.erc1404.address}`);
-  } else {
-    contracts.erc1404 = await erc1404Artifact.at(callOptions.erc1404Address);
-  }
+  contracts.erc1404 = await erc1404Artifact.new({
+    from: callOptions.control
+  });
+  await contracts.erc1404.initialize({ from: callOptions.control });
+  callOptions.erc1404Address = contracts.erc1404.address;
+  // console.log(`Deployed erc1404: ${contracts.erc1404.address}`);
+  await contracts.erc1404.approve(callOptions.control, true, {
+    from: callOptions.control
+  });
+  await contracts.erc1404.approve(callOptions.beneficiary, true, {
+    from: callOptions.control
+  });
+  await contracts.erc1404.approve(callOptions.feeCollector, true, {
+    from: callOptions.control
+  });
+
   // Update DAT (with new AUTH and other callOptions)
   await updateDatConfig(contracts, callOptions);
   // Move the initReserve to vesting contracts

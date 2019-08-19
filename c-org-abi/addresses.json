@@ -2,14 +2,12 @@
   "mainnet": {
     "dai": "0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359",
     "usdc": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
-    "bigDiv": "",
-    "erc1404": ""
+    "bigDiv": ""
   },
   "rinkeby": {
     "dai": "0xe86dBee701DE570F53611D6B6D706f78A8a4F648",
     "usdc": "0x521104B09737BFEda072D24E569dB26F16382344",
     "bigDiv": "",
-    "erc1404": "",
     "orgs": [
       { 
         "name": "Fairmint (test w/ DAI)",
@@ -25,7 +23,6 @@
     "dai": "0xC51cA7FE8bA4bc64a9a2e25f295EECb4C3d8bABE",
     "usdc": "0xe12Aea94b74EEE8a2504E9f26c7f64c2c09E66BE",
     "bigDiv": "",
-    "erc1404": "",
     "orgs": [
       { 
         "name": "Fairmint (test w/ DAI)",
