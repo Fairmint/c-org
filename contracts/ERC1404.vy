@@ -4,7 +4,7 @@ Approve: event({
   _isApproved: bool
 })
 
-approved: public(map(address => bool))
+approved: public(map(address, bool))
 owner: public(address)
 
 @public
