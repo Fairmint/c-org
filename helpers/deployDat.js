@@ -126,6 +126,10 @@ module.exports = async function deployDat(accounts, options, useProxy = true) {
         }
       );
       contracts.vesting.push(contract);
+      
+      await contracts.erc1404.approve(contracts.vesting[i].address, true, {
+        from: callOptions.control
+      });
       await contracts.fair.transfer(
         contract.address,
         callOptions.vesting[i].value,
