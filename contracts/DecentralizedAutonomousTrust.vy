@@ -1,4 +1,4 @@
-# Decentralized Autonomous Trust
+# @title Decentralized Autonomous Trust
 
 #region Types
 ##################################################
