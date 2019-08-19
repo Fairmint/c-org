@@ -10,7 +10,7 @@ owner: public(address)
 
 @public
 def initialize():
-  assert self.owner = ZERO_ADDRESS, "ALREADY_INITIALIZED"
+  assert self.owner == ZERO_ADDRESS, "ALREADY_INITIALIZED"
 
   self.owner = msg.sender
   self.approved[ZERO_ADDRESS] = True
