@@ -9,7 +9,7 @@ owner: public(address)
 
 @public
 def __init__():
-  owner = msg.sender
+  self.owner = msg.sender
 
 @public
 def detectTransferRestriction(
@@ -17,11 +17,11 @@ def detectTransferRestriction(
   _to: address,
   _value: uint256
 ) -> uint256:
-  if(approved[_from] and approved[_to]):
+  if(self.approved[_from] and self.approved[_to]):
     return 0
-  if(approved[_from] and _to == ZERO_ADDRESS):
+  if(self.approved[_from] and _to == ZERO_ADDRESS):
     return 0
-  if(approved[_to] and _from == ZERO_ADDRESS):
+  if(self.approved[_to] and _from == ZERO_ADDRESS):
     return 0
 
   return 1 # Denied
@@ -39,7 +39,9 @@ def messageForTransferRestriction(
 
 @public
 def approve(
-  _trader: address
+  _trader: address,
+  _isApproved: bool
 ):
-  assert msg.sender == owner, "OWNER_ONLY"
-  approved[_trader] = True
+  assert msg.sender == self.owner, "OWNER_ONLY"
+  self.approved[_trader] = _isApproved
+  log.Approve(_trader, _isApproved)
