@@ -1,3 +1,5 @@
+# @title ERC-1404 implementation which manages KYC approvals for the org.
+
 # Events
 Approve: event({
   _trader: indexed(address),
