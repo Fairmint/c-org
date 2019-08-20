@@ -75,6 +75,9 @@ contract("dat / csvTests", accounts => {
             return console.log("Test skipped.");
           }
           await deployAndConfigDat(sheet);
+          for(let i = 0; i < 10; i++) {
+            await contracts.erc1404.approve(accounts[i], {from: accounts[1]})
+          }
           await runTestScript(sheet);
         });
       });
