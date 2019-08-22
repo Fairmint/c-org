@@ -121,7 +121,9 @@ contract("wiki / tokensReceivedCurrency", accounts => {
         await contracts.fair.balanceOf(await contracts.dat.beneficiary())
       );
 
-      await contracts.erc1404.approve(await contracts.dat.beneficiary(), true, {from: await contracts.dat.control()});
+      await contracts.erc1404.approve(await contracts.dat.beneficiary(), true, {
+        from: await contracts.dat.control()
+      });
       await currency.send(contracts.dat.address, payAmount, [], {
         from: investor
       });
@@ -176,7 +178,9 @@ contract("wiki / tokensReceivedCurrency", accounts => {
               .plus(await contracts.fair.burnedSupply())
           )
         );
-      await contracts.erc1404.approve(await contracts.dat.beneficiary(), true,{from: await contracts.dat.control()});
+      await contracts.erc1404.approve(await contracts.dat.beneficiary(), true, {
+        from: await contracts.dat.control()
+      });
       await currency.send(contracts.dat.address, payAmount, [], {
         from: investor
       });

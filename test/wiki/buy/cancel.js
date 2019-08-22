@@ -15,6 +15,9 @@ contract("wiki / buy / cancel", accounts => {
   });
 
   it("Sanity check: buy() works durning init", async () => {
+    await contracts.erc1404.approve(accounts[9], true, {
+      from: await contracts.dat.control()
+    });
     await contracts.dat.buy(accounts[9], "100000000000000000000", 1, {
       value: "100000000000000000000",
       from: accounts[9]

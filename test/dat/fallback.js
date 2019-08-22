@@ -14,7 +14,9 @@ contract("dat / fallback", accounts => {
 
     // Buy tokens for various accounts
     for (let i = 9; i >= 0; i--) {
-      await contracts.erc1404.approve(accounts[i], true, {from: await contracts.dat.control()})
+      await contracts.erc1404.approve(accounts[i], true, {
+        from: await contracts.dat.control()
+      });
       await contracts.dat.buy(accounts[i], "100000000000000000000", 1, {
         value: "100000000000000000000",
         from: accounts[i]
@@ -112,8 +114,12 @@ contract("dat / fallback", accounts => {
         await contracts.fair.balanceOf(await contracts.dat.beneficiary())
       );
 
-      await contracts.erc1404.approve(await contracts.dat.beneficiary(), true, {from: await contracts.dat.control()});
-      await contracts.erc1404.approve(investor, false, {from: await contracts.dat.control()});
+      await contracts.erc1404.approve(await contracts.dat.beneficiary(), true, {
+        from: await contracts.dat.control()
+      });
+      await contracts.erc1404.approve(investor, false, {
+        from: await contracts.dat.control()
+      });
       await contracts.dat.sendTransaction({
         from: investor,
         value: payAmount
@@ -170,8 +176,12 @@ contract("dat / fallback", accounts => {
               .plus(await contracts.fair.burnedSupply())
           )
         );
-      await contracts.erc1404.approve(await contracts.dat.beneficiary(), true, {from: await contracts.dat.control()});
-      await contracts.erc1404.approve(investor, false, {from: await contracts.dat.control()})
+      await contracts.erc1404.approve(await contracts.dat.beneficiary(), true, {
+        from: await contracts.dat.control()
+      });
+      await contracts.erc1404.approve(investor, false, {
+        from: await contracts.dat.control()
+      });
       await contracts.dat.sendTransaction({
         from: investor,
         value: payAmount
