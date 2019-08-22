@@ -1,4 +1,9 @@
-const { constants, deployDat, shouldFail } = require("../../helpers");
+const {
+  approveAll,
+  constants,
+  deployDat,
+  shouldFail
+} = require("../../helpers");
 
 contract("wiki / buy / close", accounts => {
   let contracts;
@@ -7,6 +12,8 @@ contract("wiki / buy / close", accounts => {
     contracts = await deployDat(accounts, {
       initGoal: "0" // Start in the run state
     });
+
+    await approveAll(contracts, accounts);
   });
 
   it("Sanity check: state is run", async () => {

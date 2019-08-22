@@ -1,6 +1,7 @@
 const sleep = require("sleep");
 const BigNumber = require("bignumber.js");
 const {
+  approveAll,
   constants,
   deployDat,
   getGasCost,
@@ -16,6 +17,8 @@ contract("wiki / close / run", accounts => {
       initGoal: "0", // Start in the run state
       burnThresholdBasisPoints: 8000
     });
+
+    await approveAll(contracts, accounts);
 
     // Buy tokens for various accounts
     for (let i = 9; i >= 0; i--) {

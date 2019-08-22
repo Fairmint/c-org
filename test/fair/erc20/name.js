@@ -29,7 +29,6 @@ contract("fair / erc20 / name", accounts => {
       it("should emit an event", async () => {
         const log = tx.logs[0];
         assert.notEqual(log, undefined);
-        // TODO
         // assert.equal(log.event, 'NameUpdated');
         // assert.equal(log.args._previousName, name);
         // assert.equal(log.args._name, newName);
@@ -55,7 +54,6 @@ contract("fair / erc20 / name", accounts => {
     });
 
     it.skip("should fail to change name from a different account", async () => {
-      // TODO
       await shouldFail(
         updateDatConfig(contracts, { name: "Test" }, accounts[2]),
         "CONTROL_ONLY"

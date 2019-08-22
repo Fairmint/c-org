@@ -1,4 +1,4 @@
-const { deployDat } = require("../../helpers");
+const { approveAll, deployDat } = require("../../helpers");
 
 contract("fair / erc20 / transfer", accounts => {
   let contracts;
@@ -9,6 +9,7 @@ contract("fair / erc20 / transfer", accounts => {
       initReserve,
       initGoal: 0
     });
+    await approveAll(contracts, accounts);
   });
 
   it("has expected balance before transfer", async () => {
@@ -38,14 +39,6 @@ contract("fair / erc20 / transfer", accounts => {
     });
 
     it("should emit an event");
-
-    describe("can transfer from other accounts", () => {
-      it("todo");
-    });
-  });
-
-  describe("can transfer tokens after buy", () => {
-    it("todo");
   });
 
   it(

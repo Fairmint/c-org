@@ -1,10 +1,11 @@
-const { deployDat } = require("../helpers");
+const { approveAll, deployDat } = require("../helpers");
 
 contract("dat / erc1404 / restrictionCode", accounts => {
   let contracts;
 
   before(async () => {
     contracts = await deployDat(accounts);
+    await approveAll(contracts, accounts);
   });
 
   it("Can read status 0", async () => {
@@ -17,8 +18,10 @@ contract("dat / erc1404 / restrictionCode", accounts => {
   });
 
   describe("when restriction applies", () => {
-    before(async () => {
-      await contracts.erc1404.updateRestriction(1);
+    beforeEach(async () => {
+      await contracts.erc1404.approve(accounts[1], false, {
+        from: await contracts.dat.control()
+      });
     });
 
     it("Can read status 1", async () => {

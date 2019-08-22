@@ -1,4 +1,9 @@
-const { constants, deployDat, shouldFail } = require("../../helpers");
+const {
+  approveAll,
+  constants,
+  deployDat,
+  shouldFail
+} = require("../../helpers");
 
 contract("wiki / close / cancel", accounts => {
   let contracts;
@@ -8,6 +13,8 @@ contract("wiki / close / cancel", accounts => {
     contracts = await deployDat(accounts, {
       initGoal: "10000000000000000000000"
     });
+
+    await approveAll(contracts, accounts);
 
     // Buy tokens for various accounts
     for (let i = 0; i < 9; i++) {

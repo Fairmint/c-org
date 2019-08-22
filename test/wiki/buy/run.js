@@ -1,5 +1,10 @@
 const BigNumber = require("bignumber.js");
-const { constants, deployDat, shouldFail } = require("../../helpers");
+const {
+  approveAll,
+  constants,
+  deployDat,
+  shouldFail
+} = require("../../helpers");
 
 contract("wiki / buy / run", accounts => {
   let contracts;
@@ -10,6 +15,8 @@ contract("wiki / buy / run", accounts => {
       feeBasisPoints: 10,
       burnThresholdBasisPoints: 8000
     });
+
+    await approveAll(contracts, accounts);
   });
 
   it("state is run", async () => {
@@ -19,7 +26,9 @@ contract("wiki / buy / run", accounts => {
 
   describe("If investor is not allowed to buy FAIR, then the function exits.", () => {
     beforeEach(async () => {
-      await contracts.erc1404.updateRestriction(1);
+      await contracts.erc1404.approve(accounts[5], false, {
+        from: await contracts.dat.control()
+      });
     });
 
     it("Buy fails", async () => {

@@ -1,5 +1,5 @@
 const BigNumber = require("bignumber.js");
-const { constants, deployDat, getGasCost } = require("../helpers");
+const { approveAll, deployDat, getGasCost } = require("../helpers");
 
 contract("dat / to", accounts => {
   let contracts;
@@ -14,6 +14,8 @@ contract("dat / to", accounts => {
       },
       false
     );
+
+    await approveAll(contracts, accounts);
   });
 
   describe("buy", () => {

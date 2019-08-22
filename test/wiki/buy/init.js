@@ -1,6 +1,11 @@
 const BigNumber = require("bignumber.js");
 const vestingArtifact = artifacts.require("TokenVesting");
-const { constants, deployDat, shouldFail } = require("../../helpers");
+const {
+  approveAll,
+  constants,
+  deployDat,
+  shouldFail
+} = require("../../helpers");
 
 contract("wiki / buy / init", accounts => {
   const initGoal = "10000000000000000000000";
@@ -13,6 +18,8 @@ contract("wiki / buy / init", accounts => {
       initReserve,
       feeBasisPoints: "10"
     });
+
+    await approveAll(contracts, accounts);
   });
 
   it("Sanity check: state is init", async () => {
@@ -96,6 +103,10 @@ contract("wiki / buy / init", accounts => {
           from: accounts[1] // control
         }
       );
+      await contracts.erc1404.approve(vesting.address, true, {
+        from: await contracts.dat.control()
+      });
+
       await contracts.fair.transfer(vesting.address, "42");
     });
 
@@ -186,7 +197,9 @@ contract("wiki / buy / init", accounts => {
 
   describe("If investor is not allowed to buy FAIR, then the function exits.", () => {
     beforeEach(async () => {
-      await contracts.erc1404.updateRestriction(1);
+      await contracts.erc1404.approve(accounts[5], false, {
+        from: await contracts.dat.control()
+      });
     });
 
     it("Buy fails", async () => {

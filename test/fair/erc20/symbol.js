@@ -27,7 +27,6 @@ contract("fair / erc20 / symbol", accounts => {
 
       it("should emit an event", async () => {
         const log = tx.logs[0];
-        // TODO
         assert.notEqual(log, undefined);
         // assert.equal(log.event, 'SymbolUpdated');
         // assert.equal(log.args._previousSymbol, symbol);
@@ -54,7 +53,6 @@ contract("fair / erc20 / symbol", accounts => {
     });
 
     it.skip("should fail to change symbol from a different account", async () => {
-      // TODO need to not use helper for this test
       await shouldFail(
         updateDatConfig(contracts, { symbol: "Test" }, accounts[2]),
         "CONTROL_ONLY"

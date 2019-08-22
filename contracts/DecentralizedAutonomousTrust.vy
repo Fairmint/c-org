@@ -92,12 +92,25 @@ contract IFAIR:
     _to: address, 
     _value: uint256
   ) -> uint256: constant
-contract IBigDiv: # TODO maybe add more versions for optimization
+contract IBigDiv:
+  def bigDiv2x1(
+    _numA: uint256,
+    _numB: uint256,
+    _den: uint256,
+    _roundUp: bool
+  ) -> uint256: constant
   def bigDiv2x2(
     _numA: uint256,
     _numB: uint256,
     _denA: uint256,
     _denB: uint256,
+    _roundUp: bool
+  ) -> uint256: constant
+  def bigDiv3x1(
+    _numA: uint256,
+    _numB: uint256,
+    _numC: uint256,
+    _den: uint256,
     _roundUp: bool
   ) -> uint256: constant
   def bigDiv3x3(
@@ -561,9 +574,9 @@ def estimateBuyValue(
   elif(self.state == STATE_RUN):
     # Math: supply's max value is 10e28 as enforced in FAIR.vy
     supply: uint256 = self.fair.totalSupply() + self.fair.burnedSupply()
-    tokenValue = self.bigDiv.bigDiv2x2(
+    tokenValue = self.bigDiv.bigDiv2x1(
       2 * _currencyValue, self.buySlopeDen,
-      self.buySlopeNum, 1,
+      self.buySlopeNum,
       False
     )
     # Math: to avoid overflow in _toDecimalWithPlaces, supply must be <= 1.3e28.  Then large 
@@ -628,9 +641,9 @@ def buy(
     if(self.fair.totalSupply() + tokenValue - self.initReserve >= self.initGoal):
       log.StateChange(self.state, STATE_RUN)
       self.state = STATE_RUN
-      beneficiaryContribution: uint256 = self.bigDiv.bigDiv3x3(
+      beneficiaryContribution: uint256 = self.bigDiv.bigDiv3x1(
         self.initInvestors[self.beneficiary], self.buySlopeNum, self.initGoal,
-        self.buySlopeDen, 2, 1,
+        self.buySlopeDen * 2,
         False
       )
       self._distributeInvestment(self.buybackReserve() - beneficiaryContribution)
@@ -767,9 +780,9 @@ def estimatePayValue(
   supply: uint256 = self.fair.totalSupply() + self.fair.burnedSupply()
 
   # Math: max _currencyValue of (2^256 - 1) / 2e31 == 5.7e45 (* 2 * BASIS_POINTS won't overflow)
-  tokenValue: uint256 = self.bigDiv.bigDiv2x2(
+  tokenValue: uint256 = self.bigDiv.bigDiv2x1(
     2 * _currencyValue * self.revenueCommitmentBasisPoints, self.buySlopeDen,
-    BASIS_POINTS_DEN, self.buySlopeNum,
+    BASIS_POINTS_DEN * self.buySlopeNum,
     False
   )
 
@@ -887,9 +900,9 @@ def estimateExitFee(
     # Math: the supply hard-cap ensures this does not overflow
     exitFee += self.fair.totalSupply()
     # Math: self.totalSupply cap makes the worst case: 10 ** 28 * 10 ** 28 which does not overflow
-    exitFee = self.bigDiv.bigDiv2x2(
+    exitFee = self.bigDiv.bigDiv2x1(
       exitFee * self.fair.totalSupply(), self.buySlopeNum,
-      2, self.buySlopeDen,
+      2 * self.buySlopeDen,
       False
     )
     # Math: this if condition avoids a potential overflow

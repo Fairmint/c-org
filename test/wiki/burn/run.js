@@ -1,5 +1,5 @@
 const BigNumber = require("bignumber.js");
-const { constants, deployDat, shouldFail } = require("../../helpers");
+const { approveAll, constants, deployDat } = require("../../helpers");
 
 contract("wiki / burn / run", accounts => {
   let contracts;
@@ -10,6 +10,7 @@ contract("wiki / burn / run", accounts => {
     contracts = await deployDat(accounts, {
       initGoal: "0" // Start in the run state
     });
+    await approveAll(contracts, accounts);
 
     // Buy tokens for various accounts
     for (let i = 0; i < 9; i++) {
@@ -104,10 +105,6 @@ contract("wiki / burn / run", accounts => {
   });
 
   describe("If trades are restricted", () => {
-    beforeEach(async () => {
-      await contracts.erc1404.updateRestriction(1);
-    });
-
     it("Can burn even if account is restricted", async () => {
       await contracts.fair.burn(burnAmount, [], {
         from: investor

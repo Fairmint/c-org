@@ -1,7 +1,13 @@
 const BigNumber = require("bignumber.js");
-const { constants, deployDat, getGasCost, shouldFail } = require("../helpers");
+const {
+  approveAll,
+  constants,
+  deployDat,
+  getGasCost,
+  shouldFail
+} = require("../helpers");
 
-contract("wiki / sell / run", accounts => {
+contract("dat / tokensReceivedFair", accounts => {
   const initReserve = "1000000000000000000000";
   const buyAmount = "100000000000000000000";
   const sellAmount = "1000000000000000000";
@@ -15,6 +21,9 @@ contract("wiki / sell / run", accounts => {
       initReserve,
       feeBasisPoints: "10"
     });
+
+    await approveAll(contracts, accounts);
+
     beneficiary = await contracts.dat.beneficiary();
 
     // Buy with various accounts including the beneficiary account
@@ -46,6 +55,7 @@ contract("wiki / sell / run", accounts => {
       initReserve,
       feeBasisPoints: "10"
     });
+    await approveAll(contracts, accounts);
     await contracts.fair.transfer(investor, sellAmount, { from: beneficiary });
     await shouldFail(
       contracts.fair.send(contracts.dat.address, sellAmount, [], {
@@ -61,6 +71,7 @@ contract("wiki / sell / run", accounts => {
       initReserve,
       feeBasisPoints: "10"
     });
+    await approveAll(contracts, accounts);
     await contracts.fair.transfer(investor, sellAmount, { from: beneficiary });
     await contracts.dat.buy(accounts[9], buyAmount, 1, {
       from: accounts[9],

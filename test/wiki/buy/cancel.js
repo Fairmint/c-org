@@ -1,4 +1,9 @@
-const { constants, deployDat, shouldFail } = require("../../helpers");
+const {
+  approveAll,
+  constants,
+  deployDat,
+  shouldFail
+} = require("../../helpers");
 
 contract("wiki / buy / cancel", accounts => {
   let contracts;
@@ -7,6 +12,8 @@ contract("wiki / buy / cancel", accounts => {
     contracts = await deployDat(accounts, {
       initGoal: "1000000000000000000000" // 10x the buy size below
     });
+
+    await approveAll(contracts, accounts);
   });
 
   it("Sanity check: state is init", async () => {

@@ -2,13 +2,14 @@
  * Tests the ability to buy dat tokens
  */
 
-const { deployDat } = require("../helpers");
+const { approveAll, deployDat } = require("../helpers");
 
 contract("dat / buy", accounts => {
   let contracts;
 
   before(async () => {
     contracts = await deployDat(accounts);
+    await approveAll(contracts, accounts);
   });
 
   it("balanceOf should be 0 by default", async () => {

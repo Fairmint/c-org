@@ -1,7 +1,7 @@
 const fairArtifact = artifacts.require("FAIR");
 const datArtifact = artifacts.require("DecentralizedAutonomousTrust");
 const bigDivArtifact = artifacts.require("BigDiv");
-const erc1404Artifact = artifacts.require("TestERC1404");
+const erc1404Artifact = artifacts.require("ERC1404");
 const proxyArtifact = artifacts.require("AdminUpgradeabilityProxy");
 const proxyAdminArtifact = artifacts.require("ProxyAdmin");
 const vestingArtifact = artifacts.require("TokenVesting");
@@ -92,22 +92,44 @@ module.exports = async function deployDat(accounts, options, useProxy = true) {
     { from: callOptions.control }
   );
   // ERC1404
-  if (!callOptions.erc1404Address) {
-    contracts.erc1404 = await erc1404Artifact.new({
+  contracts.erc1404 = await erc1404Artifact.new({
+    from: callOptions.control
+  });
+  await contracts.erc1404.initialize({ from: callOptions.control });
+  callOptions.erc1404Address = contracts.erc1404.address;
+  // console.log(`Deployed erc1404: ${contracts.erc1404.address}`);
+  let promises = [];
+
+  promises.push(
+    contracts.erc1404.approve(callOptions.control, true, {
       from: callOptions.control
-    });
-    callOptions.erc1404Address = contracts.erc1404.address;
-    // console.log(`Deployed erc1404: ${contracts.erc1404.address}`);
-  } else {
-    contracts.erc1404 = await erc1404Artifact.at(callOptions.erc1404Address);
-  }
+    })
+  );
+  promises.push(
+    contracts.erc1404.approve(callOptions.beneficiary, true, {
+      from: callOptions.control
+    })
+  );
+  promises.push(
+    contracts.erc1404.approve(callOptions.feeCollector, true, {
+      from: callOptions.control
+    })
+  );
+  promises.push(
+    contracts.erc1404.approve(contracts.dat.address, true, {
+      from: callOptions.control
+    })
+  );
+
   // Update DAT (with new AUTH and other callOptions)
-  await updateDatConfig(contracts, callOptions);
+  promises.push(updateDatConfig(contracts, callOptions));
+  await Promise.all(promises);
+
   // Move the initReserve to vesting contracts
   if (callOptions.vesting) {
     contracts.vesting = [];
     for (let i = 0; i < callOptions.vesting.length; i++) {
-      const vestingBeneficiary = callOptions.vesting[i].address; // TODO
+      const vestingBeneficiary = callOptions.vesting[i].address;
       const contract = await vestingArtifact.new(
         vestingBeneficiary, // beneficiary
         Math.round(Date.now() / 1000) + 100, // startTime is seconds
@@ -119,6 +141,10 @@ module.exports = async function deployDat(accounts, options, useProxy = true) {
         }
       );
       contracts.vesting.push(contract);
+
+      await contracts.erc1404.approve(contracts.vesting[i].address, true, {
+        from: callOptions.control
+      });
       await contracts.fair.transfer(
         contract.address,
         callOptions.vesting[i].value,

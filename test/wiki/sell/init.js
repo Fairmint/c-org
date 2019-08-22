@@ -1,5 +1,6 @@
 const BigNumber = require("bignumber.js");
 const {
+  approveAll,
   constants,
   deployDat,
   getGasCost,
@@ -21,6 +22,9 @@ contract("wiki / sell / init", accounts => {
       initReserve,
       feeBasisPoints: "10"
     });
+
+    await approveAll(contracts, accounts);
+
     beneficiary = await contracts.dat.beneficiary();
 
     // Buy with various accounts including the beneficiary account

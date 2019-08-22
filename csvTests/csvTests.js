@@ -1,7 +1,12 @@
 const Papa = require("papaparse");
 const fs = require("fs");
 const BigNumber = require("bignumber.js");
-const { constants, deployDat, getGasCost } = require("../test/helpers");
+const {
+  approveAll,
+  constants,
+  deployDat,
+  getGasCost
+} = require("../test/helpers");
 const sheets = require("./test-data/script.json");
 const sheet = sheets[process.env.SHEET_ID || 0];
 
@@ -18,7 +23,6 @@ contract("dat / csvTests", accounts => {
   const TRANSFER_GAS_COST = new BigNumber("22000").times("100000000000");
   const GAS_COST_BUFFER = new BigNumber("2200000").times("100000000000");
 
-  // TODO test a DAT using another FAIR as currency
   const tokenType = [
     undefined,
     daiArtifact,
@@ -75,6 +79,10 @@ contract("dat / csvTests", accounts => {
             return console.log("Test skipped.");
           }
           await deployAndConfigDat(sheet);
+          await approveAll(contracts, accounts);
+          await contracts.erc1404.approve(ethBank, true, {
+            from: await contracts.dat.control()
+          });
           await runTestScript(sheet);
         });
       });

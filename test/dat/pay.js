@@ -1,5 +1,5 @@
 const BigNumber = require("bignumber.js");
-const { constants, deployDat, getGasCost } = require("../helpers");
+const { approveAll, constants, deployDat, getGasCost } = require("../helpers");
 
 contract("dat / pay", accounts => {
   let contracts;
@@ -14,6 +14,7 @@ contract("dat / pay", accounts => {
       },
       false
     );
+    await approveAll(contracts, accounts);
 
     // Buy tokens for various accounts
     for (let i = 0; i < 9; i++) {
@@ -62,8 +63,12 @@ contract("dat / pay", accounts => {
 
   describe("If trades are restricted", () => {
     beforeEach(async () => {
-      await contracts.erc1404.updateRestriction(1);
-      await contracts.erc1404.approve(await contracts.dat.beneficiary());
+      await contracts.erc1404.approve(await contracts.dat.beneficiary(), true, {
+        from: await contracts.dat.control()
+      });
+      await contracts.erc1404.approve(investor, false, {
+        from: await contracts.dat.control()
+      });
     });
 
     it("Can pay even if account is restricted", async () => {
