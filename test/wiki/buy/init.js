@@ -185,10 +185,6 @@ contract("wiki / buy / init", accounts => {
   });
 
   describe("If investor is not allowed to buy FAIR, then the function exits.", () => {
-    beforeEach(async () => {
-      await contracts.erc1404.updateRestriction(1);
-    });
-
     it("Buy fails", async () => {
       await shouldFail(
         contracts.dat.buy(accounts[5], "100000000000000000000", 1, {

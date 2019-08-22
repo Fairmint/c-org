@@ -17,10 +17,6 @@ contract("dat / erc1404 / restrictionCode", accounts => {
   });
 
   describe("when restriction applies", () => {
-    before(async () => {
-      await contracts.erc1404.updateRestriction(1);
-    });
-
     it("Can read status 1", async () => {
       const restriction = await contracts.fair.detectTransferRestriction(
         accounts[0],

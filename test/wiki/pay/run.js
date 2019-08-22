@@ -111,8 +111,7 @@ contract("wiki / pay / run", accounts => {
         await contracts.fair.balanceOf(await contracts.dat.beneficiary())
       );
 
-      await contracts.erc1404.updateRestriction(1);
-      await contracts.erc1404.approve(await contracts.dat.beneficiary());
+      await contracts.erc1404.approve(await contracts.dat.beneficiary(), true, {from: await contracts.dat.control()});
       await contracts.dat.pay(investor, payAmount, {
         from: investor,
         value: payAmount
@@ -169,8 +168,7 @@ contract("wiki / pay / run", accounts => {
               .plus(await contracts.fair.burnedSupply())
           )
         );
-      await contracts.erc1404.updateRestriction(1);
-      await contracts.erc1404.approve(await contracts.dat.beneficiary());
+      await contracts.erc1404.approve(await contracts.dat.beneficiary(), true, {from: await contracts.dat.control()});
       await contracts.dat.pay(investor, payAmount, {
         from: investor,
         value: payAmount

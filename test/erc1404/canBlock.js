@@ -15,10 +15,6 @@ contract("dat / erc1404 / canBlock", accounts => {
   });
 
   describe("when restriction applies", () => {
-    before(async () => {
-      await contracts.erc1404.updateRestriction(1);
-    });
-
     it("buy shouldFail", async () => {
       await shouldFail(
         contracts.dat.buy(accounts[1], "100000000000000000000", 1, {

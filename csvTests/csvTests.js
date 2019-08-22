@@ -76,7 +76,7 @@ contract("dat / csvTests", accounts => {
           }
           await deployAndConfigDat(sheet);
           for(let i = 0; i < 10; i++) {
-            await contracts.erc1404.approve(accounts[i], {from: accounts[1]})
+            await contracts.erc1404.approve(accounts[i], true, {from: control})
           }
           await runTestScript(sheet);
         });

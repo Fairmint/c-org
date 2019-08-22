@@ -104,10 +104,6 @@ contract("wiki / burn / run", accounts => {
   });
 
   describe("If trades are restricted", () => {
-    beforeEach(async () => {
-      await contracts.erc1404.updateRestriction(1);
-    });
-
     it("Can burn even if account is restricted", async () => {
       await contracts.fair.burn(burnAmount, [], {
         from: investor

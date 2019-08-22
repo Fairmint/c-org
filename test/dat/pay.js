@@ -17,6 +17,7 @@ contract("dat / pay", accounts => {
 
     // Buy tokens for various accounts
     for (let i = 0; i < 9; i++) {
+      await contracts.erc1404.approve(accounts[i], true, {from: await contracts.erc1404.owner()})
       await contracts.dat.buy(accounts[i], "100000000000000000000", 1, {
         value: "100000000000000000000",
         from: accounts[i]
@@ -62,8 +63,7 @@ contract("dat / pay", accounts => {
 
   describe("If trades are restricted", () => {
     beforeEach(async () => {
-      await contracts.erc1404.updateRestriction(1);
-      await contracts.erc1404.approve(await contracts.dat.beneficiary());
+      await contracts.erc1404.approve(await contracts.dat.beneficiary(), true, {from: contracts.dat.control()});
     });
 
     it("Can pay even if account is restricted", async () => {
