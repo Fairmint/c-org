@@ -19,7 +19,7 @@
   "dependencies": {
     "bignumber.js": "9.0.0",
     "erc1820": "0.0.2",
-    "eslint": "6.2.0",
+    "eslint": "6.2.1",
     "eslint-config-prettier": "6.1.0",
     "eth-gas-reporter": "0.2.10",
     "ganache-cli": "6.6.0",
@@ -29,9 +29,9 @@
     "openzeppelin-test-helpers": "0.4.2",
     "papaparse": "5.0.2",
     "sleep": "6.1.0",
-    "truffle": "5.0.32",
-    "truffle-hdwallet-provider": "1.0.16",
-    "truffle-require": "2.0.18",
+    "truffle": "5.0.33",
+    "truffle-hdwallet-provider": "1.0.17",
+    "truffle-require": "2.0.19",
     "zos": "2.4.2",
     "zos-lib": "2.4.2"
   },
