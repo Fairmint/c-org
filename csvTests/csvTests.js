@@ -1,7 +1,12 @@
 const Papa = require("papaparse");
 const fs = require("fs");
 const BigNumber = require("bignumber.js");
-const { constants, deployDat, getGasCost } = require("../test/helpers");
+const {
+  approveAll,
+  constants,
+  deployDat,
+  getGasCost
+} = require("../test/helpers");
 const sheets = require("./test-data/script.json");
 const sheet = sheets[process.env.SHEET_ID || 0];
 
@@ -74,11 +79,10 @@ contract("dat / csvTests", accounts => {
             return console.log("Test skipped.");
           }
           await deployAndConfigDat(sheet);
-          for (let i = 0; i < 10; i++) {
-            await contracts.erc1404.approve(accounts[i], true, {
-              from: control
-            });
-          }
+          await approveAll(contracts, accounts);
+          await contracts.erc1404.approve(ethBank, true, {
+            from: await contracts.dat.control()
+          });
           await runTestScript(sheet);
         });
       });

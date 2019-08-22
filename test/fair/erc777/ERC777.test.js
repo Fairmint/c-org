@@ -1,6 +1,6 @@
 // Source: openzeppelin-contracts
 
-const { deployDat } = require("../../helpers");
+const { approveAll, deployDat } = require("../../helpers");
 const BigNumber = require("bignumber.js");
 
 const {
@@ -55,11 +55,7 @@ contract("ERC777", function(accounts) {
       beneficiary: holder
     });
 
-    for (let i = 0; i < accounts.length; i++) {
-      await contracts.erc1404.approve(accounts[i], true, {
-        from: await contracts.dat.control()
-      });
-    }
+    await approveAll(contracts, accounts);
 
     defaultOperatorA = contracts.dat.address;
     defaultOperators = [defaultOperatorA];

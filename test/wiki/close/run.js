@@ -1,6 +1,7 @@
 const sleep = require("sleep");
 const BigNumber = require("bignumber.js");
 const {
+  approveAll,
   constants,
   deployDat,
   getGasCost,
@@ -17,11 +18,7 @@ contract("wiki / close / run", accounts => {
       burnThresholdBasisPoints: 8000
     });
 
-    for (let i = 0; i < accounts.length; i++) {
-      await contracts.erc1404.approve(accounts[i], true, {
-        from: await contracts.dat.control()
-      });
-    }
+    await approveAll(contracts, accounts);
 
     // Buy tokens for various accounts
     for (let i = 9; i >= 0; i--) {

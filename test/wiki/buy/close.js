@@ -1,4 +1,9 @@
-const { constants, deployDat, shouldFail } = require("../../helpers");
+const {
+  approveAll,
+  constants,
+  deployDat,
+  shouldFail
+} = require("../../helpers");
 
 contract("wiki / buy / close", accounts => {
   let contracts;
@@ -8,11 +13,7 @@ contract("wiki / buy / close", accounts => {
       initGoal: "0" // Start in the run state
     });
 
-    for (let i = 0; i < accounts.length; i++) {
-      await contracts.erc1404.approve(accounts[i], true, {
-        from: await contracts.dat.control()
-      });
-    }
+    await approveAll(contracts, accounts);
   });
 
   it("Sanity check: state is run", async () => {

@@ -1,4 +1,4 @@
-const { deployDat } = require("../../helpers");
+const { approveAll, deployDat } = require("../../helpers");
 
 contract("fair / erc20 / burn", accounts => {
   let contracts;
@@ -7,12 +7,7 @@ contract("fair / erc20 / burn", accounts => {
     contracts = await deployDat(accounts, {
       initGoal: 0
     });
-
-    for (let i = 0; i < accounts.length; i++) {
-      await contracts.erc1404.approve(accounts[i], true, {
-        from: await contracts.dat.control()
-      });
-    }
+    await approveAll(contracts, accounts);
 
     await contracts.dat.buy(accounts[1], "420000000000000000000", 1, {
       value: "420000000000000000000",

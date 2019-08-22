@@ -1,5 +1,5 @@
 const BigNumber = require("bignumber.js");
-const { constants, deployDat, getGasCost } = require("../../helpers");
+const { approveAll, constants, deployDat } = require("../../helpers");
 
 contract("wiki / pay / run", accounts => {
   let contracts;
@@ -12,11 +12,7 @@ contract("wiki / pay / run", accounts => {
       burnThresholdBasisPoints: 8000
     });
 
-    for (let i = 0; i < accounts.length; i++) {
-      await contracts.erc1404.approve(accounts[i], true, {
-        from: await contracts.dat.control()
-      });
-    }
+    await approveAll(contracts, accounts);
 
     // Buy tokens for various accounts
     for (let i = 9; i >= 0; i--) {

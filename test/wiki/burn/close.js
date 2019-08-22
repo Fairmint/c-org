@@ -1,4 +1,9 @@
-const { constants, deployDat, shouldFail } = require("../../helpers");
+const {
+  approveAll,
+  constants,
+  deployDat,
+  shouldFail
+} = require("../../helpers");
 
 contract("wiki / burn / close", accounts => {
   let contracts;
@@ -9,12 +14,7 @@ contract("wiki / burn / close", accounts => {
     contracts = await deployDat(accounts, {
       initGoal: "0"
     });
-
-    for (let i = 0; i < accounts.length; i++) {
-      await contracts.erc1404.approve(accounts[i], true, {
-        from: await contracts.dat.control()
-      });
-    }
+    await approveAll(contracts, accounts);
 
     // Buy tokens for various accounts
     for (let i = 0; i < 9; i++) {

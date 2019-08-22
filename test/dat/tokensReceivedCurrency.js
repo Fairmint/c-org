@@ -1,6 +1,6 @@
 const BigNumber = require("bignumber.js");
 const TestDai = artifacts.require("TestERC777Only.sol");
-const { constants, deployDat, getGasCost } = require("../helpers");
+const { approveAll, constants, deployDat } = require("../helpers");
 
 contract("wiki / tokensReceivedCurrency", accounts => {
   let contracts;
@@ -16,11 +16,7 @@ contract("wiki / tokensReceivedCurrency", accounts => {
       burnThresholdBasisPoints: 8000
     });
 
-    for (let i = 0; i < accounts.length; i++) {
-      await contracts.erc1404.approve(accounts[i], true, {
-        from: await contracts.dat.control()
-      });
-    }
+    await approveAll(contracts, accounts);
 
     // Mint and approve tokens for testing
     for (let i = 9; i >= 0; i--) {

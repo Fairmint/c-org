@@ -1,5 +1,11 @@
 const BigNumber = require("bignumber.js");
-const { constants, deployDat, getGasCost, shouldFail } = require("../helpers");
+const {
+  approveAll,
+  constants,
+  deployDat,
+  getGasCost,
+  shouldFail
+} = require("../helpers");
 
 contract("dat / tokensReceivedFair", accounts => {
   const initReserve = "1000000000000000000000";
@@ -16,11 +22,7 @@ contract("dat / tokensReceivedFair", accounts => {
       feeBasisPoints: "10"
     });
 
-    for (let i = 0; i < accounts.length; i++) {
-      await contracts.erc1404.approve(accounts[i], true, {
-        from: await contracts.dat.control()
-      });
-    }
+    await approveAll(contracts, accounts);
 
     beneficiary = await contracts.dat.beneficiary();
 
@@ -53,11 +55,7 @@ contract("dat / tokensReceivedFair", accounts => {
       initReserve,
       feeBasisPoints: "10"
     });
-    for (let i = 0; i < accounts.length; i++) {
-      await contracts.erc1404.approve(accounts[i], true, {
-        from: await contracts.dat.control()
-      });
-    }
+    await approveAll(contracts, accounts);
     await contracts.fair.transfer(investor, sellAmount, { from: beneficiary });
     await shouldFail(
       contracts.fair.send(contracts.dat.address, sellAmount, [], {
@@ -73,11 +71,7 @@ contract("dat / tokensReceivedFair", accounts => {
       initReserve,
       feeBasisPoints: "10"
     });
-    for (let i = 0; i < accounts.length; i++) {
-      await contracts.erc1404.approve(accounts[i], true, {
-        from: await contracts.dat.control()
-      });
-    }
+    await approveAll(contracts, accounts);
     await contracts.fair.transfer(investor, sellAmount, { from: beneficiary });
     await contracts.dat.buy(accounts[9], buyAmount, 1, {
       from: accounts[9],

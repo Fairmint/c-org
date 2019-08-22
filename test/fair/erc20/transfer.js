@@ -1,4 +1,4 @@
-const { deployDat } = require("../../helpers");
+const { approveAll, deployDat } = require("../../helpers");
 
 contract("fair / erc20 / transfer", accounts => {
   let contracts;
@@ -9,12 +9,7 @@ contract("fair / erc20 / transfer", accounts => {
       initReserve,
       initGoal: 0
     });
-
-    for (let i = 0; i < accounts.length; i++) {
-      await contracts.erc1404.approve(accounts[i], true, {
-        from: await contracts.dat.control()
-      });
-    }
+    await approveAll(contracts, accounts);
   });
 
   it("has expected balance before transfer", async () => {

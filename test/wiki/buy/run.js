@@ -1,5 +1,10 @@
 const BigNumber = require("bignumber.js");
-const { constants, deployDat, shouldFail } = require("../../helpers");
+const {
+  approveAll,
+  constants,
+  deployDat,
+  shouldFail
+} = require("../../helpers");
 
 contract("wiki / buy / run", accounts => {
   let contracts;
@@ -11,11 +16,7 @@ contract("wiki / buy / run", accounts => {
       burnThresholdBasisPoints: 8000
     });
 
-    for (let i = 0; i < accounts.length; i++) {
-      await contracts.erc1404.approve(accounts[i], true, {
-        from: await contracts.dat.control()
-      });
-    }
+    await approveAll(contracts, accounts);
   });
 
   it("state is run", async () => {

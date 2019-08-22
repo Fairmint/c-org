@@ -1,6 +1,11 @@
 const BigNumber = require("bignumber.js");
 const vestingArtifact = artifacts.require("TokenVesting");
-const { constants, deployDat, shouldFail } = require("../../helpers");
+const {
+  approveAll,
+  constants,
+  deployDat,
+  shouldFail
+} = require("../../helpers");
 
 contract("wiki / buy / init", accounts => {
   const initGoal = "10000000000000000000000";
@@ -14,11 +19,7 @@ contract("wiki / buy / init", accounts => {
       feeBasisPoints: "10"
     });
 
-    for (let i = 0; i < accounts.length; i++) {
-      await contracts.erc1404.approve(accounts[i], true, {
-        from: await contracts.dat.control()
-      });
-    }
+    await approveAll(contracts, accounts);
   });
 
   it("Sanity check: state is init", async () => {

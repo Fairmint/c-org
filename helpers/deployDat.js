@@ -98,21 +98,33 @@ module.exports = async function deployDat(accounts, options, useProxy = true) {
   await contracts.erc1404.initialize({ from: callOptions.control });
   callOptions.erc1404Address = contracts.erc1404.address;
   // console.log(`Deployed erc1404: ${contracts.erc1404.address}`);
-  await contracts.erc1404.approve(callOptions.control, true, {
-    from: callOptions.control
-  });
-  await contracts.erc1404.approve(callOptions.beneficiary, true, {
-    from: callOptions.control
-  });
-  await contracts.erc1404.approve(callOptions.feeCollector, true, {
-    from: callOptions.control
-  });
-  await contracts.erc1404.approve(contracts.dat.address, true, {
-    from: callOptions.control
-  });
+  let promises = [];
+
+  promises.push(
+    contracts.erc1404.approve(callOptions.control, true, {
+      from: callOptions.control
+    })
+  );
+  promises.push(
+    contracts.erc1404.approve(callOptions.beneficiary, true, {
+      from: callOptions.control
+    })
+  );
+  promises.push(
+    contracts.erc1404.approve(callOptions.feeCollector, true, {
+      from: callOptions.control
+    })
+  );
+  promises.push(
+    contracts.erc1404.approve(contracts.dat.address, true, {
+      from: callOptions.control
+    })
+  );
 
   // Update DAT (with new AUTH and other callOptions)
-  await updateDatConfig(contracts, callOptions);
+  promises.push(updateDatConfig(contracts, callOptions));
+  await Promise.all(promises);
+
   // Move the initReserve to vesting contracts
   if (callOptions.vesting) {
     contracts.vesting = [];

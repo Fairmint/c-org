@@ -1,5 +1,6 @@
 const BigNumber = require("bignumber.js");
 const {
+  approveAll,
   constants,
   deployDat,
   getGasCost,
@@ -21,11 +22,7 @@ contract("wiki / sell / run", accounts => {
       feeBasisPoints: "10"
     });
 
-    for (let i = 0; i < accounts.length; i++) {
-      await contracts.erc1404.approve(accounts[i], true, {
-        from: await contracts.dat.control()
-      });
-    }
+    await approveAll(contracts, accounts);
 
     beneficiary = await contracts.dat.beneficiary();
 
@@ -76,6 +73,9 @@ contract("wiki / sell / run", accounts => {
     });
 
     await contracts.erc1404.approve(investor, true, {
+      from: await contracts.dat.control()
+    });
+    await contracts.erc1404.approve(accounts[9], true, {
       from: await contracts.dat.control()
     });
 
