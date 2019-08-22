@@ -107,6 +107,9 @@ module.exports = async function deployDat(accounts, options, useProxy = true) {
   await contracts.erc1404.approve(callOptions.feeCollector, true, {
     from: callOptions.control
   });
+  await contracts.erc1404.approve(contracts.dat.address, true, {
+    from: callOptions.control
+  });
 
   // Update DAT (with new AUTH and other callOptions)
   await updateDatConfig(contracts, callOptions);
