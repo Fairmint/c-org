@@ -20,6 +20,13 @@ contract("wiki / sell / cancel", accounts => {
       initReserve,
       feeBasisPoints: "10"
     });
+
+    for (let i = 0; i < accounts.length; i++) {
+      await contracts.erc1404.approve(accounts[i], true, {
+        from: await contracts.dat.control()
+      });
+    }
+
     beneficiary = await contracts.dat.beneficiary();
 
     // Buy with various accounts including the beneficiary account

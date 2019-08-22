@@ -9,6 +9,12 @@ contract("wiki / pay / cancel", accounts => {
       initGoal: "10000000000000000000000"
     });
 
+    for (let i = 0; i < accounts.length; i++) {
+      await contracts.erc1404.approve(accounts[i], true, {
+        from: await contracts.dat.control()
+      });
+    }
+
     // Buy tokens for various accounts
     for (let i = 0; i < 9; i++) {
       await contracts.dat.buy(accounts[i], "100000000000000000000", 1, {

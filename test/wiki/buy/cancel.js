@@ -7,6 +7,11 @@ contract("wiki / buy / cancel", accounts => {
     contracts = await deployDat(accounts, {
       initGoal: "1000000000000000000000" // 10x the buy size below
     });
+    for (let i = 0; i < accounts.length; i++) {
+      await contracts.erc1404.approve(accounts[i], true, {
+        from: await contracts.dat.control()
+      });
+    }
   });
 
   it("Sanity check: state is init", async () => {
@@ -15,9 +20,6 @@ contract("wiki / buy / cancel", accounts => {
   });
 
   it("Sanity check: buy() works durning init", async () => {
-    await contracts.erc1404.approve(accounts[9], true, {
-      from: await contracts.dat.control()
-    });
     await contracts.dat.buy(accounts[9], "100000000000000000000", 1, {
       value: "100000000000000000000",
       from: accounts[9]

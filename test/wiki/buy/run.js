@@ -10,6 +10,12 @@ contract("wiki / buy / run", accounts => {
       feeBasisPoints: 10,
       burnThresholdBasisPoints: 8000
     });
+
+    for (let i = 0; i < accounts.length; i++) {
+      await contracts.erc1404.approve(accounts[i], true, {
+        from: await contracts.dat.control()
+      });
+    }
   });
 
   it("state is run", async () => {
