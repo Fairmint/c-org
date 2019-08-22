@@ -44,14 +44,6 @@ contract("fair / erc20 / transfer", accounts => {
     });
 
     it("should emit an event");
-
-    describe("can transfer from other accounts", () => {
-      it("todo");
-    });
-  });
-
-  describe("can transfer tokens after buy", () => {
-    it("todo");
   });
 
   it(

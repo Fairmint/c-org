@@ -18,7 +18,6 @@ contract("dat / csvTests", accounts => {
   const TRANSFER_GAS_COST = new BigNumber("22000").times("100000000000");
   const GAS_COST_BUFFER = new BigNumber("2200000").times("100000000000");
 
-  // TODO test a DAT using another FAIR as currency
   const tokenType = [
     undefined,
     daiArtifact,

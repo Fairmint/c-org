@@ -117,7 +117,7 @@ module.exports = async function deployDat(accounts, options, useProxy = true) {
   if (callOptions.vesting) {
     contracts.vesting = [];
     for (let i = 0; i < callOptions.vesting.length; i++) {
-      const vestingBeneficiary = callOptions.vesting[i].address; // TODO
+      const vestingBeneficiary = callOptions.vesting[i].address;
       const contract = await vestingArtifact.new(
         vestingBeneficiary, // beneficiary
         Math.round(Date.now() / 1000) + 100, // startTime is seconds

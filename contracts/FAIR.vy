@@ -110,7 +110,7 @@ UpdateConfig: event({
 #region Data
 ##################################################
 
-# TODO test Vyper comment format with b11 (does not seem to work on data with b10)
+# TODO test Vyper comment format with b12 (does not seem to work on data with b11)
 
 ##############
 # Constants
@@ -135,7 +135,6 @@ MAX_SUPPLY: constant(uint256)  = 10 ** 28
 # @notice The max `totalSupply + burnedSupply`
 # @dev This limit ensures that the DAT's formulas do not overflow
 
-# TODO test gas of using hex directly instead
 TOKENS_SENDER_INTERFACE_HASH: constant(bytes32) = keccak256("ERC777TokensSender")
 # @notice The ERC-1820 ID for the ERC-777 sender hook
 
