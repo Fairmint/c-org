@@ -1,7 +1,7 @@
 const BigNumber = require("bignumber.js");
 const { constants, deployDat, getGasCost, shouldFail } = require("../helpers");
 
-contract("wiki / sell / run", accounts => {
+contract("dat / tokensReceivedFair", accounts => {
   const initReserve = "1000000000000000000000";
   const buyAmount = "100000000000000000000";
   const sellAmount = "1000000000000000000";
@@ -15,6 +15,13 @@ contract("wiki / sell / run", accounts => {
       initReserve,
       feeBasisPoints: "10"
     });
+
+    for (let i = 0; i < accounts.length; i++) {
+      await contracts.erc1404.approve(accounts[i], true, {
+        from: await contracts.dat.control()
+      });
+    }
+
     beneficiary = await contracts.dat.beneficiary();
 
     // Buy with various accounts including the beneficiary account

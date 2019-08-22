@@ -16,6 +16,12 @@ contract("wiki / tokensReceivedCurrency", accounts => {
       burnThresholdBasisPoints: 8000
     });
 
+    for (let i = 0; i < accounts.length; i++) {
+      await contracts.erc1404.approve(accounts[i], true, {
+        from: await contracts.dat.control()
+      });
+    }
+
     // Mint and approve tokens for testing
     for (let i = 9; i >= 0; i--) {
       await currency.mint(accounts[i], "10000000000000000000000000");
