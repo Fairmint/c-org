@@ -14,6 +14,12 @@ contract("dat / to", accounts => {
       },
       false
     );
+
+    for (let i = 0; i < accounts.length; i++) {
+      await contracts.erc1404.approve(accounts[i], true, {
+        from: await contracts.dat.control()
+      });
+    }
   });
 
   describe("buy", () => {

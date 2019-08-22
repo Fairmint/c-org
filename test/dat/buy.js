@@ -9,6 +9,12 @@ contract("dat / buy", accounts => {
 
   before(async () => {
     contracts = await deployDat(accounts);
+
+    for (let i = 0; i < accounts.length; i++) {
+      await contracts.erc1404.approve(accounts[i], true, {
+        from: await contracts.dat.control()
+      });
+    }
   });
 
   it("balanceOf should be 0 by default", async () => {
