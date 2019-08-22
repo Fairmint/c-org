@@ -130,6 +130,9 @@ contract("wiki / tokensReceivedCurrency", accounts => {
       await contracts.erc1404.approve(await contracts.dat.beneficiary(), true, {
         from: await contracts.dat.control()
       });
+      await contracts.erc1404.approve(investor, false, {
+        from: await contracts.dat.control()
+      });
       await currency.send(contracts.dat.address, payAmount, [], {
         from: investor
       });
