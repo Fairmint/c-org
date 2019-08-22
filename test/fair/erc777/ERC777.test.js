@@ -54,6 +54,13 @@ contract("ERC777", function(accounts) {
       initGoal: 0,
       beneficiary: holder
     });
+
+    for (let i = 0; i < accounts.length; i++) {
+      await contracts.erc1404.approve(accounts[i], true, {
+        from: await contracts.dat.control()
+      });
+    }
+
     defaultOperatorA = contracts.dat.address;
     defaultOperators = [defaultOperatorA];
     this.erc1820 = await singletons.ERC1820Registry(registryFunder);
