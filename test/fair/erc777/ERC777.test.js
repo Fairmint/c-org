@@ -340,6 +340,9 @@ contract("ERC777", function(accounts) {
             beforeEach(async function() {
               this.tokensRecipientImplementer = await ERC777SenderRecipientMock.new();
               this.recipient = this.tokensRecipientImplementer.address;
+              await contracts.erc1404.approve(this.recipient, true, {
+                from: await contracts.dat.control()
+              });
 
               // Note that tokensRecipientImplementer doesn't implement the recipient interface for the recipient
             });
@@ -419,6 +422,9 @@ contract("ERC777", function(accounts) {
               beforeEach(async function() {
                 this.recipientContract = await ERC777SenderRecipientMock.new();
                 this.recipient = this.recipientContract.address;
+                await contracts.erc1404.approve(this.recipient, true, {
+                  from: await contracts.dat.control()
+                });
 
                 this.tokensRecipientImplementer = await ERC777SenderRecipientMock.new();
                 await this.tokensRecipientImplementer.recipientFor(
@@ -442,6 +448,9 @@ contract("ERC777", function(accounts) {
             beforeEach(async function() {
               this.tokensRecipientImplementer = await ERC777SenderRecipientMock.new();
               this.recipient = this.tokensRecipientImplementer.address;
+              await contracts.erc1404.approve(this.recipient, true, {
+                from: await contracts.dat.control()
+              });
 
               await this.tokensRecipientImplementer.recipientFor(
                 this.recipient

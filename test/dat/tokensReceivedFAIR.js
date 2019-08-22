@@ -53,6 +53,11 @@ contract("dat / tokensReceivedFair", accounts => {
       initReserve,
       feeBasisPoints: "10"
     });
+    for (let i = 0; i < accounts.length; i++) {
+      await contracts.erc1404.approve(accounts[i], true, {
+        from: await contracts.dat.control()
+      });
+    }
     await contracts.fair.transfer(investor, sellAmount, { from: beneficiary });
     await shouldFail(
       contracts.fair.send(contracts.dat.address, sellAmount, [], {
@@ -68,6 +73,11 @@ contract("dat / tokensReceivedFair", accounts => {
       initReserve,
       feeBasisPoints: "10"
     });
+    for (let i = 0; i < accounts.length; i++) {
+      await contracts.erc1404.approve(accounts[i], true, {
+        from: await contracts.dat.control()
+      });
+    }
     await contracts.fair.transfer(investor, sellAmount, { from: beneficiary });
     await contracts.dat.buy(accounts[9], buyAmount, 1, {
       from: accounts[9],

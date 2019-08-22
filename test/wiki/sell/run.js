@@ -56,6 +56,11 @@ contract("wiki / sell / run", accounts => {
       initReserve,
       feeBasisPoints: "10"
     });
+
+    await contracts.erc1404.approve(investor, true, {
+      from: await contracts.dat.control()
+    });
+
     await contracts.fair.transfer(investor, sellAmount, { from: beneficiary });
     await shouldFail(
       contracts.dat.sell(investor, sellAmount, 1, { from: investor })
@@ -69,6 +74,11 @@ contract("wiki / sell / run", accounts => {
       initReserve,
       feeBasisPoints: "10"
     });
+
+    await contracts.erc1404.approve(investor, true, {
+      from: await contracts.dat.control()
+    });
+
     await contracts.fair.transfer(investor, sellAmount, { from: beneficiary });
     await contracts.dat.buy(accounts[9], buyAmount, 1, {
       from: accounts[9],

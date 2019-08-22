@@ -5,6 +5,12 @@ contract("dat / erc1404 / restrictionCode", accounts => {
 
   before(async () => {
     contracts = await deployDat(accounts);
+
+    for (let i = 0; i < accounts.length; i++) {
+      await contracts.erc1404.approve(accounts[i], true, {
+        from: await contracts.dat.control()
+      });
+    }
   });
 
   it("Can read status 0", async () => {
@@ -17,6 +23,12 @@ contract("dat / erc1404 / restrictionCode", accounts => {
   });
 
   describe("when restriction applies", () => {
+    beforeEach(async () => {
+      await contracts.erc1404.approve(accounts[1], false, {
+        from: await contracts.dat.control()
+      });
+    });
+
     it("Can read status 1", async () => {
       const restriction = await contracts.fair.detectTransferRestriction(
         accounts[0],

@@ -8,6 +8,12 @@ contract("fair / erc20 / burn", accounts => {
       initGoal: 0
     });
 
+    for (let i = 0; i < accounts.length; i++) {
+      await contracts.erc1404.approve(accounts[i], true, {
+        from: await contracts.dat.control()
+      });
+    }
+
     await contracts.dat.buy(accounts[1], "420000000000000000000", 1, {
       value: "420000000000000000000",
       from: accounts[1]

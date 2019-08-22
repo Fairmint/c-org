@@ -9,6 +9,12 @@ contract("fair / erc20 / transfer", accounts => {
       initReserve,
       initGoal: 0
     });
+
+    for (let i = 0; i < accounts.length; i++) {
+      await contracts.erc1404.approve(accounts[i], true, {
+        from: await contracts.dat.control()
+      });
+    }
   });
 
   it("has expected balance before transfer", async () => {

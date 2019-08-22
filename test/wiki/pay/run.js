@@ -186,7 +186,7 @@ contract("wiki / pay / run", accounts => {
       await contracts.erc1404.approve(investor, false, {
         from: await contracts.dat.control()
       });
-      
+
       await contracts.dat.pay(investor, payAmount, {
         from: investor,
         value: payAmount
