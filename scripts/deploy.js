@@ -20,8 +20,7 @@ contract("deploy script", accounts => {
     const staticBytecodeJson = {
       bigDiv: bigDivArtifact.bytecode,
       testDai: testDaiArtifact.bytecode,
-      testUsdc: testUsdcArtifact.bytecode,
-      testErc1404: erc1404Artifact.bytecode
+      testUsdc: testUsdcArtifact.bytecode
     };
 
     const network = await web3.eth.net.getNetworkType();
@@ -74,6 +73,7 @@ contract("deploy script", accounts => {
       );
 
       abiJson.erc1820 = erc1820Artifact.abi;
+      bytecodeJson.erc1404 = erc1404Artifact.bytecode;
       abiJson.erc1404 = contracts.erc1404.abi;
       abiJson.proxyAdmin = contracts.proxyAdmin.abi;
       abiJson.proxy = proxyArtifact.abi;
