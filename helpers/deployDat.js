@@ -92,9 +92,23 @@ module.exports = async function deployDat(accounts, options, useProxy = true) {
     { from: callOptions.control }
   );
   // ERC1404
-  contracts.erc1404 = await erc1404Artifact.new({
+  const erc1404Contract = await erc1404Artifact.new({
     from: callOptions.control
   });
+  if (useProxy) {
+    const erc1404Proxy = await proxyArtifact.new(
+      erc1404Contract.address, // logic
+      contracts.proxyAdmin.address, // admin
+      [], // data
+      {
+        from: callOptions.control
+      }
+    );
+
+    contracts.erc1404 = await erc1404Artifact.at(erc1404Proxy.address);
+  } else {
+    contracts.erc1404 = erc1404Contract;
+  }
   await contracts.erc1404.initialize({ from: callOptions.control });
   callOptions.erc1404Address = contracts.erc1404.address;
   // console.log(`Deployed erc1404: ${contracts.erc1404.address}`);
