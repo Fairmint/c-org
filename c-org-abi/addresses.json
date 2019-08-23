@@ -7,30 +7,30 @@
   "rinkeby": {
     "dai": "0xe86dBee701DE570F53611D6B6D706f78A8a4F648",
     "usdc": "0x521104B09737BFEda072D24E569dB26F16382344",
-    "bigDiv": "",
+    "bigDiv": "0x6468D1bddF99df4C6403622a32a945a5316bD7fb",
     "orgs": [
       { 
         "name": "Fairmint (test w/ DAI)",
-        "token": "0xa4f90CB604A34A43b315Ef3d3f2dcd271bD89229"
+        "token": "0xF2e4b998E5337DfC894869C994206AC22fDfD20e"
       },
       {
         "name": "HardlyDifficult (test w/ USDC)",
-        "token": "0x8F3C0Aef36cDce3BBc9225dfd0Ef6981b1527703"
+        "token": "0xa1ed22915a51B5be18b46f253fe35AbDEBEA99ad"
       }
     ]
   },
   "ropsten": {
     "dai": "0xC51cA7FE8bA4bc64a9a2e25f295EECb4C3d8bABE",
     "usdc": "0xe12Aea94b74EEE8a2504E9f26c7f64c2c09E66BE",
-    "bigDiv": "",
+    "bigDiv": "0x6468D1bddF99df4C6403622a32a945a5316bD7fb",
     "orgs": [
       { 
         "name": "Fairmint (test w/ DAI)",
-        "token": "0x4e4e5b2410850F65c22E745926bD9529dc645d90"
+        "token": "0xa337022b31c48b37C08c7084bbcb8C8d2d034E57"
       },
       { 
         "name": "HardlyDifficult (test w/ USDC)",
-        "token": "0xfD8D668db1c00dFefAE4e7A82B805C94Bc88410E"
+        "token": "0xc1F074FEC23A745b60aA42F606B5C8a616DaBD40"
       }
     ]
   }
