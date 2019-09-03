@@ -255,7 +255,6 @@ def updateConfig(
 ##################################################
 
 @public
-@constant
 def detectTransferRestriction(
   _from: address,
   _to: address, 
