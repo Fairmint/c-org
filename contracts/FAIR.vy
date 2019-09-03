@@ -333,7 +333,7 @@ def _burn(
   ):
     # This is a burn (vs a sell)
     assert self.dat.state() == STATE_RUN, "ONLY_DURING_RUN"
-    restriction: uint256 = self.detectTransferRestriction(_from, ZERO_ADDRESS, _amount)
+    restriction: uint256 = detectTransferRestriction(_from, ZERO_ADDRESS, _amount)
     assert _operator != self.datAddress or restriction == 0, "NOT_AUTHORIZED"
     self.burnedSupply += _amount
 
@@ -357,7 +357,7 @@ def _send(
   """
   assert _from != ZERO_ADDRESS, "ERC777: send from the zero address"
   assert _to != ZERO_ADDRESS, "ERC777: send to the zero address"
-  restriction: uint256 = self.detectTransferRestriction(_from, ZERO_ADDRESS, _amount)
+  restriction: uint256 = detectTransferRestriction(_from, ZERO_ADDRESS, _amount)
   assert restriction == 0, "NOT_AUTHORIZED"
   assert self.dat.state() != STATE_INIT or _from == self.dat.beneficiary(), "Only the beneficiary can make transfers during STATE_INIT"
 
@@ -572,7 +572,7 @@ def mint(
   assert msg.sender == self.datAddress, "FROM_DAT_ONLY"
   assert _to != ZERO_ADDRESS, "INVALID_ADDRESS"
   assert _quantity > 0, "INVALID_QUANTITY"
-  restriction: uint256 = self.detectTransferRestriction(_from, ZERO_ADDRESS, _amount)
+  restriction: uint256 = detectTransferRestriction(_from, ZERO_ADDRESS, _amount)
   assert restriction == 0, "NOT_AUTHORIZED"
 
   self.totalSupply += _quantity
