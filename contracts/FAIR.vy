@@ -333,7 +333,8 @@ def _burn(
   ):
     # This is a burn (vs a sell)
     assert self.dat.state() == STATE_RUN, "ONLY_DURING_RUN"
-    assert _operator != self.datAddress or self.detectTransferRestriction(_from, ZERO_ADDRESS, _amount) == 0, "NOT_AUTHORIZED"
+    restriction: uint256 = self.detectTransferRestriction(_from, ZERO_ADDRESS, _amount)
+    assert _operator != self.datAddress or restriction == 0, "NOT_AUTHORIZED"
     self.burnedSupply += _amount
 
   log.Burned(_operator, _from, _amount, _userData, _operatorData)
@@ -356,7 +357,8 @@ def _send(
   """
   assert _from != ZERO_ADDRESS, "ERC777: send from the zero address"
   assert _to != ZERO_ADDRESS, "ERC777: send to the zero address"
-  assert self.detectTransferRestriction(_from, _to, _amount) == 0, "NOT_AUTHORIZED"
+  restriction: uint256 = self.detectTransferRestriction(_from, ZERO_ADDRESS, _amount)
+  assert restriction == 0, "NOT_AUTHORIZED"
   assert self.dat.state() != STATE_INIT or _from == self.dat.beneficiary(), "Only the beneficiary can make transfers during STATE_INIT"
 
   if(_callHooks): # This intentionally violates ERC-777 in order to support standard ERC-20
@@ -570,7 +572,8 @@ def mint(
   assert msg.sender == self.datAddress, "FROM_DAT_ONLY"
   assert _to != ZERO_ADDRESS, "INVALID_ADDRESS"
   assert _quantity > 0, "INVALID_QUANTITY"
-  assert self.detectTransferRestriction(ZERO_ADDRESS, _to, _quantity) == 0, "NOT_AUTHORIZED"
+  restriction: uint256 = self.detectTransferRestriction(_from, ZERO_ADDRESS, _amount)
+  assert restriction == 0, "NOT_AUTHORIZED"
 
   self.totalSupply += _quantity
   # Math: If this value got too large, the DAT may overflow on sell
