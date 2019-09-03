@@ -23,7 +23,7 @@
     "eslint-config-prettier": "6.1.0",
     "eth-gas-reporter": "0.2.10",
     "ganache-cli": "6.6.0",
-    "hardlydifficult-test-helpers": "0.2.1",
+    "hardlydifficult-test-helpers": "0.3.0",
     "openzeppelin-eth": "2.2.0",
     "openzeppelin-solidity": "2.3.0",
     "openzeppelin-test-helpers": "0.4.2",
