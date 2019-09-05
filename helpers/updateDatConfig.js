@@ -1,6 +1,7 @@
 module.exports = async function updateDatConfig(contracts, options) {
   const callOptions = Object.assign(
     {
+      bigDivAddress: await contracts.dat.bigDivAddress(),
       erc1404Address: await contracts.fair.erc1404Address(),
       beneficiary: await contracts.dat.beneficiary(),
       control: await contracts.dat.control(),
@@ -18,6 +19,7 @@ module.exports = async function updateDatConfig(contracts, options) {
   //console.log(`Update DAT: ${JSON.stringify(callOptions, null, 2)}`);
 
   return contracts.dat.updateConfig(
+    callOptions.bigDivAddress,
     callOptions.erc1404Address,
     callOptions.beneficiary,
     callOptions.control,

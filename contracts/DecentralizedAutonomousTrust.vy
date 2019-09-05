@@ -333,7 +333,6 @@ def buybackReserve() -> uint256:
 
 @public
 def initialize(
-  _bigDiv: address,
   _fairAddress: address,
   _initReserve: uint256,
   _currencyAddress: address,
@@ -358,9 +357,6 @@ def initialize(
     # Math: If this value got too large, the DAT would overflow on sell
     assert _initGoal < MAX_BEFORE_SQUARE, "EXCESSIVE_GOAL"
     self.initGoal = _initGoal
-
-  assert _bigDiv != ZERO_ADDRESS, "INVALID_ADDRESS"
-  self.bigDiv = IBigDiv(_bigDiv)
 
   assert _buySlopeNum > 0, "INVALID_SLOPE_NUM" # 0 not supported
   assert _buySlopeDen > 0, "INVALID_SLOPE_DEN"
@@ -403,6 +399,7 @@ def initialize(
 
 @public
 def updateConfig(
+  _bigDiv: address,
   _erc1404Address: address,
   _beneficiary: address,
   _control: address,
@@ -418,6 +415,10 @@ def updateConfig(
   assert msg.sender == self.control, "CONTROL_ONLY"
 
   self.fair.updateConfig(_erc1404Address, _name, _symbol)
+  
+  assert _bigDiv != ZERO_ADDRESS, "INVALID_ADDRESS"
+  self.bigDivAddress = _bigDiv
+  self.bigDiv = IBigDiv(_bigDiv)
 
   assert _control != ZERO_ADDRESS, "INVALID_ADDRESS"
   self.control = _control
