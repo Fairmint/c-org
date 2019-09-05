@@ -342,17 +342,18 @@ def _burn(
   self.balanceOf[_from] -= _amount
   self.totalSupply -= _amount
 
-  if(not (
+  if(
     (_operator == self.datAddress and _operatorData == SELL_FLAG)
     or
-    (_from == self.datAddress and _userData == SELL_FLAG))
+    (_from == self.datAddress and _userData == SELL_FLAG)
   ):
-    # This is a burn (vs a sell)
+    # This is a sell
+    self.authorizeTransfer(_from, ZERO_ADDRESS, _amount)
+  else:
+    # This is a burn
     assert self.dat.state() == STATE_RUN, "ONLY_DURING_RUN"
 
     self.burnedSupply += _amount
-  else:
-    self.authorizeTransfer(_from, ZERO_ADDRESS, _amount)
 
   log.Burned(_operator, _from, _amount, _userData, _operatorData)
   log.Transfer(_from, ZERO_ADDRESS, _amount)
