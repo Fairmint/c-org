@@ -496,9 +496,13 @@ def _collectInvestment(
   if(self.currency == ZERO_ADDRESS): # currency is ETH
     if(_refundRemainder):
       # Math: if _msgValue was not sufficient then revert
-      refund: uint256 = _msgValue - _quantityToInvest
+      refund: uint256(wei) = _msgValue - _quantityToInvest
       if(refund > 0):
-        raw_call(_from, b"", outsize=4096, value=refund, gas=30000)
+        # TODO
+        # this line works correctly
+        # send(_from, refund)
+        # switching to the following causes a revert
+        raw_call(_from, b"", outsize=0, value=refund, gas=2300)
     else:
       assert as_wei_value(_quantityToInvest, "wei") == _msgValue, "INCORRECT_MSG_VALUE"
   else: # currency is ERC20 or ERC777
@@ -520,7 +524,8 @@ def _sendCurrency(
   """
   if(_amount > 0):
     if(self.currency == ZERO_ADDRESS):
-      raw_call(_to, b"", outsize=4096, value=as_wei_value(_amount, "wei"), gas=30000)
+      # TODO
+      send(_to, as_wei_value(_amount, "wei"))
     else:
       if(self.isCurrencyERC777):
         self.currency.send(_to, as_unitless_number(_amount), "")
