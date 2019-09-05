@@ -14,7 +14,7 @@ def initialize():
 
   self.owner = msg.sender
   self.approved[ZERO_ADDRESS] = True
-  
+
 @public
 @constant
 def detectTransferRestriction(
