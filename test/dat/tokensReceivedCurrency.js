@@ -2,7 +2,7 @@ const BigNumber = require("bignumber.js");
 const TestDai = artifacts.require("TestERC777Only.sol");
 const { approveAll, constants, deployDat } = require("../helpers");
 
-contract("wiki / tokensReceivedCurrency", accounts => {
+contract("dat / tokensReceivedCurrency", accounts => {
   let contracts;
   const investor = accounts[3];
   const payAmount = "42000000000000000000";
