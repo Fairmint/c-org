@@ -47,7 +47,12 @@ contract ERC1404:
     _from: address,
     _to: address, 
     _value: uint256
-  ) -> uint256: modifying
+  ) -> uint256: constant
+  def authorizeTransfer(
+    _from: address,
+    _to: address, 
+    _value: uint256
+  ): modifying
 contract IDAT:
   def state() -> uint256(stateMachine): constant
   def beneficiary() -> address: constant
@@ -264,6 +269,16 @@ def detectTransferRestriction(
   if(self.erc1404 != ZERO_ADDRESS): # This is not set for the minting of initialReserve
     return self.erc1404.detectTransferRestriction(_from, _to, _value)
   return 0
+  
+@public
+@constant
+def authorizeTransfer(
+  _from: address,
+  _to: address, 
+  _value: uint256
+):
+  if(self.erc1404 != ZERO_ADDRESS): # This is not set for the minting of initialReserve
+    self.erc1404.authorizeTransfer(_from, _to, _value)
 
 #endregion
 
@@ -334,8 +349,10 @@ def _burn(
   ):
     # This is a burn (vs a sell)
     assert self.dat.state() == STATE_RUN, "ONLY_DURING_RUN"
-    assert _operator != self.datAddress or self.detectTransferRestriction(_from, ZERO_ADDRESS, _amount) == 0, "NOT_AUTHORIZED"
+
     self.burnedSupply += _amount
+  else:
+    self.authorizeTransfer(_from, ZERO_ADDRESS, _amount)
 
   log.Burned(_operator, _from, _amount, _userData, _operatorData)
   log.Transfer(_from, ZERO_ADDRESS, _amount)
@@ -357,8 +374,8 @@ def _send(
   """
   assert _from != ZERO_ADDRESS, "ERC777: send from the zero address"
   assert _to != ZERO_ADDRESS, "ERC777: send to the zero address"
-  assert self.detectTransferRestriction(_from, _to, _amount) == 0, "NOT_AUTHORIZED"
   assert self.dat.state() != STATE_INIT or _from == self.dat.beneficiary(), "Only the beneficiary can make transfers during STATE_INIT"
+  self.authorizeTransfer(_from, _to, _amount)
 
   if(_callHooks): # This intentionally violates ERC-777 in order to support standard ERC-20
     self._callTokensToSend(_operator, _from, _to, _amount, _userData, _operatorData)
@@ -571,7 +588,7 @@ def mint(
   assert msg.sender == self.datAddress, "FROM_DAT_ONLY"
   assert _to != ZERO_ADDRESS, "INVALID_ADDRESS"
   assert _quantity > 0, "INVALID_QUANTITY"
-  assert self.detectTransferRestriction(ZERO_ADDRESS, _to, _quantity) == 0, "NOT_AUTHORIZED"
+  self.authorizeTransfer(ZERO_ADDRESS, _to, _quantity)
 
   self.totalSupply += _quantity
   # Math: If this value got too large, the DAT may overflow on sell

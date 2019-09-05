@@ -14,8 +14,9 @@ def initialize():
 
   self.owner = msg.sender
   self.approved[ZERO_ADDRESS] = True
-
+  
 @public
+@constant
 def detectTransferRestriction(
   _from: address,
   _to: address,
@@ -25,6 +26,14 @@ def detectTransferRestriction(
     return 0
 
   return 1 # Denied
+
+@public
+def authorizeTransfer(
+  _from: address,
+  _to: address,
+  _value: uint256
+):
+  assert self.detectTransferRestriction(_from, _to, _value) == 0, "DENIED"
 
 @public
 @constant
