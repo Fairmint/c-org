@@ -30,19 +30,14 @@ contract IFAIR:
     _userData: bytes[1024],
     _operatorData: bytes[1024]
   ): modifying
-  def operatorSend(
+  def transferFrom(
     _sender: address,
     _recipient: address,
-    _amount: uint256,
-    _userData: bytes[1024],
-    _operatorData: bytes[1024]
+    _amount: uint256
   ): modifying
   def mint(
-    _operator: address,
     _to: address,
-    _quantity: uint256,
-    _userData: bytes[1024],
-    _operatorData: bytes[1024]
+    _quantity: uint256
   ): modifying
   def updateConfig(
     _erc1404Address: address,
@@ -345,7 +340,7 @@ def initialize(
   # Mint the initial reserve
   if(_initReserve > 0):
     self.initReserve = _initReserve
-    self.fair.mint(msg.sender, self.beneficiary, self.initReserve, "", "")
+    self.fair.mint(self.beneficiary, self.initReserve)
 
 @public
 def updateConfig(
@@ -394,7 +389,7 @@ def updateConfig(
     self.initInvestors[_beneficiary] += self.initInvestors[self.beneficiary]
     self.initInvestors[self.beneficiary] = 0
     if(tokens > 0):
-      self.fair.operatorSend(self.beneficiary, _beneficiary, tokens, "", "")
+      self.fair.transferFrom(self.beneficiary, _beneficiary, tokens)
     self.beneficiary = _beneficiary
 
   log.UpdateConfig(
@@ -429,7 +424,7 @@ def _applyBurnThreshold():
 
   if(balanceBefore > maxHoldings):
     # Math: the if condition prevents an underflow
-    self.fair.operatorBurn(self.beneficiary, balanceBefore - maxHoldings, "", "")
+    self.fair.operatorBurn(self.beneficiary, balanceBefore - maxHoldings)
 
 @private
 def _collectInvestment(
@@ -596,7 +591,7 @@ def buy(
     if(_to != self.beneficiary):
       self._distributeInvestment(_currencyValue)
 
-  self.fair.mint(msg.sender, _to, tokenValue, "", "")
+  self.fair.mint(_to, tokenValue)
   
   if(self.state == STATE_RUN):
     if(_to == self.beneficiary):
@@ -794,7 +789,7 @@ def _pay(
   
   # Distribute tokens
   if(tokenValue > 0):
-    self.fair.mint(_from, to, tokenValue, "", "")
+    self.fair.mint(to, tokenValue)
     self._applyBurnThreshold() # must mint before this call
 
   log.Pay(_from, _to, _currencyValue, tokenValue)

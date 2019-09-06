@@ -221,8 +221,6 @@ def _burn(
   """
   assert _from != ZERO_ADDRESS, "ERC20: burn from the zero address"
 
-  self._callTokensToSend(_operator, _from, ZERO_ADDRESS, _amount, _userData, _operatorData)
-
   self.balanceOf[_from] -= _amount
   self.totalSupply -= _amount
 
@@ -325,9 +323,10 @@ def transferFrom(
   """
   @notice Transfers `_value` amount of tokens from address `_from` to address `_to` if authorized.
   """
-  self.allowances[_from][msg.sender] -= _value
+  if(msg.sender != self.owner):
+    self.allowances[_from][msg.sender] -= _value
+    log.Approval(_from, msg.sender, self.allowances[_from][msg.sender])
   self._send(_from, _to, _value)
-  log.Approval(_from, msg.sender, self.allowances[_from][msg.sender])
   return True
 
 #endregion
@@ -357,7 +356,8 @@ def operatorBurn(
   @notice Burn the amount of tokens on behalf of the address from if authorized.
   @dev In addition to the standard ERC-777 use case, this is used by the DAT to `sell` tokens.
   """
-  self.allowances[_from][msg.sender] -= _value
+  if(msg.sender != self.owner):
+    self.allowances[_from][msg.sender] -= _value
   self._burn(msg.sender, _from, _amount, _userData, _operatorData)
 
 #endregion
@@ -368,7 +368,6 @@ def operatorBurn(
 @public
 @payable
 def mint(
-  _operator: address,
   _to: address,
   _quantity: uint256
 ):
@@ -384,8 +383,6 @@ def mint(
   # Math: If this value got too large, the DAT may overflow on sell
   assert self.totalSupply + self.burnedSupply <= MAX_SUPPLY, "EXCESSIVE_SUPPLY"
   self.balanceOf[_to] += _quantity
-  
-  self._callTokensReceived(_operator, ZERO_ADDRESS, _to, _quantity, _userData, _operatorData)
   
   log.Transfer(ZERO_ADDRESS, _to, _quantity)
 
