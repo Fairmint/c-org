@@ -80,7 +80,6 @@ module.exports = async function deployDat(accounts, options, useProxy = true) {
     contracts.dat = datContract;
   }
   await contracts.dat.initialize(
-    callOptions.bigDivAddress,
     contracts.fair.address,
     callOptions.initReserve,
     callOptions.currency,
