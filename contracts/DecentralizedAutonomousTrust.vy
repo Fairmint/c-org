@@ -424,7 +424,7 @@ def _applyBurnThreshold():
 
   if(balanceBefore > maxHoldings):
     # Math: the if condition prevents an underflow
-    self.fair.operatorBurn(self.beneficiary, balanceBefore - maxHoldings)
+    self.fair.operatorBurn(self.beneficiary, balanceBefore - maxHoldings, "", "")
 
 @private
 def _collectInvestment(
