@@ -152,6 +152,7 @@ StateChange: event({
   _newState: uint256(stateMachine)
 })
 UpdateConfig: event({
+  _bigDivAddress: address,
   _erc1404Address: address,
   _beneficiary: indexed(address),
   _control: indexed(address),
@@ -448,6 +449,7 @@ def updateConfig(
     self.beneficiary = _beneficiary
 
   log.UpdateConfig(
+    _bigDiv,
     _erc1404Address,
     _beneficiary,
     _control,
