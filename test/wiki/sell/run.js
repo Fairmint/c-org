@@ -179,4 +179,20 @@ contract("wiki / sell / run", accounts => {
       from: investor
     });
   });
+
+  describe("If investor is not authorized, then the function exits.", () => {
+    beforeEach(async () => {
+      await contracts.erc1404.approve(investor, false, {
+        from: await contracts.dat.control()
+      });
+    });
+
+    it("Sell fails", async () => {
+      await shouldFail(
+        contracts.dat.sell(investor, sellAmount, "1", {
+          from: investor
+        })
+      );
+    });
+  });
 });
