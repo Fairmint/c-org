@@ -1,5 +1,5 @@
 const BigNumber = require("bignumber.js");
-const TestDai = artifacts.require("TestERC777Only.sol");
+const TestDai = artifacts.require("TestDai.sol");
 const { approveAll, constants, deployDat } = require("../helpers");
 
 contract("dat / tokensReceivedCurrency", accounts => {
