@@ -11,8 +11,6 @@ const sheets = require("./test-data/script.json");
 const sheet = sheets[process.env.SHEET_ID || 0];
 
 const daiArtifact = artifacts.require("TestDai");
-const erc777Artifact = artifacts.require("TestERC777Only");
-const zosTokenArtifact = artifacts.require("TestERC777ERC20");
 const usdcArtifact = artifacts.require("TestUsdc");
 
 contract("dat / csvTests", accounts => {
@@ -26,8 +24,6 @@ contract("dat / csvTests", accounts => {
   const tokenType = [
     undefined,
     daiArtifact,
-    zosTokenArtifact,
-    erc777Artifact,
     usdcArtifact
   ];
 
