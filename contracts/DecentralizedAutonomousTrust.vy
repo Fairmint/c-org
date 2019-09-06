@@ -333,6 +333,10 @@ def initialize(
   self.control = msg.sender
   self.feeCollector = msg.sender
 
+  # Save currency
+  self.currencyAddress = _currencyAddress
+  self.currency = ERC20(_currencyAddress)
+
   # Initialize the FAIR token
   self.fairAddress = _fairAddress
   self.fair = IFAIR(_fairAddress)
