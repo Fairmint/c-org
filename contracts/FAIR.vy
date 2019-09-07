@@ -47,7 +47,9 @@ Transfer: event({
 Burned: event({
   _operator: indexed(address),
   _from: indexed(address),
-  _amount: uint256
+  _amount: uint256,
+  _userData: bytes[1024],
+  _operatorData: bytes[1024]
 })
 
 # Events triggered when updating the tokens's configuration
