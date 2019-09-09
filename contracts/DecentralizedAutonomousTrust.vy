@@ -89,7 +89,7 @@ contract IFAIR:
   ): modifying
   def detectTransferRestriction(
     _from: address,
-    _to: address, 
+    _to: address,
     _value: uint256
   ) -> uint256: constant
 contract IBigDiv:
@@ -186,7 +186,7 @@ STATE_CANCEL: constant(uint256(stateMachine)) = 3
 # @notice The state after closed by the `beneficiary` account from STATE_INIT
 
 MAX_BEFORE_SQUARE: constant(uint256)  = 340282366920938425684442744474606501888
-# @notice When multiplying 2 terms, the max value is sqrt(2^256-1) 
+# @notice When multiplying 2 terms, the max value is sqrt(2^256-1)
 
 DIGITS_UINT: constant(uint256) = 10 ** 18
 # @notice Represents 1 full token (with 18 decimals)
@@ -204,8 +204,8 @@ SELL_FLAG: constant(bytes[1024]) =  b"\x01"
 ###########
 
 beneficiary: public(address)
-# @notice The address of the beneficiary organization which receives the investments. 
-# Points to the wallet of the organization. 
+# @notice The address of the beneficiary organization which receives the investments.
+# Points to the wallet of the organization.
 
 bigDivAddress: public(address)
 # @notice The BigDiv library we use for BigNumber math
@@ -219,12 +219,12 @@ burnThresholdBasisPoints: public(uint256)
 # organization are automatically burnt expressed in basis points.
 
 buySlopeNum: public(uint256)
-# @notice The buy slope of the bonding curve. 
+# @notice The buy slope of the bonding curve.
 # Does not affect the financial model, only the granularity of FAIR.
 # @dev This is the numerator component of the fractional value.
 
 buySlopeDen: public(uint256)
-# @notice The buy slope of the bonding curve. 
+# @notice The buy slope of the bonding curve.
 # Does not affect the financial model, only the granularity of FAIR.
 # @dev This is the denominator component of the fractional value.
 
@@ -232,11 +232,11 @@ control: public(address)
 # @notice The address from which the updatable variables can be updated
 
 currencyAddress: public(address)
-# @notice The address of the token used as reserve in the bonding curve 
+# @notice The address of the token used as reserve in the bonding curve
 # (e.g. the DAI contract). Use ETH if 0.
 
-currency: IERC777_20_Token 
-# @notice The address of the token used as reserve in the bonding curve 
+currency: IERC777_20_Token
+# @notice The address of the token used as reserve in the bonding curve
 # (e.g. the DAI contract). Use ETH if 0.
 # @dev redundant w/ currencyAddress, for convenience
 
@@ -249,16 +249,16 @@ feeBasisPoints: public(uint256)
 fairAddress: public(address)
 # @notice The FAIR token contract address
 
-fair: IFAIR 
+fair: IFAIR
 # @notice The FAIR token contract address
 # @dev redundant w/ fairAddress, for convenience
 
 initGoal: public(uint256)
-# @notice The initial fundraising goal (expressed in FAIR) to start the c-org. 
+# @notice The initial fundraising goal (expressed in FAIR) to start the c-org.
 # `0` means that there is no initial fundraising and the c-org immediately moves to run state.
 
 initInvestors: public(map(address, uint256))
-# @notice A map with all investors in init state using address as a key and amount as value. 
+# @notice A map with all investors in init state using address as a key and amount as value.
 # @dev This structure's purpose is to make sure that only investors can withdraw their money if init_goal is not reached.
 
 initReserve: public(uint256)
@@ -266,7 +266,7 @@ initReserve: public(uint256)
 # @dev Most organizations will move these tokens into vesting contract(s)
 
 investmentReserveBasisPoints: public(uint256)
-# @notice The investment reserve of the c-org. Defines the percentage of the value invested that is 
+# @notice The investment reserve of the c-org. Defines the percentage of the value invested that is
 # automatically funneled and held into the buyback_reserve expressed in basis points.
 
 isCurrencyERC777: public(bool)
@@ -320,7 +320,7 @@ def buybackReserve() -> uint256:
     reserve = as_unitless_number(self.balance)
   else:
     reserve = self.currency.balanceOf(self)
-  
+
   if(reserve > MAX_BEFORE_SQUARE):
     # Math: If the reserve becomes excessive, cap the value to prevent overflowing in other formulas
     return MAX_BEFORE_SQUARE
@@ -349,7 +349,7 @@ def initialize(
   @dev using the init pattern in order to support zos upgrades
   """
   assert self.control == ZERO_ADDRESS, "ALREADY_INITIALIZED"
-  
+
   # Set initGoal, which in turn defines the initial state
   if(_initGoal == 0):
     log.StateChange(self.state, STATE_RUN)
@@ -416,7 +416,7 @@ def updateConfig(
   assert msg.sender == self.control, "CONTROL_ONLY"
 
   self.fair.updateConfig(_erc1404Address, _name, _symbol)
-  
+
   assert _bigDiv != ZERO_ADDRESS, "INVALID_ADDRESS"
   self.bigDivAddress = _bigDiv
   self.bigDiv = IBigDiv(_bigDiv)
@@ -500,9 +500,9 @@ def _collectInvestment(
       if(refund > 0):
         # TODO
         # this line works correctly
-        # send(_from, refund)
+        send(_from, refund)
         # switching to the following causes a revert
-        raw_call(_from, b"", outsize=0, value=refund, gas=2300)
+        # raw_call(_from, b"", outsize=0, value=refund, gas=msg.gas)
     else:
       assert as_wei_value(_quantityToInvest, "wei") == _msgValue, "INCORRECT_MSG_VALUE"
   else: # currency is ERC20 or ERC777
@@ -525,7 +525,10 @@ def _sendCurrency(
   if(_amount > 0):
     if(self.currency == ZERO_ADDRESS):
       # TODO
-      send(_to, as_wei_value(_amount, "wei"))
+      # this line works correctly
+      # send(_to, as_wei_value(_amount, "wei"))
+      # switching to the following causes a revert
+      raw_call(_to, b"", outsize=0, value=as_wei_value(_amount, "wei"), gas=msg.gas)
     else:
       if(self.isCurrencyERC777):
         self.currency.send(_to, as_unitless_number(_amount), "")
@@ -589,14 +592,14 @@ def estimateBuyValue(
       self.buySlopeNum,
       False
     )
-    # Math: to avoid overflow in _toDecimalWithPlaces, supply must be <= 1.3e28.  Then large 
+    # Math: to avoid overflow in _toDecimalWithPlaces, supply must be <= 1.3e28.  Then large
     # _currencyValues may overflow, but they can retry with a smaller value
     tokenValue += supply * supply
 
     tokenValue /= DIGITS_UINT
 
     # Math: supports a max value of 1.7e+56 which is in-range given the comments above
-    decimalValue: decimal = self._toDecimalWithPlaces(tokenValue) 
+    decimalValue: decimal = self._toDecimalWithPlaces(tokenValue)
 
     decimalValue = sqrt(decimalValue)
 
@@ -629,7 +632,7 @@ def buy(
   @param _to The account to receive the FAIR tokens from this purchase.
   @param _currencyValue How much currency to spend in order to buy FAIR.
   @param _minTokensBought Buy at least this many FAIR tokens or the transaction reverts.
-  @dev _minTokensBought is necessary as the price will change if some elses transaction mines after 
+  @dev _minTokensBought is necessary as the price will change if some elses transaction mines after
   yours was submitted.
   """
   assert _to != ZERO_ADDRESS, "INVALID_ADDRESS"
@@ -662,7 +665,7 @@ def buy(
       self._distributeInvestment(_currencyValue)
 
   self.fair.mint(msg.sender, _to, tokenValue, "", "")
-  
+
   if(self.state == STATE_RUN):
     if(_to == self.beneficiary):
       self._applyBurnThreshold() # must mint before this call
@@ -689,7 +692,7 @@ def estimateSellValue(
     # total_supply = t
     # burnt_supply = b
     # amount = a
-    # source: (t+b)*a*(2*r)/((t+b)^2)-(((2*r)/((t+b)^2)*a^2)/2)+((2*r)/((t+b)^2)*a*b^2)/(2*(t)) 
+    # source: (t+b)*a*(2*r)/((t+b)^2)-(((2*r)/((t+b)^2)*a^2)/2)+((2*r)/((t+b)^2)*a*b^2)/(2*(t))
     # imp: (a b^2 r)/(t (b + t)^2) + (2 a r)/(b + t) - (a^2 r)/(b + t)^2
 
     # Math: burnedSupply is capped in FAIR such that the square will never overflow
@@ -699,8 +702,8 @@ def estimateSellValue(
       False
     )
     # Math: worst-case currencyValue is MAX_BEFORE_SQUARE (max reserve, 1 supply)
-    
-    # Math: buybackReserve is capped such that this will not overflow for any value of 
+
+    # Math: buybackReserve is capped such that this will not overflow for any value of
     # quantityToSell (up to the supply's hard-cap)
     temp: uint256 = 2 * _quantityToSell * buybackReserve
     temp /= supply
@@ -712,7 +715,7 @@ def estimateSellValue(
     # Math: quantityToSell has to be less than the supply's hard-cap, which means squaring will never overflow
     # Math: this will not underflow as the terms before it will sum to a greater value
     currencyValue -= self.bigDiv.bigDiv2x2(
-      _quantityToSell * _quantityToSell, buybackReserve, 
+      _quantityToSell * _quantityToSell, buybackReserve,
       supply, supply,
       True
     )
@@ -750,7 +753,7 @@ def _sell(
     self.fair.burn(_quantityToSell, SELL_FLAG)
   else:
     self.fair.operatorBurn(_from, _quantityToSell, "", SELL_FLAG)
-  
+
   self._sendCurrency(_to, currencyValue)
   log.Sell(_from, _to, currencyValue, _quantityToSell)
 
@@ -765,7 +768,7 @@ def sell(
   @param _to The account to receive the currency from this sale.
   @param _quantityToSell How many FAIR tokens to sell for currency value.
   @param _minCurrencyReturned Get at least this many currency tokens or the transaction reverts.
-  @dev _minCurrencyReturned is necessary as the price will change if some elses transaction mines after 
+  @dev _minCurrencyReturned is necessary as the price will change if some elses transaction mines after
   yours was submitted.
   """
   self._sell(msg.sender, _to, _quantityToSell, _minCurrencyReturned, False)
@@ -800,13 +803,13 @@ def estimatePayValue(
   tokenValue += supply * supply
 
   # Math: Truncates last 18 digits from tokenValue here
-  tokenValue /= DIGITS_UINT 
+  tokenValue /= DIGITS_UINT
 
   # Math: Truncates another 8 digits from tokenValue (losing 26 digits in total)
   # This will cause small values to round to 0 tokens for the payment (the payment is still accepted)
   # Math: Max supported tokenValue is 1.7e+56. If supply is at the hard-cap tokenValue would be 1e38, leaving room
   # for a _currencyValue up to 1.7e33 (or 1.7e15 after decimals)
-  decimalValue: decimal = self._toDecimalWithPlaces(tokenValue) 
+  decimalValue: decimal = self._toDecimalWithPlaces(tokenValue)
 
   decimalValue = sqrt(decimalValue)
 
@@ -856,7 +859,7 @@ def _pay(
 
   # Math: this will never underflow since investmentReserveBasisPoints is capped to BASIS_POINTS_DEN
   self._sendCurrency(self.beneficiary, _currencyValue - reserve)
-  
+
   # Distribute tokens
   if(tokenValue > 0):
     self.fair.mint(_from, to, tokenValue, "", "")
@@ -927,10 +930,10 @@ def estimateExitFee(
 @payable
 def close():
   """
-  @notice Called by the beneficiary account to STATE_CLOSE or STATE_CANCEL the c-org, 
+  @notice Called by the beneficiary account to STATE_CLOSE or STATE_CANCEL the c-org,
   preventing any more tokens from being minted.
   @dev Requires an `exitFee` to be paid.  If the currency is ETH, include a little more than
-  what appears to be required and any remainder will be returned to your account.  This is 
+  what appears to be required and any remainder will be returned to your account.  This is
   because another user may have a transaction mined which changes the exitFee required.
   For other `currency` types, the beneficiary account will be billed the exact amount required.
   """
@@ -954,7 +957,7 @@ def close():
     self._collectInvestment(msg.sender, exitFee, msg.value, True)
   else:
     assert False, "INVALID_STATE"
-  
+
   log.Close(exitFee)
 
 #endregion
