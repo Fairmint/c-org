@@ -1,6 +1,10 @@
 # @title Reduces the size of terms before multiplication, to avoid an overflow, and then
-# restores the proper size after division.  This effectively allows us to overflow values in the 
-# numerator and/or denominator of a fraction, so long as the end result does not overflow as well.
+# restores the proper size after division.  
+# @notice This effectively allows us to overflow values in the numerator and/or denominator 
+# of a fraction, so long as the end result does not overflow as well.
+# @dev Each individual numerator or denominator term is reduced if large so that multiplication 
+# is safe from overflow.  Then we perform the division using the reduced terms.  Finally the
+# result is increased to restore the original scale of terms.
 
 MAX_BEFORE_SQUARE: constant(uint256)  = 340282366920938425684442744474606501888
 # @notice When multiplying 2 terms, the max value is sqrt(2^256-1) 
