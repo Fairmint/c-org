@@ -21,11 +21,7 @@ contract("dat / csvTests", accounts => {
   const TRANSFER_GAS_COST = new BigNumber("22000").times("100000000000");
   const GAS_COST_BUFFER = new BigNumber("2200000").times("100000000000");
 
-  const tokenType = [
-    undefined,
-    daiArtifact,
-    usdcArtifact
-  ];
+  const tokenType = [undefined, daiArtifact, usdcArtifact];
 
   let initComplete;
 
@@ -321,13 +317,9 @@ contract("dat / csvTests", accounts => {
         case "xfer":
           if (isCurrency) {
             if (currency) {
-                tx = await currency.transfer(
-                  targetAddress,
-                  quantity.toFixed(),
-                  {
-                    from: row.account.address
-                  }
-                );
+              tx = await currency.transfer(targetAddress, quantity.toFixed(), {
+                from: row.account.address
+              });
             } else {
               tx = await web3.eth.sendTransaction({
                 from: row.account.address,
