@@ -11,44 +11,6 @@ units: {
 
 # TODO: switch to interface files
 # Depends on https://github.com/ethereum/vyper/issues/1367
-contract IERC1820Registry:
-  # @title Used to register support for the ERC-777 receiver hook.
-  def setInterfaceImplementer(
-    _account: address,
-    _interfaceHash: bytes32,
-    _implementer: address
-  ): modifying
-  def getInterfaceImplementer(
-    _addr: address,
-    _interfaceHash: bytes32
-  ) -> address: constant
-contract IERC777_20_Token:
-  # @title Represents either an ERC-777 or an ERC-20 token.
-  def totalSupply() -> uint256: constant
-  def balanceOf(
-    _account: address
-  ) -> uint256: constant
-  def transfer(
-    _to: address,
-    _value: uint256
-  ) -> bool: modifying
-  def transferFrom(
-    _from: address,
-    _to: address,
-    _value: uint256
-  ) -> bool: modifying
-  def send(
-    _recipient: address,
-    _amount: uint256,
-    _userData: bytes[1024]
-  ): modifying
-  def operatorSend(
-    _sender: address,
-    _recipient: address,
-    _amount: uint256,
-    _userData: bytes[1024],
-    _operatorData: bytes[1024]
-  ): modifying
 contract IFAIR:
   # @title The interface for our FAIR tokens.
   def burnedSupply() -> uint256: constant
@@ -68,19 +30,14 @@ contract IFAIR:
     _userData: bytes[1024],
     _operatorData: bytes[1024]
   ): modifying
-  def operatorSend(
+  def transferFrom(
     _sender: address,
     _recipient: address,
-    _amount: uint256,
-    _userData: bytes[1024],
-    _operatorData: bytes[1024]
+    _amount: uint256
   ): modifying
   def mint(
-    _operator: address,
     _to: address,
-    _quantity: uint256,
-    _userData: bytes[1024],
-    _operatorData: bytes[1024]
+    _quantity: uint256
   ): modifying
   def updateConfig(
     _erc1404Address: address,
@@ -235,7 +192,7 @@ currencyAddress: public(address)
 # @notice The address of the token used as reserve in the bonding curve 
 # (e.g. the DAI contract). Use ETH if 0.
 
-currency: IERC777_20_Token 
+currency: ERC20 
 # @notice The address of the token used as reserve in the bonding curve 
 # (e.g. the DAI contract). Use ETH if 0.
 # @dev redundant w/ currencyAddress, for convenience
@@ -268,9 +225,6 @@ initReserve: public(uint256)
 investmentReserveBasisPoints: public(uint256)
 # @notice The investment reserve of the c-org. Defines the percentage of the value invested that is 
 # automatically funneled and held into the buyback_reserve expressed in basis points.
-
-isCurrencyERC777: public(bool)
-# @notice A cache of the currency type, if `True` use ERC-777 otherwise use ETH or ERC-20.
 
 openUntilAtLeast: public(uint256)
 # @notice The earliest date/time (in seconds) that the DAT may enter the `CLOSE` state, ensuring
@@ -375,18 +329,9 @@ def initialize(
   self.control = msg.sender
   self.feeCollector = msg.sender
 
-  # Register supported interfaces
-  # the 1820 address is constant for all networks
-  IERC1820Registry(0x1820a4B7618BdE71Dce8cdc73aAB6C95905faD24).setInterfaceImplementer(self, keccak256("ERC777TokensRecipient"), self)
-
-  # Check if the currency is an ERC-777 token
+  # Save currency
   self.currencyAddress = _currencyAddress
-  implementer: address = IERC1820Registry(0x1820a4B7618BdE71Dce8cdc73aAB6C95905faD24).getInterfaceImplementer(_currencyAddress, keccak256("ERC777Token"))
-  if(implementer == ZERO_ADDRESS):
-    self.currency = IERC777_20_Token(_currencyAddress)
-  else:
-    self.isCurrencyERC777 = True
-    self.currency = IERC777_20_Token(implementer)
+  self.currency = ERC20(_currencyAddress)
 
   # Initialize the FAIR token
   self.fairAddress = _fairAddress
@@ -396,7 +341,7 @@ def initialize(
   # Mint the initial reserve
   if(_initReserve > 0):
     self.initReserve = _initReserve
-    self.fair.mint(msg.sender, self.beneficiary, self.initReserve, "", "")
+    self.fair.mint(self.beneficiary, self.initReserve)
 
 @public
 def updateConfig(
@@ -445,7 +390,7 @@ def updateConfig(
     self.initInvestors[_beneficiary] += self.initInvestors[self.beneficiary]
     self.initInvestors[self.beneficiary] = 0
     if(tokens > 0):
-      self.fair.operatorSend(self.beneficiary, _beneficiary, tokens, "", "")
+      self.fair.transferFrom(self.beneficiary, _beneficiary, tokens)
     self.beneficiary = _beneficiary
 
   log.UpdateConfig(
@@ -499,14 +444,11 @@ def _collectInvestment(
       send(_from, _msgValue - _quantityToInvest)
     else:
       assert as_wei_value(_quantityToInvest, "wei") == _msgValue, "INCORRECT_MSG_VALUE"
-  else: # currency is ERC20 or ERC777
+  else: # currency is ERC20
     assert _msgValue == 0, "DO_NOT_SEND_ETH"
 
-    if(self.isCurrencyERC777):
-      self.currency.operatorSend(_from, self, _quantityToInvest, "", "")
-    else:
-      success: bool = self.currency.transferFrom(_from, self, _quantityToInvest)
-      assert success, "ERC20_TRANSFER_FAILED"
+    success: bool = self.currency.transferFrom(_from, self, _quantityToInvest)
+    assert success, "ERC20_TRANSFER_FAILED"
 
 @private
 def _sendCurrency(
@@ -520,11 +462,8 @@ def _sendCurrency(
     if(self.currency == ZERO_ADDRESS):
       send(_to, as_wei_value(_amount, "wei"))
     else:
-      if(self.isCurrencyERC777):
-        self.currency.send(_to, as_unitless_number(_amount), "")
-      else:
-        success: bool = self.currency.transfer(_to, as_unitless_number(_amount))
-        assert success, "ERC20_TRANSFER_FAILED"
+      success: bool = self.currency.transfer(_to, as_unitless_number(_amount))
+      assert success, "ERC20_TRANSFER_FAILED"
 
 #endregion
 
@@ -654,7 +593,7 @@ def buy(
     if(_to != self.beneficiary):
       self._distributeInvestment(_currencyValue)
 
-  self.fair.mint(msg.sender, _to, tokenValue, "", "")
+  self.fair.mint(_to, tokenValue)
   
   if(self.state == STATE_RUN):
     if(_to == self.beneficiary):
@@ -852,7 +791,7 @@ def _pay(
   
   # Distribute tokens
   if(tokenValue > 0):
-    self.fair.mint(_from, to, tokenValue, "", "")
+    self.fair.mint(to, tokenValue)
     self._applyBurnThreshold() # must mint before this call
 
   log.Pay(_from, _to, _currencyValue, tokenValue)
@@ -951,26 +890,3 @@ def close():
   log.Close(exitFee)
 
 #endregion
-
-@public
-def tokensReceived(
-  _operator: address,
-  _from: address,
-  _to: address,
-  _amount: uint256,
-  _userData: bytes[1024],
-  _operatorData: bytes[1024]
-):
-  """
-  @dev If FAIR: Sell tokens
-  If currency: Pay the organization on-chain with ERC-777 tokens (only works when currency is ERC-777)
-  Params are from the ERC-777 token standard
-  """
-  if(_operator == self):
-    return
-  if(msg.sender == self.currency):
-    self._pay(_operator, _from, _amount)
-  elif(msg.sender == self.fairAddress):
-    self._sell(_from, _from, _amount, 1, True)
-  else:
-    assert False, "INVALID_TOKEN_TYPE"

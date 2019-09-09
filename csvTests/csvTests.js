@@ -11,8 +11,6 @@ const sheets = require("./test-data/script.json");
 const sheet = sheets[process.env.SHEET_ID || 0];
 
 const daiArtifact = artifacts.require("TestDai");
-const erc777Artifact = artifacts.require("TestERC777Only");
-const zosTokenArtifact = artifacts.require("TestERC777ERC20");
 const usdcArtifact = artifacts.require("TestUsdc");
 
 contract("dat / csvTests", accounts => {
@@ -23,13 +21,7 @@ contract("dat / csvTests", accounts => {
   const TRANSFER_GAS_COST = new BigNumber("22000").times("100000000000");
   const GAS_COST_BUFFER = new BigNumber("2200000").times("100000000000");
 
-  const tokenType = [
-    undefined,
-    daiArtifact,
-    zosTokenArtifact,
-    erc777Artifact,
-    usdcArtifact
-  ];
+  const tokenType = [undefined, daiArtifact, usdcArtifact];
 
   let initComplete;
 
@@ -190,17 +182,6 @@ contract("dat / csvTests", accounts => {
 
       if (currency) {
         if (
-          currency.isOperatorFor &&
-          !(await currency.isOperatorFor(
-            contracts.dat.address,
-            row.account.address
-          ))
-        ) {
-          console.log(`  Set #${row.account.id} to authorize dat`);
-          await currency.authorizeOperator(contracts.dat.address, {
-            from: row.account.address
-          });
-        } else if (
           currency.allowance &&
           (await currency.allowance(
             row.account.address,
@@ -336,24 +317,9 @@ contract("dat / csvTests", accounts => {
         case "xfer":
           if (isCurrency) {
             if (currency) {
-              if (currency.transfer) {
-                tx = await currency.transfer(
-                  targetAddress,
-                  quantity.toFixed(),
-                  {
-                    from: row.account.address
-                  }
-                );
-              } else {
-                tx = await currency.send(
-                  targetAddress,
-                  quantity.toFixed(),
-                  web3.utils.asciiToHex(""),
-                  {
-                    from: row.account.address
-                  }
-                );
-              }
+              tx = await currency.transfer(targetAddress, quantity.toFixed(), {
+                from: row.account.address
+              });
             } else {
               tx = await web3.eth.sendTransaction({
                 from: row.account.address,

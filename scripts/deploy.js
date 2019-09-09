@@ -4,7 +4,6 @@ const fs = require("fs");
 
 const testDaiArtifact = artifacts.require("TestDai");
 const testUsdcArtifact = artifacts.require("TestUsdc");
-const erc1820Artifact = artifacts.require("IERC1820Registry");
 const proxyArtifact = artifacts.require("AdminUpgradeabilityProxy");
 const erc1404Artifact = artifacts.require("ERC1404");
 const vestingArtifact = artifacts.require("TokenVesting");
@@ -72,7 +71,6 @@ contract("deploy script", accounts => {
         )
       );
 
-      abiJson.erc1820 = erc1820Artifact.abi;
       bytecodeJson.erc1404 = erc1404Artifact.bytecode;
       abiJson.erc1404 = contracts.erc1404.abi;
       abiJson.proxyAdmin = contracts.proxyAdmin.abi;
