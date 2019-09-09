@@ -7,7 +7,6 @@ const testUsdcArtifact = artifacts.require("TestUsdc");
 const proxyArtifact = artifacts.require("AdminUpgradeabilityProxy");
 const erc1404Artifact = artifacts.require("ERC1404");
 const vestingArtifact = artifacts.require("TokenVesting");
-const fairArtifact = artifacts.require("FAIR");
 const datArtifact = artifacts.require("DecentralizedAutonomousTrust");
 const proxyAdminArtifact = artifacts.require("ProxyAdmin");
 const bigDivArtifact = artifacts.require("BigDiv");
@@ -78,11 +77,8 @@ contract("deploy script", accounts => {
       bytecodeJson.proxyAdmin = proxyAdminArtifact.bytecode;
       bytecodeJson.proxy = proxyArtifact.bytecode;
       console.log(`ProxyAdmin: ${contracts.proxyAdmin.address}`);
-      abiJson.fair = contracts.fair.abi;
       abiJson.dat = contracts.dat.abi;
-      bytecodeJson.fair = fairArtifact.bytecode;
       bytecodeJson.dat = datArtifact.bytecode;
-      console.log(`FAIR token: ${contracts.fair.address}`);
       abiJson.bigDiv = contracts.bigDiv.abi;
       abiJson.erc20 = currencyToken.abi;
 

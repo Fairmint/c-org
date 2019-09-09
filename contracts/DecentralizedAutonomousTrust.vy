@@ -11,44 +11,6 @@ units: {
 
 # TODO: switch to interface files
 # Depends on https://github.com/ethereum/vyper/issues/1367
-contract IFAIR:
-  # @title The interface for our FAIR tokens.
-  def burnedSupply() -> uint256: constant
-  def totalSupply() -> uint256: constant
-  def balanceOf(
-    _account: address
-  ) -> uint256: constant
-  def initialize(): modifying
-  def erc1404Address() -> address: constant
-  def burn(
-    _amount: uint256,
-    _userData: bytes[1024]
-  ): modifying
-  def operatorBurn(
-    _account: address,
-    _amount: uint256,
-    _userData: bytes[1024],
-    _operatorData: bytes[1024]
-  ): modifying
-  def transferFrom(
-    _sender: address,
-    _recipient: address,
-    _amount: uint256
-  ): modifying
-  def mint(
-    _to: address,
-    _quantity: uint256
-  ): modifying
-  def updateConfig(
-    _erc1404Address: address,
-    _name: string[64],
-    _symbol: string[32]
-  ): modifying
-  def detectTransferRestriction(
-    _from: address,
-    _to: address, 
-    _value: uint256
-  ) -> uint256: constant
 contract IBigDiv:
   def bigDiv2x1(
     _numA: uint256,
@@ -79,10 +41,46 @@ contract IBigDiv:
     _denC: uint256,
     _roundUp: bool
   ) -> uint256: constant
+contract ERC1404:
+  def detectTransferRestriction(
+    _from: address,
+    _to: address, 
+    _value: uint256
+  ) -> uint256: constant
+  def authorizeTransfer(
+    _from: address,
+    _to: address, 
+    _value: uint256
+  ): modifying
+contract IDAT:
+  def state() -> uint256(stateMachine): constant
+  def beneficiary() -> address: constant
+
+implements: ERC20
 
 # Events
 ###########
 
+# Events required by the ERC-20 token standard
+Approval: event({
+  _owner: indexed(address),
+  _spender: indexed(address),
+  _value: uint256
+})
+Transfer: event({
+  _from: indexed(address),
+  _to: indexed(address),
+  _value: uint256
+})
+
+# Events specific to our use case
+Burned: event({
+  _operator: indexed(address),
+  _from: indexed(address),
+  _amount: uint256,
+  _userData: bytes[1024],
+  _operatorData: bytes[1024]
+})
 Buy: event({
   _from: address,
   _to: address,
@@ -157,6 +155,52 @@ BASIS_POINTS_DEN: constant(uint256) = 10000
 SELL_FLAG: constant(bytes[1024]) =  b"\x01"
 # @notice Send as `operatorData` or `data` for a burn via the burn threshold, to differentiate from selling.
 
+MAX_SUPPLY: constant(uint256)  = 10 ** 28
+# @notice The max `totalSupply + burnedSupply`
+# @dev This limit ensures that the DAT's formulas do not overflow
+
+##############
+# Data specific to our token business logic
+##############
+
+erc1404Address: public(address)
+# @notice The contract address for transfer authorizations, if any.
+# @dev This contract must implement the ERC1404 interface above
+
+erc1404: ERC1404 
+# @notice The contract for transfer authorizations, if any.
+# @dev This is redundant w/ erc1404Address, for convenience
+
+burnedSupply: public(uint256)
+# @notice The total number of burned FAIR tokens, excluding tokens burned from a `Sell` action in the DAT.
+
+##############
+# Data storage required by the ERC-20 token standard
+##############
+
+allowances: map(address, map(address, uint256)) 
+# @notice Stores the `from` address to the `operator` address to the max value that operator is authorized to transfer.
+# @dev not public: exposed via `allowance`
+
+balanceOf: public(map(address, uint256))
+# @notice Returns the account balance of another account with address _owner.
+
+totalSupply: public(uint256)
+# @notice The total number of tokens currently in circulation
+# @dev This does not include the burnedSupply
+
+##############
+# Metadata suggested by the ERC-20 token standard
+##############
+
+name: public(string[64])
+# @notice Returns the name of the token - e.g. "MyToken".
+# @dev Optional requirement from ERC-20.
+
+symbol: public(string[32])
+# @notice Returns the symbol of the token. E.g. “HIX”.
+# @dev Optional requirement from ERC-20
+
 # Data for DAT business logic
 ###########
 
@@ -202,13 +246,6 @@ feeCollector: public(address)
 
 feeBasisPoints: public(uint256)
 # @notice The percent fee collected each time new FAIR are issued expressed in basis points.
-
-fairAddress: public(address)
-# @notice The FAIR token contract address
-
-fair: IFAIR 
-# @notice The FAIR token contract address
-# @dev redundant w/ fairAddress, for convenience
 
 initGoal: public(uint256)
 # @notice The initial fundraising goal (expressed in FAIR) to start the c-org. 
@@ -288,7 +325,6 @@ def buybackReserve() -> uint256:
 
 @public
 def initialize(
-  _fairAddress: address,
   _initReserve: uint256,
   _currencyAddress: address,
   _initGoal: uint256,
@@ -333,15 +369,10 @@ def initialize(
   self.currencyAddress = _currencyAddress
   self.currency = ERC20(_currencyAddress)
 
-  # Initialize the FAIR token
-  self.fairAddress = _fairAddress
-  self.fair = IFAIR(_fairAddress)
-  self.fair.initialize()
-
   # Mint the initial reserve
   if(_initReserve > 0):
     self.initReserve = _initReserve
-    self.fair.mint(self.beneficiary, self.initReserve)
+    self._mint(self.beneficiary, self.initReserve)
 
 @public
 def updateConfig(
@@ -360,8 +391,13 @@ def updateConfig(
   # This assert also confirms that initialize has been called.
   assert msg.sender == self.control, "CONTROL_ONLY"
 
-  self.fair.updateConfig(_erc1404Address, _name, _symbol)
-  
+  self.name = _name
+  self.symbol = _symbol
+
+  assert _erc1404Address != ZERO_ADDRESS, "INVALID_ADDRESS"
+  self.erc1404Address = _erc1404Address
+  self.erc1404 = ERC1404(_erc1404Address)
+
   assert _bigDiv != ZERO_ADDRESS, "INVALID_ADDRESS"
   self.bigDivAddress = _bigDiv
   self.bigDiv = IBigDiv(_bigDiv)
@@ -386,11 +422,11 @@ def updateConfig(
 
   if(self.beneficiary != _beneficiary):
     assert _beneficiary != ZERO_ADDRESS, "INVALID_ADDRESS"
-    tokens: uint256 = self.fair.balanceOf(self.beneficiary)
+    tokens: uint256 = self.balanceOf(self.beneficiary)
     self.initInvestors[_beneficiary] += self.initInvestors[self.beneficiary]
     self.initInvestors[self.beneficiary] = 0
     if(tokens > 0):
-      self.fair.transferFrom(self.beneficiary, _beneficiary, tokens)
+      self.transferFrom(self.beneficiary, _beneficiary, tokens)
     self.beneficiary = _beneficiary
 
   log.UpdateConfig(
@@ -409,6 +445,32 @@ def updateConfig(
 
 #endregion
 
+#region Functions required by the ERC-1404 standard
+##################################################
+
+@public
+@constant
+def detectTransferRestriction(
+  _from: address,
+  _to: address, 
+  _value: uint256
+) -> uint256:
+  if(self.erc1404 != ZERO_ADDRESS): # This is not set for the minting of initialReserve
+    return self.erc1404.detectTransferRestriction(_from, _to, _value)
+  return 0
+  
+@public
+@constant
+def authorizeTransfer(
+  _from: address,
+  _to: address, 
+  _value: uint256
+):
+  if(self.erc1404 != ZERO_ADDRESS): # This is not set for the minting of initialReserve
+    self.erc1404.authorizeTransfer(_from, _to, _value)
+
+#endregion
+
 #region Transaction Helpers
 
 @private
@@ -416,17 +478,17 @@ def _applyBurnThreshold():
   """
   @dev Burn tokens from the beneficiary account if they have too much of the total share.
   """
-  balanceBefore: uint256 = self.fair.balanceOf(self.beneficiary)
+  balanceBefore: uint256 = self.balanceOf(self.beneficiary)
   # Math: if totalSupply is < (2^256 - 1) / 10000 this will never overflow
   # totalSupply and burnedSupply are capped to MAX_BEFORE_SQUARE
-  maxHoldings: uint256 = self.fair.totalSupply() + self.fair.burnedSupply()
+  maxHoldings: uint256 = self.totalSupply + self.burnedSupply
   # burnThresholdBasisPoints is capped to BASIS_POINTS_DEN
   maxHoldings *= self.burnThresholdBasisPoints
   maxHoldings /= BASIS_POINTS_DEN
 
   if(balanceBefore > maxHoldings):
     # Math: the if condition prevents an underflow
-    self.fair.operatorBurn(self.beneficiary, balanceBefore - maxHoldings, "", "")
+    self.operatorBurn(self.beneficiary, balanceBefore - maxHoldings, "", "")
 
 @private
 def _collectInvestment(
@@ -470,6 +532,178 @@ def _sendCurrency(
     else:
       success: bool = self.currency.transfer(_to, as_unitless_number(_amount))
       assert success, "ERC20_TRANSFER_FAILED"
+
+@private
+def _burn(
+  _operator: address,
+  _from: address,
+  _amount: uint256,
+  _userData: bytes[1024],
+  _operatorData: bytes[1024]
+):
+  """
+  @dev Removes tokens from the circulating supply.
+  params from the ERC-777 token standard
+  """
+  assert _from != ZERO_ADDRESS, "ERC20: burn from the zero address"
+
+  self.balanceOf[_from] -= _amount
+  self.totalSupply -= _amount
+
+  if(
+    (_operator == self.datAddress and _operatorData == SELL_FLAG)
+    or
+    (_from == self.datAddress and _userData == SELL_FLAG)
+  ):
+    # This is a sell
+    self.authorizeTransfer(_from, ZERO_ADDRESS, _amount)
+  else:
+    # This is a burn
+    assert self.dat.state() == STATE_RUN, "ONLY_DURING_RUN"
+
+    self.burnedSupply += _amount
+
+  log.Burned(_operator, _from, _amount, _userData, _operatorData)
+  log.Transfer(_from, ZERO_ADDRESS, _amount)
+
+@private
+def _mint(
+  _to: address,
+  _quantity: uint256
+):
+  """
+  @notice Called by the owner, which is the DAT contract, in order to mint tokens on `buy`.
+  """
+  assert _to != ZERO_ADDRESS, "INVALID_ADDRESS"
+  assert _quantity > 0, "INVALID_QUANTITY"
+  self.authorizeTransfer(ZERO_ADDRESS, _to, _quantity)
+
+  self.totalSupply += _quantity
+  # Math: If this value got too large, the DAT may overflow on sell
+  assert self.totalSupply + self.burnedSupply <= MAX_SUPPLY, "EXCESSIVE_SUPPLY"
+  self.balanceOf[_to] += _quantity
+  
+  log.Transfer(ZERO_ADDRESS, _to, _quantity)
+
+@private
+def _send(
+  _from: address,
+  _to: address,
+  _amount: uint256
+):
+  """
+  @dev Moves tokens from one account to another if authorized.
+  We have disabled the call hooks for ERC-20 style transfers in order to ensure other contracts interfacing with
+  FAIR tokens (e.g. Uniswap) remain secure.
+  """
+  assert _from != ZERO_ADDRESS, "ERC20: send from the zero address"
+  assert _to != ZERO_ADDRESS, "ERC20: send to the zero address"
+  assert self.dat.state() != STATE_INIT or _from == self.dat.beneficiary(), "Only the beneficiary can make transfers during STATE_INIT"
+
+  self.authorizeTransfer(_from, _to, _amount)
+
+  self.balanceOf[_from] -= _amount
+  self.balanceOf[_to] += _amount
+
+  log.Transfer(_from, _to, _amount)
+
+#endregion
+
+#region Functions required by the ERC-20 token standard
+##################################################
+
+@public
+@constant
+def allowance(
+  _owner: address,
+  _spender: address
+) -> uint256:
+  """
+  @notice Returns the amount which `_spender` is still allowed to withdraw from `_owner`.
+  """
+  return self.allowances[_owner][_spender]
+
+@public
+@constant
+def decimals() -> uint256:
+  """
+  @notice Returns the number of decimals the token uses - e.g. 8, means to divide
+  the token amount by 100000000 to get its user representation.
+  @dev This is optional per ERC-20 but must always be 18 per ERC-777
+  """
+  return 18
+
+@public
+def approve(
+  _spender: address,
+  _value: uint256
+) -> bool:
+  """
+  @notice Allows `_spender` to withdraw from your account multiple times, up to the `_value` amount. 
+  @dev If this function is called again it overwrites the current allowance with `_value`.
+  """
+  assert _spender != ZERO_ADDRESS, "ERC777: approve to the zero address"
+
+  self.allowances[msg.sender][_spender] = _value
+  log.Approval(msg.sender, _spender, _value)
+  return True
+
+@public
+def transfer(
+  _to: address,
+  _value: uint256
+) -> bool:
+  """
+  @notice Transfers `_value` amount of tokens to address `_to` if authorized.
+  """
+  self._send(msg.sender, _to, _value)
+  return True
+
+@public
+def transferFrom(
+  _from: address,
+  _to: address,
+  _value: uint256
+) -> bool:
+  """
+  @notice Transfers `_value` amount of tokens from address `_from` to address `_to` if authorized.
+  """
+  if(msg.sender != self.datAddress):
+    self.allowances[_from][msg.sender] -= _value
+    log.Approval(_from, msg.sender, self.allowances[_from][msg.sender])
+  self._send(_from, _to, _value)
+  return True
+
+#endregion
+
+#region Functions for our business logic
+##################################################
+
+@public
+def burn(
+  _amount: uint256,
+  _userData: bytes[1024]
+):
+  """
+  @notice Burn the amount of tokens from the address msg.sender if authorized.
+  @dev Note that this is not the same as a `sell` via the DAT.
+  """
+  self._burn(msg.sender, msg.sender, _amount, _userData, "")
+
+@public
+def operatorBurn(
+  _from: address,
+  _amount: uint256,
+  _userData: bytes[1024],
+  _operatorData: bytes[1024]
+):
+  """
+  @notice Burn the amount of tokens on behalf of the address from if authorized.
+  @dev In addition to the standard ERC-777 use case, this is used by the DAT to `sell` tokens.
+  """
+  if(msg.sender != self.datAddress):
+    self.allowances[_from][msg.sender] -= _amount
+  self._burn(msg.sender, _from, _amount, _userData, _operatorData)
 
 #endregion
 
@@ -521,7 +755,7 @@ def estimateBuyValue(
       return 0
   elif(self.state == STATE_RUN):
     # Math: supply's max value is 10e28 as enforced in FAIR.vy
-    supply: uint256 = self.fair.totalSupply() + self.fair.burnedSupply()
+    supply: uint256 = self.totalSupply + self.burnedSupply
     tokenValue = self.bigDiv.bigDiv2x1(
       2 * _currencyValue, self.buySlopeDen,
       self.buySlopeNum,
@@ -586,7 +820,7 @@ def buy(
     # Math: the hard-cap in mint ensures that this line could never overflow
     self.initInvestors[_to] += tokenValue
     # Math: this would only overflow if initReserve was burned, but FAIR blocks burning durning init
-    if(self.fair.totalSupply() + tokenValue - self.initReserve >= self.initGoal):
+    if(self.totalSupply + tokenValue - self.initReserve >= self.initGoal):
       log.StateChange(self.state, STATE_RUN)
       self.state = STATE_RUN
       beneficiaryContribution: uint256 = self.bigDiv.bigDiv3x1(
@@ -599,7 +833,7 @@ def buy(
     if(_to != self.beneficiary):
       self._distributeInvestment(_currencyValue)
 
-  self.fair.mint(_to, tokenValue)
+  self._mint(_to, tokenValue)
   
   if(self.state == STATE_RUN):
     if(_to == self.beneficiary):
@@ -615,12 +849,12 @@ def estimateSellValue(
   _quantityToSell: uint256
 ) -> uint256:
   buybackReserve: uint256 = self.buybackReserve()
-  totalSupply: uint256 = self.fair.totalSupply()
+  totalSupply: uint256 = self.totalSupply
 
   # Calculate currencyValue for this sale
   currencyValue: uint256
   if(self.state == STATE_RUN):
-    burnedSupply: uint256 = self.fair.burnedSupply()
+    burnedSupply: uint256 = self.burnedSupply
     supply: uint256 = totalSupply + burnedSupply
 
     # buyback_reserve = r
@@ -685,9 +919,9 @@ def _sell(
 
   # Distribute funds
   if(_hasReceivedFunds):
-    self.fair.burn(_quantityToSell, SELL_FLAG)
+    self.burn(_quantityToSell, SELL_FLAG)
   else:
-    self.fair.operatorBurn(_from, _quantityToSell, "", SELL_FLAG)
+    self.operatorBurn(_from, _quantityToSell, "", SELL_FLAG)
   
   self._sendCurrency(_to, currencyValue)
   log.Sell(_from, _to, currencyValue, _quantityToSell)
@@ -725,7 +959,7 @@ def estimatePayValue(
   #  + s^2
   # ) - s
 
-  supply: uint256 = self.fair.totalSupply() + self.fair.burnedSupply()
+  supply: uint256 = self.totalSupply + self.burnedSupply
 
   # Math: max _currencyValue of (2^256 - 1) / 2e31 == 5.7e45 (* 2 * BASIS_POINTS won't overflow)
   tokenValue: uint256 = self.bigDiv.bigDiv2x1(
@@ -789,7 +1023,7 @@ def _pay(
   to: address = _to
   if(to == ZERO_ADDRESS):
     to = self.beneficiary
-  elif(self.fair.detectTransferRestriction(ZERO_ADDRESS, _to, tokenValue) != 0):
+  elif(self.detectTransferRestriction(ZERO_ADDRESS, _to, tokenValue) != 0):
     to = self.beneficiary
 
   # Math: this will never underflow since investmentReserveBasisPoints is capped to BASIS_POINTS_DEN
@@ -797,7 +1031,7 @@ def _pay(
   
   # Distribute tokens
   if(tokenValue > 0):
-    self.fair.mint(to, tokenValue)
+    self._mint(to, tokenValue)
     self._applyBurnThreshold() # must mint before this call
 
   log.Pay(_from, _to, _currencyValue, tokenValue)
@@ -844,12 +1078,12 @@ def estimateExitFee(
     # Source: (t^2 * (n/d))/2 + b*(n/d)*t - r
     # Implementation: (n t (2 b + t))/(2 d) - r
 
-    exitFee = 2 * self.fair.burnedSupply()
+    exitFee = 2 * self.burnedSupply
     # Math: the supply hard-cap ensures this does not overflow
-    exitFee += self.fair.totalSupply()
+    exitFee += self.totalSupply
     # Math: self.totalSupply cap makes the worst case: 10 ** 28 * 10 ** 28 which does not overflow
     exitFee = self.bigDiv.bigDiv2x1(
-      exitFee * self.fair.totalSupply(), self.buySlopeNum,
+      exitFee * self.totalSupply, self.buySlopeNum,
       2 * self.buySlopeDen,
       False
     )
