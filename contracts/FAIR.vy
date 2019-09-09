@@ -325,7 +325,7 @@ def transferFrom(
   """
   @notice Transfers `_value` amount of tokens from address `_from` to address `_to` if authorized.
   """
-  if(msg.sender != self.owner):
+  if(msg.sender != self.datAddress):
     self.allowances[_from][msg.sender] -= _value
     log.Approval(_from, msg.sender, self.allowances[_from][msg.sender])
   self._send(_from, _to, _value)
@@ -358,8 +358,8 @@ def operatorBurn(
   @notice Burn the amount of tokens on behalf of the address from if authorized.
   @dev In addition to the standard ERC-777 use case, this is used by the DAT to `sell` tokens.
   """
-  if(msg.sender != self.owner):
-    self.allowances[_from][msg.sender] -= _value
+  if(msg.sender != self.datAddress):
+    self.allowances[_from][msg.sender] -= _amount
   self._burn(msg.sender, _from, _amount, _userData, _operatorData)
 
 #endregion
