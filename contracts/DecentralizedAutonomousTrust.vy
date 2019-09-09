@@ -526,9 +526,9 @@ def _sendCurrency(
     if(self.currency == ZERO_ADDRESS):
       # TODO
       # this line works correctly
-      # send(_to, as_wei_value(_amount, "wei"))
+      send(_to, as_wei_value(_amount, "wei"))
       # switching to the following causes a revert
-      raw_call(_to, b"", outsize=0, value=as_wei_value(_amount, "wei"), gas=msg.gas)
+      #raw_call(_to, b"", outsize=0, value=as_wei_value(_amount, "wei"), gas=msg.gas)
     else:
       if(self.isCurrencyERC777):
         self.currency.send(_to, as_unitless_number(_amount), "")
