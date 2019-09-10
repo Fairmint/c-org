@@ -35,7 +35,7 @@ contract("wiki / burn / run", accounts => {
         await contracts.dat.balanceOf(investor)
       );
       totalSupplyBefore = new BigNumber(await contracts.dat.totalSupply());
-      await contracts.dat.burn(burnAmount, [], {
+      await contracts.dat.burn(burnAmount, {
         from: investor
       });
     });
@@ -73,7 +73,7 @@ contract("wiki / burn / run", accounts => {
           await contracts.dat.balanceOf(investor)
         );
         totalSupplyBefore = new BigNumber(await contracts.dat.totalSupply());
-        await contracts.dat.burn(burnAmount, [], {
+        await contracts.dat.burn(burnAmount, {
           from: investor
         });
       });
@@ -112,7 +112,7 @@ contract("wiki / burn / run", accounts => {
     });
 
     it("Can burn even if account is restricted", async () => {
-      await contracts.dat.burn(burnAmount, [], {
+      await contracts.dat.burn(burnAmount, {
         from: investor
       });
     });

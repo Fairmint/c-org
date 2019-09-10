@@ -340,7 +340,6 @@ contract("dat / csvTests", accounts => {
         case "burn":
           tx = await contracts.dat.burn(
             quantity.toFixed(),
-            web3.utils.asciiToHex(""),
             {
               from: row.account.address
             }

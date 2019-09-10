@@ -37,7 +37,7 @@ contract("wiki / burn / close", accounts => {
 
   it("Burn fails", async () => {
     await shouldFail(
-      contracts.dat.burn(burnAmount, [], {
+      contracts.dat.burn(burnAmount, {
         from: investor
       })
     );
