@@ -22,24 +22,7 @@ contract IBigDiv:
     _numA: uint256,
     _numB: uint256,
     _denA: uint256,
-    _denB: uint256,
-    _roundUp: bool
-  ) -> uint256: constant
-  def bigDiv3x1(
-    _numA: uint256,
-    _numB: uint256,
-    _numC: uint256,
-    _den: uint256,
-    _roundUp: bool
-  ) -> uint256: constant
-  def bigDiv3x3(
-    _numA: uint256,
-    _numB: uint256,
-    _numC: uint256,
-    _denA: uint256,
-    _denB: uint256,
-    _denC: uint256,
-    _roundUp: bool
+    _denB: uint256
   ) -> uint256: constant
 contract ERC1404:
   def detectTransferRestriction(
@@ -564,6 +547,8 @@ def initialize(
 
   assert _buySlopeNum > 0, "INVALID_SLOPE_NUM" # 0 not supported
   assert _buySlopeDen > 0, "INVALID_SLOPE_DEN"
+  assert _buySlopeNum < MAX_BEFORE_SQUARE, "EXCESSIVE_SLOPE_NUM" # 0 not supported
+  assert _buySlopeDen < MAX_BEFORE_SQUARE, "EXCESSIVE_SLOPE_DEN"
   self.buySlopeNum = _buySlopeNum
   self.buySlopeDen = _buySlopeDen
   assert _investmentReserveBasisPoints <= BASIS_POINTS_DEN, "INVALID_RESERVE" # 100% or less
@@ -714,8 +699,7 @@ def estimateBuyValue(
   if(self.state == STATE_INIT):
     tokenValue = self.bigDiv.bigDiv2x2(
       2 * _currencyValue, self.buySlopeDen,
-      self.initGoal, self.buySlopeNum,
-      False
+      self.initGoal, self.buySlopeNum
     )
     if(tokenValue > self.initGoal):
       return 0
@@ -789,8 +773,8 @@ def buy(
     if(self.totalSupply + tokenValue - self.initReserve >= self.initGoal):
       log.StateChange(self.state, STATE_RUN)
       self.state = STATE_RUN
-      beneficiaryContribution: uint256 = self.bigDiv.bigDiv3x1(
-        self.initInvestors[self.beneficiary], self.buySlopeNum, self.initGoal,
+      beneficiaryContribution: uint256 = self.bigDiv.bigDiv2x1(
+        self.initInvestors[self.beneficiary], self.buySlopeNum * self.initGoal,
         self.buySlopeDen * 2,
         False
       )
@@ -829,10 +813,9 @@ def estimateSellValue(
     # imp: (a b^2 r)/(t (b + t)^2) + (2 a r)/(b + t) - (a^2 r)/(b + t)^2
 
     # Math: burnedSupply is capped in FAIR such that the square will never overflow
-    currencyValue = self.bigDiv.bigDiv3x3(
-      _quantityToSell, buybackReserve, self.burnedSupply * self.burnedSupply,
-      self.totalSupply, supply, supply,
-      False
+    currencyValue = self.bigDiv.bigDiv2x2(
+      _quantityToSell * buybackReserve, self.burnedSupply * self.burnedSupply,
+      self.totalSupply, supply * supply
     )
     # Math: worst-case currencyValue is MAX_BEFORE_SQUARE (max reserve, 1 supply)
 
@@ -847,9 +830,9 @@ def estimateSellValue(
 
     # Math: quantityToSell has to be less than the supply's hard-cap, which means squaring will never overflow
     # Math: this will not underflow as the terms before it will sum to a greater value
-    currencyValue -= self.bigDiv.bigDiv2x2(
+    currencyValue -= self.bigDiv.bigDiv2x1(
       _quantityToSell * _quantityToSell, buybackReserve,
-      supply, supply,
+      supply * supply,
       True
     )
   elif(self.state == STATE_CLOSE):
