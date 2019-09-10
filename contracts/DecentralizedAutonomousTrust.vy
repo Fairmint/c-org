@@ -424,7 +424,6 @@ def transferFrom(
   @notice Transfers `_value` amount of tokens from address `_from` to address `_to` if authorized.
   """
   self.allowances[_from][msg.sender] -= _value
-  log.Approval(_from, msg.sender, self.allowances[_from][msg.sender])
   self._send(_from, _to, _value)
   return True
 
