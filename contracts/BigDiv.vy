@@ -6,6 +6,8 @@
 # is safe from overflow.  Then we perform the division using the reduced terms.  Finally the
 # result is increased to restore the original scale of terms.
 
+MAX_UINT: constant(uint256) = 2**256 - 1
+
 MAX_BEFORE_SQUARE: constant(uint256)  = 340282366920938463463374607431768211456
 # @notice When multiplying 2 terms, the max value is sqrt(2^256-1) 
 
@@ -19,6 +21,8 @@ def bigDiv2x1(
 ) -> uint256:
   if(_numA == 0 or _numB == 0):
     return 0
+  if(MAX_UINT / _numA > _numB):
+    return _numA * _numB / _den
 
   # Find max value
   value: uint256 = _numA
@@ -87,6 +91,8 @@ def bigDiv2x2(
   """
   if(_numA == 0 or _numB == 0):
     return 0
+  if(MAX_UINT / _numA > _numB and MAX_UINT / _denA > _denB):
+    return _numA * _numB / (_denA * _denB)
 
   # Find max value
   value: uint256 = _numA
