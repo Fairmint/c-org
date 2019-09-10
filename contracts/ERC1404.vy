@@ -19,9 +19,9 @@ def initialize(
   self.dat = msg.sender
   self.approved[ZERO_ADDRESS] = True
 
-@public
+@private
 @constant
-def detectTransferRestriction(
+def _detectTransferRestriction(
   _from: address,
   _to: address,
   _value: uint256
@@ -32,13 +32,22 @@ def detectTransferRestriction(
   return 1 # Denied
 
 @public
+@constant
+def detectTransferRestriction(
+  _from: address,
+  _to: address,
+  _value: uint256
+) -> uint256:
+  return self._detectTransferRestriction(_from, _to, _value)
+
+@public
 def authorizeTransfer(
   _from: address,
   _to: address,
   _value: uint256
 ):
   assert self.dat == msg.sender, "CALL_VIA_DAT_ONLY"
-  assert self.detectTransferRestriction(_from, _to, _value) == 0, "DENIED"
+  assert self._detectTransferRestriction(_from, _to, _value) == 0, "DENIED"
 
 @public
 @constant
