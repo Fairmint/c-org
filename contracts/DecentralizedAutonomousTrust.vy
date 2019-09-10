@@ -133,7 +133,7 @@ STATE_CLOSE: constant(uint256(stateMachine)) = 2
 STATE_CANCEL: constant(uint256(stateMachine)) = 3
 # @notice The state after closed by the `beneficiary` account from STATE_INIT
 
-MAX_BEFORE_SQUARE: constant(uint256)  = 340282366920938425684442744474606501888
+MAX_BEFORE_SQUARE: constant(uint256)  = 340282366920938463463374607431768211456
 # @notice When multiplying 2 terms, the max value is sqrt(2^256-1)
 
 DIGITS_UINT: constant(uint256) = 10 ** 18
