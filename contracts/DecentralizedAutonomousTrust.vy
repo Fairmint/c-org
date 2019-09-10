@@ -276,19 +276,42 @@ state: public(uint256(stateMachine))
 
 @private
 @constant
-def _toDecimalWithPlaces(
-  _value: uint256
-) -> decimal:
+def _sqrtOfTokensSupplySquared(
+  _tokenValue: uint256,
+  _supply: uint256
+) -> uint256:
   """
-  @dev Converts a uint token value into its decimal value, dropping the last 8 digits.
-  e.g. 1 token is _value 1000000000000000000 and returns 1.0000000000
-  Math: Max supported value is 2^127-1 * 10^18 == 1.7e+56
+  @dev Returns the sqrt of the token value and adds supply^2 converted into whole number of tokens for the sqrt operation
+  @returns uint256 the tokenValue after sqrt, converted back into base units
   """
-  temp: uint256 = _value / DIGITS_UINT
-  decimalValue: decimal = convert(_value - temp * DIGITS_UINT, decimal)
+  tokenValue: uint256 = _tokenValue
+
+  # Math: max supply^2 given the hard-cap is 1e56 leaving room for the max tokenValue (equal to the FAIR hard-cap)
+  tokenValue += _supply * _supply
+
+  # Math: Truncates last 18 digits from tokenValue here
+  tokenValue /= DIGITS_UINT
+
+  # Math: Truncates another 8 digits from tokenValue (losing 26 digits in total)
+  # This will cause small values to round to 0 tokens for the payment (the payment is still accepted)
+  # Math: Max supported tokenValue is 1.7e+56. If supply is at the hard-cap tokenValue would be 1e38, leaving room
+  # for a _currencyValue up to 1.7e33 (or 1.7e15 after decimals)
+
+  temp: uint256 = tokenValue / DIGITS_UINT
+  decimalValue: decimal = convert(tokenValue - temp * DIGITS_UINT, decimal)
   decimalValue /= DIGITS_DECIMAL
   decimalValue += convert(temp, decimal)
-  return decimalValue
+
+  decimalValue = sqrt(decimalValue)
+
+  # Unshift results
+  # Math: decimalValue has a max value of 2^127 - 1 which after sqrt can always be multiplied
+  # here without overflow
+  decimalValue *= DIGITS_DECIMAL
+
+  tokenValue = convert(decimalValue, uint256)
+
+  return tokenValue
 
 @public
 @constant
@@ -727,23 +750,8 @@ def estimateBuyValue(
       self.buySlopeNum,
       False
     )
-    # Math: to avoid overflow in _toDecimalWithPlaces, supply must be <= 1.3e28.  Then large
-    # _currencyValues may overflow, but they can retry with a smaller value
-    tokenValue += supply * supply
-
-    tokenValue /= DIGITS_UINT
-
-    # Math: supports a max value of 1.7e+56 which is in-range given the comments above
-    decimalValue: decimal = self._toDecimalWithPlaces(tokenValue)
-
-    decimalValue = sqrt(decimalValue)
-
-    # Unshift results
-    # Math: decimalValue has a max value of 2^127 - 1 which after sqrt can always be multiplied
-    # here without overflow
-    decimalValue *= DIGITS_DECIMAL
-
-    tokenValue = convert(decimalValue, uint256)
+    
+    tokenValue = self._sqrtOfTokensSupplySquared(tokenValue, supply)
 
     # Math: small chance of underflow due to possible rounding in sqrt
     if(tokenValue > supply):
@@ -932,26 +940,7 @@ def estimatePayValue(
     False
   )
 
-  # Math: max supply^2 given the hard-cap is 1e56 leaving room for the max tokenValue (equal to the FAIR hard-cap)
-  tokenValue += supply * supply
-
-  # Math: Truncates last 18 digits from tokenValue here
-  tokenValue /= DIGITS_UINT
-
-  # Math: Truncates another 8 digits from tokenValue (losing 26 digits in total)
-  # This will cause small values to round to 0 tokens for the payment (the payment is still accepted)
-  # Math: Max supported tokenValue is 1.7e+56. If supply is at the hard-cap tokenValue would be 1e38, leaving room
-  # for a _currencyValue up to 1.7e33 (or 1.7e15 after decimals)
-  decimalValue: decimal = self._toDecimalWithPlaces(tokenValue)
-
-  decimalValue = sqrt(decimalValue)
-
-  # Unshift results
-  # Math: decimalValue has a max value of 2^127 - 1 which after sqrt can always be multiplied
-  # here without overflow
-  decimalValue *= DIGITS_DECIMAL
-
-  tokenValue = convert(decimalValue, uint256)
+  tokenValue = self._sqrtOfTokensSupplySquared(tokenValue, supply)
 
   if(tokenValue > supply):
     tokenValue -= supply
