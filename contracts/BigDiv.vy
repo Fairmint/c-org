@@ -6,8 +6,8 @@
 # is safe from overflow.  Then we perform the division using the reduced terms.  Finally the
 # result is increased to restore the original scale of terms.
 
-MAX_BEFORE_SQUARE: constant(uint256)  = 340282366920938425684442744474606501888
-# @notice When multiplying 2 terms, the max value is sqrt(2^256-1)
+MAX_BEFORE_SQUARE: constant(uint256)  = 340282366920938463463374607431768211456
+# @notice When multiplying 2 terms, the max value is sqrt(2^256-1) 
 
 @public
 @constant
