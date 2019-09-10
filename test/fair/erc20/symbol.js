@@ -10,7 +10,7 @@ contract("fair / erc20 / symbol", accounts => {
   });
 
   it("should have an empty symbol by default", async () => {
-    assert.equal(await contracts.fair.symbol(), "");
+    assert.equal(await contracts.dat.symbol(), "");
   });
 
   describe("updateSymbol", () => {
@@ -22,7 +22,7 @@ contract("fair / erc20 / symbol", accounts => {
       });
 
       it("should have the new symbol", async () => {
-        assert.equal(await contracts.fair.symbol(), newSymbol);
+        assert.equal(await contracts.dat.symbol(), newSymbol);
       });
 
       it("should emit an event", async () => {
@@ -39,7 +39,7 @@ contract("fair / erc20 / symbol", accounts => {
         });
 
         it("should have the new symbol", async () => {
-          assert.equal(await contracts.fair.symbol(), maxLengthSymbol);
+          assert.equal(await contracts.dat.symbol(), maxLengthSymbol);
         });
 
         it("should fail to update longer than the max", async () => {

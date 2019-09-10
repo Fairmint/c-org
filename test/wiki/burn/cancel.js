@@ -34,7 +34,7 @@ contract("wiki / burn / cancel", accounts => {
 
   it("Burn fails", async () => {
     await shouldFail(
-      contracts.fair.burn(burnAmount, [], {
+      contracts.dat.burn(burnAmount, [], {
         from: investor
       })
     );

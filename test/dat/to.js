@@ -27,7 +27,7 @@ contract("dat / to", accounts => {
 
     beforeEach(async () => {
       fairHolderBalanceBefore = new BigNumber(
-        await contracts.fair.balanceOf(fairHolder)
+        await contracts.dat.balanceOf(fairHolder)
       );
       currencyHolderBalanceBefore = new BigNumber(
         await web3.eth.getBalance(currencyHolder)
@@ -58,7 +58,7 @@ contract("dat / to", accounts => {
     });
 
     it("fairHolder's balance went up", async () => {
-      const balance = new BigNumber(await contracts.fair.balanceOf(fairHolder));
+      const balance = new BigNumber(await contracts.dat.balanceOf(fairHolder));
       assert.equal(
         balance.toFixed(),
         fairHolderBalanceBefore.plus(tokensIssued).toFixed()
@@ -73,7 +73,7 @@ contract("dat / to", accounts => {
 
       beforeEach(async () => {
         fairHolderBalanceBefore = new BigNumber(
-          await contracts.fair.balanceOf(fairHolder)
+          await contracts.dat.balanceOf(fairHolder)
         );
         currencyHolderBalanceBefore = new BigNumber(
           await web3.eth.getBalance(currencyHolder)
@@ -102,7 +102,7 @@ contract("dat / to", accounts => {
 
       it("fairHolder's balance went down", async () => {
         const balance = new BigNumber(
-          await contracts.fair.balanceOf(fairHolder)
+          await contracts.dat.balanceOf(fairHolder)
         );
         assert.equal(
           balance.toFixed(),
@@ -121,7 +121,7 @@ contract("dat / to", accounts => {
 
     beforeEach(async () => {
       fairHolderBalanceBefore = new BigNumber(
-        await contracts.fair.balanceOf(fairHolder)
+        await contracts.dat.balanceOf(fairHolder)
       );
       currencyHolderBalanceBefore = new BigNumber(
         await web3.eth.getBalance(currencyHolder)
@@ -152,7 +152,7 @@ contract("dat / to", accounts => {
     });
 
     it("fairHolder's balance went up", async () => {
-      const balance = new BigNumber(await contracts.fair.balanceOf(fairHolder));
+      const balance = new BigNumber(await contracts.dat.balanceOf(fairHolder));
       assert.equal(
         balance.toFixed(),
         fairHolderBalanceBefore.plus(tokensIssued).toFixed()

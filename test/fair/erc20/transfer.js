@@ -14,26 +14,26 @@ contract("fair / erc20 / transfer", accounts => {
 
   it("has expected balance before transfer", async () => {
     assert.equal(
-      (await contracts.fair.balanceOf(accounts[0])).toString(),
+      (await contracts.dat.balanceOf(accounts[0])).toString(),
       initReserve
     );
-    assert.equal(await contracts.fair.balanceOf(accounts[1]), 0);
+    assert.equal(await contracts.dat.balanceOf(accounts[1]), 0);
   });
 
   describe("can transfer funds from initReserve", () => {
     const transferAmount = 42;
 
     before(async () => {
-      await contracts.fair.transfer(accounts[1], transferAmount);
+      await contracts.dat.transfer(accounts[1], transferAmount);
     });
 
     it("has expected after after transfer", async () => {
       assert.equal(
-        (await contracts.fair.balanceOf(accounts[0])).toString(),
+        (await contracts.dat.balanceOf(accounts[0])).toString(),
         initReserve - transferAmount
       );
       assert.equal(
-        (await contracts.fair.balanceOf(accounts[1])).toString(),
+        (await contracts.dat.balanceOf(accounts[1])).toString(),
         transferAmount
       );
     });

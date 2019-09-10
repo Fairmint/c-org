@@ -36,7 +36,7 @@ contract("dat / pay", accounts => {
 
     beforeEach(async () => {
       investorBalanceBefore = new BigNumber(
-        await contracts.fair.balanceOf(investor)
+        await contracts.dat.balanceOf(investor)
       );
       payValue = new BigNumber(await contracts.dat.estimatePayValue(payAmount));
       await contracts.dat.pay(investor, payAmount, {
@@ -46,7 +46,7 @@ contract("dat / pay", accounts => {
     });
 
     it("The investor balance went up", async () => {
-      const balance = new BigNumber(await contracts.fair.balanceOf(investor));
+      const balance = new BigNumber(await contracts.dat.balanceOf(investor));
       assert.equal(
         balance.toFixed(),
         investorBalanceBefore.plus(payValue).toFixed()
@@ -87,13 +87,13 @@ contract("dat / pay", accounts => {
 
       beforeEach(async () => {
         investorBalanceBefore = new BigNumber(
-          await contracts.fair.balanceOf(investor)
+          await contracts.dat.balanceOf(investor)
         );
         investorCurrencyBalanceBefore = new BigNumber(
           await web3.eth.getBalance(investor)
         );
         beneficiaryBalanceBefore = new BigNumber(
-          await contracts.fair.balanceOf(await contracts.dat.beneficiary())
+          await contracts.dat.balanceOf(await contracts.dat.beneficiary())
         );
         payValue = new BigNumber(
           await contracts.dat.estimatePayValue(payAmount)
@@ -107,7 +107,7 @@ contract("dat / pay", accounts => {
       });
 
       it("The investors token balance did not change", async () => {
-        const balance = new BigNumber(await contracts.fair.balanceOf(investor));
+        const balance = new BigNumber(await contracts.dat.balanceOf(investor));
         assert.equal(balance.toFixed(), investorBalanceBefore.toFixed());
       });
 
@@ -124,7 +124,7 @@ contract("dat / pay", accounts => {
 
       it("Tokens went to the beneficiary account instead", async () => {
         const balance = new BigNumber(
-          await contracts.fair.balanceOf(await contracts.dat.beneficiary())
+          await contracts.dat.balanceOf(await contracts.dat.beneficiary())
         );
         assert.equal(
           balance.toFixed(),

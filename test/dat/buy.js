@@ -13,7 +13,7 @@ contract("dat / buy", accounts => {
   });
 
   it("balanceOf should be 0 by default", async () => {
-    const balance = await contracts.fair.balanceOf(accounts[1]);
+    const balance = await contracts.dat.balanceOf(accounts[1]);
 
     assert.equal(balance, 0);
   });
@@ -27,7 +27,7 @@ contract("dat / buy", accounts => {
     });
 
     it("balanceOf should have increased", async () => {
-      const balance = await contracts.fair.balanceOf(accounts[1]);
+      const balance = await contracts.dat.balanceOf(accounts[1]);
 
       assert.equal(balance.toString(), "105526268847200000000");
     });
