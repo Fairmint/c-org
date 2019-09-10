@@ -30,18 +30,18 @@ contract("wiki / burn / run", accounts => {
     let investorBalanceBefore, burnedSupplyBefore, totalSupplyBefore;
 
     beforeEach(async () => {
-      burnedSupplyBefore = new BigNumber(await contracts.fair.burnedSupply());
+      burnedSupplyBefore = new BigNumber(await contracts.dat.burnedSupply());
       investorBalanceBefore = new BigNumber(
-        await contracts.fair.balanceOf(investor)
+        await contracts.dat.balanceOf(investor)
       );
-      totalSupplyBefore = new BigNumber(await contracts.fair.totalSupply());
-      await contracts.fair.burn(burnAmount, [], {
+      totalSupplyBefore = new BigNumber(await contracts.dat.totalSupply());
+      await contracts.dat.burn(burnAmount, {
         from: investor
       });
     });
 
     it("The burn amount was added to burnedSupply", async () => {
-      const burnedSupply = new BigNumber(await contracts.fair.burnedSupply());
+      const burnedSupply = new BigNumber(await contracts.dat.burnedSupply());
       assert.equal(
         burnedSupply.toFixed(),
         burnedSupplyBefore.plus(burnAmount).toFixed()
@@ -49,7 +49,7 @@ contract("wiki / burn / run", accounts => {
     });
 
     it("The burn amount was deducted from totalSupply", async () => {
-      const totalSupply = new BigNumber(await contracts.fair.totalSupply());
+      const totalSupply = new BigNumber(await contracts.dat.totalSupply());
       assert.equal(
         totalSupply.toFixed(),
         totalSupplyBefore.minus(burnAmount).toFixed()
@@ -57,7 +57,7 @@ contract("wiki / burn / run", accounts => {
     });
 
     it("The investor balance went down", async () => {
-      const balance = new BigNumber(await contracts.fair.balanceOf(investor));
+      const balance = new BigNumber(await contracts.dat.balanceOf(investor));
       assert.equal(
         balance.toFixed(),
         investorBalanceBefore.minus(burnAmount).toFixed()
@@ -68,18 +68,18 @@ contract("wiki / burn / run", accounts => {
       let investorBalanceBefore, burnedSupplyBefore, totalSupplyBefore;
 
       beforeEach(async () => {
-        burnedSupplyBefore = new BigNumber(await contracts.fair.burnedSupply());
+        burnedSupplyBefore = new BigNumber(await contracts.dat.burnedSupply());
         investorBalanceBefore = new BigNumber(
-          await contracts.fair.balanceOf(investor)
+          await contracts.dat.balanceOf(investor)
         );
-        totalSupplyBefore = new BigNumber(await contracts.fair.totalSupply());
-        await contracts.fair.burn(burnAmount, [], {
+        totalSupplyBefore = new BigNumber(await contracts.dat.totalSupply());
+        await contracts.dat.burn(burnAmount, {
           from: investor
         });
       });
 
       it("The burn amount was added to burnedSupply", async () => {
-        const burnedSupply = new BigNumber(await contracts.fair.burnedSupply());
+        const burnedSupply = new BigNumber(await contracts.dat.burnedSupply());
         assert.equal(
           burnedSupply.toFixed(),
           burnedSupplyBefore.plus(burnAmount).toFixed()
@@ -87,7 +87,7 @@ contract("wiki / burn / run", accounts => {
       });
 
       it("The burn amount was deducted from totalSupply", async () => {
-        const totalSupply = new BigNumber(await contracts.fair.totalSupply());
+        const totalSupply = new BigNumber(await contracts.dat.totalSupply());
         assert.equal(
           totalSupply.toFixed(),
           totalSupplyBefore.minus(burnAmount).toFixed()
@@ -95,7 +95,7 @@ contract("wiki / burn / run", accounts => {
       });
 
       it("The investor balance went down", async () => {
-        const balance = new BigNumber(await contracts.fair.balanceOf(investor));
+        const balance = new BigNumber(await contracts.dat.balanceOf(investor));
         assert.equal(
           balance.toFixed(),
           investorBalanceBefore.minus(burnAmount).toFixed()
@@ -112,7 +112,7 @@ contract("wiki / burn / run", accounts => {
     });
 
     it("Can burn even if account is restricted", async () => {
-      await contracts.fair.burn(burnAmount, [], {
+      await contracts.dat.burn(burnAmount, {
         from: investor
       });
     });

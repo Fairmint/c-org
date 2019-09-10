@@ -1,4 +1,3 @@
-const fairArtifact = artifacts.require("FAIR");
 const datArtifact = artifacts.require("DecentralizedAutonomousTrust");
 const bigDivArtifact = artifacts.require("BigDiv");
 const erc1404Artifact = artifacts.require("ERC1404");
@@ -34,24 +33,6 @@ module.exports = async function deployDat(accounts, options, useProxy = true) {
     });
   }
 
-  // FAIR
-  const fairContract = await fairArtifact.new({
-    from: callOptions.control
-  });
-  if (useProxy) {
-    const fairProxy = await proxyArtifact.new(
-      fairContract.address, // logic
-      contracts.proxyAdmin.address, // admin
-      [], // data
-      {
-        from: callOptions.control
-      }
-    );
-
-    contracts.fair = await fairArtifact.at(fairProxy.address);
-  } else {
-    contracts.fair = fairContract;
-  }
   // BigDiv
   if (callOptions.bigDivAddress) {
     contracts.bigDiv = await bigDivArtifact.at(callOptions.bigDivAddress);
@@ -80,7 +61,6 @@ module.exports = async function deployDat(accounts, options, useProxy = true) {
     contracts.dat = datContract;
   }
   await contracts.dat.initialize(
-    contracts.fair.address,
     callOptions.initReserve,
     callOptions.currency,
     callOptions.initGoal,
@@ -158,7 +138,7 @@ module.exports = async function deployDat(accounts, options, useProxy = true) {
       await contracts.erc1404.approve(contracts.vesting[i].address, true, {
         from: callOptions.control
       });
-      await contracts.fair.transfer(
+      await contracts.dat.transfer(
         contract.address,
         callOptions.vesting[i].value,
         {

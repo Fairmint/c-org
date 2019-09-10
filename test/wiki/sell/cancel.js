@@ -60,7 +60,7 @@ contract("wiki / sell / cancel", accounts => {
 
     beforeEach(async () => {
       investorFairBalanceBefore = new BigNumber(
-        await contracts.fair.balanceOf(investor)
+        await contracts.dat.balanceOf(investor)
       );
       investorCurrencyBalanceBefore = new BigNumber(
         await web3.eth.getBalance(investor)
@@ -68,7 +68,7 @@ contract("wiki / sell / cancel", accounts => {
       initInvestmentBefore = new BigNumber(
         await contracts.dat.initInvestors(investor)
       );
-      totalSupplyBefore = new BigNumber(await contracts.fair.totalSupply());
+      totalSupplyBefore = new BigNumber(await contracts.dat.totalSupply());
 
       x = new BigNumber(await contracts.dat.estimateSellValue(sellAmount));
 
@@ -79,7 +79,7 @@ contract("wiki / sell / cancel", accounts => {
     });
 
     it("amount is being substracted from the investor's balance.", async () => {
-      const balance = new BigNumber(await contracts.fair.balanceOf(investor));
+      const balance = new BigNumber(await contracts.dat.balanceOf(investor));
       assert.equal(
         balance.toFixed(),
         investorFairBalanceBefore.minus(sellAmount).toFixed()
@@ -99,7 +99,7 @@ contract("wiki / sell / cancel", accounts => {
     });
 
     it("The total_supply is decreased of amount FAIRs.", async () => {
-      const totalSupply = new BigNumber(await contracts.fair.totalSupply());
+      const totalSupply = new BigNumber(await contracts.dat.totalSupply());
       assert.equal(
         totalSupply.toFixed(),
         totalSupplyBefore.minus(sellAmount).toFixed()
@@ -137,7 +137,7 @@ contract("wiki / sell / cancel", accounts => {
 
   describe("if the investor was awarded tokens from the initReserve", () => {
     beforeEach(async () => {
-      await contracts.fair.transfer(investor, initReserve, {
+      await contracts.dat.transfer(investor, initReserve, {
         from: beneficiary
       });
     });

@@ -39,14 +39,14 @@ contract("wiki / buy / init", accounts => {
     });
 
     it("Sanity check: investors received FAIR tokens", async () => {
-      const balance = await contracts.fair.balanceOf(accounts[3]);
+      const balance = await contracts.dat.balanceOf(accounts[3]);
       assert.notEqual(balance.toString(), 0);
     });
 
     it("every investor has the same number of tokens for their equal investment", async () => {
-      const expectedBalance = await contracts.fair.balanceOf(accounts[3]);
+      const expectedBalance = await contracts.dat.balanceOf(accounts[3]);
       for (let i = 4; i < 6; i++) {
-        const accountBalance = await contracts.fair.balanceOf(accounts[i]);
+        const accountBalance = await contracts.dat.balanceOf(accounts[i]);
         assert.equal(expectedBalance.toString(), accountBalance.toString());
       }
     });
@@ -62,23 +62,23 @@ contract("wiki / buy / init", accounts => {
       const targetAddress = accounts[9];
 
       it("Sanity check: targetAddress does not have any tokens yet", async () => {
-        const balance = await contracts.fair.balanceOf(targetAddress);
+        const balance = await contracts.dat.balanceOf(targetAddress);
         assert.equal(balance.toString(), 0);
       });
 
       it("Sanity check: beneficiary balance == initReserve", async () => {
-        const balance = await contracts.fair.balanceOf(accounts[0]);
+        const balance = await contracts.dat.balanceOf(accounts[0]);
         assert.equal(balance.toString(), initReserve);
       });
 
       describe("transfer", () => {
         const transferAmount = "42";
         beforeEach(async () => {
-          await contracts.fair.transfer(accounts[9], transferAmount);
+          await contracts.dat.transfer(accounts[9], transferAmount);
         });
 
         it("beneficiary balance went down", async () => {
-          const balance = await contracts.fair.balanceOf(accounts[0]);
+          const balance = await contracts.dat.balanceOf(accounts[0]);
           assert.equal(
             balance.toString(),
             new BigNumber(initReserve).minus(transferAmount).toFixed()
@@ -86,7 +86,7 @@ contract("wiki / buy / init", accounts => {
         });
 
         it("target account balance went up", async () => {
-          const balance = await contracts.fair.balanceOf(targetAddress);
+          const balance = await contracts.dat.balanceOf(targetAddress);
           assert.equal(balance.toString(), transferAmount);
         });
       });
@@ -107,7 +107,7 @@ contract("wiki / buy / init", accounts => {
         from: await contracts.dat.control()
       });
 
-      await contracts.fair.transfer(vesting.address, "42");
+      await contracts.dat.transfer(vesting.address, "42");
     });
 
     describe("other accounts cannot transfer", () => {
@@ -127,14 +127,14 @@ contract("wiki / buy / init", accounts => {
       });
 
       it("Sanity check: from account has FAIR tokens", async () => {
-        const balance = await contracts.fair.balanceOf(fromAccount);
+        const balance = await contracts.dat.balanceOf(fromAccount);
         assert.notEqual(balance.toString(), 0);
         assert(balance.gt(42));
       });
 
       it("transfer shouldFail", async () => {
         await shouldFail(
-          contracts.fair.transfer(toAccount, 42, { from: fromAccount })
+          contracts.dat.transfer(toAccount, 42, { from: fromAccount })
         );
       });
     });
@@ -239,12 +239,12 @@ contract("wiki / buy / init", accounts => {
     });
 
     it("Investor's balance went up by x", async () => {
-      const balance = await contracts.fair.balanceOf(fromAccount);
+      const balance = await contracts.dat.balanceOf(fromAccount);
       assert.equal(balance.toString(), x.toFixed());
     });
 
     it("Increase total_supply with x new FAIRs", async () => {
-      const totalSupply = await contracts.fair.totalSupply();
+      const totalSupply = await contracts.dat.totalSupply();
       assert.equal(totalSupply.toString(), x.plus(initReserve).toFixed());
     });
 
@@ -267,12 +267,12 @@ contract("wiki / buy / init", accounts => {
       });
 
       it("Investor's balance went up by x * 2", async () => {
-        const balance = await contracts.fair.balanceOf(fromAccount);
+        const balance = await contracts.dat.balanceOf(fromAccount);
         assert.equal(balance.toString(), x.times(2).toFixed());
       });
 
       it("Increase total_supply with x new FAIRs", async () => {
-        const totalSupply = await contracts.fair.totalSupply();
+        const totalSupply = await contracts.dat.totalSupply();
         assert.equal(
           totalSupply.toString(),
           x

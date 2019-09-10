@@ -8,7 +8,7 @@ contract("fair / erc20 / totalSupply", accounts => {
   });
 
   it("defaults to 0", async () => {
-    assert.equal((await contracts.fair.totalSupply()).toString(), 0);
+    assert.equal((await contracts.dat.totalSupply()).toString(), 0);
   });
 
   it("goes up on mint");

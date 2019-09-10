@@ -20,13 +20,13 @@ contract("fair / erc20 / burn", accounts => {
     let accountBalanceBefore;
 
     before(async () => {
-      accountBalanceBefore = await contracts.fair.balanceOf(accounts[0]);
-      await contracts.fair.burn(burnAmount, web3.utils.asciiToHex(""));
+      accountBalanceBefore = await contracts.dat.balanceOf(accounts[0]);
+      await contracts.dat.burn(burnAmount);
     });
 
     it("account balance went down", async () => {
       assert.equal(
-        (await contracts.fair.balanceOf(accounts[0])).toString(),
+        (await contracts.dat.balanceOf(accounts[0])).toString(),
         accountBalanceBefore.subn(burnAmount).toString()
       );
     });

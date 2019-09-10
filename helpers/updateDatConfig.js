@@ -2,7 +2,7 @@ module.exports = async function updateDatConfig(contracts, options) {
   const callOptions = Object.assign(
     {
       bigDivAddress: await contracts.dat.bigDivAddress(),
-      erc1404Address: await contracts.fair.erc1404Address(),
+      erc1404Address: await contracts.dat.erc1404Address(),
       beneficiary: await contracts.dat.beneficiary(),
       control: await contracts.dat.control(),
       feeCollector: await contracts.dat.feeCollector(),
@@ -10,15 +10,14 @@ module.exports = async function updateDatConfig(contracts, options) {
       burnThresholdBasisPoints: await contracts.dat.burnThresholdBasisPoints(),
       minInvestment: await contracts.dat.minInvestment(),
       openUntilAtLeast: await contracts.dat.openUntilAtLeast(),
-      name: await contracts.fair.name(),
-      symbol: await contracts.fair.symbol()
+      name: await contracts.dat.name(),
+      symbol: await contracts.dat.symbol()
     },
     options
   );
 
   //console.log(`Update DAT: ${JSON.stringify(callOptions, null, 2)}`);
-
-  return contracts.dat.updateConfig(
+  const result = await contracts.dat.updateConfig(
     callOptions.bigDivAddress,
     callOptions.erc1404Address,
     callOptions.beneficiary,
@@ -32,4 +31,5 @@ module.exports = async function updateDatConfig(contracts, options) {
     callOptions.symbol,
     { from: await contracts.dat.control() }
   );
+  return result;
 };

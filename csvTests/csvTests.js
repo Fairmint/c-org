@@ -174,7 +174,7 @@ contract("dat / csvTests", accounts => {
         id,
         address,
         eth: new BigNumber(await web3.eth.getBalance(address)),
-        fair: new BigNumber(await contracts.fair.balanceOf(address)),
+        fair: new BigNumber(await contracts.dat.balanceOf(address)),
         currency: new BigNumber(
           currency ? await currency.balanceOf(address) : 0
         )
@@ -328,7 +328,7 @@ contract("dat / csvTests", accounts => {
               });
             }
           } else {
-            tx = await contracts.fair.transfer(
+            tx = await contracts.dat.transfer(
               targetAddress,
               quantity.toFixed(),
               {
@@ -338,13 +338,9 @@ contract("dat / csvTests", accounts => {
           }
           break;
         case "burn":
-          tx = await contracts.fair.burn(
-            quantity.toFixed(),
-            web3.utils.asciiToHex(""),
-            {
-              from: row.account.address
-            }
-          );
+          tx = await contracts.dat.burn(quantity.toFixed(), {
+            from: row.account.address
+          });
           break;
         default:
           throw new Error(`Missing action ${row.Action}`);
@@ -355,7 +351,7 @@ contract("dat / csvTests", accounts => {
 
     async function checkPreConditions(row) {
       await assertBalance(
-        contracts.fair,
+        contracts.dat,
         row.account.address,
         row.PreviousFAIRBal
       );
@@ -364,7 +360,7 @@ contract("dat / csvTests", accounts => {
 
     async function checkPostConiditons(row) {
       await assertBalance(
-        contracts.fair,
+        contracts.dat,
         row.account.address,
         row.FAIRBalanceOfAcct
       );
@@ -375,11 +371,11 @@ contract("dat / csvTests", accounts => {
         row.TotalDAISentToFeeCollector
       );
       assertAlmostEqual(
-        new BigNumber(await contracts.fair.totalSupply()),
+        new BigNumber(await contracts.dat.totalSupply()),
         parseNumber(row.FAIRTotalSupply).shiftedBy(18)
       );
       assertAlmostEqual(
-        new BigNumber(await contracts.fair.burnedSupply()),
+        new BigNumber(await contracts.dat.burnedSupply()),
         parseNumber(row.FAIRBurnedSupply).shiftedBy(18)
       );
       assertAlmostEqual(
@@ -405,8 +401,8 @@ contract("dat / csvTests", accounts => {
       } else {
         throw new Error(`Missing state: ${state}`);
       }
-      const totalSupply = new BigNumber(await contracts.fair.totalSupply());
-      const burnedSupply = new BigNumber(await contracts.fair.burnedSupply());
+      const totalSupply = new BigNumber(await contracts.dat.totalSupply());
+      const burnedSupply = new BigNumber(await contracts.dat.burnedSupply());
       const buybackReserve = new BigNumber(
         await contracts.dat.buybackReserve()
       );
@@ -416,7 +412,7 @@ contract("dat / csvTests", accounts => {
           : await web3.eth.getBalance(beneficiary)
       );
       const beneficiaryFairBalance = new BigNumber(
-        await contracts.fair.balanceOf(beneficiary)
+        await contracts.dat.balanceOf(beneficiary)
       );
       const feeCollectorDaiBalance = new BigNumber(
         currency
@@ -424,7 +420,7 @@ contract("dat / csvTests", accounts => {
           : await web3.eth.getBalance(feeCollector)
       );
       const feeCollectorFairBalance = new BigNumber(
-        await contracts.fair.balanceOf(feeCollector)
+        await contracts.dat.balanceOf(feeCollector)
       );
       console.log(`\tState: ${state}
 \tSupply: ${totalSupply
@@ -511,7 +507,7 @@ contract("dat / csvTests", accounts => {
     async function assertBalance(token, account, expectedBalance) {
       expectedBalance = parseNumber(expectedBalance);
       expectedBalance = expectedBalance.shiftedBy(
-        token == contracts.fair ? 18 : currencyDecimals
+        token == contracts.dat ? 18 : currencyDecimals
       );
       const balance = new BigNumber(
         token

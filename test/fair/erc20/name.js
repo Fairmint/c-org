@@ -11,7 +11,7 @@ contract("fair / erc20 / name", accounts => {
   });
 
   it("should have an empty name by default name", async () => {
-    assert.equal(await contracts.fair.name(), "");
+    assert.equal(await contracts.dat.name(), "");
   });
 
   describe("updateName", () => {
@@ -23,7 +23,7 @@ contract("fair / erc20 / name", accounts => {
       });
 
       it("should have the new name", async () => {
-        assert.equal(await contracts.fair.name(), newName);
+        assert.equal(await contracts.dat.name(), newName);
       });
 
       it("should emit an event", async () => {
@@ -40,7 +40,7 @@ contract("fair / erc20 / name", accounts => {
         });
 
         it("should have the new name", async () => {
-          assert.equal(await contracts.fair.name(), maxLengthName);
+          assert.equal(await contracts.dat.name(), maxLengthName);
         });
 
         it("should fail to update longer than the max", async () => {

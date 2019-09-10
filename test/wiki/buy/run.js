@@ -85,10 +85,8 @@ contract("wiki / buy / run", accounts => {
     let x;
 
     beforeEach(async () => {
-      balanceBefore = new BigNumber(
-        await contracts.fair.balanceOf(accounts[5])
-      );
-      totalSupplyBefore = new BigNumber(await contracts.fair.totalSupply());
+      balanceBefore = new BigNumber(await contracts.dat.balanceOf(accounts[5]));
+      totalSupplyBefore = new BigNumber(await contracts.dat.totalSupply());
       x = new BigNumber(await contracts.dat.estimateBuyValue(amount));
       await contracts.dat.buy(accounts[5], amount, 1, {
         from: accounts[5],
@@ -97,23 +95,21 @@ contract("wiki / buy / run", accounts => {
     });
 
     it("Add x FAIRs to the investor's balance.", async () => {
-      const balance = new BigNumber(
-        await contracts.fair.balanceOf(accounts[5])
-      );
+      const balance = new BigNumber(await contracts.dat.balanceOf(accounts[5]));
       assert.equal(balance.toFixed(), balanceBefore.plus(x).toFixed());
     });
 
     it("Increase total_supply with x new FAIRs.", async () => {
-      const totalSupply = new BigNumber(await contracts.fair.totalSupply());
+      const totalSupply = new BigNumber(await contracts.dat.totalSupply());
       assert.equal(totalSupply.toFixed(), totalSupplyBefore.plus(x).toFixed());
     });
 
     describe("Mint more tokens", () => {
       beforeEach(async () => {
         balanceBefore = new BigNumber(
-          await contracts.fair.balanceOf(accounts[5])
+          await contracts.dat.balanceOf(accounts[5])
         );
-        totalSupplyBefore = new BigNumber(await contracts.fair.totalSupply());
+        totalSupplyBefore = new BigNumber(await contracts.dat.totalSupply());
         x = new BigNumber(await contracts.dat.estimateBuyValue(amount));
         await contracts.dat.buy(accounts[5], amount, 1, {
           from: accounts[5],
@@ -123,13 +119,13 @@ contract("wiki / buy / run", accounts => {
 
       it("Add x FAIRs to the investor's balance.", async () => {
         const balance = new BigNumber(
-          await contracts.fair.balanceOf(accounts[5])
+          await contracts.dat.balanceOf(accounts[5])
         );
         assert.equal(balance.toFixed(), balanceBefore.plus(x).toFixed());
       });
 
       it("Increase total_supply with x new FAIRs.", async () => {
-        const totalSupply = new BigNumber(await contracts.fair.totalSupply());
+        const totalSupply = new BigNumber(await contracts.dat.totalSupply());
         assert.equal(
           totalSupply.toFixed(),
           totalSupplyBefore.plus(x).toFixed()
@@ -154,7 +150,7 @@ contract("wiki / buy / run", accounts => {
       beforeEach(async () => {
         x = new BigNumber(await contracts.dat.estimateBuyValue(amount));
         const investorBalance = new BigNumber(
-          await contracts.fair.balanceOf(from)
+          await contracts.dat.balanceOf(from)
         );
         burnAmount = x
           .plus(investorBalance)
@@ -162,13 +158,13 @@ contract("wiki / buy / run", accounts => {
             new BigNumber(await contracts.dat.burnThresholdBasisPoints())
               .div(constants.BASIS_POINTS_DEN)
               .times(
-                new BigNumber(await contracts.fair.totalSupply())
+                new BigNumber(await contracts.dat.totalSupply())
                   .plus(x)
-                  .plus(await contracts.fair.burnedSupply())
+                  .plus(await contracts.dat.burnedSupply())
               )
           );
 
-        burnBefore = new BigNumber(await contracts.fair.burnedSupply());
+        burnBefore = new BigNumber(await contracts.dat.burnedSupply());
         buybackReserveBefore = new BigNumber(
           await contracts.dat.buybackReserve()
         );
@@ -185,7 +181,7 @@ contract("wiki / buy / run", accounts => {
       });
 
       it("burn((x+investor_balance)-(burn_threshold*(total_supply+burnt_supply))", async () => {
-        const burned = new BigNumber(await contracts.fair.burnedSupply()).minus(
+        const burned = new BigNumber(await contracts.dat.burnedSupply()).minus(
           burnBefore
         );
         assert.equal(burnAmount.toFixed(), burned.toFixed());
@@ -215,7 +211,7 @@ contract("wiki / buy / run", accounts => {
 
         x = new BigNumber(await contracts.dat.estimateBuyValue(amount));
         const investorBalance = new BigNumber(
-          await contracts.fair.balanceOf(from)
+          await contracts.dat.balanceOf(from)
         );
         burnAmount = x
           .plus(investorBalance)
@@ -223,8 +219,8 @@ contract("wiki / buy / run", accounts => {
             new BigNumber(await contracts.dat.burnThresholdBasisPoints())
               .div(constants.BASIS_POINTS_DEN)
               .times(
-                new BigNumber(await contracts.fair.totalSupply()).plus(
-                  await contracts.fair.burnedSupply()
+                new BigNumber(await contracts.dat.totalSupply()).plus(
+                  await contracts.dat.burnedSupply()
                 )
               )
           );
@@ -239,7 +235,7 @@ contract("wiki / buy / run", accounts => {
       });
 
       it("no burn", async () => {
-        const burned = new BigNumber(await contracts.fair.burnedSupply());
+        const burned = new BigNumber(await contracts.dat.burnedSupply());
         assert.equal(burned.toFixed(), 0);
         assert(burnAmount.lte(0));
       });
