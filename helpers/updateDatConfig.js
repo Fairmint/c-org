@@ -17,8 +17,7 @@ module.exports = async function updateDatConfig(contracts, options) {
   );
 
   //console.log(`Update DAT: ${JSON.stringify(callOptions, null, 2)}`);
-
-  return contracts.dat.updateConfig(
+  const result = await contracts.dat.updateConfig(
     callOptions.bigDivAddress,
     callOptions.erc1404Address,
     callOptions.beneficiary,
@@ -32,4 +31,5 @@ module.exports = async function updateDatConfig(contracts, options) {
     callOptions.symbol,
     { from: await contracts.dat.control() }
   );
+  return result;
 };

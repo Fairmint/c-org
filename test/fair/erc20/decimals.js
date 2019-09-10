@@ -1,6 +1,6 @@
 const { shouldFail, deployDat, updateDatConfig } = require("../../helpers");
 
-contract("fair / erc20 / decimals", () => {
+contract("fair / erc20 / decimals", (accounts) => {
   let contracts;
 
   before(async () => {

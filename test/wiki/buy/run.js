@@ -85,9 +85,7 @@ contract("wiki / buy / run", accounts => {
     let x;
 
     beforeEach(async () => {
-      balanceBefore = new BigNumber(
-        await contracts.dat.balanceOf(accounts[5])
-      );
+      balanceBefore = new BigNumber(await contracts.dat.balanceOf(accounts[5]));
       totalSupplyBefore = new BigNumber(await contracts.dat.totalSupply());
       x = new BigNumber(await contracts.dat.estimateBuyValue(amount));
       await contracts.dat.buy(accounts[5], amount, 1, {
@@ -97,9 +95,7 @@ contract("wiki / buy / run", accounts => {
     });
 
     it("Add x FAIRs to the investor's balance.", async () => {
-      const balance = new BigNumber(
-        await contracts.dat.balanceOf(accounts[5])
-      );
+      const balance = new BigNumber(await contracts.dat.balanceOf(accounts[5]));
       assert.equal(balance.toFixed(), balanceBefore.plus(x).toFixed());
     });
 

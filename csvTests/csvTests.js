@@ -338,12 +338,9 @@ contract("dat / csvTests", accounts => {
           }
           break;
         case "burn":
-          tx = await contracts.dat.burn(
-            quantity.toFixed(),
-            {
-              from: row.account.address
-            }
-          );
+          tx = await contracts.dat.burn(quantity.toFixed(), {
+            from: row.account.address
+          });
           break;
         default:
           throw new Error(`Missing action ${row.Action}`);

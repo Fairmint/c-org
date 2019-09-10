@@ -417,9 +417,8 @@ def transferFrom(
   """
   @notice Transfers `_value` amount of tokens from address `_from` to address `_to` if authorized.
   """
-  if(msg.sender != self):
-    self.allowances[_from][msg.sender] -= _value
-    log.Approval(_from, msg.sender, self.allowances[_from][msg.sender])
+  self.allowances[_from][msg.sender] -= _value
+  log.Approval(_from, msg.sender, self.allowances[_from][msg.sender])
   self._send(_from, _to, _value)
   return True
 
@@ -640,7 +639,7 @@ def updateConfig(
     self.initInvestors[_beneficiary] += self.initInvestors[self.beneficiary]
     self.initInvestors[self.beneficiary] = 0
     if(tokens > 0):
-      self.transferFrom(self.beneficiary, _beneficiary, tokens)
+      self._send(self.beneficiary, _beneficiary, tokens)
     self.beneficiary = _beneficiary
 
   log.UpdateConfig(
