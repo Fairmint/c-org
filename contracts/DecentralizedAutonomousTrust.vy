@@ -25,16 +25,16 @@ contract IBigDiv:
     _denB: uint256
   ) -> uint256: constant
 contract ERC1404:
-  def detectTransferRestriction(
-    _from: address,
-    _to: address,
-    _value: uint256
-  ) -> uint256: constant
   def authorizeTransfer(
     _from: address,
     _to: address,
     _value: uint256
   ): modifying
+  def detectTransferRestriction(
+    _from: address,
+    _to: address,
+    _value: uint256
+  ): constant
 contract IDAT:
   def state() -> uint256(stateMachine): constant
   def beneficiary() -> address: constant
@@ -316,23 +316,11 @@ def buybackReserve() -> uint256:
 
 #endregion
 
-#region Functions required by the ERC-1404 standard
+#region Functions required for the ERC-1404 standard
 ##################################################
 
-@public
-@constant
-def detectTransferRestriction(
-  _from: address,
-  _to: address,
-  _value: uint256
-) -> uint256:
-  if(self.erc1404 != ZERO_ADDRESS): # This is not set for the minting of initialReserve
-    return self.erc1404.detectTransferRestriction(_from, _to, _value)
-  return 0
-
-@public
-@constant
-def authorizeTransfer(
+@private
+def _authorizeTransfer(
   _from: address,
   _to: address,
   _value: uint256

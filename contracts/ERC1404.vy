@@ -6,13 +6,17 @@ Approve: event({
 })
 
 approved: public(map(address, bool))
+dat: public(address)
 owner: public(address)
 
 @public
-def initialize():
+def initialize(
+  _dat: address
+):
   assert self.owner == ZERO_ADDRESS, "ALREADY_INITIALIZED"
 
   self.owner = msg.sender
+  self.dat = msg.sender
   self.approved[ZERO_ADDRESS] = True
 
 @public
@@ -33,6 +37,7 @@ def authorizeTransfer(
   _to: address,
   _value: uint256
 ):
+  assert self.dat == msg.sender, "CALL_VIA_DAT_ONLY"
   assert self.detectTransferRestriction(_from, _to, _value) == 0, "DENIED"
 
 @public
