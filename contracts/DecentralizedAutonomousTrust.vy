@@ -34,7 +34,7 @@ contract ERC1404:
     _from: address,
     _to: address,
     _value: uint256
-  ): constant
+  ) -> uint256: constant
 contract IDAT:
   def state() -> uint256(stateMachine): constant
   def beneficiary() -> address: constant
