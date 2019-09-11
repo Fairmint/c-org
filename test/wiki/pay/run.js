@@ -116,9 +116,13 @@ contract("wiki / pay / run", accounts => {
       await contracts.whitelist.approve(investor, false, {
         from: await contracts.dat.control()
       });
-      await contracts.whitelist.approve(await contracts.dat.beneficiary(), true, {
-        from: await contracts.dat.control()
-      });
+      await contracts.whitelist.approve(
+        await contracts.dat.beneficiary(),
+        true,
+        {
+          from: await contracts.dat.control()
+        }
+      );
       await contracts.dat.pay(investor, payAmount, {
         from: investor,
         value: payAmount
@@ -175,9 +179,13 @@ contract("wiki / pay / run", accounts => {
               .plus(await contracts.dat.burnedSupply())
           )
         );
-      await contracts.whitelist.approve(await contracts.dat.beneficiary(), true, {
-        from: await contracts.dat.control()
-      });
+      await contracts.whitelist.approve(
+        await contracts.dat.beneficiary(),
+        true,
+        {
+          from: await contracts.dat.control()
+        }
+      );
 
       await contracts.whitelist.approve(investor, false, {
         from: await contracts.dat.control()

@@ -113,9 +113,13 @@ contract("dat / fallback", accounts => {
         await contracts.dat.balanceOf(await contracts.dat.beneficiary())
       );
 
-      await contracts.whitelist.approve(await contracts.dat.beneficiary(), true, {
-        from: await contracts.dat.control()
-      });
+      await contracts.whitelist.approve(
+        await contracts.dat.beneficiary(),
+        true,
+        {
+          from: await contracts.dat.control()
+        }
+      );
       await contracts.whitelist.approve(investor, false, {
         from: await contracts.dat.control()
       });
@@ -175,9 +179,13 @@ contract("dat / fallback", accounts => {
               .plus(await contracts.dat.burnedSupply())
           )
         );
-      await contracts.whitelist.approve(await contracts.dat.beneficiary(), true, {
-        from: await contracts.dat.control()
-      });
+      await contracts.whitelist.approve(
+        await contracts.dat.beneficiary(),
+        true,
+        {
+          from: await contracts.dat.control()
+        }
+      );
       await contracts.whitelist.approve(investor, false, {
         from: await contracts.dat.control()
       });
