@@ -1,6 +1,6 @@
 const { approveAll, deployDat } = require("../helpers");
 
-contract("dat / erc1404 / restrictionCode", accounts => {
+contract("dat / whitelist / restrictionCode", accounts => {
   let contracts;
 
   before(async () => {
@@ -9,7 +9,7 @@ contract("dat / erc1404 / restrictionCode", accounts => {
   });
 
   it("Can read status 0", async () => {
-    const restriction = await contracts.erc1404.detectTransferRestriction(
+    const restriction = await contracts.whitelist.detectTransferRestriction(
       accounts[0],
       accounts[1],
       42
@@ -19,13 +19,13 @@ contract("dat / erc1404 / restrictionCode", accounts => {
 
   describe("when restriction applies", () => {
     beforeEach(async () => {
-      await contracts.erc1404.approve(accounts[1], false, {
+      await contracts.whitelist.approve(accounts[1], false, {
         from: await contracts.dat.control()
       });
     });
 
     it("Can read status 1", async () => {
-      const restriction = await contracts.erc1404.detectTransferRestriction(
+      const restriction = await contracts.whitelist.detectTransferRestriction(
         accounts[0],
         accounts[1],
         42

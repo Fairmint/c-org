@@ -54,7 +54,7 @@ contract("wiki / sell / run", accounts => {
       feeBasisPoints: "10"
     });
 
-    await contracts.erc1404.approve(investor, true, {
+    await contracts.whitelist.approve(investor, true, {
       from: await contracts.dat.control()
     });
 
@@ -72,10 +72,10 @@ contract("wiki / sell / run", accounts => {
       feeBasisPoints: "10"
     });
 
-    await contracts.erc1404.approve(investor, true, {
+    await contracts.whitelist.approve(investor, true, {
       from: await contracts.dat.control()
     });
-    await contracts.erc1404.approve(accounts[9], true, {
+    await contracts.whitelist.approve(accounts[9], true, {
       from: await contracts.dat.control()
     });
 
@@ -182,7 +182,7 @@ contract("wiki / sell / run", accounts => {
 
   describe("If investor is not authorized, then the function exits.", () => {
     beforeEach(async () => {
-      await contracts.erc1404.approve(investor, false, {
+      await contracts.whitelist.approve(investor, false, {
         from: await contracts.dat.control()
       });
     });

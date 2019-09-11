@@ -106,7 +106,7 @@ contract("wiki / burn / run", accounts => {
 
   describe("If trades are restricted", () => {
     beforeEach(async () => {
-      await contracts.erc1404.approve(investor, false, {
+      await contracts.whitelist.approve(investor, false, {
         from: await contracts.dat.control()
       });
     });

@@ -26,7 +26,7 @@ contract("wiki / buy / run", accounts => {
 
   describe("If investor is not allowed to buy FAIR, then the function exits.", () => {
     beforeEach(async () => {
-      await contracts.erc1404.approve(accounts[5], false, {
+      await contracts.whitelist.approve(accounts[5], false, {
         from: await contracts.dat.control()
       });
     });

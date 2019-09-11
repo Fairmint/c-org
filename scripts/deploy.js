@@ -5,7 +5,7 @@ const fs = require("fs");
 const testDaiArtifact = artifacts.require("TestDai");
 const testUsdcArtifact = artifacts.require("TestUsdc");
 const proxyArtifact = artifacts.require("AdminUpgradeabilityProxy");
-const erc1404Artifact = artifacts.require("ERC1404");
+const whitelistArtifact = artifacts.require("Whitelist");
 const vestingArtifact = artifacts.require("TokenVesting");
 const datArtifact = artifacts.require("DecentralizedAutonomousTrust");
 const proxyAdminArtifact = artifacts.require("ProxyAdmin");
@@ -60,7 +60,7 @@ contract("deploy script", accounts => {
         Object.assign(
           {
             bigMathAddress: addresses.bigMath,
-            erc1404Address: addresses.erc1404,
+            whitelistAddress: addresses.whitelist,
             currency: currencyToken.address,
             minInvestment: new BigNumber("100")
               .shiftedBy(currencyDecimals)
@@ -70,8 +70,8 @@ contract("deploy script", accounts => {
         )
       );
 
-      bytecodeJson.erc1404 = erc1404Artifact.bytecode;
-      abiJson.erc1404 = contracts.erc1404.abi;
+      bytecodeJson.whitelist = whitelistArtifact.bytecode;
+      abiJson.whitelist = contracts.whitelist.abi;
       abiJson.proxyAdmin = contracts.proxyAdmin.abi;
       abiJson.proxy = proxyArtifact.abi;
       bytecodeJson.proxyAdmin = proxyAdminArtifact.bytecode;

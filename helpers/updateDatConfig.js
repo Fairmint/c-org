@@ -2,7 +2,7 @@ module.exports = async function updateDatConfig(contracts, options) {
   const callOptions = Object.assign(
     {
       bigMathAddress: await contracts.dat.bigMathAddress(),
-      erc1404Address: await contracts.dat.erc1404Address(),
+      whitelistAddress: await contracts.dat.whitelistAddress(),
       beneficiary: await contracts.dat.beneficiary(),
       control: await contracts.dat.control(),
       feeCollector: await contracts.dat.feeCollector(),
@@ -19,7 +19,7 @@ module.exports = async function updateDatConfig(contracts, options) {
   //console.log(`Update DAT: ${JSON.stringify(callOptions, null, 2)}`);
   const result = await contracts.dat.updateConfig(
     callOptions.bigMathAddress,
-    callOptions.erc1404Address,
+    callOptions.whitelistAddress,
     callOptions.beneficiary,
     callOptions.control,
     callOptions.feeCollector,

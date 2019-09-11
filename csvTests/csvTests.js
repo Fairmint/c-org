@@ -72,7 +72,7 @@ contract("dat / csvTests", accounts => {
           }
           await deployAndConfigDat(sheet);
           await approveAll(contracts, accounts);
-          await contracts.erc1404.approve(ethBank, true, {
+          await contracts.whitelist.approve(ethBank, true, {
             from: await contracts.dat.control()
           });
           await runTestScript(sheet);
