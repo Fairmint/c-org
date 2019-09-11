@@ -123,12 +123,6 @@ STATE_CANCEL: constant(uint256(stateMachine)) = 3
 MAX_BEFORE_SQUARE: constant(uint256)  = 340282366920938463463374607431768211456
 # @notice When multiplying 2 terms, the max value is sqrt(2^256-1)
 
-DIGITS_UINT: constant(uint256) = 10 ** 18
-# @notice Represents 1 full token (with 18 decimals)
-
-DIGITS_DECIMAL: constant(decimal) = convert(DIGITS_UINT, decimal)
-# @notice Represents 1 full token (with 18 decimals)
-
 BASIS_POINTS_DEN: constant(uint256) = 10000
 # @notice The denominator component for values specified in basis points.
 

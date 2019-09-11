@@ -8,8 +8,14 @@
 
 MAX_UINT: constant(uint256) = 2**256 - 1
 
-MAX_BEFORE_SQUARE: constant(uint256)  = 340282366920938463463374607431768211456
+MAX_BEFORE_SQUARE: constant(uint256) = 340282366920938463463374607431768211456
 # @notice When multiplying 2 terms, the max value is sqrt(2^256-1) 
+
+DIGITS_UINT: constant(uint256) = 10 ** 18
+# @notice Represents 1 full token (with 18 decimals)
+
+DIGITS_DECIMAL: constant(decimal) = convert(DIGITS_UINT, decimal)
+# @notice Represents 1 full token (with 18 decimals)
 
 @public
 @constant
