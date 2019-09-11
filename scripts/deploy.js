@@ -9,14 +9,14 @@ const erc1404Artifact = artifacts.require("ERC1404");
 const vestingArtifact = artifacts.require("TokenVesting");
 const datArtifact = artifacts.require("DecentralizedAutonomousTrust");
 const proxyAdminArtifact = artifacts.require("ProxyAdmin");
-const bigDivArtifact = artifacts.require("BigDiv");
+const bigMathArtifact = artifacts.require("BigMath");
 
 contract("deploy script", accounts => {
   it("deploy", async () => {
     const abiJson = {};
     const bytecodeJson = {};
     const staticBytecodeJson = {
-      bigDiv: bigDivArtifact.bytecode,
+      bigMath: bigMathArtifact.bytecode,
       testDai: testDaiArtifact.bytecode,
       testUsdc: testUsdcArtifact.bytecode
     };
@@ -59,7 +59,7 @@ contract("deploy script", accounts => {
         accounts,
         Object.assign(
           {
-            bigDivAddress: addresses.bigDiv,
+            bigMathAddress: addresses.bigMath,
             erc1404Address: addresses.erc1404,
             currency: currencyToken.address,
             minInvestment: new BigNumber("100")
@@ -79,7 +79,7 @@ contract("deploy script", accounts => {
       console.log(`ProxyAdmin: ${contracts.proxyAdmin.address}`);
       abiJson.dat = contracts.dat.abi;
       bytecodeJson.dat = datArtifact.bytecode;
-      abiJson.bigDiv = contracts.bigDiv.abi;
+      abiJson.bigMath = contracts.bigMath.abi;
       abiJson.erc20 = currencyToken.abi;
 
       abiJson.vesting = vestingArtifact.abi;

@@ -1,5 +1,5 @@
 const datArtifact = artifacts.require("DecentralizedAutonomousTrust");
-const bigDivArtifact = artifacts.require("BigDiv");
+const bigMathArtifact = artifacts.require("BigMath");
 const erc1404Artifact = artifacts.require("ERC1404");
 const proxyArtifact = artifacts.require("AdminUpgradeabilityProxy");
 const proxyAdminArtifact = artifacts.require("ProxyAdmin");
@@ -33,15 +33,15 @@ module.exports = async function deployDat(accounts, options, useProxy = true) {
     });
   }
 
-  // BigDiv
-  if (callOptions.bigDivAddress) {
-    contracts.bigDiv = await bigDivArtifact.at(callOptions.bigDivAddress);
+  // BigMath
+  if (callOptions.bigMathAddress) {
+    contracts.bigMath = await bigMathArtifact.at(callOptions.bigMathAddress);
   } else {
-    contracts.bigDiv = await bigDivArtifact.new({
+    contracts.bigMath = await bigMathArtifact.new({
       from: callOptions.control
     });
-    callOptions.bigDivAddress = contracts.bigDiv.address;
-    // console.log(`Deployed bigDiv: ${contracts.bigDiv.address}`);
+    callOptions.bigMathAddress = contracts.bigMath.address;
+    // console.log(`Deployed bigMath: ${contracts.bigMath.address}`);
   }
   // DAT
   const datContract = await datArtifact.new({
