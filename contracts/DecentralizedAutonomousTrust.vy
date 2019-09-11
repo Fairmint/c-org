@@ -325,6 +325,15 @@ def buybackReserve() -> uint256:
 ##################################################
 
 @private
+def _detectTransferRestriction(
+  _from: address,
+  _to: address,
+  _value: uint256
+):
+  if(self.erc1404 != ZERO_ADDRESS): # This is not set for the minting of initialReserve
+    return self.erc1404._detectTransferRestriction(_from, _to, _value)
+
+@private
 def _authorizeTransfer(
   _from: address,
   _to: address,
@@ -972,7 +981,7 @@ def _pay(
   to: address = _to
   if(to == ZERO_ADDRESS):
     to = self.beneficiary
-  elif(self.erc1404.detectTransferRestriction(ZERO_ADDRESS, _to, tokenValue) != 0):
+  elif(self._detectTransferRestriction(ZERO_ADDRESS, _to, tokenValue) != 0):
     to = self.beneficiary
 
   # Math: this will never underflow since investmentReserveBasisPoints is capped to BASIS_POINTS_DEN
