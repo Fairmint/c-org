@@ -439,9 +439,8 @@ def _collectInvestment(
       # Math: if _msgValue was not sufficient then revert
       refund: uint256(wei) = _msgValue - _quantityToInvest
       if(refund > 0):
-      # TODO switch from send to raw_call
-        send(_from, _msgValue - _quantityToInvest)
-        # raw_call(_from, b"", outsize=0, value=refund, gas=msg.gas)
+        # this call fails if we don't capture a response
+        res: bytes[1]= raw_call(_from, b"", outsize=0, value=refund, gas=msg.gas)
     else:
       assert as_wei_value(_quantityToInvest, "wei") == _msgValue, "INCORRECT_MSG_VALUE"
   else: # currency is ERC20
@@ -460,9 +459,8 @@ def _sendCurrency(
   """
   if(_amount > 0):
     if(self.currency == ZERO_ADDRESS):
-      # TODO switch from send to raw_call
-      send(_to, as_wei_value(_amount, "wei"))
-      # raw_call(_from, b"", outsize=0, value=as_wei_value(_amount, "wei"), gas=msg.gas)
+      # this call fails if we don't capture a response
+      res: bytes[1] = raw_call(_to, b"", outsize=0, value=as_wei_value(_amount, "wei"), gas=msg.gas)
     else:
       success: bool = self.currency.transfer(_to, as_unitless_number(_amount))
       assert success, "ERC20_TRANSFER_FAILED"
