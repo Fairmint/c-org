@@ -113,10 +113,10 @@ contract("dat / fallback", accounts => {
         await contracts.dat.balanceOf(await contracts.dat.beneficiary())
       );
 
-      await contracts.erc1404.approve(await contracts.dat.beneficiary(), true, {
+      await contracts.whitelist.approve(await contracts.dat.beneficiary(), true, {
         from: await contracts.dat.control()
       });
-      await contracts.erc1404.approve(investor, false, {
+      await contracts.whitelist.approve(investor, false, {
         from: await contracts.dat.control()
       });
       await contracts.dat.sendTransaction({
@@ -175,10 +175,10 @@ contract("dat / fallback", accounts => {
               .plus(await contracts.dat.burnedSupply())
           )
         );
-      await contracts.erc1404.approve(await contracts.dat.beneficiary(), true, {
+      await contracts.whitelist.approve(await contracts.dat.beneficiary(), true, {
         from: await contracts.dat.control()
       });
-      await contracts.erc1404.approve(investor, false, {
+      await contracts.whitelist.approve(investor, false, {
         from: await contracts.dat.control()
       });
       await contracts.dat.sendTransaction({

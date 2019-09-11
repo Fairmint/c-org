@@ -30,7 +30,7 @@ contract IBigMath:
     _tokenValue: uint256,
     _supply: uint256
   ) -> uint256: constant
-contract ERC1404:
+contract Whitelist:
   def authorizeTransfer(
     _from: address,
     _to: address,
@@ -90,7 +90,7 @@ StateChange: event({
 })
 UpdateConfig: event({
   _bigMathAddress: address,
-  _erc1404Address: address,
+  _whitelistAddress: address,
   _beneficiary: indexed(address),
   _control: indexed(address),
   _feeCollector: indexed(address),
@@ -131,13 +131,13 @@ MAX_SUPPLY: constant(uint256)  = 10 ** 28
 # Data specific to our token business logic
 ##############
 
-erc1404Address: public(address)
+whitelistAddress: public(address)
 # @notice The contract address for transfer authorizations, if any.
-# @dev This contract must implement the ERC1404 interface above
+# @dev This contract must implement the Whitelist interface above
 
-erc1404: ERC1404
+whitelist: Whitelist
 # @notice The contract for transfer authorizations, if any.
-# @dev This is redundant w/ erc1404Address, for convenience
+# @dev This is redundant w/ whitelistAddress, for convenience
 
 burnedSupply: public(uint256)
 # @notice The total number of burned FAIR tokens, excluding tokens burned from a `Sell` action in the DAT.
@@ -270,7 +270,7 @@ def _buybackReserve() -> uint256:
 def buybackReserve() -> uint256:
   return self._buybackReserve()
 
-# Functions required for the ERC-1404 standard
+# Functions required for the whitelist
 ##################################################
 
 @private
@@ -279,8 +279,8 @@ def _detectTransferRestriction(
   _to: address,
   _value: uint256
 ) -> uint256:
-  if(self.erc1404 != ZERO_ADDRESS): # This is not set for the minting of initialReserve
-    return self.erc1404.detectTransferRestriction(_from, _to, _value)
+  if(self.whitelist != ZERO_ADDRESS): # This is not set for the minting of initialReserve
+    return self.whitelist.detectTransferRestriction(_from, _to, _value)
   return 0
 
 @private
@@ -289,8 +289,8 @@ def _authorizeTransfer(
   _to: address,
   _value: uint256
 ):
-  if(self.erc1404 != ZERO_ADDRESS): # This is not set for the minting of initialReserve
-    self.erc1404.authorizeTransfer(_from, _to, _value)
+  if(self.whitelist != ZERO_ADDRESS): # This is not set for the minting of initialReserve
+    self.whitelist.authorizeTransfer(_from, _to, _value)
 
 
 # Functions required by the ERC-20 token standard
@@ -545,7 +545,7 @@ def initialize(
 @public
 def updateConfig(
   _bigMath: address,
-  _erc1404Address: address,
+  _whitelistAddress: address,
   _beneficiary: address,
   _control: address,
   _feeCollector: address,
@@ -562,9 +562,9 @@ def updateConfig(
   self.name = _name
   self.symbol = _symbol
 
-  assert _erc1404Address != ZERO_ADDRESS, "INVALID_ADDRESS"
-  self.erc1404Address = _erc1404Address
-  self.erc1404 = ERC1404(_erc1404Address)
+  assert _whitelistAddress != ZERO_ADDRESS, "INVALID_ADDRESS"
+  self.whitelistAddress = _whitelistAddress
+  self.whitelist = Whitelist(_whitelistAddress)
 
   assert _bigMath != ZERO_ADDRESS, "INVALID_ADDRESS"
   self.bigMathAddress = _bigMath
@@ -599,7 +599,7 @@ def updateConfig(
 
   log.UpdateConfig(
     _bigMath,
-    _erc1404Address,
+    _whitelistAddress,
     _beneficiary,
     _control,
     _feeCollector,

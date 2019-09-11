@@ -1,6 +1,6 @@
 const datArtifact = artifacts.require("DecentralizedAutonomousTrust");
 const bigMathArtifact = artifacts.require("BigMath");
-const erc1404Artifact = artifacts.require("ERC1404");
+const whitelistArtifact = artifacts.require("Whitelist");
 const proxyArtifact = artifacts.require("AdminUpgradeabilityProxy");
 const proxyAdminArtifact = artifacts.require("ProxyAdmin");
 const vestingArtifact = artifacts.require("TokenVesting");
@@ -70,13 +70,13 @@ module.exports = async function deployDat(accounts, options, useProxy = true) {
     callOptions.revenueCommitementBasisPoints,
     { from: callOptions.control }
   );
-  // ERC1404
-  const erc1404Contract = await erc1404Artifact.new({
+  // Whitelist
+  const whitelistContract = await whitelistArtifact.new({
     from: callOptions.control
   });
   if (useProxy) {
-    const erc1404Proxy = await proxyArtifact.new(
-      erc1404Contract.address, // logic
+    const whitelistProxy = await proxyArtifact.new(
+      whitelistContract.address, // logic
       contracts.proxyAdmin.address, // admin
       [], // data
       {
@@ -84,34 +84,34 @@ module.exports = async function deployDat(accounts, options, useProxy = true) {
       }
     );
 
-    contracts.erc1404 = await erc1404Artifact.at(erc1404Proxy.address);
+    contracts.whitelist = await whitelistArtifact.at(whitelistProxy.address);
   } else {
-    contracts.erc1404 = erc1404Contract;
+    contracts.whitelist = whitelistContract;
   }
-  await contracts.erc1404.initialize(contracts.dat.address, {
+  await contracts.whitelist.initialize(contracts.dat.address, {
     from: callOptions.control
   });
-  callOptions.erc1404Address = contracts.erc1404.address;
-  // console.log(`Deployed erc1404: ${contracts.erc1404.address}`);
+  callOptions.whitelistAddress = contracts.whitelist.address;
+  // console.log(`Deployed whitelist: ${contracts.whitelist.address}`);
   let promises = [];
 
   promises.push(
-    contracts.erc1404.approve(callOptions.control, true, {
+    contracts.whitelist.approve(callOptions.control, true, {
       from: callOptions.control
     })
   );
   promises.push(
-    contracts.erc1404.approve(callOptions.beneficiary, true, {
+    contracts.whitelist.approve(callOptions.beneficiary, true, {
       from: callOptions.control
     })
   );
   promises.push(
-    contracts.erc1404.approve(callOptions.feeCollector, true, {
+    contracts.whitelist.approve(callOptions.feeCollector, true, {
       from: callOptions.control
     })
   );
   promises.push(
-    contracts.erc1404.approve(contracts.dat.address, true, {
+    contracts.whitelist.approve(contracts.dat.address, true, {
       from: callOptions.control
     })
   );
@@ -137,7 +137,7 @@ module.exports = async function deployDat(accounts, options, useProxy = true) {
       );
       contracts.vesting.push(contract);
 
-      await contracts.erc1404.approve(contracts.vesting[i].address, true, {
+      await contracts.whitelist.approve(contracts.vesting[i].address, true, {
         from: callOptions.control
       });
       await contracts.dat.transfer(

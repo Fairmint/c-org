@@ -1,13 +1,13 @@
 const { deployDat, shouldFail } = require("../helpers");
 
-contract("dat / erc1404 / canBlock", accounts => {
+contract("dat / whitelist / canBlock", accounts => {
   let contracts;
   const investor = accounts[9];
 
   before(async () => {
     contracts = await deployDat(accounts);
 
-    await contracts.erc1404.approve(investor, true, {
+    await contracts.whitelist.approve(investor, true, {
       from: await contracts.dat.control()
     });
   });
@@ -21,7 +21,7 @@ contract("dat / erc1404 / canBlock", accounts => {
 
   describe("when restriction applies", () => {
     beforeEach(async () => {
-      await contracts.erc1404.approve(investor, false, {
+      await contracts.whitelist.approve(investor, false, {
         from: await contracts.dat.control()
       });
     });

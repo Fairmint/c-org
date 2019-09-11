@@ -1,4 +1,4 @@
-# @title ERC-1404 implementation which manages KYC approvals for the org.
+# @title ERC-1404 whitelist implementation which manages KYC approvals for the org.
 
 Approve: event({
   _trader: indexed(address),

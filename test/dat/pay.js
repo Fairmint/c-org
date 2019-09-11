@@ -63,10 +63,10 @@ contract("dat / pay", accounts => {
 
   describe("If trades are restricted", () => {
     beforeEach(async () => {
-      await contracts.erc1404.approve(await contracts.dat.beneficiary(), true, {
+      await contracts.whitelist.approve(await contracts.dat.beneficiary(), true, {
         from: await contracts.dat.control()
       });
-      await contracts.erc1404.approve(investor, false, {
+      await contracts.whitelist.approve(investor, false, {
         from: await contracts.dat.control()
       });
     });
