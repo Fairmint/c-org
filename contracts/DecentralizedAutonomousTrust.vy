@@ -25,16 +25,16 @@ contract IBigDiv:
     _denB: uint256
   ) -> uint256: constant
 contract ERC1404:
-  def detectTransferRestriction(
-    _from: address,
-    _to: address,
-    _value: uint256
-  ) -> uint256: constant
   def authorizeTransfer(
     _from: address,
     _to: address,
     _value: uint256
   ): modifying
+  def detectTransferRestriction(
+    _from: address,
+    _to: address,
+    _value: uint256
+  ) -> uint256: constant
 contract IDAT:
   def state() -> uint256(stateMachine): constant
   def beneficiary() -> address: constant
@@ -296,9 +296,9 @@ def _sqrtOfTokensSupplySquared(
 
   return tokenValue
 
-@public
+@private
 @constant
-def buybackReserve() -> uint256:
+def _buybackReserve() -> uint256:
   """
   @notice The total amount of currency value currently locked in the contract and available to sellers.
   """
@@ -314,14 +314,18 @@ def buybackReserve() -> uint256:
 
   return reserve
 
-#endregion
-
-#region Functions required by the ERC-1404 standard
-##################################################
-
 @public
 @constant
-def detectTransferRestriction(
+def buybackReserve() -> uint256:
+  return self._buybackReserve()
+
+#endregion
+
+#region Functions required for the ERC-1404 standard
+##################################################
+
+@private
+def _detectTransferRestriction(
   _from: address,
   _to: address,
   _value: uint256
@@ -330,9 +334,8 @@ def detectTransferRestriction(
     return self.erc1404.detectTransferRestriction(_from, _to, _value)
   return 0
 
-@public
-@constant
-def authorizeTransfer(
+@private
+def _authorizeTransfer(
   _from: address,
   _to: address,
   _value: uint256
@@ -360,7 +363,7 @@ def _send(
   assert _to != ZERO_ADDRESS, "ERC20: send to the zero address"
   assert self.state != STATE_INIT or _from == self.beneficiary, "Only the beneficiary can make transfers during STATE_INIT"
 
-  self.authorizeTransfer(_from, _to, _amount)
+  self._authorizeTransfer(_from, _to, _amount)
 
   self.balanceOf[_from] -= _amount
   self.balanceOf[_to] += _amount
@@ -448,7 +451,7 @@ def _burn(
 
   if(_isSell):
     # This is a sell
-    self.authorizeTransfer(_from, ZERO_ADDRESS, _amount)
+    self._authorizeTransfer(_from, ZERO_ADDRESS, _amount)
   else:
     # This is a burn
     assert self.state == STATE_RUN, "ONLY_DURING_RUN"
@@ -527,7 +530,7 @@ def _mint(
   """
   assert _to != ZERO_ADDRESS, "INVALID_ADDRESS"
   assert _quantity > 0, "INVALID_QUANTITY"
-  self.authorizeTransfer(ZERO_ADDRESS, _to, _quantity)
+  self._authorizeTransfer(ZERO_ADDRESS, _to, _quantity)
 
   self.totalSupply += _quantity
   # Math: If this value got too large, the DAT may overflow on sell
@@ -704,9 +707,9 @@ def _distributeInvestment(
   self._sendCurrency(self.beneficiary, reserve - fee)
   self._sendCurrency(self.feeCollector, fee)
 
-@public
+@private
 @constant
-def estimateBuyValue(
+def _estimateBuyValue(
   _currencyValue: uint256
 ) -> uint256:
   """
@@ -747,6 +750,13 @@ def estimateBuyValue(
   return tokenValue
 
 @public
+@constant
+def estimateBuyValue(
+  _currencyValue: uint256
+) -> uint256:
+  return self._estimateBuyValue(_currencyValue)
+
+@public
 @payable
 def buy(
   _to: address,
@@ -765,7 +775,7 @@ def buy(
   assert _minTokensBought > 0, "MUST_BUY_AT_LEAST_1"
 
   # Calculate the tokenValue for this investment
-  tokenValue: uint256 = self.estimateBuyValue(_currencyValue)
+  tokenValue: uint256 = self._estimateBuyValue(_currencyValue)
   assert tokenValue >= _minTokensBought, "PRICE_SLIPPAGE"
 
   log.Buy(msg.sender, _to, _currencyValue, tokenValue)
@@ -785,7 +795,7 @@ def buy(
         self.buySlopeDen * 2,
         False
       )
-      self._distributeInvestment(self.buybackReserve() - beneficiaryContribution)
+      self._distributeInvestment(self._buybackReserve() - beneficiaryContribution)
   elif(self.state == STATE_RUN):
     if(_to != self.beneficiary):
       self._distributeInvestment(_currencyValue)
@@ -800,12 +810,12 @@ def buy(
 
 #region Sell
 
-@public
+@private
 @constant
-def estimateSellValue(
+def _estimateSellValue(
   _quantityToSell: uint256
 ) -> uint256:
-  buybackReserve: uint256 = self.buybackReserve()
+  buybackReserve: uint256 = self._buybackReserve()
 
   # Calculate currencyValue for this sale
   currencyValue: uint256
@@ -854,6 +864,13 @@ def estimateSellValue(
 
   return currencyValue
 
+@public
+@constant
+def estimateSellValue(
+  _quantityToSell: uint256
+) -> uint256:
+  return self._estimateSellValue(_quantityToSell)
+
 @private
 def _sell(
   _from: address,
@@ -865,7 +882,7 @@ def _sell(
   assert _from != self.beneficiary or self.state >= STATE_CLOSE, "BENEFICIARY_ONLY_SELL_IN_CLOSE_OR_CANCEL"
   assert _minCurrencyReturned > 0, "MUST_SELL_AT_LEAST_1"
 
-  currencyValue: uint256 = self.estimateSellValue(_quantityToSell)
+  currencyValue: uint256 = self._estimateSellValue(_quantityToSell)
   assert currencyValue >= _minCurrencyReturned, "PRICE_SLIPPAGE"
 
   if(self.state == STATE_INIT or self.state == STATE_CANCEL):
@@ -899,9 +916,9 @@ def sell(
 
 #region Pay
 
-@public
+@private
 @constant
-def estimatePayValue(
+def _estimatePayValue(
   _currencyValue: uint256
 ) -> uint256:
   # buy_slope = n/d
@@ -931,6 +948,13 @@ def estimatePayValue(
 
   return tokenValue
 
+@public
+@constant
+def estimatePayValue(
+  _currencyValue: uint256
+) -> uint256:
+  return self._estimatePayValue(_currencyValue)
+
 @private
 def _pay(
   _from: address,
@@ -952,13 +976,13 @@ def _pay(
   reserve: uint256 = _currencyValue * self.investmentReserveBasisPoints
   reserve /= BASIS_POINTS_DEN
 
-  tokenValue: uint256 = self.estimatePayValue(_currencyValue)
+  tokenValue: uint256 = self._estimatePayValue(_currencyValue)
 
   # Update the to address to the beneficiary if the currency value would fail
   to: address = _to
   if(to == ZERO_ADDRESS):
     to = self.beneficiary
-  elif(self.detectTransferRestriction(ZERO_ADDRESS, _to, tokenValue) != 0):
+  elif(self._detectTransferRestriction(ZERO_ADDRESS, _to, tokenValue) != 0):
     to = self.beneficiary
 
   # Math: this will never underflow since investmentReserveBasisPoints is capped to BASIS_POINTS_DEN
@@ -999,15 +1023,15 @@ def __default__():
 
 #region Close
 
-@public
+@private
 @constant
-def estimateExitFee(
+def _estimateExitFee(
   _msgValue: uint256(wei)
 ) -> uint256:
   exitFee: uint256 = 0
 
   if(self.state == STATE_RUN):
-    buybackReserve: uint256 = self.buybackReserve()
+    buybackReserve: uint256 = self._buybackReserve()
     buybackReserve -= as_unitless_number(_msgValue)
 
     # Source: (t^2 * (n/d))/2 + b*(n/d)*t - r
@@ -1029,6 +1053,13 @@ def estimateExitFee(
       exitFee -= buybackReserve
 
   return exitFee
+
+@public
+@constant
+def estimateExitFee(
+  _msgValue: uint256(wei)
+) -> uint256:
+  return self._estimateExitFee(_msgValue)
 
 @public
 @payable
@@ -1053,7 +1084,7 @@ def close():
     # Collect the exitFee and close the c-org.
     assert self.openUntilAtLeast <= block.timestamp, "TOO_EARLY"
 
-    exitFee = self.estimateExitFee(msg.value)
+    exitFee = self._estimateExitFee(msg.value)
 
     log.StateChange(self.state, STATE_CLOSE)
     self.state = STATE_CLOSE

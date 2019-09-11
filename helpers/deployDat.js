@@ -88,7 +88,9 @@ module.exports = async function deployDat(accounts, options, useProxy = true) {
   } else {
     contracts.erc1404 = erc1404Contract;
   }
-  await contracts.erc1404.initialize({ from: callOptions.control });
+  await contracts.erc1404.initialize(contracts.dat.address, {
+    from: callOptions.control
+  });
   callOptions.erc1404Address = contracts.erc1404.address;
   // console.log(`Deployed erc1404: ${contracts.erc1404.address}`);
   let promises = [];
