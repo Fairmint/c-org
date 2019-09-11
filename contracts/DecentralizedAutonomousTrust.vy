@@ -11,7 +11,7 @@ units: {
 
 # TODO: switch to interface files
 # Depends on https://github.com/ethereum/vyper/issues/1367
-contract IBigDiv:
+contract IBigMath:
   def bigDiv2x1(
     _numA: uint256,
     _numB: uint256,
@@ -83,7 +83,7 @@ StateChange: event({
   _newState: uint256(stateMachine)
 })
 UpdateConfig: event({
-  _bigDivAddress: address,
+  _bigMathAddress: address,
   _erc1404Address: address,
   _beneficiary: indexed(address),
   _control: indexed(address),
@@ -181,11 +181,11 @@ beneficiary: public(address)
 # @notice The address of the beneficiary organization which receives the investments.
 # Points to the wallet of the organization.
 
-bigDivAddress: public(address)
-# @notice The BigDiv library we use for BigNumber math
+bigMathAddress: public(address)
+# @notice The BigMath library we use for BigNumber math
 
-bigDiv: IBigDiv
-# @notice The BigDiv library we use for BigNumber math
+bigMath: IBigMath
+# @notice The BigMath library we use for BigNumber math
 # @dev redundant w/ currencyAddress, for convenience
 
 burnThresholdBasisPoints: public(uint256)
@@ -599,7 +599,7 @@ def initialize(
 
 @public
 def updateConfig(
-  _bigDiv: address,
+  _bigMath: address,
   _erc1404Address: address,
   _beneficiary: address,
   _control: address,
@@ -621,9 +621,9 @@ def updateConfig(
   self.erc1404Address = _erc1404Address
   self.erc1404 = ERC1404(_erc1404Address)
 
-  assert _bigDiv != ZERO_ADDRESS, "INVALID_ADDRESS"
-  self.bigDivAddress = _bigDiv
-  self.bigDiv = IBigDiv(_bigDiv)
+  assert _bigMath != ZERO_ADDRESS, "INVALID_ADDRESS"
+  self.bigMathAddress = _bigMath
+  self.bigMath = IBigDiv(_bigMath)
 
   assert _control != ZERO_ADDRESS, "INVALID_ADDRESS"
   self.control = _control
@@ -653,7 +653,7 @@ def updateConfig(
     self.beneficiary = _beneficiary
 
   log.UpdateConfig(
-    _bigDiv,
+    _bigMath,
     _erc1404Address,
     _beneficiary,
     _control,
@@ -722,7 +722,7 @@ def _estimateBuyValue(
   # Calculate the tokenValue for this investment
   tokenValue: uint256
   if(self.state == STATE_INIT):
-    tokenValue = self.bigDiv.bigDiv2x2(
+    tokenValue = self.bigMath.bigDiv2x2(
       2 * _currencyValue, self.buySlopeDen,
       self.initGoal, self.buySlopeNum
     )
@@ -731,7 +731,7 @@ def _estimateBuyValue(
   elif(self.state == STATE_RUN):
     # Math: supply's max value is 10e28 as enforced in FAIR.vy
     supply: uint256 = self.totalSupply + self.burnedSupply
-    tokenValue = self.bigDiv.bigDiv2x1(
+    tokenValue = self.bigMath.bigDiv2x1(
       2 * _currencyValue, self.buySlopeDen,
       self.buySlopeNum,
       False
@@ -790,7 +790,7 @@ def buy(
     if(self.totalSupply + tokenValue - self.initReserve >= self.initGoal):
       log.StateChange(self.state, STATE_RUN)
       self.state = STATE_RUN
-      beneficiaryContribution: uint256 = self.bigDiv.bigDiv2x1(
+      beneficiaryContribution: uint256 = self.bigMath.bigDiv2x1(
         self.initInvestors[self.beneficiary], self.buySlopeNum * self.initGoal,
         self.buySlopeDen * 2,
         False
@@ -830,7 +830,7 @@ def _estimateSellValue(
     # imp: (a b^2 r)/(t (b + t)^2) + (2 a r)/(b + t) - (a^2 r)/(b + t)^2
 
     # Math: burnedSupply is capped in FAIR such that the square will never overflow
-    currencyValue = self.bigDiv.bigDiv2x2(
+    currencyValue = self.bigMath.bigDiv2x2(
       _quantityToSell * buybackReserve, self.burnedSupply * self.burnedSupply,
       self.totalSupply, supply * supply
     )
@@ -847,7 +847,7 @@ def _estimateSellValue(
 
     # Math: quantityToSell has to be less than the supply's hard-cap, which means squaring will never overflow
     # Math: this will not underflow as the terms before it will sum to a greater value
-    currencyValue -= self.bigDiv.bigDiv2x1(
+    currencyValue -= self.bigMath.bigDiv2x1(
       _quantityToSell * _quantityToSell, buybackReserve,
       supply * supply,
       True
@@ -933,7 +933,7 @@ def _estimatePayValue(
   supply: uint256 = self.totalSupply + self.burnedSupply
 
   # Math: max _currencyValue of (2^256 - 1) / 2e31 == 5.7e45 (* 2 * BASIS_POINTS won't overflow)
-  tokenValue: uint256 = self.bigDiv.bigDiv2x1(
+  tokenValue: uint256 = self.bigMath.bigDiv2x1(
     2 * _currencyValue * self.revenueCommitmentBasisPoints, self.buySlopeDen,
     BASIS_POINTS_DEN * self.buySlopeNum,
     False
@@ -1041,7 +1041,7 @@ def _estimateExitFee(
     # Math: the supply hard-cap ensures this does not overflow
     exitFee += self.totalSupply
     # Math: self.totalSupply cap makes the worst case: 10 ** 28 * 10 ** 28 which does not overflow
-    exitFee = self.bigDiv.bigDiv2x1(
+    exitFee = self.bigMath.bigDiv2x1(
       exitFee * self.totalSupply, self.buySlopeNum,
       2 * self.buySlopeDen,
       False
