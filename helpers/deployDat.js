@@ -33,7 +33,7 @@ module.exports = async function deployDat(accounts, options, useProxy = true) {
     });
   }
 
-  // BigDiv
+  // BigMath
   if (callOptions.bigMathAddress) {
     contracts.bigMath = await bigMathArtifact.at(callOptions.bigMathAddress);
   } else {

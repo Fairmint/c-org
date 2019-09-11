@@ -623,7 +623,7 @@ def updateConfig(
 
   assert _bigMath != ZERO_ADDRESS, "INVALID_ADDRESS"
   self.bigMathAddress = _bigMath
-  self.bigMath = IBigDiv(_bigMath)
+  self.bigMath = IBigMath(_bigMath)
 
   assert _control != ZERO_ADDRESS, "INVALID_ADDRESS"
   self.control = _control
