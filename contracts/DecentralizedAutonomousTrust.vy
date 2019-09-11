@@ -24,6 +24,10 @@ contract IBigMath:
     _denA: uint256,
     _denB: uint256
   ) -> uint256: constant
+  def sqrtOfTokensSupplySquared(
+    _tokenValue: uint256,
+    _supply: uint256
+  ) -> uint256: constant
 contract ERC1404:
   def authorizeTransfer(
     _from: address,
@@ -256,45 +260,6 @@ state: public(uint256(stateMachine))
 
 #region Read-only
 ##################################################
-
-@private
-@constant
-def _sqrtOfTokensSupplySquared(
-  _tokenValue: uint256,
-  _supply: uint256
-) -> uint256:
-  """
-  @dev Returns the sqrt of the token value and adds supply^2 converted into whole number of tokens for the sqrt operation
-  @returns uint256 the tokenValue after sqrt, converted back into base units
-  """
-  tokenValue: uint256 = _tokenValue
-
-  # Math: max supply^2 given the hard-cap is 1e56 leaving room for the max tokenValue (equal to the FAIR hard-cap)
-  tokenValue += _supply * _supply
-
-  # Math: Truncates last 18 digits from tokenValue here
-  tokenValue /= DIGITS_UINT
-
-  # Math: Truncates another 8 digits from tokenValue (losing 26 digits in total)
-  # This will cause small values to round to 0 tokens for the payment (the payment is still accepted)
-  # Math: Max supported tokenValue is 1.7e+56. If supply is at the hard-cap tokenValue would be 1e38, leaving room
-  # for a _currencyValue up to 1.7e33 (or 1.7e15 after decimals)
-
-  temp: uint256 = tokenValue / DIGITS_UINT
-  decimalValue: decimal = convert(tokenValue - temp * DIGITS_UINT, decimal)
-  decimalValue /= DIGITS_DECIMAL
-  decimalValue += convert(temp, decimal)
-
-  decimalValue = sqrt(decimalValue)
-
-  # Unshift results
-  # Math: decimalValue has a max value of 2^127 - 1 which after sqrt can always be multiplied
-  # here without overflow
-  decimalValue *= DIGITS_DECIMAL
-
-  tokenValue = convert(decimalValue, uint256)
-
-  return tokenValue
 
 @private
 @constant
@@ -737,7 +702,7 @@ def _estimateBuyValue(
       False
     )
     
-    tokenValue = self._sqrtOfTokensSupplySquared(tokenValue, supply)
+    tokenValue = self.bigMath.sqrtOfTokensSupplySquared(tokenValue, supply)
 
     # Math: small chance of underflow due to possible rounding in sqrt
     if(tokenValue > supply):
@@ -939,7 +904,7 @@ def _estimatePayValue(
     False
   )
 
-  tokenValue = self._sqrtOfTokensSupplySquared(tokenValue, supply)
+  tokenValue = self.bigMath.sqrtOfTokensSupplySquared(tokenValue, supply)
 
   if(tokenValue > supply):
     tokenValue -= supply
