@@ -1,7 +1,11 @@
 # @title Decentralized Autonomous Trust
-
-#region Types
-##################################################
+# This contract is the reference implementation provided by Fairmint for a
+# Decentralized Autonomous Trust as described in the continuous
+# organization whitepaper (https://github.com/c-org/whitepaper) and
+# specified here: https://github.com/fairmint/c-org/wiki. Use at your own
+# risk. If you have question or if you're looking for a ready-to-use
+# solution using this contract, you might be interested in Fairmint's
+# offering. Do not hesitate to get in touch with us: https://fairmint.co
 
 from vyper.interfaces import ERC20
 
@@ -99,11 +103,6 @@ UpdateConfig: event({
   _name: string[64],
   _symbol: string[32]
 })
-
-#endregion
-
-#region Data
-##################################################
 
 # Constants
 ###########
@@ -250,11 +249,6 @@ state: public(uint256(stateMachine))
 # @notice The current state of the contract.
 # @dev See the constants above for possible state values.
 
-#endregion
-
-#region Read-only
-##################################################
-
 @private
 @constant
 def _buybackReserve() -> uint256:
@@ -278,9 +272,7 @@ def _buybackReserve() -> uint256:
 def buybackReserve() -> uint256:
   return self._buybackReserve()
 
-#endregion
-
-#region Functions required for the ERC-1404 standard
+# Functions required for the ERC-1404 standard
 ##################################################
 
 @private
@@ -302,9 +294,8 @@ def _authorizeTransfer(
   if(self.erc1404 != ZERO_ADDRESS): # This is not set for the minting of initialReserve
     self.erc1404.authorizeTransfer(_from, _to, _value)
 
-#endregion
 
-#region Functions required by the ERC-20 token standard
+# Functions required by the ERC-20 token standard
 ##################################################
 
 @private
@@ -389,9 +380,8 @@ def transferFrom(
   self._send(_from, _to, _value)
   return True
 
-#endregion
 
-#region Transaction Helpers
+# Transaction Helpers
 
 @private
 def _burn(
@@ -498,9 +488,7 @@ def _mint(
 
   log.Transfer(ZERO_ADDRESS, _to, _quantity)
 
-#endregion
-
-#region Config / Control
+# Config / Control
 ##################################################
 
 @public
@@ -625,9 +613,7 @@ def updateConfig(
     _symbol
   )
 
-#endregion
-
-#region Functions for our business logic
+# Functions for our business logic
 ##################################################
 
 @public
@@ -640,9 +626,7 @@ def burn(
   """
   self._burn(msg.sender, _amount, False)
 
-#endregion
-
-#region Buy
+# Buy
 
 @private
 def _distributeInvestment(
@@ -765,9 +749,7 @@ def buy(
     if(_to == self.beneficiary):
       self._applyBurnThreshold() # must mint before this call
 
-#endregion
-
-#region Sell
+# Sell
 
 @private
 @constant
@@ -871,9 +853,8 @@ def sell(
   yours was submitted.
   """
   self._sell(msg.sender, _to, _quantityToSell, _minCurrencyReturned, False)
-#endregion
 
-#region Pay
+# Pay
 
 @private
 @constant
@@ -978,9 +959,7 @@ def __default__():
   self._collectInvestment(msg.sender, as_unitless_number(msg.value), msg.value, False)
   self._pay(msg.sender, msg.sender, as_unitless_number(msg.value))
 
-#endregion
-
-#region Close
+# Close
 
 @private
 @constant
@@ -1053,5 +1032,3 @@ def close():
     assert False, "INVALID_STATE"
 
   log.Close(exitFee)
-
-#endregion
