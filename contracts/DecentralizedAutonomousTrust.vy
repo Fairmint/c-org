@@ -13,8 +13,6 @@ units: {
   stateMachine: "The DAT's internal state machine"
 }
 
-# TODO: switch to interface files
-# Depends on https://github.com/ethereum/vyper/issues/1367
 contract IBigMath:
   def bigDiv2x1(
     _numA: uint256,
