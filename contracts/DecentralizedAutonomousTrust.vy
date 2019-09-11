@@ -459,13 +459,13 @@ def _sendCurrency(
   @dev Send `_amount` currency from the contract to the `_to` account.
   """
   if(_amount > 0):
-    if(self.currency == ZERO_ADDRESS):
+    if(self.currency != ZERO_ADDRESS):
+      success: bool = self.currency.transfer(_to, as_unitless_number(_amount))
+      assert success, "ERC20_TRANSFER_FAILED"
+    else:
       # TODO switch from send to raw_call
       # send(_to, as_wei_value(_amount, "wei"))
       raw_call(_to, b"", outsize=0, value=as_wei_value(_amount, "wei"), gas=msg.gas)
-    else:
-      success: bool = self.currency.transfer(_to, as_unitless_number(_amount))
-      assert success, "ERC20_TRANSFER_FAILED"
 
 @private
 def _mint(
