@@ -329,9 +329,10 @@ def _detectTransferRestriction(
   _from: address,
   _to: address,
   _value: uint256
-):
+) -> uint256:
   if(self.erc1404 != ZERO_ADDRESS): # This is not set for the minting of initialReserve
     return self.erc1404.detectTransferRestriction(_from, _to, _value)
+  return 0
 
 @private
 def _authorizeTransfer(
