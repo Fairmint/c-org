@@ -22,7 +22,10 @@ def bigDiv2x1(
   if(_numA == 0 or _numB == 0):
     return 0
   if(MAX_UINT / _numA > _numB):
-    return _numA * _numB / _den
+    if(_roundUp):
+      return (_numA * _numB - 1) / _den + 1
+    else:
+      return _numA * _numB / _den
 
   # Find max value
   value: uint256 = _numA
