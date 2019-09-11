@@ -16,7 +16,7 @@ def initialize(
   assert self.owner == ZERO_ADDRESS, "ALREADY_INITIALIZED"
 
   self.owner = msg.sender
-  self.dat = msg.sender
+  self.dat = _dat
   self.approved[ZERO_ADDRESS] = True
 
 @private
