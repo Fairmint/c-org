@@ -461,8 +461,8 @@ def _sendCurrency(
   if(_amount > 0):
     if(self.currency == ZERO_ADDRESS):
       # TODO switch from send to raw_call
-      send(_to, as_wei_value(_amount, "wei"))
-      # raw_call(_from, b"", outsize=0, value=as_wei_value(_amount, "wei"), gas=msg.gas)
+      # send(_to, as_wei_value(_amount, "wei"))
+      raw_call(_to, b"", outsize=0, value=as_wei_value(_amount, "wei"), gas=msg.gas)
     else:
       success: bool = self.currency.transfer(_to, as_unitless_number(_amount))
       assert success, "ERC20_TRANSFER_FAILED"
