@@ -972,8 +972,8 @@ def _pay(
   to: address = _to
   if(to == ZERO_ADDRESS):
     to = self.beneficiary
-  # TODO restore elif(self.erc1404.detectTransferRestriction(ZERO_ADDRESS, _to, tokenValue) != 0):
-  #   to = self.beneficiary
+  elif(self.erc1404.detectTransferRestriction(ZERO_ADDRESS, _to, tokenValue) != 0):
+    to = self.beneficiary
 
   # Math: this will never underflow since investmentReserveBasisPoints is capped to BASIS_POINTS_DEN
   self._sendCurrency(self.beneficiary, _currencyValue - reserve)
