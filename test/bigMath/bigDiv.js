@@ -264,4 +264,24 @@ contract("bigMath / bigDiv", accounts => {
     await contract.bigDiv2x2(1, 1, maxValue.toFixed(), 1);
     await contract.bigDiv2x2(1, 1, 1, maxValue.toFixed());
   });
+
+  it("MythX detected possible overflow case 1", async () => {
+    const result = await contract.bigDiv2x2(
+      "0x0000000000000000000000000000000000000000000000000000000000000002",
+      "0x0000000000000000000000000000000000000000000000000000000000001700",
+      "0x0000003800000000000000000000000000000000000000000000000000000000",
+      "0x0000fb0000000000000000000000000000000000000000000000000000000000"
+    );
+    assert.equal(result, 0);
+  });
+
+  it("MythX detected possible overflow case 2", async () => {
+    const result = await contract.bigDiv2x2(
+      "2",
+      "5888",
+      "1509757013360435828501352844873099317723680087662272058941802173956096",
+      "1732338333044431510646123721431533388565228352014767025345793580173623296"
+    );
+    assert.equal(result, 0);
+  });
 });
