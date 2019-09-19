@@ -26,7 +26,7 @@ contract("dat / buy", accounts => {
       });
     });
 
-    it.only("balanceOf should have increased", async () => {
+    it("balanceOf should have increased", async () => {
       const balance = await contracts.dat.balanceOf(accounts[1]);
 
       assert.equal(balance.toString(), "105526268847200000000");

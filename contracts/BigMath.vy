@@ -41,9 +41,9 @@ def bigDiv2x1(
     value = _den
   
   # Use max to determine factor to use
-  factor: uint256 = value / MAX_BEFORE_SQUARE 
-  if(factor == 0):
-    factor = 1
+  factor: uint256 = value / MAX_BEFORE_SQUARE
+  if(factor == 0 or factor >= MAX_BEFORE_SQUARE / 2):
+    factor += 1
   
   count: int128 = 0
   
@@ -79,11 +79,12 @@ def bigDiv2x1(
   else:
     value /= den
 
-  if(count >= 1):
-    value *= factor ** convert(count, uint256)
-  elif(count <= -1):
-    count *= -1
-    value /= factor ** convert(count, uint256)
+  if(count == 1):
+    value = value * factor
+  elif(count == 2):
+    value = value * factor * factor
+  elif(count == -1):
+    value = value / factor
 
   return value
 
@@ -114,8 +115,8 @@ def bigDiv2x2(
   
   # Use max to determine factor to use
   factor: uint256 = value / MAX_BEFORE_SQUARE 
-  if(factor == 0):
-    factor = 1
+  if(factor == 0 or factor >= MAX_BEFORE_SQUARE / 2):
+    factor += 1
   
   count: int128 = 0
   
