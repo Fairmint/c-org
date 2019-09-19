@@ -7,6 +7,7 @@
 # result is increased to restore the original scale of terms.
 
 MAX_UINT: constant(uint256) = 2**256 - 1
+# @notice The max possible value
 
 MAX_BEFORE_SQUARE: constant(uint256) = 340282366920938463463374607431768211456
 # @notice When multiplying 2 terms, the max value is sqrt(2^256-1) 
@@ -25,12 +26,29 @@ def bigDiv2x1(
   _den: uint256,
   _roundUp: bool
 ) -> uint256:
+  """
+  @notice Multiply the numerators, scaling them down if there is potential for overflow, and then
+  scale them back up after division.
+  @param _numA the first numerator term
+  @param _numB the second numerator term
+  @param _den the denominator
+  @param _roundUp if true, the math may round the final value up from the exact expected value
+  @return the approximate value of _numA * _numB / _den
+  @dev this will overflow if the final value is > MAX_UINT (and may overflow if ~MAX_UINT)
+  rounding applies but should be close to the expected value
+  if the expected value is small, a rounding error or 1 may be a large percent error
+  """
   if(_numA == 0 or _numB == 0):
+    # If a numerator is 0, we return here to avoid an underflow below
+    # (if the dem is 0 we revert below)
     return 0
   if(MAX_UINT / _numA > _numB):
+    # The numerators when multiplied will not overflow, we can do the math directly
     if(_roundUp):
+      # The -1 / +1 here is how we round up using only integer math
       return (_numA * _numB - 1) / _den + 1
     else:
+      # The default behavior is to round down
       return _numA * _numB / _den
 
   # Find max value
@@ -42,12 +60,17 @@ def bigDiv2x1(
   
   # Use max to determine factor to use
   factor: uint256 = value / MAX_BEFORE_SQUARE
+
   if(factor == 0 or factor >= MAX_BEFORE_SQUARE / 2):
+    # If the factor is 0, we need +1 to avoid a revert below
+    # If the factor is large, the +1 helps to avoid overflow of huge values
     factor += 1
   
+  # count tracks how much the value was scaled up or down by, so we can correct for it at the end
   count: int128 = 0
   
   if(_numA >= MAX_BEFORE_SQUARE):
+    # To minimize rounding, we only modify the value if it is very large
     if(_roundUp):
       value = (_numA - 1) / factor + 1
     else:
@@ -74,11 +97,13 @@ def bigDiv2x1(
   else:
     den = _den
   
+  # Calculate the fraction value
   if(_roundUp):
     value = (value - 1) / den + 1
   else:
     value /= den
 
+  # Then scale the value back up or down based on the adjustments made above
   if(count == 1):
     value = value * factor
   elif(count == 2):
@@ -97,7 +122,15 @@ def bigDiv2x2(
   _denB: uint256
 ) -> uint256:
   """
-  @dev rounds down
+  @notice Multiply the numerators, scaling them down if there is potential for overflow.
+  Multiply the denominators, scaling them down if there is potential for overflow.
+  Then compute the fraction and scale the final value back up or down as appropriate.
+  @param _numA the first numerator term
+  @param _numB the second numerator term
+  @param _denA the first denominator term
+  @param _denB the second denominator term
+  @return the approximate value of _numA * _numB / (_denA * _denB)
+  @dev rounds down by default. Comments from bigDiv2x1 apply here as well.
   """
   if(_numA == 0 or _numB == 0):
     return 0
@@ -120,6 +153,7 @@ def bigDiv2x2(
   
   count: int128 = 0
   
+  # Numerator
   if(_numA >= MAX_BEFORE_SQUARE):
     value = _numA / factor
     count += 1
@@ -131,6 +165,7 @@ def bigDiv2x2(
   else:
     value *= _numB
 
+  # Denominator
   den: uint256
   if(_denA >= MAX_BEFORE_SQUARE):
     den = (_denA - 1) / factor + 1
@@ -143,13 +178,18 @@ def bigDiv2x2(
   else:
     den *= _denB
   
+  # Faction
   value /= den
 
-  if(count >= 1):
-    value *= factor ** convert(count, uint256)
-  elif(count <= -1):
-    count *= -1
-    value /= factor ** convert(count, uint256)
+  # Scale back up/down
+  if(count == 1):
+    value *= factor
+  elif(count == 2):
+    value *= factor * factor
+  elif(count == -1):
+    value /= factor
+  elif(count == -2):
+    value /= factor * factor
 
   return value
 
@@ -160,8 +200,7 @@ def sqrtOfTokensSupplySquared(
   _supply: uint256
 ) -> uint256:
   """
-  @dev Returns the sqrt of the token value and adds supply^2 converted into whole number of tokens for the sqrt operation
-  @returns uint256 the tokenValue after sqrt, converted back into base units
+  @notice Calculates sqrt((_tokenValue + _supply^2)/10^18)*10^18
   """
   tokenValue: uint256 = _tokenValue
 
