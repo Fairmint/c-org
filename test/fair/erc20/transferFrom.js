@@ -47,11 +47,4 @@ contract("fair / erc20 / transferFrom", accounts => {
       );
     });
   });
-
-  it(
-    "The function SHOULD throw if the message caller’s account balance does not have enough tokens to spend."
-  );
-  it(
-    "Transfers of 0 values MUST be treated as normal transfers and fire the Transfer event."
-  );
 });

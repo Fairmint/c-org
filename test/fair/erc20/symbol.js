@@ -51,12 +51,5 @@ contract("fair / erc20 / symbol", accounts => {
         });
       });
     });
-
-    it.skip("should fail to change symbol from a different account", async () => {
-      await shouldFail(
-        updateDatConfig(contracts, { symbol: "Test" }, accounts[2]),
-        "CONTROL_ONLY"
-      );
-    });
   });
 });

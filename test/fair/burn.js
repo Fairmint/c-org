@@ -1,6 +1,6 @@
-const { approveAll, deployDat } = require("../../helpers");
+const { approveAll, deployDat } = require("../helpers");
 
-contract("fair / erc20 / burn", accounts => {
+contract("fair / burn", accounts => {
   let contracts;
 
   before(async () => {
@@ -31,6 +31,4 @@ contract("fair / erc20 / burn", accounts => {
       );
     });
   });
-
-  it("can't burn more than I have");
 });
