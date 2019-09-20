@@ -8,9 +8,6 @@ contract("fair / erc20 / decimals", accounts => {
   });
 
   it("should have 18 decimals", async () => {
-    /**
-     * Per ERC-777 this value must always be exactly 18.
-     */
     assert.equal(await contracts.dat.decimals(), 18);
   });
 });

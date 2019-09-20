@@ -39,11 +39,7 @@ contract("dat / csvTests", accounts => {
       } else {
         currency = await tokenArtifact.new({ from: control });
         currencyString = await currency.symbol();
-        if (!currency.decimals) {
-          currencyDecimals = 18; // 18 is assumed for ERC-777 only tokens
-        } else {
-          currencyDecimals = parseInt((await currency.decimals()).toString());
-        }
+        currencyDecimals = parseInt((await currency.decimals()).toString());
       }
 
       await resetEthBalances();

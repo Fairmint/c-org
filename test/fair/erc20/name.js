@@ -52,12 +52,5 @@ contract("fair / erc20 / name", accounts => {
         });
       });
     });
-
-    it.skip("should fail to change name from a different account", async () => {
-      await shouldFail(
-        updateDatConfig(contracts, { name: "Test" }, accounts[2]),
-        "CONTROL_ONLY"
-      );
-    });
   });
 });

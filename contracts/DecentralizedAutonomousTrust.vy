@@ -335,7 +335,7 @@ def decimals() -> uint256:
   """
   @notice Returns the number of decimals the token uses - e.g. 8, means to divide
   the token amount by 100000000 to get its user representation.
-  @dev This is optional per ERC-20 but must always be 18 per ERC-777
+  @dev Hardcoded to 18
   """
   return 18
 
@@ -348,7 +348,7 @@ def approve(
   @notice Allows `_spender` to withdraw from your account multiple times, up to the `_value` amount.
   @dev If this function is called again it overwrites the current allowance with `_value`.
   """
-  assert _spender != ZERO_ADDRESS, "ERC777: approve to the zero address"
+  assert _spender != ZERO_ADDRESS, "ERC20: approve to the zero address"
 
   self.allowances[msg.sender][_spender] = _value
   log.Approval(msg.sender, _spender, _value)
@@ -389,7 +389,6 @@ def _burn(
 ):
   """
   @dev Removes tokens from the circulating supply.
-  params from the ERC-777 token standard
   """
   assert _from != ZERO_ADDRESS, "ERC20: burn from the zero address"
 

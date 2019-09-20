@@ -18,7 +18,6 @@
   },
   "dependencies": {
     "bignumber.js": "9.0.0",
-    "erc1820": "0.0.2",
     "eth-gas-reporter": "0.2.11",
     "ganache-cli": "6.6.0",
     "hardlydifficult-test-helpers": "0.3.0",
