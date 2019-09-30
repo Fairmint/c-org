@@ -117,8 +117,8 @@ STATE_CLOSE: constant(uint256(stateMachine)) = 2
 STATE_CANCEL: constant(uint256(stateMachine)) = 3
 # @notice The state after closed by the `beneficiary` account from STATE_INIT
 
-MAX_BEFORE_SQUARE: constant(uint256)  = 340282366920938463463374607431768211456
-# @notice When multiplying 2 terms, the max value is sqrt(2^256-1)
+MAX_BEFORE_SQUARE: constant(uint256)  = 340282366920938463463374607431768211455
+# @notice When multiplying 2 terms, the max value is sqrt(2^128-1)
 
 BASIS_POINTS_DEN: constant(uint256) = 10000
 # @notice The denominator component for values specified in basis points.
