@@ -123,9 +123,9 @@ MAX_BEFORE_SQUARE: constant(uint256)  = 340282366920938463463374607431768211456
 BASIS_POINTS_DEN: constant(uint256) = 10000
 # @notice The denominator component for values specified in basis points.
 
-MAX_SUPPLY: constant(uint256)  = 10 ** 28
+MAX_SUPPLY: constant(uint256)  = 10 ** 38
 # @notice The max `totalSupply + burnedSupply`
-# @dev This limit ensures that the DAT's formulas do not overflow
+# @dev This limit ensures that the DAT's formulas do not overflow (<MAX_BEFORE_SQUARE/2)
 
 ##############
 # Data specific to our token business logic
@@ -412,10 +412,11 @@ def _applyBurnThreshold():
   @dev Burn tokens from the beneficiary account if they have too much of the total share.
   """
   balanceBefore: uint256 = self.balanceOf[self.beneficiary]
-  # Math: if totalSupply is < (2^256 - 1) / 10000 this will never overflow
-  # totalSupply and burnedSupply are capped to MAX_BEFORE_SQUARE
+  # Math worst case:
+  # MAX_BEFORE_SQUARE + MAX_BEFORE_SQUARE
   maxHoldings: uint256 = self.totalSupply + self.burnedSupply
-  # burnThresholdBasisPoints is capped to BASIS_POINTS_DEN
+  # Math worst case:
+  # MAX_BEFORE_SQUARE * 2 * 10000
   maxHoldings *= self.burnThresholdBasisPoints
   maxHoldings /= BASIS_POINTS_DEN
 
@@ -439,7 +440,7 @@ def _collectInvestment(
       refund: uint256(wei) = _msgValue - _quantityToInvest
       if(refund > 0):
         # this call fails if we don't capture a response
-        res: bytes[1]= raw_call(_from, b"", outsize=0, value=refund, gas=msg.gas)
+        res: bytes[1] = raw_call(_from, b"", outsize=0, value=refund, gas=msg.gas)
     else:
       assert as_wei_value(_quantityToInvest, "wei") == _msgValue, "INCORRECT_MSG_VALUE"
   else: # currency is ERC20
@@ -509,7 +510,7 @@ def initialize(
     self.state = STATE_RUN
   else:
     # Math: If this value got too large, the DAT would overflow on sell
-    assert _initGoal < MAX_BEFORE_SQUARE, "EXCESSIVE_GOAL"
+    assert _initGoal < MAX_SUPPLY, "EXCESSIVE_GOAL"
     self.initGoal = _initGoal
 
   assert _buySlopeNum > 0, "INVALID_SLOPE_NUM" # 0 not supported
@@ -660,20 +661,23 @@ def _estimateBuyValue(
   # Calculate the tokenValue for this investment
   tokenValue: uint256
   if(self.state == STATE_INIT):
-    tokenValue = self.bigMath.bigDiv2x2(
+    # Math: worst case
+    # 2 * MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE
+    # / MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE
+    tokenValue = self.bigMath.bigDiv2x1(
       2 * _currencyValue, self.buySlopeDen,
-      self.initGoal, self.buySlopeNum
+      self.initGoal * self.buySlopeNum,
+      False
     )
     if(tokenValue > self.initGoal):
       return 0
   elif(self.state == STATE_RUN):
-    # Math: supply's max value is 10e28 as enforced in FAIR.vy
     supply: uint256 = self.totalSupply + self.burnedSupply
-    tokenValue = self.bigMath.bigDiv2x1(
-      2 * _currencyValue, self.buySlopeDen,
-      self.buySlopeNum,
-      False
-    )
+    # Math: worst case
+    # 2 * MAX_BEFORE_SQUARE / 2 * MAX_BEFORE_SQUARE
+    # / MAX_BEFORE_SQUARE
+    tokenValue = 2 * _currencyValue * self.buySlopeDen
+    tokenValue /= self.buySlopeNum
     
     tokenValue = self.bigMath.sqrtOfTokensSupplySquared(tokenValue, supply)
 
@@ -722,12 +726,16 @@ def buy(
 
   # Update state, initInvestors, and distribute the investment when appropriate
   if(self.state == STATE_INIT):
-    # Math: the hard-cap in mint ensures that this line could never overflow
+    # Math worst case: MAX_BEFORE_SQUARE
     self.initInvestors[_to] += tokenValue
-    # Math: this would only overflow if initReserve was burned, but FAIR blocks burning durning init
+    # Math worst case:
+    # MAX_BEFORE_SQUARE + MAX_BEFORE_SQUARE
     if(self.totalSupply + tokenValue - self.initReserve >= self.initGoal):
       log.StateChange(self.state, STATE_RUN)
       self.state = STATE_RUN
+      # Math worst case:
+      # MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE/2
+      # / MAX_BEFORE_SQUARE * 2
       beneficiaryContribution: uint256 = self.bigMath.bigDiv2x1(
         self.initInvestors[self.beneficiary], self.buySlopeNum * self.initGoal,
         self.buySlopeDen * 2,
@@ -766,14 +774,17 @@ def _estimateSellValue(
     # imp: (a b^2 r)/(t (b + t)^2) + (2 a r)/(b + t) - (a^2 r)/(b + t)^2
 
     # Math: burnedSupply is capped in FAIR such that the square will never overflow
+    # Math worst case:
+    # MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE/2
+    # / MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE/2
     currencyValue = self.bigMath.bigDiv2x2(
       _quantityToSell * buybackReserve, self.burnedSupply * self.burnedSupply,
       self.totalSupply, supply * supply
     )
-    # Math: worst-case currencyValue is MAX_BEFORE_SQUARE (max reserve, 1 supply)
+    # Math: worst case currencyValue is MAX_BEFORE_SQUARE (max reserve, 1 supply)
 
-    # Math: buybackReserve is capped such that this will not overflow for any value of
-    # quantityToSell (up to the supply's hard-cap)
+    # Math worst case:
+    # 2 * MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE
     temp: uint256 = 2 * _quantityToSell * buybackReserve
     temp /= supply
     # Math: worst-case temp is MAX_BEFORE_SQUARE (max reserve, 1 supply)
@@ -781,19 +792,22 @@ def _estimateSellValue(
     # Math: considering the worst-case for currencyValue and temp, this can never overflow
     currencyValue += temp
 
-    # Math: quantityToSell has to be less than the supply's hard-cap, which means squaring will never overflow
-    # Math: this will not underflow as the terms before it will sum to a greater value
+    # Math: worst case
+    # MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE
+    # / MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE/2
     currencyValue -= self.bigMath.bigDiv2x1(
       _quantityToSell * _quantityToSell, buybackReserve,
       supply * supply,
       True
     )
   elif(self.state == STATE_CLOSE):
-    # Math: _quantityToSell and buybackReserve are both capped such that this can never overflow
+    # Math worst case
+    # MAX_BEFORE_SQUARE / 2 * MAX_BEFORE_SQUARE
     currencyValue = _quantityToSell * buybackReserve
     currencyValue /= self.totalSupply
   else: # STATE_INIT or STATE_CANCEL
-    # Math: _quantityToSell and buybackReserve are both capped such that this can never overflow
+    # Math worst case:
+    # MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE
     currencyValue = _quantityToSell * buybackReserve
     # Math: FAIR blocks initReserve from being burned unless we reach the RUN state which prevents an underflow
     currencyValue /= self.totalSupply - self.initReserve
@@ -867,7 +881,9 @@ def _estimatePayValue(
 
   supply: uint256 = self.totalSupply + self.burnedSupply
 
-  # Math: max _currencyValue of (2^256 - 1) / 2e31 == 5.7e45 (* 2 * BASIS_POINTS won't overflow)
+  # Math: worst case
+  # 2 * MAX_BEFORE_SQUARE/2 * 10000 * MAX_BEFORE_SQUARE
+  # / 10000 * MAX_BEFORE_SQUARE
   tokenValue: uint256 = self.bigMath.bigDiv2x1(
     2 * _currencyValue * self.revenueCommitmentBasisPoints, self.buySlopeDen,
     BASIS_POINTS_DEN * self.buySlopeNum,
@@ -971,9 +987,12 @@ def _estimateExitFee(
     # Implementation: (n t (2 b + t))/(2 d) - r
 
     exitFee = 2 * self.burnedSupply
-    # Math: the supply hard-cap ensures this does not overflow
+    # Math worst case:
+    # 2 * MAX_BEFORE_SQUARE/2 + MAX_BEFORE_SQUARE
     exitFee += self.totalSupply
-    # Math: self.totalSupply cap makes the worst case: 10 ** 28 * 10 ** 28 which does not overflow
+    # Math worst case:
+    # MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE
+    # / 2 * MAX_BEFORE_SQUARE
     exitFee = self.bigMath.bigDiv2x1(
       exitFee * self.totalSupply, self.buySlopeNum,
       2 * self.buySlopeDen,
