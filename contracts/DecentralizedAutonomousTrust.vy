@@ -798,7 +798,7 @@ def _estimateSellValue(
     currencyValue -= self.bigMath.bigDiv2x1(
       _quantityToSell * _quantityToSell, buybackReserve,
       supply * supply,
-      True
+      False
     )
   elif(self.state == STATE_CLOSE):
     # Math worst case
