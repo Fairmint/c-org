@@ -15,6 +15,12 @@ MAX_ERROR: constant(uint256) = 100000000
 MAX_ERROR_BEFORE_DIV: constant(uint256) = MAX_ERROR * 2
 # @notice A larger error threshold to use when multiple rounding errors may apply
 
+DIGITS_UINT: constant(uint256) = 10 ** 18
+# @notice Represents 1 full token (with 18 decimals)
+
+DIGITS_DECIMAL: constant(decimal) = convert(DIGITS_UINT, decimal)
+# @notice Represents 1 full token (with 18 decimals)
+
 @private
 @constant
 def _bigDiv2x1(
