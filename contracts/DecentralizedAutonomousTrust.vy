@@ -842,6 +842,8 @@ def _sell(
   else:
     self._burn(_from, _quantityToSell, True)
 
+  self._applyBurnThreshold()
+
   self._sendCurrency(_to, currencyValue)
   log.Sell(_from, _to, currencyValue, _quantityToSell)
 
