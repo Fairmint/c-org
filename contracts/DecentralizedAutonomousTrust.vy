@@ -253,10 +253,8 @@ def _buybackReserve() -> uint256:
   """
   @notice The total amount of currency value currently locked in the contract and available to sellers.
   """
-  reserve: uint256
-  if(self.currency == ZERO_ADDRESS):
-    reserve = as_unitless_number(self.balance)
-  else:
+  reserve: uint256 = as_unitless_number(self.balance)
+  if(self.currency != ZERO_ADDRESS):
     reserve = self.currency.balanceOf(self)
 
   if(reserve > MAX_BEFORE_SQUARE):
@@ -659,7 +657,7 @@ def _estimateBuyValue(
     return 0
 
   # Calculate the tokenValue for this investment
-  tokenValue: uint256
+  tokenValue: uint256 = 0
   if(self.state == STATE_INIT):
     # Math: worst case
     # 2 * MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE
@@ -762,7 +760,7 @@ def _estimateSellValue(
   buybackReserve: uint256 = self._buybackReserve()
 
   # Calculate currencyValue for this sale
-  currencyValue: uint256
+  currencyValue: uint256 = 0
   if(self.state == STATE_RUN):
     supply: uint256 = self.totalSupply + self.burnedSupply
 
