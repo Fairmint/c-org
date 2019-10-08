@@ -39,7 +39,7 @@ def _bigDiv2x1(
     # would div by 0 or underflow if we don't special case 0
     return 0
 
-  value: uint256
+  value: uint256 = 0
 
   if(MAX_UINT / _numA >= _numB):
     # a*b does not overflow, return exact math
@@ -48,14 +48,11 @@ def _bigDiv2x1(
     return value
 
   # Sort numerators
-  numMax: uint256
-  numMin: uint256
+  numMax: uint256 = _numB
+  numMin: uint256 = _numA
   if(_numA > _numB):
     numMax = _numA
     numMin = _numB
-  else:
-    numMax = _numB
-    numMin = _numA
 
   value = numMax / _den
   if(value > MAX_ERROR):
@@ -63,15 +60,12 @@ def _bigDiv2x1(
     value *= numMin
     return value
 
-  factor: uint256
-  temp: uint256
-
   # formula = ((a / f) * b) / (d / f)
   # factor >= a / sqrt(MAX) * (b / sqrt(MAX))
-  factor = numMin - 1
+  factor: uint256 = numMin - 1
   factor /= MAX_BEFORE_SQUARE
   factor += 1
-  temp = numMax - 1
+  temp: uint256 = numMax - 1
   temp /= MAX_BEFORE_SQUARE
   temp += 1
   if(MAX_UINT / factor >= temp):
@@ -162,16 +156,13 @@ def bigDiv2x2(
     return 0
 
   # Sort denominators
-  denMax: uint256
-  denMin: uint256
+  denMax: uint256 = _denB
+  denMin: uint256 = _denA
   if(_denA > _denB):
     denMax = _denA
     denMin = _denB
-  else:
-    denMax = _denB
-    denMin = _denA
 
-  value: uint256
+  value: uint256 = 0
 
   if(MAX_UINT / _numA >= _numB):
     # a*b does not overflow, use `a / d / c`
@@ -183,27 +174,20 @@ def bigDiv2x2(
   # `ab / cd` where both `ab` and `cd` would overflow
 
   # Sort numerators
-  numMax: uint256
-  numMin: uint256
+  numMax: uint256 = _numB
+  numMin: uint256 = _numA
   if(_numA > _numB):
     numMax = _numA
     numMin = _numB
-  else:
-    numMax = _numB
-    numMin = _numA
-
-  temp: uint256
 
   # formula = (a/d) * b / c
-  temp = numMax / denMin
+  temp: uint256 = numMax / denMin
   if(temp > MAX_ERROR_BEFORE_DIV):
     return self._bigDiv2x1(temp, numMin, denMax)
 
-  factor: uint256
-
   # formula: ((a/f) * b) / d then either * f / c or / c * f
   # factor >= a / sqrt(MAX) * (b / sqrt(MAX))
-  factor = numMin - 1
+  factor: uint256 = numMin - 1
   factor /= MAX_BEFORE_SQUARE
   factor += 1
   temp = numMax - 1
