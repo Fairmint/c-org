@@ -760,7 +760,7 @@ def _estimateSellValue(
   buybackReserve: uint256 = self._buybackReserve()
 
   # Calculate currencyValue for this sale
-  currencyValue: uint256
+  currencyValue: uint256 = 0
   if(self.state == STATE_RUN):
     supply: uint256 = self.totalSupply + self.burnedSupply
 
