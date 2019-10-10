@@ -169,15 +169,13 @@ contract("dat / fallback", accounts => {
       const burnThreshold = new BigNumber(
         await contracts.dat.burnThresholdBasisPoints()
       ).div(constants.BASIS_POINTS_DEN);
-      //(x+investor_balance)-(burn_threshold*(total_supply+burnt_supply)
+      //(x+investor_balance)-(burn_threshold*(total_supply)
       expectedBurn = x
         .plus(beneficiaryFairBalanceBefore)
         .minus(
-          burnThreshold.times(
-            new BigNumber(await contracts.dat.totalSupply())
-              .plus(x)
-              .plus(await contracts.dat.burnedSupply())
-          )
+          burnThreshold
+            .times(new BigNumber(await contracts.dat.totalSupply()).plus(x))
+            .dp(0, BigNumber.ROUND_DOWN)
         );
       await contracts.whitelist.approve(
         await contracts.dat.beneficiary(),
@@ -196,11 +194,11 @@ contract("dat / fallback", accounts => {
     });
 
     it("Sanity check: expected burn > 0", async () => {
-      assert.notEqual(expectedBurn.toFixed(), 0);
+      assert.notEqual(expectedBurn.toFixed(), "0");
       assert(expectedBurn.gt(0));
     });
 
-    it("If (x+investor_balance)/(total_supply+burnt_supply) >= burn_threshold then burn((x+investor_balance)-(burn_threshold*(total_supply+burnt_supply)) is called.", async () => {
+    it("If (x+investor_balance)/(total_supply) >= burn_threshold then burn((x+investor_balance)-(burn_threshold*(total_supply)) is called.", async () => {
       const burnedSupply = new BigNumber(await contracts.dat.burnedSupply());
       assert.equal(
         burnedSupply.toFixed(),

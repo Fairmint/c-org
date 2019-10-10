@@ -411,8 +411,8 @@ def _applyBurnThreshold():
   """
   balanceBefore: uint256 = self.balanceOf[self.beneficiary]
   # Math worst case:
-  # MAX_BEFORE_SQUARE + MAX_BEFORE_SQUARE
-  maxHoldings: uint256 = self.totalSupply + self.burnedSupply
+  # MAX_BEFORE_SQUARE/2
+  maxHoldings: uint256 = self.totalSupply
   # Math worst case:
   # MAX_BEFORE_SQUARE * 2 * 10000
   maxHoldings *= self.burnThresholdBasisPoints
