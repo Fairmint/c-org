@@ -173,9 +173,9 @@ contract("dat / fallback", accounts => {
       expectedBurn = x
         .plus(beneficiaryFairBalanceBefore)
         .minus(
-          burnThreshold.times(
-            new BigNumber(await contracts.dat.totalSupply()).plus(x)
-          )
+          burnThreshold
+            .times(new BigNumber(await contracts.dat.totalSupply()).plus(x))
+            .dp(0, BigNumber.ROUND_DOWN)
         );
       await contracts.whitelist.approve(
         await contracts.dat.beneficiary(),
