@@ -37,7 +37,6 @@ contract("wiki / sell / runBurn", accounts => {
 
   describe("on sell by any account pushing the beneficiary over the burn threshold", async () => {
     let beneficiaryFairBalanceBefore;
-    let x;
     let burnedSupplyBefore;
     let expectedBurn;
 
@@ -63,15 +62,6 @@ contract("wiki / sell / runBurn", accounts => {
         await contracts.dat.burnThresholdBasisPoints()
       ).div(constants.BASIS_POINTS_DEN);
 
-      expectedBurn = x
-        .plus(beneficiaryFairBalanceBefore)
-        .minus(
-          burnThreshold.times(
-            new BigNumber(await contracts.dat.totalSupply())
-              .plus(x)
-              .plus(await contracts.dat.burnedSupply())
-          )
-        );
       await contracts.whitelist.approve(
         await contracts.dat.beneficiary(),
         true,
@@ -80,11 +70,16 @@ contract("wiki / sell / runBurn", accounts => {
         }
       );
 
-      await contracts.whitelist.approve(investor, false, {
-        from: await contracts.dat.control()
-      });
-
-      x = new BigNumber(await contracts.dat.estimateSellValue(sellAmount));
+      const x = new BigNumber(
+        await contracts.dat.estimateSellValue(sellAmount)
+      );
+      expectedBurn = beneficiaryFairBalanceBefore.minus(
+        burnThreshold
+          .times(
+            new BigNumber(await contracts.dat.totalSupply()).minus(sellAmount)
+          )
+          .dp(0, BigNumber.ROUND_DOWN)
+      );
 
       await contracts.dat.sell(investor, sellAmount, 1, {
         from: investor
@@ -96,24 +91,16 @@ contract("wiki / sell / runBurn", accounts => {
       assert(expectedBurn.gt(0));
     });
 
-    it("If (x+investor_balance)/(total_supply+burnt_supply) >= burn_threshold then burn((x+investor_balance)-(burn_threshold*(total_supply+burnt_supply)) is called.", async () => {
+    it("Sanity check: actual burn > 0", async () => {
+      const burnedSupply = new BigNumber(await contracts.dat.burnedSupply());
+      assert.notEqual(burnedSupply.toFixed(), burnedSupplyBefore.toFixed());
+    });
+
+    it("If (x+investor_balance)/(total_supply) >= burn_threshold then burn((x+investor_balance)-(burn_threshold*(total_supply)) is called.", async () => {
       const burnedSupply = new BigNumber(await contracts.dat.burnedSupply());
       assert.equal(
         burnedSupply.toFixed(),
         burnedSupplyBefore.plus(expectedBurn).toFixed()
-      );
-    });
-
-    it("x - expectedBurn is added to the beneficiary's balance", async () => {
-      const balance = new BigNumber(
-        await contracts.dat.balanceOf(await contracts.dat.beneficiary())
-      );
-      assert.equal(
-        balance.toFixed(),
-        beneficiaryFairBalanceBefore
-          .plus(x)
-          .minus(expectedBurn)
-          .toFixed()
       );
     });
   });
