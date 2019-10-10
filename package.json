@@ -18,27 +18,22 @@
   },
   "dependencies": {
     "bignumber.js": "9.0.0",
-    "eth-gas-reporter": "0.2.11",
-    "ganache-cli": "6.6.0",
-    "hardlydifficult-test-helpers": "0.3.0",
-    "openzeppelin-eth": "2.2.0",
+    "ganache-cli": "6.7.0",
     "openzeppelin-solidity": "2.3.0",
     "openzeppelin-test-helpers": "0.4.3",
-    "papaparse": "5.0.2",
+    "papaparse": "5.1.0",
     "sleep": "6.1.0",
-    "truffle": "5.0.35",
+    "truffle": "5.0.39",
     "truffle-hdwallet-provider": "1.0.17",
-    "truffle-require": "2.0.19",
-    "zos": "2.4.2",
     "zos-lib": "2.4.2"
   },
   "devDependencies": {
     "chai": "4.2.0",
-    "eslint": "6.3.0",
-    "eslint-config-prettier": "6.2.0",
+    "eslint": "6.5.1",
+    "eslint-config-prettier": "6.4.0",
     "eslint-config-airbnb-base": "14.0.0",
     "eslint-plugin-import": "2.18.2",
-    "eslint-plugin-prettier": "3.1.0",
+    "eslint-plugin-prettier": "3.1.1",
     "prettier": "1.18.2"
   }
 }
