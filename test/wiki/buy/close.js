@@ -30,10 +30,9 @@ contract("wiki / buy / close", accounts => {
 
   describe("close", () => {
     before(async () => {
-      console.log(await contracts.dat.estimateExitFee()); // TODO remove
       await contracts.dat.close({
         from: accounts[0],
-        value: "100000000000000000000"
+        value: "1000000000000000000000"
       });
     });
 
