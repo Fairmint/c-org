@@ -985,19 +985,21 @@ def _estimateExitFee(
     buybackReserve: uint256 = self._buybackReserve()
     buybackReserve -= as_unitless_number(_msgValue)
 
-    # Source: (t^2 * (n/d))/2 + b*(n/d)*t - r
-    # Implementation: (n t (2 b + t))/(2 d) - r
+    # Source: t*(t+b)*(n/d)-r
+    # Implementation: (b n t)/d + (n t^2)/d - r
 
-    exitFee = 2 * self.burnedSupply
     # Math worst case:
-    # 2 * MAX_BEFORE_SQUARE/2 + MAX_BEFORE_SQUARE
-    exitFee += self.totalSupply
-    # Math worst case:
-    # MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE
-    # / 2 * MAX_BEFORE_SQUARE
+    # MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE
     exitFee = self.bigMath.bigDiv2x1(
-      exitFee * self.totalSupply, self.buySlopeNum,
-      2 * self.buySlopeDen,
+      self.burnedSupply * self.buySlopeNum, self.totalSupply,
+      self.buySlopeDen,
+      False
+    )
+    # Math worst case:
+    # MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE
+    exitFee += self.bigMath.bigDiv2x1(
+      self.buySlopeNum * self.totalSupply, self.totalSupply,
+      self.buySlopeDen,
       False
     )
     # Math: this if condition avoids a potential overflow

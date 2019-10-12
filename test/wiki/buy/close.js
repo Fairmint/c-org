@@ -32,7 +32,7 @@ contract("wiki / buy / close", accounts => {
     before(async () => {
       await contracts.dat.close({
         from: accounts[0],
-        value: "100000000000000000000"
+        value: "1000000000000000000000"
       });
     });
 
