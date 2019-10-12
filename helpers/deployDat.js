@@ -17,7 +17,7 @@ module.exports = async function deployDat(accounts, options, useProxy = true) {
       buySlopeNum: "1",
       buySlopeDen: "100000000000000000000",
       investmentReserveBasisPoints: "1000",
-      revenueCommitementBasisPoints: "1000",
+      revenueCommitmentBasisPoints: "1000",
       control: accounts.length > 2 ? accounts[1] : accounts[0],
       beneficiary: accounts[0],
       feeCollector: accounts.length > 2 ? accounts[2] : accounts[0]
