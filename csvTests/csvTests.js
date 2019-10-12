@@ -87,9 +87,7 @@ contract("dat / csvTests", accounts => {
 
       const buySlope = parseFraction(configJson.buy_slope);
       const investmentReserve = parseBasisPoints(configJson.investment_reserve);
-      const revenueCommitement = parseBasisPoints(
-        configJson.revenue_commitment
-      );
+      const revenueCommitment = parseBasisPoints(configJson.revenue_commitment);
       const fee = parseBasisPoints(configJson.fee);
       contracts = await deployDat(accounts, {
         buySlopeNum: new BigNumber(buySlope[0]).toFixed(),
@@ -99,8 +97,8 @@ contract("dat / csvTests", accounts => {
         investmentReserveBasisPoints: new BigNumber(
           investmentReserve
         ).toFixed(),
-        revenueCommitementBasisPoints: new BigNumber(
-          revenueCommitement
+        revenueCommitmentBasisPoints: new BigNumber(
+          revenueCommitment
         ).toFixed(),
         initGoal: parseNumber(configJson.init_goal)
           .shiftedBy(18)

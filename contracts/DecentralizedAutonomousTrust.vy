@@ -95,6 +95,7 @@ UpdateConfig: event({
   _control: indexed(address),
   _feeCollector: indexed(address),
   _burnThresholdBasisPoints: uint256,
+  _revenueCommitmentBasisPoints: uint256,
   _feeBasisPoints: uint256,
   _minInvestment: uint256,
   _openUntilAtLeast: uint256,
@@ -492,8 +493,7 @@ def initialize(
   _initGoal: uint256,
   _buySlopeNum: uint256,
   _buySlopeDen: uint256,
-  _investmentReserveBasisPoints: uint256,
-  _revenueCommitmentBasisPoints: uint256
+  _investmentReserveBasisPoints: uint256
 ):
   """
   @notice Called once after deploy to set the initial configuration.
@@ -519,8 +519,6 @@ def initialize(
   self.buySlopeDen = _buySlopeDen
   assert _investmentReserveBasisPoints <= BASIS_POINTS_DEN, "INVALID_RESERVE" # 100% or less
   self.investmentReserveBasisPoints = _investmentReserveBasisPoints # 0 means all investments go to the beneficiary
-  assert _revenueCommitmentBasisPoints <= BASIS_POINTS_DEN, "INVALID_COMMITMENT" # 100% or less
-  self.revenueCommitmentBasisPoints = _revenueCommitmentBasisPoints # 0 means all renvue goes to the beneficiary
 
   # Set default values (which may be updated using `updateConfig`)
   self.burnThresholdBasisPoints = BASIS_POINTS_DEN
@@ -547,6 +545,7 @@ def updateConfig(
   _feeCollector: address,
   _feeBasisPoints: uint256,
   _burnThresholdBasisPoints: uint256,
+  _revenueCommitmentBasisPoints: uint256,
   _minInvestment: uint256,
   _openUntilAtLeast: uint256,
   _name: string[64],
@@ -575,6 +574,10 @@ def updateConfig(
   assert _burnThresholdBasisPoints <= BASIS_POINTS_DEN, "INVALID_THRESHOLD" # 100% or less
   self.burnThresholdBasisPoints = _burnThresholdBasisPoints # 0 means burn all of beneficiary's holdings
 
+  assert _revenueCommitmentBasisPoints <= BASIS_POINTS_DEN, "INVALID_COMMITMENT" # 100% or less
+  assert _revenueCommitmentBasisPoints >= self.revenueCommitmentBasisPoints, "COMMITMENT_MAY_NOT_BE_REDUCED"
+  self.revenueCommitmentBasisPoints = _revenueCommitmentBasisPoints # 0 means all renvue goes to the beneficiary
+
   assert _feeBasisPoints <= BASIS_POINTS_DEN, "INVALID_FEE" # 100% or less
   self.feeBasisPoints = _feeBasisPoints # 0 means no fee
 
@@ -600,6 +603,7 @@ def updateConfig(
     _control,
     _feeCollector,
     _burnThresholdBasisPoints,
+    _revenueCommitmentBasisPoints,
     _feeBasisPoints,
     _minInvestment,
     _openUntilAtLeast,
