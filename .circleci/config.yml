@@ -80,7 +80,7 @@ jobs:
       - run: export SHEET_ID=7 && npm run csvTests
       - run: export SHEET_ID=8 && npm run csvTests
 
-  TS8-11:
+  TS8-12:
     context: docker-hub-credentials
     docker:
       - image: circleci/node:10
@@ -93,17 +93,6 @@ jobs:
       - run: export SHEET_ID=9 && npm run csvTests
       - run: export SHEET_ID=10 && npm run csvTests
       - run: export SHEET_ID=11 && npm run csvTests
-
-  TS12:
-    context: docker-hub-credentials
-    docker:
-      - image: circleci/node:10
-      - image: trufflesuite/ganache-cli
-        command: ganache-cli -e 10000000000 -a 100
-    working_directory: ~/repo
-    steps:
-      - attach_workspace:
-          at: ~/repo
       - run: export SHEET_ID=12 && npm run csvTests
 
   publish:
@@ -138,10 +127,7 @@ workflows:
       - TS4-7:
           requires:
             - build
-      - TS8-11:
-          requires:
-            - build
-      - TS12:
+      - TS8-12:
           requires:
             - build
       - publish:
