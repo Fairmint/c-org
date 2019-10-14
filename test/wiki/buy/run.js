@@ -13,7 +13,7 @@ contract("wiki / buy / run", accounts => {
     contracts = await deployDat(accounts, {
       initGoal: 0,
       feeBasisPoints: 10,
-      burnThresholdBasisPoints: 8000
+      autoBurn: true
     });
 
     await approveAll(contracts, accounts);
@@ -155,7 +155,7 @@ contract("wiki / buy / run", accounts => {
         burnAmount = x
           .plus(investorBalance)
           .minus(
-            new BigNumber(await contracts.dat.burnThresholdBasisPoints())
+            new BigNumber(await contracts.dat.autoBurn())
               .div(constants.BASIS_POINTS_DEN)
               .times(
                 new BigNumber(await contracts.dat.totalSupply())
@@ -216,7 +216,7 @@ contract("wiki / buy / run", accounts => {
         burnAmount = x
           .plus(investorBalance)
           .minus(
-            new BigNumber(await contracts.dat.burnThresholdBasisPoints())
+            new BigNumber(await contracts.dat.autoBurn())
               .div(constants.BASIS_POINTS_DEN)
               .times(
                 new BigNumber(await contracts.dat.totalSupply()).plus(

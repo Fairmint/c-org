@@ -94,7 +94,7 @@ UpdateConfig: event({
   _beneficiary: indexed(address),
   _control: indexed(address),
   _feeCollector: indexed(address),
-  _burnThresholdBasisPoints: uint256,
+  _autoBurn: bool,
   _revenueCommitmentBasisPoints: uint256,
   _feeBasisPoints: uint256,
   _minInvestment: uint256,
@@ -173,6 +173,11 @@ symbol: public(string[32])
 # Data for DAT business logic
 ###########
 
+autoBurn: public(bool)
+# @notice Set if the FAIRs minted by the organization when it commits its revenues are
+# automatically burnt (`true`) or not (`false`). Defaults to `false` meaning that there
+# is no automatic burn.
+
 beneficiary: public(address)
 # @notice The address of the beneficiary organization which receives the investments.
 # Points to the wallet of the organization.
@@ -183,10 +188,6 @@ bigMathAddress: public(address)
 bigMath: IBigMath
 # @notice The BigMath library we use for BigNumber math
 # @dev redundant w/ currencyAddress, for convenience
-
-burnThresholdBasisPoints: public(uint256)
-# @notice The percentage of the total supply of FAIR above which the FAIRs minted by the
-# organization are automatically burnt expressed in basis points.
 
 buySlopeNum: public(uint256)
 # @notice The buy slope of the bonding curve.
@@ -406,24 +407,6 @@ def _burn(
   log.Transfer(_from, ZERO_ADDRESS, _amount)
 
 @private
-def _applyBurnThreshold():
-  """
-  @dev Burn tokens from the beneficiary account if they have too much of the total share.
-  """
-  balanceBefore: uint256 = self.balanceOf[self.beneficiary]
-  # Math worst case:
-  # MAX_BEFORE_SQUARE + MAX_BEFORE_SQUARE
-  maxHoldings: uint256 = self.totalSupply + self.burnedSupply
-  # Math worst case:
-  # MAX_BEFORE_SQUARE * 2 * 10000
-  maxHoldings *= self.burnThresholdBasisPoints
-  maxHoldings /= BASIS_POINTS_DEN
-
-  if(balanceBefore > maxHoldings):
-    # Math: the if condition prevents an underflow
-    self._burn(self.beneficiary, balanceBefore - maxHoldings, False)
-
-@private
 def _collectInvestment(
   _from: address,
   _quantityToInvest: uint256,
@@ -521,7 +504,6 @@ def initialize(
   self.investmentReserveBasisPoints = _investmentReserveBasisPoints # 0 means all investments go to the beneficiary
 
   # Set default values (which may be updated using `updateConfig`)
-  self.burnThresholdBasisPoints = BASIS_POINTS_DEN
   self.minInvestment = as_unitless_number(as_wei_value(100, "ether"))
   self.beneficiary = msg.sender
   self.control = msg.sender
@@ -544,7 +526,7 @@ def updateConfig(
   _control: address,
   _feeCollector: address,
   _feeBasisPoints: uint256,
-  _burnThresholdBasisPoints: uint256,
+  _autoBurn: bool,
   _revenueCommitmentBasisPoints: uint256,
   _minInvestment: uint256,
   _openUntilAtLeast: uint256,
@@ -571,8 +553,7 @@ def updateConfig(
   assert _feeCollector != ZERO_ADDRESS, "INVALID_ADDRESS"
   self.feeCollector = _feeCollector
 
-  assert _burnThresholdBasisPoints <= BASIS_POINTS_DEN, "INVALID_THRESHOLD" # 100% or less
-  self.burnThresholdBasisPoints = _burnThresholdBasisPoints # 0 means burn all of beneficiary's holdings
+  self.autoBurn = _autoBurn
 
   assert _revenueCommitmentBasisPoints <= BASIS_POINTS_DEN, "INVALID_COMMITMENT" # 100% or less
   assert _revenueCommitmentBasisPoints >= self.revenueCommitmentBasisPoints, "COMMITMENT_MAY_NOT_BE_REDUCED"
@@ -602,7 +583,7 @@ def updateConfig(
     _beneficiary,
     _control,
     _feeCollector,
-    _burnThresholdBasisPoints,
+    _autoBurn,
     _revenueCommitmentBasisPoints,
     _feeBasisPoints,
     _minInvestment,
@@ -751,8 +732,8 @@ def buy(
   self._mint(_to, tokenValue)
 
   if(self.state == STATE_RUN):
-    if(_to == self.beneficiary):
-      self._applyBurnThreshold() # must mint before this call
+    if(msg.sender == self.beneficiary and _to == self.beneficiary and self.autoBurn):
+      self._burn(self.beneficiary, tokenValue, False) # must mint before this call
 
 # Sell
 
@@ -944,7 +925,8 @@ def _pay(
   # Distribute tokens
   if(tokenValue > 0):
     self._mint(to, tokenValue)
-    self._applyBurnThreshold() # must mint before this call
+    if(to == self.beneficiary and self.autoBurn):
+      self._burn(self.beneficiary, tokenValue, False) # must mint before this call
 
   log.Pay(_from, _to, _currencyValue, tokenValue)
 

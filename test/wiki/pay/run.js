@@ -9,7 +9,7 @@ contract("wiki / pay / run", accounts => {
   beforeEach(async () => {
     contracts = await deployDat(accounts, {
       initGoal: "0", // Start in the run state
-      burnThresholdBasisPoints: 8000
+      autoBurn: true
     });
 
     await approveAll(contracts, accounts);
@@ -166,9 +166,9 @@ contract("wiki / pay / run", accounts => {
         await contracts.dat.balanceOf(await contracts.dat.beneficiary())
       );
       burnedSupplyBefore = new BigNumber(await contracts.dat.burnedSupply());
-      const burnThreshold = new BigNumber(
-        await contracts.dat.burnThresholdBasisPoints()
-      ).div(constants.BASIS_POINTS_DEN);
+      const burnThreshold = new BigNumber(await contracts.dat.autoBurn()).div(
+        constants.BASIS_POINTS_DEN
+      );
       //(x+investor_balance)-(burn_threshold*(total_supply+burnt_supply)
       expectedBurn = x
         .plus(beneficiaryFairBalanceBefore)
