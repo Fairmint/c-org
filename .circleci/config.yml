@@ -108,7 +108,7 @@ jobs:
           command: echo "//registry.npmjs.org/:_authToken=$npm_TOKEN" > ~/repo/c-org-abi/.npmrc
       - run:
           name: Publish package
-          command: cd c-org-abi && npm publish
+          command: cd c-org-abi && npm publish --access public
 
 workflows:
   version: 2
