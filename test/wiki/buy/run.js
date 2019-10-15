@@ -152,17 +152,7 @@ contract("wiki / buy / run", accounts => {
         const investorBalance = new BigNumber(
           await contracts.dat.balanceOf(from)
         );
-        burnAmount = x
-          .plus(investorBalance)
-          .minus(
-            new BigNumber(await contracts.dat.autoBurn())
-              .div(constants.BASIS_POINTS_DEN)
-              .times(
-                new BigNumber(await contracts.dat.totalSupply())
-                  .plus(x)
-                  .plus(await contracts.dat.burnedSupply())
-              )
-          );
+        burnAmount = x;
 
         burnBefore = new BigNumber(await contracts.dat.burnedSupply());
         buybackReserveBefore = new BigNumber(
@@ -186,58 +176,6 @@ contract("wiki / buy / run", accounts => {
         );
         assert.equal(burnAmount.toFixed(), burned.toFixed());
         assert(burned.gt(0));
-      });
-
-      it("the full amount is added to the buyback_reserve", async () => {
-        const buybackReserve = new BigNumber(
-          await contracts.dat.buybackReserve()
-        );
-        assert.equal(
-          buybackReserve.toFixed(),
-          buybackReserveBefore.plus(amount).toFixed()
-        );
-      });
-    });
-
-    describe("if (x+investor_balance)/(total_supply+burnt_supply) < burn_threshold", () => {
-      beforeEach(async () => {
-        // Other accounts need to buy some first
-        for (let i = 3; i < 5; i++) {
-          await contracts.dat.buy(accounts[i], amount, 1, {
-            from: accounts[i],
-            value: amount
-          });
-        }
-
-        x = new BigNumber(await contracts.dat.estimateBuyValue(amount));
-        const investorBalance = new BigNumber(
-          await contracts.dat.balanceOf(from)
-        );
-        burnAmount = x
-          .plus(investorBalance)
-          .minus(
-            new BigNumber(await contracts.dat.autoBurn())
-              .div(constants.BASIS_POINTS_DEN)
-              .times(
-                new BigNumber(await contracts.dat.totalSupply()).plus(
-                  await contracts.dat.burnedSupply()
-                )
-              )
-          );
-        buybackReserveBefore = new BigNumber(
-          await contracts.dat.buybackReserve()
-        );
-
-        await contracts.dat.buy(from, amount, 1, {
-          from,
-          value: amount
-        });
-      });
-
-      it("no burn", async () => {
-        const burned = new BigNumber(await contracts.dat.burnedSupply());
-        assert.equal(burned.toFixed(), 0);
-        assert(burnAmount.lte(0));
       });
 
       it("the full amount is added to the buyback_reserve", async () => {

@@ -104,14 +104,11 @@ contract("wiki / pay / run", accounts => {
   });
 
   describe("on pay to the beneficiary", async () => {
-    let beneficiaryFairBalanceBefore;
+    let burnedSupplyBefore;
     let x;
 
     beforeEach(async () => {
       x = new BigNumber(await contracts.dat.estimatePayValue(payAmount));
-      beneficiaryFairBalanceBefore = new BigNumber(
-        await contracts.dat.balanceOf(await contracts.dat.beneficiary())
-      );
 
       await contracts.whitelist.approve(investor, false, {
         from: await contracts.dat.control()
@@ -123,20 +120,17 @@ contract("wiki / pay / run", accounts => {
           from: await contracts.dat.control()
         }
       );
+      burnedSupplyBefore = new BigNumber(await contracts.dat.burnedSupply());
+
       await contracts.dat.pay(investor, payAmount, {
         from: investor,
         value: payAmount
       });
     });
 
-    it("If to is not allowed to receive FAIRs, x FAIRs are added to the beneficiary's balance.", async () => {
-      const balance = new BigNumber(
-        await contracts.dat.balanceOf(await contracts.dat.beneficiary())
-      );
-      assert.equal(
-        balance.toFixed(),
-        beneficiaryFairBalanceBefore.plus(x).toFixed()
-      );
+    it("If to is not allowed to receive FAIRs, x FAIRs are burned on the beneficiary's behalf.", async () => {
+      const balance = new BigNumber(await contracts.dat.burnedSupply());
+      assert.equal(balance.toFixed(), burnedSupplyBefore.plus(x).toFixed());
     });
   });
 
@@ -166,19 +160,8 @@ contract("wiki / pay / run", accounts => {
         await contracts.dat.balanceOf(await contracts.dat.beneficiary())
       );
       burnedSupplyBefore = new BigNumber(await contracts.dat.burnedSupply());
-      const burnThreshold = new BigNumber(await contracts.dat.autoBurn()).div(
-        constants.BASIS_POINTS_DEN
-      );
       //(x+investor_balance)-(burn_threshold*(total_supply+burnt_supply)
-      expectedBurn = x
-        .plus(beneficiaryFairBalanceBefore)
-        .minus(
-          burnThreshold.times(
-            new BigNumber(await contracts.dat.totalSupply())
-              .plus(x)
-              .plus(await contracts.dat.burnedSupply())
-          )
-        );
+      expectedBurn = x;
       await contracts.whitelist.approve(
         await contracts.dat.beneficiary(),
         true,
