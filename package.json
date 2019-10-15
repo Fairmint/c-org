@@ -17,13 +17,13 @@
     "url": "git+https://github.com/Fairmint/c-org.git"
   },
   "dependencies": {
+    "@openzeppelin/contracts": "2.3.0",
+    "@openzeppelin/test-helpers": "0.5.1",
     "bignumber.js": "9.0.0",
     "ganache-cli": "6.7.0",
-    "openzeppelin-solidity": "2.3.0",
-    "openzeppelin-test-helpers": "0.4.3",
     "papaparse": "5.1.0",
     "sleep": "6.1.0",
-    "truffle": "5.0.39",
+    "truffle": "5.0.40",
     "truffle-hdwallet-provider": "1.0.17",
     "zos-lib": "2.4.2"
   },
