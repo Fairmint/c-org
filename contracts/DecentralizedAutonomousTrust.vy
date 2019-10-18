@@ -34,7 +34,8 @@ contract Whitelist:
   def authorizeTransfer(
     _from: address,
     _to: address,
-    _value: uint256
+    _value: uint256,
+    _isSell: bool
   ): modifying
   def detectTransferRestriction(
     _from: address,
