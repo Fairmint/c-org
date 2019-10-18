@@ -6,7 +6,7 @@ jobs:
   build:
     context: docker-hub-credentials
     docker:
-      - image: circleci/python
+      - image: circleci/python:3.7.4
       - image: trufflesuite/ganache-cli
         command: ganache-cli -e 10000000000 -a 100
     working_directory: ~/repo
