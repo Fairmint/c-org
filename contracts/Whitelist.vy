@@ -44,7 +44,8 @@ def detectTransferRestriction(
 def authorizeTransfer(
   _from: address,
   _to: address,
-  _value: uint256
+  _value: uint256,
+  _isSell: bool
 ):
   assert self.dat == msg.sender, "CALL_VIA_DAT_ONLY"
   assert self._detectTransferRestriction(_from, _to, _value) == 0, "DENIED"
