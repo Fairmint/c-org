@@ -7,30 +7,30 @@
   "rinkeby": {
     "dai": "0xe86dBee701DE570F53611D6B6D706f78A8a4F648",
     "usdc": "0x521104B09737BFEda072D24E569dB26F16382344",
-    "bigMath": "",
+    "bigMath": "0x8C1A1c79Ab5E139684Be85D245274999BAF97984",
     "orgs": [
       { 
         "name": "Fairmint (test w/ DAI)",
-        "token": ""
+        "token": "0x4079c761940570aAe930166Fae048D1c6E4822f0"
       },
       {
         "name": "HardlyDifficult (test w/ USDC)",
-        "token": ""
+        "token": "0x8aeAD5B152fC94b8aF7B93D661b0A8e308592D46"
       }
     ]
   },
   "ropsten": {
     "dai": "0xC51cA7FE8bA4bc64a9a2e25f295EECb4C3d8bABE",
     "usdc": "0xe12Aea94b74EEE8a2504E9f26c7f64c2c09E66BE",
-    "bigMath": "",
+    "bigMath": "0x63c28a2C0CE1917b8A75bC4109E64BcFc775b37b",
     "orgs": [
       { 
         "name": "Fairmint (test w/ DAI)",
-        "token": ""
+        "token": "0xC85661FCAc534F509fa1BfbE177D164379B804CF"
       },
       { 
         "name": "HardlyDifficult (test w/ USDC)",
-        "token": ""
+        "token": "0x0f6e537F759691E456D4040Ca109F1260209e91C"
       }
     ]
   }
