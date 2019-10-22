@@ -41,7 +41,7 @@ module.exports = async function deployDat(accounts, options, useProxy = true) {
       from: callOptions.control
     });
     callOptions.bigMathAddress = contracts.bigMath.address;
-    // console.log(`Deployed bigMath: ${contracts.bigMath.address}`);
+    console.log(`Deployed bigMath: ${contracts.bigMath.address}`);
   }
   // DAT
   const datContract = await datArtifact.new({
@@ -60,6 +60,7 @@ module.exports = async function deployDat(accounts, options, useProxy = true) {
   } else {
     contracts.dat = datContract;
   }
+  console.log(`Deployed DAT: ${contracts.dat.address}`);
   await contracts.dat.initialize(
     callOptions.initReserve,
     callOptions.currency,

@@ -1,5 +1,10 @@
 const BigNumber = require("bignumber.js");
-const { approveAll, constants, deployDat } = require("../../helpers");
+const {
+  approveAll,
+  constants,
+  deployDat,
+  shouldFail
+} = require("../../helpers");
 
 contract("wiki / burn / run", accounts => {
   let contracts;
@@ -111,10 +116,12 @@ contract("wiki / burn / run", accounts => {
       });
     });
 
-    it("Can burn even if account is restricted", async () => {
-      await contracts.dat.burn(burnAmount, {
-        from: investor
-      });
+    it("Can't burn if account is restricted", async () => {
+      await shouldFail(
+        contracts.dat.burn(burnAmount, {
+          from: investor
+        })
+      );
     });
   });
 });

@@ -2,35 +2,47 @@
   "mainnet": {
     "dai": "0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359",
     "usdc": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
-    "bigMath": ""
+    "testUSDC": "0x6F39Ee6BA02770a9a18FE75A1726CC627C67780D",
+    "bigMath": "0xDC746F0079c5D6455A437196ea1bEB80080b785B",
+    "orgs": [
+      {
+        "name": "Fairmint",
+        "token": "0xc1C57Fb7D4156b988f263345deb9fd9c75408ff0",
+        "proxyAdmin": "0xA326aC509d7a3361C6a08f4b34949f1838d3f529"
+      }
+    ]
   },
   "rinkeby": {
     "dai": "0xe86dBee701DE570F53611D6B6D706f78A8a4F648",
     "usdc": "0x521104B09737BFEda072D24E569dB26F16382344",
-    "bigMath": "0x3969D75b012EFFDae79d59958b865C3b6C5A1015",
+    "bigMath": "0x8C1A1c79Ab5E139684Be85D245274999BAF97984",
     "orgs": [
       { 
-        "name": "Fairmint (test w/ DAI)",
-        "token": "0x1Ea54c005470A5efE4b609F9F8679e453E36668f"
+        "name": "Fairmint",
+        "token": "0x5Be5b9d8EcD37EEceDe66A1423cF637162cDA114",
+        "proxyAdmin": "0x148C434B02B1De03d9d2325757d2588D176775B8"
       },
       {
-        "name": "HardlyDifficult (test w/ USDC)",
-        "token": "0x03030aF9D1FD778410cB1E94a7e591494Cf12c8d"
+        "name": "HardlyDifficult (test w/ DAI)",
+        "token": "0x40Ab43d1564B2325923C0150FA489a5Fff6aCd02",
+        "proxyAdmin": "0x68b0b5e0104a6576610b5204C0Ac61b7f3EeB5DD"
       }
     ]
   },
   "ropsten": {
     "dai": "0xC51cA7FE8bA4bc64a9a2e25f295EECb4C3d8bABE",
     "usdc": "0xe12Aea94b74EEE8a2504E9f26c7f64c2c09E66BE",
-    "bigMath": "0xCE5bad6c156Bb4b685f22bdAa98A7BDa434f0c25",
+    "bigMath": "0x63c28a2C0CE1917b8A75bC4109E64BcFc775b37b",
     "orgs": [
       { 
-        "name": "Fairmint (test w/ DAI)",
-        "token": "0xF136D7F39BA8C9A0Fe02CB2E414ecBE3302B7AC5"
+        "name": "Fairmint",
+        "token": "0xD5E0aF8f13Ef662Db7E220a833086041797680A8",
+        "proxyAdmin": "0x79A1EdaBf6579c826F17F9eED12aC3E7e2912046"
       },
       { 
-        "name": "HardlyDifficult (test w/ USDC)",
-        "token": "0x4C4aC3A809d58648E440f23287f3E97bDB8cb4fD"
+        "name": "HardlyDifficult (test w/ DAI)",
+        "token": "0x62311413a079276A3583a668A78A335F6fE77854",
+        "proxyAdmin": "0x0Ea600C865C9652D55aA7DF25cF2A6b59765a0Bf"
       }
     ]
   }

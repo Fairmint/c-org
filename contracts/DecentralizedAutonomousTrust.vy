@@ -34,7 +34,8 @@ contract Whitelist:
   def authorizeTransfer(
     _from: address,
     _to: address,
-    _value: uint256
+    _value: uint256,
+    _isSell: bool
   ): modifying
   def detectTransferRestriction(
     _from: address,
@@ -274,6 +275,7 @@ def buybackReserve() -> uint256:
 ##################################################
 
 @private
+@constant
 def _detectTransferRestriction(
   _from: address,
   _to: address,
@@ -287,10 +289,11 @@ def _detectTransferRestriction(
 def _authorizeTransfer(
   _from: address,
   _to: address,
-  _value: uint256
+  _value: uint256,
+  _isSell: bool
 ):
   if(self.whitelist != ZERO_ADDRESS): # This is not set for the minting of initialReserve
-    self.whitelist.authorizeTransfer(_from, _to, _value)
+    self.whitelist.authorizeTransfer(_from, _to, _value, _isSell)
 
 
 # Functions required by the ERC-20 token standard
@@ -311,7 +314,7 @@ def _send(
   assert _to != ZERO_ADDRESS, "ERC20: send to the zero address"
   assert self.state != STATE_INIT or _from == self.beneficiary, "Only the beneficiary can make transfers during STATE_INIT"
 
-  self._authorizeTransfer(_from, _to, _amount)
+  self._authorizeTransfer(_from, _to, _amount, False)
 
   self.balanceOf[_from] -= _amount
   self.balanceOf[_to] += _amount
@@ -395,13 +398,10 @@ def _burn(
   self.balanceOf[_from] -= _amount
   self.totalSupply -= _amount
 
-  if(_isSell):
-    # This is a sell
-    self._authorizeTransfer(_from, ZERO_ADDRESS, _amount)
-  else:
+  self._authorizeTransfer(_from, ZERO_ADDRESS, _amount, _isSell)
+  if(not _isSell):
     # This is a burn
     assert self.state == STATE_RUN, "ONLY_DURING_RUN"
-
     self.burnedSupply += _amount
 
   log.Transfer(_from, ZERO_ADDRESS, _amount)
@@ -457,7 +457,7 @@ def _mint(
   """
   assert _to != ZERO_ADDRESS, "INVALID_ADDRESS"
   assert _quantity > 0, "INVALID_QUANTITY"
-  self._authorizeTransfer(ZERO_ADDRESS, _to, _quantity)
+  self._authorizeTransfer(ZERO_ADDRESS, _to, _quantity, False)
 
   self.totalSupply += _quantity
   # Math: If this value got too large, the DAT may overflow on sell
