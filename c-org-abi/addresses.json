@@ -12,23 +12,6 @@
       }
     ]
   },
-  "rinkeby": {
-    "dai": "0xe86dBee701DE570F53611D6B6D706f78A8a4F648",
-    "usdc": "0x521104B09737BFEda072D24E569dB26F16382344",
-    "bigMath": "0x8C1A1c79Ab5E139684Be85D245274999BAF97984",
-    "orgs": [
-      { 
-        "name": "Fairmint",
-        "token": "0x5Be5b9d8EcD37EEceDe66A1423cF637162cDA114",
-        "proxyAdmin": "0x148C434B02B1De03d9d2325757d2588D176775B8"
-      },
-      {
-        "name": "HardlyDifficult (test w/ DAI)",
-        "token": "0x40Ab43d1564B2325923C0150FA489a5Fff6aCd02",
-        "proxyAdmin": "0x68b0b5e0104a6576610b5204C0Ac61b7f3EeB5DD"
-      }
-    ]
-  },
   "ropsten": {
     "dai": "0xC51cA7FE8bA4bc64a9a2e25f295EECb4C3d8bABE",
     "usdc": "0xe12Aea94b74EEE8a2504E9f26c7f64c2c09E66BE",
