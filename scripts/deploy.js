@@ -45,9 +45,15 @@ contract("deploy script", accounts => {
           throw new Error("Missing currency type");
         }
       } else {
-        if (callOptions.currencyType === "dai") {
+        if (
+          callOptions.currencyType === "dai" ||
+          callOptions.currencyType === "testDAI"
+        ) {
           currencyToken = await tokens.dai.deploy(web3, accounts[0]);
-        } else if (callOptions.currencyType === "usdc") {
+        } else if (
+          callOptions.currencyType === "usdc" ||
+          callOptions.currencyType === "testUSDC"
+        ) {
           currencyToken = await tokens.usdc.deploy(
             web3,
             accounts[accounts.length - 1],
