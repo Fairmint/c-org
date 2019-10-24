@@ -2,8 +2,7 @@ const BigNumber = require("bignumber.js");
 const { deployDat } = require("../helpers");
 const fs = require("fs");
 
-const testDaiArtifact = artifacts.require("TestDai");
-const testUsdcArtifact = artifacts.require("TestUsdc");
+const { tokens } = require("hardlydifficult-ethereum-contracts");
 const proxyArtifact = artifacts.require("AdminUpgradeabilityProxy");
 const whitelistArtifact = artifacts.require("Whitelist");
 const vestingArtifact = artifacts.require("TokenVesting");
@@ -16,9 +15,7 @@ contract("deploy script", accounts => {
     const abiJson = {};
     const bytecodeJson = {};
     const staticBytecodeJson = {
-      bigMath: bigMathArtifact.bytecode,
-      testDai: testDaiArtifact.bytecode,
-      testUsdc: testUsdcArtifact.bytecode
+      bigMath: bigMathArtifact.bytecode
     };
 
     const network = await web3.eth.net.getNetworkType();
@@ -34,14 +31,28 @@ contract("deploy script", accounts => {
       let currencyToken;
       let currencyDecimals = 18;
       if (addresses[callOptions.currencyType]) {
-        currencyToken = await testDaiArtifact.at(
-          addresses[callOptions.currencyType]
-        );
+        if (callOptions.currencyType === "dai") {
+          currencyToken = await tokens.dai.getToken(
+            web3,
+            addresses[callOptions.currencyType]
+          );
+        } else if (callOptions.currencyType === "usdc") {
+          currencyToken = await tokens.usdc.getToken(
+            web3,
+            addresses[callOptions.currencyType]
+          );
+        } else {
+          throw new Error("Missing currency type");
+        }
       } else {
         if (callOptions.currencyType === "dai") {
-          currencyToken = await testDaiArtifact.new({ from: accounts[0] });
+          currencyToken = await tokens.dai.deploy(web3, accounts[0]);
         } else if (callOptions.currencyType === "usdc") {
-          currencyToken = await testUsdcArtifact.new({ from: accounts[0] });
+          currencyToken = await tokens.usdc.deploy(
+            web3,
+            accounts[accounts.length - 1],
+            accounts[0]
+          );
         } else {
           throw new Error("Missing currency type");
         }
