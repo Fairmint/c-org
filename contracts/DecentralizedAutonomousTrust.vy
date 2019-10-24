@@ -65,20 +65,20 @@ Transfer: event({
 
 # Events specific to our use case
 Buy: event({
-  _from: address,
-  _to: address,
+  _from: indexed(address),
+  _to: indexed(address),
   _currencyValue: uint256,
   _fairValue: uint256
 })
 Sell: event({
-  _from: address,
-  _to: address,
+  _from: indexed(address),
+  _to: indexed(address),
   _currencyValue: uint256,
   _fairValue: uint256
 })
 Pay: event({
-  _from: address,
-  _to: address,
+  _from: indexed(address),
+  _to: indexed(address),
   _currencyValue: uint256,
   _fairValue: uint256
 })
