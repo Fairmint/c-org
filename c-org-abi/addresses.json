@@ -2,30 +2,31 @@
   "mainnet": {
     "dai": "0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359",
     "usdc": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
-    "testUSDC": "0x6F39Ee6BA02770a9a18FE75A1726CC627C67780D",
-    "bigMath": "0xDC746F0079c5D6455A437196ea1bEB80080b785B",
+    "testDAI": "",
+    "testUSDC": "0x7d9C10E2F7AF22200126A0EA6826c1A16F8F6d38",
+    "bigMath": "0x9FF457d924A941A0f37A40a7E7EFCaC9c39bdC25",
     "orgs": [
       {
         "name": "Fairmint",
-        "token": "0xc1C57Fb7D4156b988f263345deb9fd9c75408ff0",
-        "proxyAdmin": "0xA326aC509d7a3361C6a08f4b34949f1838d3f529"
+        "token": "0x9e9404849B9A6dd520bD6199AEe5CE7f76c09245",
+        "proxyAdmin": "0xDF0678877FF0BE818d4e74B245AE6331b1cCE57e"
       }
     ]
   },
   "ropsten": {
-    "dai": "0xC51cA7FE8bA4bc64a9a2e25f295EECb4C3d8bABE",
-    "usdc": "0xe12Aea94b74EEE8a2504E9f26c7f64c2c09E66BE",
+    "dai": "0xF836D97Db00f091c98977bBa4a25Cd99dF1A9021",
+    "usdc": "0x14039994048f873dc5F86a32075669652b9F0fA7",
     "bigMath": "0x63c28a2C0CE1917b8A75bC4109E64BcFc775b37b",
     "orgs": [
       { 
         "name": "Fairmint",
-        "token": "0xD5E0aF8f13Ef662Db7E220a833086041797680A8",
-        "proxyAdmin": "0x79A1EdaBf6579c826F17F9eED12aC3E7e2912046"
+        "token": "0xA47807BE67E76E7E464dc1f3cEB58790059785a7",
+        "proxyAdmin": "0x677448852eeDd60803bdD9c5990cBB7B5d38Ff7E"
       },
       { 
         "name": "HardlyDifficult (test w/ DAI)",
-        "token": "0x62311413a079276A3583a668A78A335F6fE77854",
-        "proxyAdmin": "0x0Ea600C865C9652D55aA7DF25cF2A6b59765a0Bf"
+        "token": "0xb003DF166160097D83d27800d5927A3F2dd02D22",
+        "proxyAdmin": "0x4D46d6cF57187713dE20B1fb69081b111F4c3Cb2"
       }
     ]
   }

@@ -21,6 +21,7 @@
     "@openzeppelin/test-helpers": "0.5.3",
     "bignumber.js": "9.0.0",
     "ganache-cli": "6.7.0",
+    "hardlydifficult-ethereum-contracts": "0.6.3",
     "papaparse": "5.1.0",
     "sleep": "6.1.0",
     "truffle": "5.0.41",

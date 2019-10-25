@@ -1,6 +1,6 @@
 [
   {
-    "currencyType": "usdc",
+    "currencyType": "testUSDC",
     "name": "Fairmint",
     "symbol": "FAIR",
     "revenueCommitmentBasisPoints": "1000",
@@ -15,7 +15,7 @@
     "openUntilAtLeast": "4725712652"
   },
   {
-    "currencyType": "dai",
+    "currencyType": "testDAI",
     "name": "Hardly Difficult",
     "symbol": "HDY"
   }

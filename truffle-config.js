@@ -26,7 +26,6 @@ const privateKeyOrMnemonic = fs.existsSync(".privateKey")
   ? fs
       .readFileSync(".privateKey")
       .toString()
-      .trim()
       .split(",")
   : undefined;
 
@@ -71,19 +70,23 @@ module.exports = {
       provider: () =>
         new HDWalletProvider(
           privateKeyOrMnemonic,
-          `https://mainnet.infura.io/v3/c13019f552f542188c0b0cdfaeb76cc4`
+          `https://mainnet.infura.io/v3/c13019f552f542188c0b0cdfaeb76cc4`,
+          0,
+          2
         ),
       network_id: "1",
       confirmations: 1,
       gas: 6400000,
-      gasPrice: 2500000000, // 2.5GWEI
+      gasPrice: 1000100000, // 1.0001GWEI
       skipDryRun: true
     },
     rinkeby: {
       provider: () =>
         new HDWalletProvider(
           privateKeyOrMnemonic,
-          `https://rinkeby.infura.io/v3/c13019f552f542188c0b0cdfaeb76cc4`
+          `https://rinkeby.infura.io/v3/c13019f552f542188c0b0cdfaeb76cc4`,
+          0,
+          2
         ),
       network_id: "4", // Network Id for Rinkeby
       confirmations: 1,
@@ -95,7 +98,9 @@ module.exports = {
       provider: () =>
         new HDWalletProvider(
           privateKeyOrMnemonic,
-          `https://ropsten.infura.io/v3/c13019f552f542188c0b0cdfaeb76cc4`
+          `https://ropsten.infura.io/v3/c13019f552f542188c0b0cdfaeb76cc4`,
+          0,
+          2
         ),
       network_id: "3", // Network Id for Ropsten
       confirmations: 1,
