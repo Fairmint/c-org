@@ -26,7 +26,6 @@ const privateKeyOrMnemonic = fs.existsSync(".privateKey")
   ? fs
       .readFileSync(".privateKey")
       .toString()
-      .trim()
       .split(",")
   : undefined;
 
@@ -95,7 +94,9 @@ module.exports = {
       provider: () =>
         new HDWalletProvider(
           privateKeyOrMnemonic,
-          `https://ropsten.infura.io/v3/c13019f552f542188c0b0cdfaeb76cc4`
+          `https://ropsten.infura.io/v3/c13019f552f542188c0b0cdfaeb76cc4`,
+          0,
+          2
         ),
       network_id: "3", // Network Id for Ropsten
       confirmations: 1,
