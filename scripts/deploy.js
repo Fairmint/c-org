@@ -97,7 +97,9 @@ contract("deploy script", accounts => {
       abiJson.dat = contracts.dat.abi;
       bytecodeJson.dat = datArtifact.bytecode;
       abiJson.bigMath = contracts.bigMath.abi;
-      abiJson.erc20 = currencyToken.abi;
+      if (!abiJson.erc20) {
+        abiJson.erc20 = currencyToken.abi;
+      }
 
       abiJson.vesting = vestingArtifact.abi;
       bytecodeJson.vesting = vestingArtifact.bytecode;
