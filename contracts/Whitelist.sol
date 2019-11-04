@@ -1,7 +1,7 @@
 pragma solidity 0.5.12;
 
 
-import "./interfaces/Erc1404.sol";
+import "./interfaces/ERC1404.sol";
 
 /**
  * @title ERC-1404 whitelist implementation which manages KYC approvals for the org.
