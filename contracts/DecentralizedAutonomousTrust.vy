@@ -125,6 +125,12 @@ MAX_SUPPLY: constant(uint256)  = 10 ** 38
 # @notice The max `totalSupply + burnedSupply`
 # @dev This limit ensures that the DAT's formulas do not overflow (<MAX_BEFORE_SQUARE/2)
 
+DIGITS_UINT: constant(uint256) = 10 ** 18
+# @notice Represents 1 full token (with 18 decimals)
+
+DIGITS_DECIMAL: constant(decimal) = convert(DIGITS_UINT, decimal)
+# @notice Represents 1 full token (with 18 decimals)
+
 ##############
 # Data specific to our token business logic
 ##############
