@@ -1,13 +1,12 @@
 const BigNumber = require("bignumber.js");
-const bigMathArtifact = artifacts.require("BigMath");
-const shouldFail = require("../helpers/shouldFail");
+const bigDivArtifact = artifacts.require("BigDiv");
 
-contract("bigMath / bigDiv", accounts => {
+contract("bigDiv", accounts => {
   let contract;
   const maxValue = new BigNumber(2).pow(256).minus(1);
 
   before(async () => {
-    contract = await bigMathArtifact.new();
+    contract = await bigDivArtifact.new();
   });
 
   it("2x1 does not overflow with sqrt max value", async () => {
