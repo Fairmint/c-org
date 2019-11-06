@@ -13,7 +13,7 @@ units: {
   stateMachine: "The DAT's internal state machine"
 }
 
-contract IBigMath:
+contract IBigDiv:
   def bigDiv2x1(
     _numA: uint256,
     _numB: uint256,
@@ -26,6 +26,7 @@ contract IBigMath:
     _denA: uint256,
     _denB: uint256
   ) -> uint256: constant
+contract ISqrt:
   def sqrtOfTokensSupplySquared(
     _tokenValue: uint256,
     _supply: uint256
@@ -90,7 +91,8 @@ StateChange: event({
   _newState: uint256(stateMachine)
 })
 UpdateConfig: event({
-  _bigMathAddress: address,
+  _bigDivAddress: address,
+  _sqrtAddress: address,
   _whitelistAddress: address,
   _beneficiary: indexed(address),
   _control: indexed(address),
@@ -183,12 +185,14 @@ beneficiary: public(address)
 # @notice The address of the beneficiary organization which receives the investments.
 # Points to the wallet of the organization.
 
-bigMathAddress: public(address)
+bigDivAddress: public(address)
 # @notice The BigMath library we use for BigNumber math
 
-bigMath: IBigMath
+bigDiv: IBigDiv
 # @notice The BigMath library we use for BigNumber math
 # @dev redundant w/ currencyAddress, for convenience
+
+sqrtContract: ISqrt
 
 buySlopeNum: public(uint256)
 # @notice The buy slope of the bonding curve.
@@ -520,7 +524,8 @@ def initialize(
 
 @public
 def updateConfig(
-  _bigMath: address,
+  _bigDiv: address,
+  _sqrtContract: address,
   _whitelistAddress: address,
   _beneficiary: address,
   _control: address,
@@ -543,9 +548,11 @@ def updateConfig(
   self.whitelistAddress = _whitelistAddress
   self.whitelist = Whitelist(_whitelistAddress)
 
-  assert _bigMath != ZERO_ADDRESS, "INVALID_ADDRESS"
-  self.bigMathAddress = _bigMath
-  self.bigMath = IBigMath(_bigMath)
+  assert _bigDiv != ZERO_ADDRESS, "INVALID_ADDRESS"
+  assert _bigDiv != ZERO_ADDRESS, "INVALID_ADDRESS"
+  self.bigDivAddress = _bigDiv
+  self.bigDiv = IBigDiv(_bigDiv)
+  self.sqrtContract = ISqrt(_sqrtContract)
 
   assert _control != ZERO_ADDRESS, "INVALID_ADDRESS"
   self.control = _control
@@ -578,7 +585,8 @@ def updateConfig(
     self.beneficiary = _beneficiary
 
   log.UpdateConfig(
-    _bigMath,
+    _bigDiv,
+    _sqrtContract,
     _whitelistAddress,
     _beneficiary,
     _control,
@@ -647,7 +655,7 @@ def _estimateBuyValue(
     # Math: worst case
     # 2 * MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE
     # / MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE
-    tokenValue = self.bigMath.bigDiv2x1(
+    tokenValue = self.bigDiv.bigDiv2x1(
       2 * _currencyValue, self.buySlopeDen,
       self.initGoal * self.buySlopeNum,
       False
@@ -662,7 +670,7 @@ def _estimateBuyValue(
     tokenValue = 2 * _currencyValue * self.buySlopeDen
     tokenValue /= self.buySlopeNum
     
-    tokenValue = self.bigMath.sqrtOfTokensSupplySquared(tokenValue, supply)
+    tokenValue = self.sqrtContract.sqrtOfTokensSupplySquared(tokenValue, supply)
 
     # Math: small chance of underflow due to possible rounding in sqrt
     if(tokenValue > supply):
@@ -719,7 +727,7 @@ def buy(
       # Math worst case:
       # MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE/2
       # / MAX_BEFORE_SQUARE * 2
-      beneficiaryContribution: uint256 = self.bigMath.bigDiv2x1(
+      beneficiaryContribution: uint256 = self.bigDiv.bigDiv2x1(
         self.initInvestors[self.beneficiary], self.buySlopeNum * self.initGoal,
         self.buySlopeDen * 2,
         False
@@ -760,7 +768,7 @@ def _estimateSellValue(
     # Math worst case:
     # MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE/2
     # / MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE/2
-    currencyValue = self.bigMath.bigDiv2x2(
+    currencyValue = self.bigDiv.bigDiv2x2(
       _quantityToSell * buybackReserve, self.burnedSupply * self.burnedSupply,
       self.totalSupply, supply * supply
     )
@@ -778,7 +786,7 @@ def _estimateSellValue(
     # Math: worst case
     # MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE
     # / MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE/2
-    currencyValue -= self.bigMath.bigDiv2x1(
+    currencyValue -= self.bigDiv.bigDiv2x1(
       _quantityToSell * _quantityToSell, buybackReserve,
       supply * supply,
       True
@@ -867,13 +875,13 @@ def _estimatePayValue(
   # Math: worst case
   # 2 * MAX_BEFORE_SQUARE/2 * 10000 * MAX_BEFORE_SQUARE
   # / 10000 * MAX_BEFORE_SQUARE
-  tokenValue: uint256 = self.bigMath.bigDiv2x1(
+  tokenValue: uint256 = self.bigDiv.bigDiv2x1(
     2 * _currencyValue * self.revenueCommitmentBasisPoints, self.buySlopeDen,
     BASIS_POINTS_DEN * self.buySlopeNum,
     False
   )
 
-  tokenValue = self.bigMath.sqrtOfTokensSupplySquared(tokenValue, supply)
+  tokenValue = self.sqrtContract.sqrtOfTokensSupplySquared(tokenValue, supply)
 
   if(tokenValue > supply):
     tokenValue -= supply
@@ -972,14 +980,14 @@ def _estimateExitFee(
 
     # Math worst case:
     # MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE
-    exitFee = self.bigMath.bigDiv2x1(
+    exitFee = self.bigDiv.bigDiv2x1(
       self.burnedSupply * self.buySlopeNum, self.totalSupply,
       self.buySlopeDen,
       False
     )
     # Math worst case:
     # MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE
-    exitFee += self.bigMath.bigDiv2x1(
+    exitFee += self.bigDiv.bigDiv2x1(
       self.buySlopeNum * self.totalSupply, self.totalSupply,
       self.buySlopeDen,
       False
