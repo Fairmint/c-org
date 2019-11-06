@@ -27,7 +27,7 @@ contract IBigDiv:
     _denB: uint256
   ) -> uint256: constant
 contract ISqrt:
-  def sqrt(
+  def sqrtUint(
     x: uint256
   ) -> uint256: constant
 contract Whitelist:
@@ -672,7 +672,7 @@ def _estimateBuyValue(
     tokenValue /= self.buySlopeNum
     
     tokenValue += supply * supply
-    tokenValue = self.sqrtContract.sqrt(tokenValue)
+    tokenValue = self.sqrtContract.sqrtUint(tokenValue)
 
     # Math: small chance of underflow due to possible rounding in sqrt
     if(tokenValue > supply):
@@ -884,7 +884,7 @@ def _estimatePayValue(
   )
 
   tokenValue += supply * supply
-  tokenValue = self.sqrtContract.sqrt(tokenValue)
+  tokenValue = self.sqrtContract.sqrtUint(tokenValue)
 
   if(tokenValue > supply):
     tokenValue -= supply
