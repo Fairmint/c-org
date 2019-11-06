@@ -192,6 +192,7 @@ bigDiv: IBigDiv
 # @notice The BigMath library we use for BigNumber math
 # @dev redundant w/ currencyAddress, for convenience
 
+sqrtAddress: public(address)
 sqrtContract: ISqrt
 
 buySlopeNum: public(uint256)
@@ -552,6 +553,7 @@ def updateConfig(
   assert _bigDiv != ZERO_ADDRESS, "INVALID_ADDRESS"
   self.bigDivAddress = _bigDiv
   self.bigDiv = IBigDiv(_bigDiv)
+  self.sqrtAddress = _sqrtContract
   self.sqrtContract = ISqrt(_sqrtContract)
 
   assert _control != ZERO_ADDRESS, "INVALID_ADDRESS"
