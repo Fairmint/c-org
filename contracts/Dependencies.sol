@@ -1,10 +1,8 @@
 pragma solidity ^0.5.0;
 
-import "hardlydifficult-ethereum-contracts/contracts/math/Sqrt.sol";
 import "@openzeppelin/contracts/drafts/TokenVesting.sol";
 import "zos-lib/contracts/upgradeability/AdminUpgradeabilityProxy.sol";
 import "zos-lib/contracts/upgradeability/ProxyAdmin.sol";
-import "hardlydifficult-ethereum-contracts/contracts/math/BigDiv.sol";
 
 
 /**

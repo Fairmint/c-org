@@ -38,7 +38,7 @@ contract Whitelist is ERC1404
   function detectTransferRestriction(
     address _from,
     address _to,
-    uint256 //_value (ignored)
+    uint //_value (ignored)
   ) public view returns(uint8)
   {
     if(approved[_from] && approved[_to])
@@ -89,7 +89,7 @@ contract Whitelist is ERC1404
   function authorizeTransfer(
     address _from,
     address _to,
-    uint256 _value,
+    uint _value,
     bool _isSell
   ) external
   {
