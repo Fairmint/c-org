@@ -2,8 +2,13 @@ pragma solidity 0.5.12;
 
 import "hardlydifficult-ethereum-contracts/contracts/math/BigDiv.sol";
 import "hardlydifficult-ethereum-contracts/contracts/math/Sqrt.sol";
-import "./Whitelist.sql";
+import "./Whitelist.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
+// TODO ZOS ERC-20 and metadata
+// TODO safemath
+// TODO remove redundant private functions
+// TODO add burn event (for non-sell transfer to 0)
 
 
 /**
@@ -43,7 +48,6 @@ contract DecentralizedAutonomousTrust
     uint _currencyValue,
     uint _fairValue
   );
-  // TODO add burn
   event Close(
     uint _exitFee
   );
@@ -93,6 +97,12 @@ contract DecentralizedAutonomousTrust
   /// @dev This limit ensures that the DAT's formulas do not overflow (<MAX_BEFORE_SQUARE/2)
   uint constant MAX_SUPPLY = 10 ** 38;
 
+
+  /// @notice Returns the number of decimals the token uses - e.g. 8, means to divide
+  /// the token amount by 100000000 to get its user representation.
+  /// @dev Hardcoded to 18
+  uint constant decimals = 18;
+
   /**
    * Data specific to our token business logic
    */
@@ -106,7 +116,6 @@ contract DecentralizedAutonomousTrust
   /**
    * Data storage required by the ERC-20 token standard
    */
-  // TODO switch to the open zeppelin implementation
 
   /// @notice Stores the `from` address to the `operator` address to the max value that operator is authorized to transfer.
   /// @dev not public: exposed via `allowance`
@@ -122,7 +131,6 @@ contract DecentralizedAutonomousTrust
   /**
    * Metadata suggested by the ERC-20 token standard
    */
-  // TODO switch to the open zeppelin implementation
 
   /// @notice Returns the name of the token - e.g. "MyToken".
   /// @dev Optional requirement from ERC-20.
@@ -213,10 +221,10 @@ contract DecentralizedAutonomousTrust
   /// @notice The total amount of currency value currently locked in the contract and available to sellers.
   function buybackReserve() public view returns (uint)
   {
-    uint reserve = self.balance;
-    if(self.currency != address(0))
+    uint reserve = address(this).balance;
+    if(address(currency) != address(0))
     {
-      reserve = self.currency.balanceOf(self);
+      reserve = currency.balanceOf(address(this));
     }
 
     if(reserve > MAX_BEFORE_SQUARE)
@@ -228,317 +236,342 @@ contract DecentralizedAutonomousTrust
     return reserve;
   }
 
-  /// Functions required for the whitelist
-  ##################################################
+  /**
+   * Functions required for the whitelist
+   */
 
-  @private
-  @constant
-  def _detectTransferRestriction(
-    _from: address,
-    _to: address,
-    _value: uint
-  ) -> uint:
-    if(self.whitelist != address(0)): /// This is not set for the minting of initialReserve
-      return self.whitelist.detectTransferRestriction(_from, _to, _value)
-    return 0
+  function _detectTransferRestriction(
+    address _from,
+    address _to,
+    uint _value
+  ) private view
+    returns (uint)
+  {
+    if(address(whitelist) != address(0))
+    {
+      // This is not set for the minting of initialReserve
+      return whitelist.detectTransferRestriction(_from, _to, _value);
+    }
 
-  @private
-  def _authorizeTransfer(
-    _from: address,
-    _to: address,
-    _value: uint,
-    _isSell: bool
-  ):
-    if(self.whitelist != address(0)): /// This is not set for the minting of initialReserve
-      self.whitelist.authorizeTransfer(_from, _to, _value, _isSell)
+    return 0;
+  }
 
-
-  /// Functions required by the ERC-20 token standard
-  ##################################################
-
-  @private
-  def _send(
-    _from: address,
-    _to: address,
-    _amount: uint
-  ):
-    """
-    @dev Moves tokens from one account to another if authorized.
-    We have disabled the call hooks for ERC-20 style transfers in order to ensure other contracts interfacing with
-    FAIR tokens (e.g. Uniswap) remain secure.
-    """
-    assert _from != address(0), "ERC20: send from the zero address"
-    assert _to != address(0), "ERC20: send to the zero address"
-    assert self.state != STATE_INIT or _from == self.beneficiary, "Only the beneficiary can make transfers during STATE_INIT"
-
-    self._authorizeTransfer(_from, _to, _amount, False)
-
-    self.balanceOf[_from] -= _amount
-    self.balanceOf[_to] += _amount
-
-    log.Transfer(_from, _to, _amount)
-
-  @public
-  @constant
-  def allowance(
-    _owner: address,
-    _spender: address
-  ) -> uint:
-    """
-    @notice Returns the amount which `_spender` is still allowed to withdraw from `_owner`.
-    """
-    return self.allowances[_owner][_spender]
-
-  @public
-  @constant
-  def decimals() -> uint:
-    """
-    @notice Returns the number of decimals the token uses - e.g. 8, means to divide
-    the token amount by 100000000 to get its user representation.
-    @dev Hardcoded to 18
-    """
-    return 18
-
-  @public
-  def approve(
-    _spender: address,
-    _value: uint
-  ) -> bool:
-    """
-    @notice Allows `_spender` to withdraw from your account multiple times, up to the `_value` amount.
-    @dev If this function is called again it overwrites the current allowance with `_value`.
-    """
-    assert _spender != address(0), "ERC20: approve to the zero address"
-
-    self.allowances[msg.sender][_spender] = _value
-    log.Approval(msg.sender, _spender, _value)
-    return True
-
-  @public
-  def transfer(
-    _to: address,
-    _value: uint
-  ) -> bool:
-    """
-    @notice Transfers `_value` amount of tokens to address `_to` if authorized.
-    """
-    self._send(msg.sender, _to, _value)
-    return True
-
-  @public
-  def transferFrom(
-    _from: address,
-    _to: address,
-    _value: uint
-  ) -> bool:
-    """
-    @notice Transfers `_value` amount of tokens from address `_from` to address `_to` if authorized.
-    """
-    self.allowances[_from][msg.sender] -= _value
-    self._send(_from, _to, _value)
-    return True
+  function _authorizeTransfer(
+    address _from,
+    address _to,
+    uint _value,
+    bool _isSell
+  ) private
+  {
+    if(address(whitelist) != address(0))
+    {
+      // This is not set for the minting of initialReserve
+      whitelist.authorizeTransfer(_from, _to, _value, _isSell);
+    }
+  }
 
 
-  /// Transaction Helpers
+  /**
+   * Functions required by the ERC-20 token standard
+   */
 
-  @private
-  def _burn(
-    _from: address,
-    _amount: uint,
-    _isSell: bool
-  ):
-    """
-    @dev Removes tokens from the circulating supply.
-    """
-    assert _from != address(0), "ERC20: burn from the zero address"
+  /// @dev Moves tokens from one account to another if authorized.
+  /// We have disabled the call hooks for ERC-20 style transfers in order to ensure other contracts interfacing with
+  /// FAIR tokens (e.g. Uniswap) remain secure.
+  function _send(
+    address _from,
+    address _to,
+    uint _amount
+  ) private
+  {
+    require(_from != address(0), "ERC20: send from the zero address");
+    require(_to != address(0), "ERC20: send to the zero address");
+    require(state != STATE_INIT || _from == beneficiary, "Only the beneficiary can make transfers during STATE_INIT");
 
-    self.balanceOf[_from] -= _amount
-    self.totalSupply -= _amount
+    _authorizeTransfer(_from, _to, _amount, false);
 
-    self._authorizeTransfer(_from, address(0), _amount, _isSell)
-    if(not _isSell):
+    balanceOf[_from] -= _amount;
+    balanceOf[_to] += _amount;
+
+    emit Transfer(_from, _to, _amount);
+  }
+
+  /// @notice Returns the amount which `_spender` is still allowed to withdraw from `_owner`.
+  function  allowance(
+    address _owner,
+    address _spender
+  ) public view
+    returns (uint)
+  {
+    return allowances[_owner][_spender];
+  }
+
+  /// @notice Allows `_spender` to withdraw from your account multiple times, up to the `_value` amount.
+  /// @dev If this function is called again it overwrites the current allowance with `_value`.
+  function approve(
+    address _spender,
+    uint _value
+  ) public
+    returns (bool)
+  {
+    require(_spender != address(0), "ERC20: approve to the zero address");
+
+    allowances[msg.sender][_spender] = _value;
+    emit Approval(msg.sender, _spender, _value);
+    return true;
+  }
+
+  /// @notice Transfers `_value` amount of tokens to address `_to` if authorized.
+  function transfer(
+    address _to,
+    uint _value
+  ) public
+    returns (bool)
+  {
+    _send(msg.sender, _to, _value);
+    return true;
+  }
+
+  /// @notice Transfers `_value` amount of tokens from address `_from` to address `_to` if authorized.
+  function transferFrom(
+    address _from,
+    address _to,
+    uint _value
+  ) public
+    returns(bool)
+  {
+    allowances[_from][msg.sender] -= _value;
+    _send(_from, _to, _value);
+    return true;
+  }
+
+  /**
+   * Transaction Helpers
+   */
+
+  /// @dev Removes tokens from the circulating supply.
+  function _burn(
+    address _from,
+    uint _amount,
+    bool _isSell
+  ) private
+  {
+    require(_from != address(0), "ERC20: burn from the zero address");
+
+    balanceOf[_from] -= _amount;
+    totalSupply -= _amount;
+
+    _authorizeTransfer(_from, address(0), _amount, _isSell);
+    if(!_isSell)
+    {
       /// This is a burn
-      assert self.state == STATE_RUN, "ONLY_DURING_RUN"
-      self.burnedSupply += _amount
+      require(state == STATE_RUN, "ONLY_DURING_RUN");
+      burnedSupply += _amount;
+    }
 
-    log.Transfer(_from, address(0), _amount)
+    emit Transfer(_from, address(0), _amount);
+  }
 
-  @private
-  def _collectInvestment(
-    _from: address,
-    _quantityToInvest: uint,
-    _msgValue: uint(wei),
-    _refundRemainder: bool
-  ):
-    """
-    @notice Confirms the transfer of `_quantityToInvest` currency to the contract.
-    """
-    if(self.currency == address(0)): /// currency is ETH
-      if(_refundRemainder):
-        /// Math: if _msgValue was not sufficient then revert
-        refund: uint(wei) = _msgValue - _quantityToInvest
-        if(refund > 0):
-          /// this call fails if we don't capture a response
-          res: bytes[1] = raw_call(_from, b"", outsize=0, value=refund, gas=msg.gas)
-      else:
-        assert as_wei_value(_quantityToInvest, "wei") == _msgValue, "INCORRECT_MSG_VALUE"
-    else: /// currency is ERC20
-      assert _msgValue == 0, "DO_NOT_SEND_ETH"
+  /// @notice Confirms the transfer of `_quantityToInvest` currency to the contract.
+  function _collectInvestment(
+    address _from,
+    uint _quantityToInvest,
+    uint _msgValue,
+    bool _refundRemainder
+  ) private
+  {
+    if(address(currency) == address(0))
+    {
+      // currency is ETH
+      if(_refundRemainder)
+      {
+        // Math: if _msgValue was not sufficient then revert
+        uint refund = _msgValue - _quantityToInvest;
+        if(refund > 0)
+        {
+          // https://diligence.consensys.net/blog/2019/09/stop-using-soliditys-transfer-now/
+          (bool success, ) = _from.call.value(refund)("");
+          require(success, "Transfer failed.");
+        }
+      }
+      else
+      {
+        require(_quantityToInvest == _msgValue, "INCORRECT_MSG_VALUE");
+      }
+    }
+    else
+    {
+      // currency is ERC20
+      require(_msgValue == 0, "DO_NOT_SEND_ETH");
 
-      success: bool = self.currency.transferFrom(_from, self, _quantityToInvest)
-      assert success, "ERC20_TRANSFER_FAILED"
+      bool success = currency.transferFrom(_from, address(this), _quantityToInvest);
+      require(success, "ERC20_TRANSFER_FAILED");
+    }
+  }
 
-  @private
-  def _sendCurrency(
-    _to: address,
-    _amount: uint
-  ):
-    """
-    @dev Send `_amount` currency from the contract to the `_to` account.
-    """
-    if(_amount > 0):
-      if(self.currency == address(0)):
-        /// this call fails if we don't capture a response
-        res: bytes[1] = raw_call(_to, b"", outsize=0, value=as_wei_value(_amount, "wei"), gas=msg.gas)
-      else:
-        success: bool = self.currency.transfer(_to, as_unitless_number(_amount))
-        assert success, "ERC20_TRANSFER_FAILED"
+  /// @dev Send `_amount` currency from the contract to the `_to` account.
+  function _sendCurrency(
+    address _to,
+    uint _amount
+  ) private
+  {
+    if(_amount > 0)
+    {
+      if(address(currency) == address(0))
+      {
+        // https://diligence.consensys.net/blog/2019/09/stop-using-soliditys-transfer-now/
+        (bool success, ) = _to.call.value(_amount)("");
+        require(success, "Transfer failed.");
+      }
+      else
+      {
+        bool success = currency.transfer(_to, _amount);
+        require(success, "ERC20_TRANSFER_FAILED");
+      }
+    }
+  }
 
-  @private
-  def _mint(
-    _to: address,
-    _quantity: uint
-  ):
-    """
-    @notice Called by the owner, which is the DAT contract, in order to mint tokens on `buy`.
-    """
-    assert _to != address(0), "INVALID_ADDRESS"
-    assert _quantity > 0, "INVALID_QUANTITY"
-    self._authorizeTransfer(address(0), _to, _quantity, False)
+  /// @notice Called by the owner, which is the DAT contract, in order to mint tokens on `buy`.
+  function _mint(
+    address _to,
+    uint _quantity
+  ) private
+  {
+    require(_to != address(0), "INVALID_ADDRESS");
+    require(_quantity > 0, "INVALID_QUANTITY");
+    _authorizeTransfer(address(0), _to, _quantity, false);
 
-    self.totalSupply += _quantity
+    totalSupply += _quantity;
     /// Math: If this value got too large, the DAT may overflow on sell
-    assert self.totalSupply + self.burnedSupply <= MAX_SUPPLY, "EXCESSIVE_SUPPLY"
-    self.balanceOf[_to] += _quantity
+    require(totalSupply + burnedSupply <= MAX_SUPPLY, "EXCESSIVE_SUPPLY");
+    balanceOf[_to] += _quantity;
 
-    log.Transfer(address(0), _to, _quantity)
+    emit Transfer(address(0), _to, _quantity);
+  }
 
-  /// Config / Control
-  ##################################################
+  /**
+   * Config / Control
+   */
 
-  @public
-  def initialize(
-    _initReserve: uint,
-    _currencyAddress: address,
-    _initGoal: uint,
-    _buySlopeNum: uint,
-    _buySlopeDen: uint,
-    _investmentReserveBasisPoints: uint
-  ):
-    """
-    @notice Called once after deploy to set the initial configuration.
-    None of the values provided here may change once initially set.
-    @dev using the init pattern in order to support zos upgrades
-    """
-    assert self.control == address(0), "ALREADY_INITIALIZED"
+  /// @notice Called once after deploy to set the initial configuration.
+  /// None of the values provided here may change once initially set.
+  /// @dev using the init pattern in order to support zos upgrades
+  function initialize(
+    uint _initReserve,
+    address _currencyAddress,
+    uint _initGoal,
+    uint _buySlopeNum,
+    uint _buySlopeDen,
+    uint _investmentReserveBasisPoints
+  ) public
+  {
+    require(control == address(0), "ALREADY_INITIALIZED");
 
-    /// Set initGoal, which in turn defines the initial state
-    if(_initGoal == 0):
-      log.StateChange(self.state, STATE_RUN)
-      self.state = STATE_RUN
-    else:
-      /// Math: If this value got too large, the DAT would overflow on sell
-      assert _initGoal < MAX_SUPPLY, "EXCESSIVE_GOAL"
-      self.initGoal = _initGoal
+    // Set initGoal, which in turn defines the initial state
+    if(_initGoal == 0)
+    {
+      emit StateChange(state, STATE_RUN);
+      state = STATE_RUN;
+    }
+    else
+    {
+      // Math: If this value got too large, the DAT would overflow on sell
+      require(_initGoal < MAX_SUPPLY, "EXCESSIVE_GOAL");
+      initGoal = _initGoal;
+    }
 
-    assert _buySlopeNum > 0, "INVALID_SLOPE_NUM" /// 0 not supported
-    assert _buySlopeDen > 0, "INVALID_SLOPE_DEN"
-    assert _buySlopeNum < MAX_BEFORE_SQUARE, "EXCESSIVE_SLOPE_NUM" /// 0 not supported
-    assert _buySlopeDen < MAX_BEFORE_SQUARE, "EXCESSIVE_SLOPE_DEN"
-    self.buySlopeNum = _buySlopeNum
-    self.buySlopeDen = _buySlopeDen
-    assert _investmentReserveBasisPoints <= BASIS_POINTS_DEN, "INVALID_RESERVE" /// 100% or less
-    self.investmentReserveBasisPoints = _investmentReserveBasisPoints /// 0 means all investments go to the beneficiary
+    require(_buySlopeNum > 0, "INVALID_SLOPE_NUM");
+    require(_buySlopeDen > 0, "INVALID_SLOPE_DEN");
+    require(_buySlopeNum < MAX_BEFORE_SQUARE, "EXCESSIVE_SLOPE_NUM");
+    require(_buySlopeDen < MAX_BEFORE_SQUARE, "EXCESSIVE_SLOPE_DEN");
+    buySlopeNum = _buySlopeNum;
+    buySlopeDen = _buySlopeDen;
+    // 100% or less
+    require(_investmentReserveBasisPoints <= BASIS_POINTS_DEN, "INVALID_RESERVE");
+    investmentReserveBasisPoints = _investmentReserveBasisPoints;
 
-    /// Set default values (which may be updated using `updateConfig`)
-    self.minInvestment = as_unitless_number(as_wei_value(100, "ether"))
-    self.beneficiary = msg.sender
-    self.control = msg.sender
-    self.feeCollector = msg.sender
+    // Set default values (which may be updated using `updateConfig`)
+    minInvestment = 100 ether;
+    beneficiary = msg.sender;
+    control = msg.sender;
+    feeCollector = msg.sender;
 
-    /// Save currency
-    self.currencyAddress = _currencyAddress
-    self.currency = ERC20(_currencyAddress)
+    // Save currency
+    currency = IERC20(_currencyAddress);
 
-    /// Mint the initial reserve
-    if(_initReserve > 0):
-      self.initReserve = _initReserve
-      self._mint(self.beneficiary, self.initReserve)
+    // Mint the initial reserve
+    if(_initReserve > 0)
+    {
+      initReserve = _initReserve;
+      _mint(beneficiary, initReserve);
+    }
+  }
 
-  @public
-  def updateConfig(
-    _bigDiv: address,
-    _sqrtContract: address,
-    _whitelistAddress: address,
-    _beneficiary: address,
-    _control: address,
-    _feeCollector: address,
-    _feeBasisPoints: uint,
-    _autoBurn: bool,
-    _revenueCommitmentBasisPoints: uint,
-    _minInvestment: uint,
-    _openUntilAtLeast: uint,
-    _name: string[64],
-    _symbol: string[32]
-  ):
-    /// This assert also confirms that initialize has been called.
-    assert msg.sender == self.control, "CONTROL_ONLY"
+  function updateConfig(
+    address _bigDiv,
+    address _sqrtContract,
+    address _whitelistAddress,
+    address _beneficiary,
+    address _control,
+    address _feeCollector,
+    uint _feeBasisPoints,
+    bool _autoBurn,
+    uint _revenueCommitmentBasisPoints,
+    uint _minInvestment,
+    uint _openUntilAtLeast,
+    string memory _name,
+    string memory _symbol
+  ) public
+  {
+    // This require(also confirms that initialize has been called.
+    require(msg.sender == control, "CONTROL_ONLY");
 
-    self.name = _name
-    self.symbol = _symbol
+    name = _name;
+    symbol = _symbol;
 
-    assert _whitelistAddress != address(0), "INVALID_ADDRESS"
-    self.whitelistAddress = _whitelistAddress
-    self.whitelist = Whitelist(_whitelistAddress)
+    require(_whitelistAddress != address(0), "INVALID_ADDRESS");
+    whitelist = Whitelist(_whitelistAddress);
 
-    assert _bigDiv != address(0), "INVALID_ADDRESS"
-    assert _bigDiv != address(0), "INVALID_ADDRESS"
-    self.bigDivAddress = _bigDiv
-    self.bigDiv = IBigDiv(_bigDiv)
-    self.sqrtAddress = _sqrtContract
-    self.sqrtContract = ISqrt(_sqrtContract)
+    require(_bigDiv != address(0), "INVALID_ADDRESS");
+    require(_bigDiv != address(0), "INVALID_ADDRESS");
+    bigDiv = BigDiv(_bigDiv);
+    sqrtContract = Sqrt(_sqrtContract);
 
-    assert _control != address(0), "INVALID_ADDRESS"
-    self.control = _control
+    require(_control != address(0), "INVALID_ADDRESS");
+    control = _control;
 
-    assert _feeCollector != address(0), "INVALID_ADDRESS"
-    self.feeCollector = _feeCollector
+    require(_feeCollector != address(0), "INVALID_ADDRESS");
+    feeCollector = _feeCollector;
 
-    self.autoBurn = _autoBurn
+    autoBurn = _autoBurn;
 
-    assert _revenueCommitmentBasisPoints <= BASIS_POINTS_DEN, "INVALID_COMMITMENT" /// 100% or less
-    assert _revenueCommitmentBasisPoints >= self.revenueCommitmentBasisPoints, "COMMITMENT_MAY_NOT_BE_REDUCED"
-    self.revenueCommitmentBasisPoints = _revenueCommitmentBasisPoints /// 0 means all renvue goes to the beneficiary
+    require(_revenueCommitmentBasisPoints <= BASIS_POINTS_DEN, "INVALID_COMMITMENT");
+    require(_revenueCommitmentBasisPoints >= revenueCommitmentBasisPoints, "COMMITMENT_MAY_NOT_BE_REDUCED");
+    revenueCommitmentBasisPoints = _revenueCommitmentBasisPoints;
 
-    assert _feeBasisPoints <= BASIS_POINTS_DEN, "INVALID_FEE" /// 100% or less
-    self.feeBasisPoints = _feeBasisPoints /// 0 means no fee
+    require(_feeBasisPoints <= BASIS_POINTS_DEN, "INVALID_FEE");
+    feeBasisPoints = _feeBasisPoints;
 
-    assert _minInvestment > 0, "INVALID_MIN_INVESTMENT"
-    self.minInvestment = _minInvestment
+    require(_minInvestment > 0, "INVALID_MIN_INVESTMENT");
+    minInvestment = _minInvestment;
 
-    assert _openUntilAtLeast >= self.openUntilAtLeast, "OPEN_UNTIL_MAY_NOT_BE_REDUCED"
-    self.openUntilAtLeast = _openUntilAtLeast
+    require(_openUntilAtLeast >= openUntilAtLeast, "OPEN_UNTIL_MAY_NOT_BE_REDUCED");
+    openUntilAtLeast = _openUntilAtLeast;
 
-    if(self.beneficiary != _beneficiary):
-      assert _beneficiary != address(0), "INVALID_ADDRESS"
-      tokens: uint = self.balanceOf[self.beneficiary]
-      self.initInvestors[_beneficiary] += self.initInvestors[self.beneficiary]
-      self.initInvestors[self.beneficiary] = 0
-      if(tokens > 0):
-        self._send(self.beneficiary, _beneficiary, tokens)
-      self.beneficiary = _beneficiary
+    if(beneficiary != _beneficiary)
+    {
+      require(_beneficiary != address(0), "INVALID_ADDRESS");
+      uint tokens = balanceOf[beneficiary];
+      initInvestors[_beneficiary] += initInvestors[beneficiary];
+      initInvestors[beneficiary] = 0;
+      if(tokens > 0)
+      {
+        _send(beneficiary, _beneficiary, tokens);
+      }
+      beneficiary = _beneficiary;
+    }
 
-    log.UpdateConfig(
+    emit UpdateConfig(
       _bigDiv,
       _sqrtContract,
       _whitelistAddress,
@@ -552,448 +585,510 @@ contract DecentralizedAutonomousTrust
       _openUntilAtLeast,
       _name,
       _symbol
-    )
+    );
+  }
 
-  /// Functions for our business logic
-  ##################################################
+  /**
+   * Functions for our business logic
+   */
 
-  @public
-  def burn(
-    _amount: uint
-  ):
-    """
-    @notice Burn the amount of tokens from the address msg.sender if authorized.
-    @dev Note that this is not the same as a `sell` via the DAT.
-    """
-    self._burn(msg.sender, _amount, False)
+  /// @notice Burn the amount of tokens from the address msg.sender if authorized.
+  /// @dev Note that this is not the same as a `sell` via the DAT.
+  function burn(
+    uint _amount
+  ) public
+  {
+    _burn(msg.sender, _amount, false);
+  }
 
-  /// Buy
+  // Buy
 
-  @private
-  def _distributeInvestment(
-    _value: uint
-  ):
-    """
-    @dev Distributes _value currency between the buybackReserve, beneficiary, and feeCollector.
-    """
-    /// Rounding favors buybackReserve, then beneficiary, and feeCollector is last priority.
+  /// @dev Distributes _value currency between the buybackReserve, beneficiary, and feeCollector.
+  function _distributeInvestment(
+    uint _value
+  ) private
+  {
+    // Rounding favors buybackReserve, then beneficiary, and feeCollector is last priority.
 
-    /// Math: if investment value is < (2^256 - 1) / 10000 this will never overflow.
-    /// Except maybe with a huge single investment, but they can try again with multiple smaller investments.
-    reserve: uint = self.investmentReserveBasisPoints * _value
-    reserve /= BASIS_POINTS_DEN
-    reserve = _value - reserve
+    // Math: if investment value is < (2^256 - 1) / 10000 this will never overflow.
+    // Except maybe with a huge single investment, but they can try again with multiple smaller investments.
+    uint reserve = investmentReserveBasisPoints * _value;
+    reserve /= BASIS_POINTS_DEN;
+    reserve = _value - reserve;
     /// Math: since reserve is <= the investment value, this will never overflow.
-    fee: uint = reserve * self.feeBasisPoints
-    fee /= BASIS_POINTS_DEN
+    uint fee = reserve * feeBasisPoints;
+    fee /= BASIS_POINTS_DEN;
 
-    /// Math: since feeBasisPoints is <= BASIS_POINTS_DEN, this will never underflow.
-    self._sendCurrency(self.beneficiary, reserve - fee)
-    self._sendCurrency(self.feeCollector, fee)
+    // Math: since feeBasisPoints is <= BASIS_POINTS_DEN, this will never underflow.
+    _sendCurrency(beneficiary, reserve - fee);
+    _sendCurrency(feeCollector, fee);
+  }
 
-  @private
-  @constant
-  def _estimateBuyValue(
-    _currencyValue: uint
-  ) -> uint:
-    """
-    @notice Calculate how many FAIR tokens you would buy with the given amount of currency if `buy` was called now.
-    @param _currencyValue How much currency to spend in order to buy FAIR.
-    """
-    if(_currencyValue < self.minInvestment):
-      return 0
+  /// @notice Calculate how many FAIR tokens you would buy with the given amount of currency if `buy` was called now.
+  /// @param _currencyValue How much currency to spend in order to buy FAIR.
+  function _estimateBuyValue(
+    uint _currencyValue
+  ) private view
+    returns (uint)
+  {
+    if(_currencyValue < minInvestment)
+    {
+      return 0;
+    }
 
     /// Calculate the tokenValue for this investment
-    tokenValue: uint = 0
-    if(self.state == STATE_INIT):
-      /// Math: worst case
-      /// 2 * MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE
-      /// / MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE
-      tokenValue = self.bigDiv.bigDiv2x1(
-        2 * _currencyValue, self.buySlopeDen,
-        self.initGoal * self.buySlopeNum,
-        False
-      )
-      if(tokenValue > self.initGoal):
-        return 0
-    elif(self.state == STATE_RUN):
-      supply: uint = self.totalSupply + self.burnedSupply
-      /// Math: worst case
-      /// 2 * MAX_BEFORE_SQUARE / 2 * MAX_BEFORE_SQUARE
-      /// / MAX_BEFORE_SQUARE
-      tokenValue = 2 * _currencyValue * self.buySlopeDen
-      tokenValue /= self.buySlopeNum
+    uint tokenValue;
+    if(state == STATE_INIT)
+    {
+      // Math: worst case
+      // 2 * MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE
+      // / MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE
+      tokenValue = bigDiv.bigDiv2x1(
+        2 * _currencyValue, buySlopeDen,
+        initGoal * buySlopeNum
+      );
+      if(tokenValue > initGoal)
+      {
+        return 0;
+      }
+    }
+    else if(state == STATE_RUN)
+    {
+      uint supply = totalSupply + burnedSupply;
+      // Math: worst case
+      // 2 * MAX_BEFORE_SQUARE / 2 * MAX_BEFORE_SQUARE
+      // / MAX_BEFORE_SQUARE
+      tokenValue = 2 * _currencyValue * buySlopeDen;
+      tokenValue /= buySlopeNum;
       
-      tokenValue += supply * supply
-      tokenValue = self.sqrtContract.sqrtUint(tokenValue)
+      tokenValue += supply * supply;
+      tokenValue = sqrtContract.sqrtUint(tokenValue);
 
-      /// Math: small chance of underflow due to possible rounding in sqrt
-      if(tokenValue > supply):
-        tokenValue -= supply
-      else:
-        tokenValue = 0
-    else:
-      return 0 /// invalid state
+      // Math: small chance of underflow due to possible rounding in sqrt
+      if(tokenValue > supply)
+      {
+        tokenValue -= supply;
+      }
+      else
+      { 
+        tokenValue = 0;
+      }
+    }
+    else
+    {
+      // invalid state
+      return 0;
+    }
 
-    return tokenValue
+    return tokenValue;
+  }
 
-  @public
-  @constant
-  def estimateBuyValue(
-    _currencyValue: uint
-  ) -> uint:
-    return self._estimateBuyValue(_currencyValue)
+  function estimateBuyValue(
+    uint _currencyValue
+  ) public view
+    returns (uint)
+  {
+    return _estimateBuyValue(_currencyValue);
+  }
 
-  @public
-  @payable
-  def buy(
-    _to: address,
-    _currencyValue: uint,
-    _minTokensBought: uint
-  ):
-    """
-    @notice Purchase FAIR tokens with the given amount of currency.
-    @param _to The account to receive the FAIR tokens from this purchase.
-    @param _currencyValue How much currency to spend in order to buy FAIR.
-    @param _minTokensBought Buy at least this many FAIR tokens or the transaction reverts.
-    @dev _minTokensBought is necessary as the price will change if some elses transaction mines after
-    yours was submitted.
-    """
-    assert _to != address(0), "INVALID_ADDRESS"
-    assert _minTokensBought > 0, "MUST_BUY_AT_LEAST_1"
+  /// @notice Purchase FAIR tokens with the given amount of currency.
+  /// @param _to The account to receive the FAIR tokens from this purchase.
+  /// @param _currencyValue How much currency to spend in order to buy FAIR.
+  /// @param _minTokensBought Buy at least this many FAIR tokens or the transaction reverts.
+  /// @dev _minTokensBought is necessary as the price will change if some elses transaction mines after
+  /// yours was submitted.
+  function  buy(
+    address _to,
+    uint _currencyValue,
+    uint _minTokensBought
+  ) public payable
+  {
+    require(_to != address(0), "INVALID_ADDRESS");
+    require(_minTokensBought > 0, "MUST_BUY_AT_LEAST_1");
 
-    /// Calculate the tokenValue for this investment
-    tokenValue: uint = self._estimateBuyValue(_currencyValue)
-    assert tokenValue >= _minTokensBought, "PRICE_SLIPPAGE"
+    // Calculate the tokenValue for this investment
+    uint tokenValue = _estimateBuyValue(_currencyValue);
+    require(tokenValue >= _minTokensBought, "PRICE_SLIPPAGE");
 
-    log.Buy(msg.sender, _to, _currencyValue, tokenValue)
+    emit Buy(msg.sender, _to, _currencyValue, tokenValue);
 
-    self._collectInvestment(msg.sender, _currencyValue, msg.value, False)
+    _collectInvestment(msg.sender, _currencyValue, msg.value, false);
 
-    /// Update state, initInvestors, and distribute the investment when appropriate
-    if(self.state == STATE_INIT):
-      /// Math worst case: MAX_BEFORE_SQUARE
-      self.initInvestors[_to] += tokenValue
-      /// Math worst case:
-      /// MAX_BEFORE_SQUARE + MAX_BEFORE_SQUARE
-      if(self.totalSupply + tokenValue - self.initReserve >= self.initGoal):
-        log.StateChange(self.state, STATE_RUN)
-        self.state = STATE_RUN
-        /// Math worst case:
-        /// MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE/2
-        /// / MAX_BEFORE_SQUARE * 2
-        beneficiaryContribution: uint = self.bigDiv.bigDiv2x1(
-          self.initInvestors[self.beneficiary], self.buySlopeNum * self.initGoal,
-          self.buySlopeDen * 2,
-          False
-        )
-        self._distributeInvestment(self._buybackReserve() - beneficiaryContribution)
-    elif(self.state == STATE_RUN):
-      if(_to != self.beneficiary):
-        self._distributeInvestment(_currencyValue)
+    // Update state, initInvestors, and distribute the investment when appropriate
+    if(state == STATE_INIT)
+    {
+      // Math worst case: MAX_BEFORE_SQUARE
+      initInvestors[_to] += tokenValue;
+      // Math worst case:
+      // MAX_BEFORE_SQUARE + MAX_BEFORE_SQUARE
+      if(totalSupply + tokenValue - initReserve >= initGoal)
+      {
+        emit StateChange(state, STATE_RUN);
+        state = STATE_RUN;
+        // Math worst case:
+        // MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE/2
+        // / MAX_BEFORE_SQUARE * 2
+        uint beneficiaryContribution = bigDiv.bigDiv2x1(
+          initInvestors[beneficiary], buySlopeNum * initGoal,
+          buySlopeDen * 2,
+          false
+        );
+        _distributeInvestment(buybackReserve() - beneficiaryContribution);
+      }
+    }
+    else if(state == STATE_RUN)
+    {
+      if(_to != beneficiary)
+      {
+        _distributeInvestment(_currencyValue);
+      }
+    }
 
-    self._mint(_to, tokenValue)
+    _mint(_to, tokenValue);
 
-    if(self.state == STATE_RUN):
-      if(msg.sender == self.beneficiary and _to == self.beneficiary and self.autoBurn):
-        self._burn(self.beneficiary, tokenValue, False) /// must mint before this call
+    if(state == STATE_RUN)
+    {
+      if(msg.sender == beneficiary && _to == beneficiary && autoBurn)
+      {
+        // must mint before this call
+        _burn(beneficiary, tokenValue, false);
+      }
+    }
+  }
 
   /// Sell
 
-  @private
-  @constant
-  def _estimateSellValue(
-    _quantityToSell: uint
-  ) -> uint:
-    buybackReserve: uint = self._buybackReserve()
+  function _estimateSellValue(
+    uint _quantityToSell
+  ) private view
+    returns(uint)
+  {
+    uint reserve = buybackReserve();
 
-    /// Calculate currencyValue for this sale
-    currencyValue: uint = 0
-    if(self.state == STATE_RUN):
-      supply: uint = self.totalSupply + self.burnedSupply
+    // Calculate currencyValue for this sale
+    uint currencyValue;
+    if(state == STATE_RUN)
+    {
+      uint supply = totalSupply + burnedSupply;
 
-      /// buyback_reserve = r
-      /// total_supply = t
-      /// burnt_supply = b
-      /// amount = a
-      /// source: (t+b)*a*(2*r)/((t+b)^2)-(((2*r)/((t+b)^2)*a^2)/2)+((2*r)/((t+b)^2)*a*b^2)/(2*(t))
-      /// imp: (a b^2 r)/(t (b + t)^2) + (2 a r)/(b + t) - (a^2 r)/(b + t)^2
+      // buyback_reserve = r
+      // total_supply = t
+      // burnt_supply = b
+      // amount = a
+      // source: (t+b)*a*(2*r)/((t+b)^2)-(((2*r)/((t+b)^2)*a^2)/2)+((2*r)/((t+b)^2)*a*b^2)/(2*(t))
+      // imp: (a b^2 r)/(t (b + t)^2) + (2 a r)/(b + t) - (a^2 r)/(b + t)^2
 
-      /// Math: burnedSupply is capped in FAIR such that the square will never overflow
-      /// Math worst case:
-      /// MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE/2
-      /// / MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE/2
-      currencyValue = self.bigDiv.bigDiv2x2(
-        _quantityToSell * buybackReserve, self.burnedSupply * self.burnedSupply,
-        self.totalSupply, supply * supply
-      )
-      /// Math: worst case currencyValue is MAX_BEFORE_SQUARE (max reserve, 1 supply)
+      // Math: burnedSupply is capped in FAIR such that the square will never overflow
+      // Math worst case:
+      // MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE/2
+      // / MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE/2
+      currencyValue = bigDiv.bigDiv2x2(
+        _quantityToSell * reserve, burnedSupply * burnedSupply,
+        totalSupply, supply * supply
+      );
+      // Math: worst case currencyValue is MAX_BEFORE_SQUARE (max reserve, 1 supply)
 
-      /// Math worst case:
-      /// 2 * MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE
-      temp: uint = 2 * _quantityToSell * buybackReserve
-      temp /= supply
-      /// Math: worst-case temp is MAX_BEFORE_SQUARE (max reserve, 1 supply)
+      // Math worst case:
+      // 2 * MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE
+      uint temp = 2 * _quantityToSell * reserve;
+      temp /= supply;
+      // Math: worst-case temp is MAX_BEFORE_SQUARE (max reserve, 1 supply)
 
-      /// Math: considering the worst-case for currencyValue and temp, this can never overflow
-      currencyValue += temp
+      // Math: considering the worst-case for currencyValue and temp, this can never overflow
+      currencyValue += temp;
 
-      /// Math: worst case
-      /// MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE
-      /// / MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE/2
-      currencyValue -= self.bigDiv.bigDiv2x1(
-        _quantityToSell * _quantityToSell, buybackReserve,
+      // Math: worst case
+      // MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE
+      // / MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE/2
+      currencyValue -= bigDiv.bigDiv2x1(
+        _quantityToSell * _quantityToSell, reserve,
         supply * supply,
-        True
-      )
-    elif(self.state == STATE_CLOSE):
-      /// Math worst case
-      /// MAX_BEFORE_SQUARE / 2 * MAX_BEFORE_SQUARE
-      currencyValue = _quantityToSell * buybackReserve
-      currencyValue /= self.totalSupply
-    else: /// STATE_INIT or STATE_CANCEL
-      /// Math worst case:
-      /// MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE
-      currencyValue = _quantityToSell * buybackReserve
-      /// Math: FAIR blocks initReserve from being burned unless we reach the RUN state which prevents an underflow
-      currencyValue /= self.totalSupply - self.initReserve
+        true
+      );
+    }
+    else if(state == STATE_CLOSE)
+    {
+      // Math worst case
+      // MAX_BEFORE_SQUARE / 2 * MAX_BEFORE_SQUARE
+      currencyValue = _quantityToSell * reserve;
+      currencyValue /= totalSupply;
+    }
+    else
+    {
+      // STATE_INIT or STATE_CANCEL
+      // Math worst case:
+      // MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE
+      currencyValue = _quantityToSell * reserve;
+      // Math: FAIR blocks initReserve from being burned unless we reach the RUN state which prevents an underflow
+      currencyValue /= totalSupply - initReserve;
+    }
 
-    return currencyValue
+    return currencyValue;
+  }
 
-  @public
-  @constant
-  def estimateSellValue(
-    _quantityToSell: uint
-  ) -> uint:
-    return self._estimateSellValue(_quantityToSell)
+  function estimateSellValue(
+    uint _quantityToSell
+  ) public view
+    returns(uint)
+  {
+    return _estimateSellValue(_quantityToSell);
+  }
 
-  @private
-  def _sell(
-    _from: address,
-    _to: address,
-    _quantityToSell: uint,
-    _minCurrencyReturned: uint,
-    _hasReceivedFunds: bool
-  ):
-    assert _from != self.beneficiary or self.state >= STATE_CLOSE, "BENEFICIARY_ONLY_SELL_IN_CLOSE_OR_CANCEL"
-    assert _minCurrencyReturned > 0, "MUST_SELL_AT_LEAST_1"
+  function _sell(
+    address _from,
+    address _to,
+    uint _quantityToSell,
+    uint _minCurrencyReturned,
+    bool _hasReceivedFunds
+  ) private
+  {
+    require(_from != beneficiary || state >= STATE_CLOSE, "BENEFICIARY_ONLY_SELL_IN_CLOSE_OR_CANCEL");
+    require(_minCurrencyReturned > 0, "MUST_SELL_AT_LEAST_1");
 
-    currencyValue: uint = self._estimateSellValue(_quantityToSell)
-    assert currencyValue >= _minCurrencyReturned, "PRICE_SLIPPAGE"
+    uint currencyValue = _estimateSellValue(_quantityToSell);
+    require(currencyValue >= _minCurrencyReturned, "PRICE_SLIPPAGE");
 
-    if(self.state == STATE_INIT or self.state == STATE_CANCEL):
-      self.initInvestors[_from] -= _quantityToSell
+    if(state == STATE_INIT || state == STATE_CANCEL)
+    {
+      initInvestors[_from] -= _quantityToSell;
+    }
 
-    /// Distribute funds
-    if(_hasReceivedFunds):
-      self._burn(self, _quantityToSell, True)
-    else:
-      self._burn(_from, _quantityToSell, True)
+    // Distribute funds
+    if(_hasReceivedFunds)
+    {
+      _burn(this, _quantityToSell, true);
+    }
+    else
+    {
+      _burn(_from, _quantityToSell, true);
+    }
 
-    self._sendCurrency(_to, currencyValue)
-    log.Sell(_from, _to, currencyValue, _quantityToSell)
+    _sendCurrency(_to, currencyValue);
+    emit Sell(_from, _to, currencyValue, _quantityToSell);
+  }
 
-  @public
-  def sell(
-    _to: address,
-    _quantityToSell: uint,
-    _minCurrencyReturned: uint
-  ):
-    """
-    @notice Sell FAIR tokens for at least the given amount of currency.
-    @param _to The account to receive the currency from this sale.
-    @param _quantityToSell How many FAIR tokens to sell for currency value.
-    @param _minCurrencyReturned Get at least this many currency tokens or the transaction reverts.
-    @dev _minCurrencyReturned is necessary as the price will change if some elses transaction mines after
-    yours was submitted.
-    """
-    self._sell(msg.sender, _to, _quantityToSell, _minCurrencyReturned, False)
+  /// @notice Sell FAIR tokens for at least the given amount of currency.
+  /// @param _to The account to receive the currency from this sale.
+  /// @param _quantityToSell How many FAIR tokens to sell for currency value.
+  /// @param _minCurrencyReturned Get at least this many currency tokens or the transaction reverts.
+  /// @dev _minCurrencyReturned is necessary as the price will change if some elses transaction mines after
+  /// yours was submitted.
+  function sell(
+    address _to,
+    uint _quantityToSell,
+    uint _minCurrencyReturned
+  ) public
+  {
+    _sell(msg.sender, _to, _quantityToSell, _minCurrencyReturned, false);
+  }
 
   /// Pay
 
-  @private
-  @constant
-  def _estimatePayValue(
-    _currencyValue: uint
-  ) -> uint:
-    /// buy_slope = n/d
-    /// revenue_commitment = c/g
-    /// sqrt(
-    ///  (2 a c d)
-    ///  /
-    ///  (g n)
-    ///  + s^2
-    /// ) - s
+  function _estimatePayValue(
+    uint _currencyValue
+  ) private view
+    returns (uint)
+  {
+    // buy_slope = n/d
+    // revenue_commitment = c/g
+    // sqrt(
+    //  (2 a c d)
+    //  /
+    //  (g n)
+    //  + s^2
+    // ) - s
 
-    supply: uint = self.totalSupply + self.burnedSupply
+    uint supply = totalSupply + burnedSupply;
 
-    /// Math: worst case
-    /// 2 * MAX_BEFORE_SQUARE/2 * 10000 * MAX_BEFORE_SQUARE
-    /// / 10000 * MAX_BEFORE_SQUARE
-    tokenValue: uint = self.bigDiv.bigDiv2x1(
-      2 * _currencyValue * self.revenueCommitmentBasisPoints, self.buySlopeDen,
-      BASIS_POINTS_DEN * self.buySlopeNum,
-      False
-    )
+    // Math: worst case
+    // 2 * MAX_BEFORE_SQUARE/2 * 10000 * MAX_BEFORE_SQUARE
+    // / 10000 * MAX_BEFORE_SQUARE
+    uint tokenValue = bigDiv.bigDiv2x1(
+      2 * _currencyValue * revenueCommitmentBasisPoints, buySlopeDen,
+      BASIS_POINTS_DEN * buySlopeNum,
+      false
+    );
 
-    tokenValue += supply * supply
-    tokenValue = self.sqrtContract.sqrtUint(tokenValue)
+    tokenValue += supply * supply;
+    tokenValue = sqrtContract.sqrtUint(tokenValue);
 
-    if(tokenValue > supply):
-      tokenValue -= supply
-    else:
-      tokenValue = 0
+    if(tokenValue > supply)
+    {
+      tokenValue -= supply;
+    }
+    else
+    {
+      tokenValue = 0;
+    }
 
-    return tokenValue
+    return tokenValue;
+  }
 
-  @public
-  @constant
-  def estimatePayValue(
-    _currencyValue: uint
-  ) -> uint:
-    return self._estimatePayValue(_currencyValue)
+  function estimatePayValue(
+    uint _currencyValue
+  ) public view
+    returns (uint)
+  {
+    return _estimatePayValue(_currencyValue);
+  }
 
-  @private
-  def _pay(
-    _from: address,
-    _to: address,
-    _currencyValue: uint
-  ):
-    """
-    @dev Pay the organization on-chain.
-    @param _from The account which issued the transaction and paid the currencyValue.
-    @param _to The account which receives tokens for the contribution.
-    @param _currencyValue How much currency which was paid.
-    """
-    assert _from != address(0), "INVALID_ADDRESS"
-    assert _currencyValue > 0, "MISSING_CURRENCY"
-    assert self.state == STATE_RUN, "INVALID_STATE"
+  /// @dev Pay the organization on-chain.
+  /// @param _from The account which issued the transaction and paid the currencyValue.
+  /// @param _to The account which receives tokens for the contribution.
+  /// @param _currencyValue How much currency which was paid.
+  function _pay(
+    address _from,
+    address _to,
+    uint _currencyValue
+  ) private
+  {
+    require(_from != address(0), "INVALID_ADDRESS");
+    require(_currencyValue > 0, "MISSING_CURRENCY");
+    require(state == STATE_RUN, "INVALID_STATE");
 
-    /// Send a portion of the funds to the beneficiary, the rest is added to the buybackReserve
-    /// Math: if _currencyValue is < (2^256 - 1) / 10000 this will never overflow
-    reserve: uint = _currencyValue * self.investmentReserveBasisPoints
-    reserve /= BASIS_POINTS_DEN
+    // Send a portion of the funds to the beneficiary, the rest is added to the buybackReserve
+    // Math: if _currencyValue is < (2^256 - 1) / 10000 this will never overflow
+    uint reserve = _currencyValue * investmentReserveBasisPoints;
+    reserve /= BASIS_POINTS_DEN;
 
-    tokenValue: uint = self._estimatePayValue(_currencyValue)
+    uint tokenValue = _estimatePayValue(_currencyValue);
 
-    /// Update the to address to the beneficiary if the currency value would fail
-    to: address = _to
-    if(to == address(0)):
-      to = self.beneficiary
-    elif(self._detectTransferRestriction(address(0), _to, tokenValue) != 0):
-      to = self.beneficiary
+    // Update the to address to the beneficiary if the currency value would fail
+    address to = _to;
+    if(to == address(0))
+    {
+      to = beneficiary;
+    }
+    else if(_detectTransferRestriction(address(0), _to, tokenValue) != 0)
+    {
+      to = beneficiary;
+    }
 
-    /// Math: this will never underflow since investmentReserveBasisPoints is capped to BASIS_POINTS_DEN
-    self._sendCurrency(self.beneficiary, _currencyValue - reserve)
+    // Math: this will never underflow since investmentReserveBasisPoints is capped to BASIS_POINTS_DEN
+    _sendCurrency(beneficiary, _currencyValue - reserve);
 
-    /// Distribute tokens
-    if(tokenValue > 0):
-      self._mint(to, tokenValue)
-      if(to == self.beneficiary and self.autoBurn):
-        self._burn(self.beneficiary, tokenValue, False) /// must mint before this call
+    // Distribute tokens
+    if(tokenValue > 0)
+    {
+      _mint(to, tokenValue);
+      if(to == beneficiary && autoBurn)
+      {
+        // must mint before this call
+        _burn(beneficiary, tokenValue, false);
+      }
+    }
 
-    log.Pay(_from, _to, _currencyValue, tokenValue)
+    emit Pay(_from, _to, _currencyValue, tokenValue);
+  }
 
-  @public
-  @payable
-  def pay(
-    _to: address,
-    _currencyValue: uint
-  ):
-    """
-    @dev Pay the organization on-chain.
-    @param _to The account which receives tokens for the contribution. If this address
-    is not authorized to receive tokens then they will be sent to the beneficiary account instead.
-    @param _currencyValue How much currency which was paid.
-    """
-    self._collectInvestment(msg.sender, _currencyValue, msg.value, False)
-    self._pay(msg.sender, _to, _currencyValue)
+  /// @dev Pay the organization on-chain.
+  /// @param _to The account which receives tokens for the contribution. If this address
+  /// is not authorized to receive tokens then they will be sent to the beneficiary account instead.
+  /// @param _currencyValue How much currency which was paid.
+  function pay(
+    address _to,
+    uint _currencyValue
+  ) public payable
+  {
+    _collectInvestment(msg.sender, _currencyValue, msg.value, false);
+    _pay(msg.sender, _to, _currencyValue);
+  }
 
-  @public
-  @payable
-  def __default__():
-    """
-    @dev Pay the organization on-chain with ETH (only works when currency is ETH)
-    """
-    self._collectInvestment(msg.sender, as_unitless_number(msg.value), msg.value, False)
-    self._pay(msg.sender, msg.sender, as_unitless_number(msg.value))
+  /// @dev Pay the organization on-chain with ETH (only works when currency is ETH)
+  function () external payable
+  {
+    _collectInvestment(msg.sender, msg.value, msg.value, false);
+    _pay(msg.sender, msg.sender, msg.value);
+  }
 
   /// Close
 
-  @private
-  @constant
-  def _estimateExitFee(
-    _msgValue: uint(wei)
-  ) -> uint:
-    exitFee: uint = 0
+  function _estimateExitFee(
+    uint _msgValue
+  ) private view
+    returns(uint)
+  {
+    uint exitFee;
 
-    if(self.state == STATE_RUN):
-      buybackReserve: uint = self._buybackReserve()
-      buybackReserve -= as_unitless_number(_msgValue)
+    if(state == STATE_RUN)
+    {
+      uint reserve = buybackReserve();
+      reserve -= _msgValue;
 
-      /// Source: t*(t+b)*(n/d)-r
-      /// Implementation: (b n t)/d + (n t^2)/d - r
+      // Source: t*(t+b)*(n/d)-r
+      // Implementation: (b n t)/d + (n t^2)/d - r
 
-      /// Math worst case:
-      /// MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE
-      exitFee = self.bigDiv.bigDiv2x1(
-        self.burnedSupply * self.buySlopeNum, self.totalSupply,
-        self.buySlopeDen,
-        False
-      )
-      /// Math worst case:
-      /// MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE
-      exitFee += self.bigDiv.bigDiv2x1(
-        self.buySlopeNum * self.totalSupply, self.totalSupply,
-        self.buySlopeDen,
-        False
-      )
+      // Math worst case:
+      // MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE
+      exitFee = bigDiv.bigDiv2x1(
+        burnedSupply * buySlopeNum, totalSupply,
+        buySlopeDen,
+        false
+      );
+      // Math worst case:
+      // MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE
+      exitFee += bigDiv.bigDiv2x1(
+        buySlopeNum * totalSupply, totalSupply,
+        buySlopeDen,
+        false
+      );
       /// Math: this if condition avoids a potential overflow
-      if(exitFee <= buybackReserve):
-        exitFee = 0
-      else:
-        exitFee -= buybackReserve
+      if(exitFee <= reserve)
+      {
+        exitFee = 0;
+      }
+      else
+      {
+        exitFee -= reserve;
+      }
+    }
 
-    return exitFee
+    return exitFee;
+  }
 
-  @public
-  @constant
-  def estimateExitFee(
-    _msgValue: uint(wei)
-  ) -> uint:
-    return self._estimateExitFee(_msgValue)
+  function estimateExitFee(
+    uint _msgValue
+  ) public view
+    returns(uint)
+  {
+    return _estimateExitFee(_msgValue);
+  }
 
-  @public
-  @payable
-  def close():
-    """
-    @notice Called by the beneficiary account to STATE_CLOSE or STATE_CANCEL the c-org,
-    preventing any more tokens from being minted.
-    @dev Requires an `exitFee` to be paid.  If the currency is ETH, include a little more than
-    what appears to be required and any remainder will be returned to your account.  This is
-    because another user may have a transaction mined which changes the exitFee required.
-    For other `currency` types, the beneficiary account will be billed the exact amount required.
-    """
-    assert msg.sender == self.beneficiary, "BENEFICIARY_ONLY"
+  /// @notice Called by the beneficiary account to STATE_CLOSE or STATE_CANCEL the c-org,
+  /// preventing any more tokens from being minted.
+  /// @dev Requires an `exitFee` to be paid.  If the currency is ETH, include a little more than
+  /// what appears to be required and any remainder will be returned to your account.  This is
+  /// because another user may have a transaction mined which changes the exitFee required.
+  /// For other `currency` types, the beneficiary account will be billed the exact amount required.
+  function close() public payable
+  {
+    require(msg.sender == beneficiary, "BENEFICIARY_ONLY");
 
-    exitFee: uint = 0
+    uint exitFee = 0;
 
-    if(self.state == STATE_INIT):
-      /// Allow the org to cancel anytime if the initGoal was not reached.
-      log.StateChange(self.state, STATE_CANCEL)
-      self.state = STATE_CANCEL
-    elif(self.state == STATE_RUN):
-      /// Collect the exitFee and close the c-org.
-      assert self.openUntilAtLeast <= block.timestamp, "TOO_EARLY"
+    if(state == STATE_INIT)
+    {
+      // Allow the org to cancel anytime if the initGoal was not reached.
+      emit StateChange(state, STATE_CANCEL);
+      state = STATE_CANCEL;
+    }
+    else if(state == STATE_RUN)
+    {
+      // Collect the exitFee and close the c-org.
+      require(openUntilAtLeast <= block.timestamp, "TOO_EARLY");
 
-      exitFee = self._estimateExitFee(msg.value)
+      exitFee = _estimateExitFee(msg.value);
 
-      log.StateChange(self.state, STATE_CLOSE)
-      self.state = STATE_CLOSE
+      emit StateChange(state, STATE_CLOSE);
+      state = STATE_CLOSE;
 
-      self._collectInvestment(msg.sender, exitFee, msg.value, True)
-    else:
-      assert False, "INVALID_STATE"
+      _collectInvestment(msg.sender, exitFee, msg.value, true);
+    }
+    else
+    {
+      require(false, "INVALID_STATE");
+    }
 
-    log.Close(exitFee)
+    emit Close(exitFee);
+  }
 }
