@@ -25,7 +25,7 @@ contract("fair / erc20 / symbol", accounts => {
         assert.equal(await contracts.dat.symbol(), newSymbol);
       });
 
-      it("should emit an event", async () => {
+      it.skip("should emit an event", async () => {
         const log = tx.logs[0];
         assert.notEqual(log, undefined);
         // assert.equal(log.event, 'SymbolUpdated');
