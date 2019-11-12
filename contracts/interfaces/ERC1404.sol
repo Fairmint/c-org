@@ -18,7 +18,7 @@ interface ERC1404
   function detectTransferRestriction(
     address from,
     address to,
-    uint256 value
+    uint value
   ) external view
     returns (uint8);
 

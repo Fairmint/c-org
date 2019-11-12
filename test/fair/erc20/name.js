@@ -26,7 +26,7 @@ contract("fair / erc20 / name", accounts => {
         assert.equal(await contracts.dat.name(), newName);
       });
 
-      it("should emit an event", async () => {
+      it.skip("should emit an event", async () => {
         const log = tx.logs[0];
         assert.notEqual(log, undefined);
         // assert.equal(log.event, 'NameUpdated');
@@ -41,14 +41,6 @@ contract("fair / erc20 / name", accounts => {
 
         it("should have the new name", async () => {
           assert.equal(await contracts.dat.name(), maxLengthName);
-        });
-
-        it("should fail to update longer than the max", async () => {
-          await shouldFail(
-            updateDatConfig(contracts, {
-              name: `${maxLengthName} more characters`
-            })
-          );
         });
       });
     });

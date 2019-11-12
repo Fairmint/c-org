@@ -11,52 +11,43 @@ contract("bigDiv", accounts => {
 
   it("2x1 does not overflow with sqrt max value", async () => {
     const sqrtMax = maxValue.sqrt().dp(0);
-    await contract.bigDiv2x1(sqrtMax.toFixed(), 1, 1, false);
-    await contract.bigDiv2x1(1, sqrtMax.toFixed(), 1, false);
-    await contract.bigDiv2x1(1, 1, sqrtMax.toFixed(), false);
+    await contract.bigDiv2x1(sqrtMax.toFixed(), 1, 1);
+    await contract.bigDiv2x1(1, sqrtMax.toFixed(), 1);
+    await contract.bigDiv2x1(1, 1, sqrtMax.toFixed());
+    await contract.bigDiv2x1(sqrtMax.toFixed(), sqrtMax.minus(1).toFixed(), 1);
     await contract.bigDiv2x1(
       sqrtMax.toFixed(),
       sqrtMax.minus(1).toFixed(),
-      1,
-      false
-    );
-    await contract.bigDiv2x1(
-      sqrtMax.toFixed(),
-      sqrtMax.minus(1).toFixed(),
-      sqrtMax.toFixed(),
-      false
+      sqrtMax.toFixed()
     );
   });
 
   it("2x1 does not overflow with half max value", async () => {
-    await contract.bigDiv2x1(
+    await contract.bigDiv2x1RoundUp(
       maxValue
         .div(2)
         .dp(0)
         .toFixed(),
       1,
-      1,
-      true
+      1
     );
-    await contract.bigDiv2x1(
+    await contract.bigDiv2x1RoundUp(
       1,
       maxValue
         .div(2)
         .dp(0)
         .toFixed(),
-      1,
-      true
+      1
     );
-    await contract.bigDiv2x1(
+    await contract.bigDiv2x1RoundUp(
       1,
       1,
       maxValue
         .div(2)
         .dp(0)
-        .toFixed(),
-      true
+        .toFixed()
     );
-    await contract.bigDiv2x1(
+    await contract.bigDiv2x1RoundUp(
       maxValue
         .div(2)
         .dp(0)
@@ -68,16 +59,15 @@ contract("bigDiv", accounts => {
       maxValue
         .div(2)
         .dp(0)
-        .toFixed(),
-      true
+        .toFixed()
     );
   });
 
   it("2x1 does not overflow with max value", async () => {
-    await contract.bigDiv2x1(maxValue.toFixed(), 1, 1, false);
-    await contract.bigDiv2x1(1, maxValue.toFixed(), 1, false);
-    await contract.bigDiv2x1(1, 1, maxValue.toFixed(), false);
-    await contract.bigDiv2x1(maxValue.toFixed(), 1, maxValue.toFixed(), false);
+    await contract.bigDiv2x1(maxValue.toFixed(), 1, 1);
+    await contract.bigDiv2x1(1, maxValue.toFixed(), 1);
+    await contract.bigDiv2x1(1, 1, maxValue.toFixed());
+    await contract.bigDiv2x1(maxValue.toFixed(), 1, maxValue.toFixed());
   });
 
   it("2x2 does not overflow with sqrt max value", async () => {
