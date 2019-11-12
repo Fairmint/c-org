@@ -41,14 +41,6 @@ contract("fair / erc20 / symbol", accounts => {
         it("should have the new symbol", async () => {
           assert.equal(await contracts.dat.symbol(), maxLengthSymbol);
         });
-
-        it("should fail to update longer than the max", async () => {
-          await shouldFail(
-            updateDatConfig(contracts, {
-              symbol: `${maxLengthSymbol} more characters`
-            })
-          );
-        });
       });
     });
   });

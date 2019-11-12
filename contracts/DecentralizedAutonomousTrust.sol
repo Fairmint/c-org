@@ -99,7 +99,7 @@ contract DecentralizedAutonomousTrust
   /// @notice Returns the number of decimals the token uses - e.g. 8, means to divide
   /// the token amount by 100000000 to get its user representation.
   /// @dev Hardcoded to 18
-  uint constant decimals = 18;
+  uint public constant decimals = 18;
 
   /**
    * Data specific to our token business logic

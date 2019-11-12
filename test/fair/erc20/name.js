@@ -42,14 +42,6 @@ contract("fair / erc20 / name", accounts => {
         it("should have the new name", async () => {
           assert.equal(await contracts.dat.name(), maxLengthName);
         });
-
-        it("should fail to update longer than the max", async () => {
-          await shouldFail(
-            updateDatConfig(contracts, {
-              name: `${maxLengthName} more characters`
-            })
-          );
-        });
       });
     });
   });
