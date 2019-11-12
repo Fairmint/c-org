@@ -1,9 +1,9 @@
 module.exports = async function updateDatConfig(contracts, options) {
   const callOptions = Object.assign(
     {
-      bigDivAddress: await contracts.dat.bigDivAddress(),
-      sqrtAddress: await contracts.dat.sqrtAddress(),
-      whitelistAddress: await contracts.dat.whitelistAddress(),
+      bigDivAddress: await contracts.dat.bigDiv(),
+      sqrtAddress: await contracts.dat.sqrtContract(),
+      whitelistAddress: await contracts.dat.whitelist(),
       beneficiary: await contracts.dat.beneficiary(),
       control: await contracts.dat.control(),
       feeCollector: await contracts.dat.feeCollector(),
