@@ -24,8 +24,6 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 contract DecentralizedAutonomousTrust
   is IERC20
 {
-  using Sqrt for uint;
-
   /**
    * Events
    */
@@ -571,21 +569,22 @@ contract DecentralizedAutonomousTrust
       beneficiary = _beneficiary;
     }
 
-    emit UpdateConfig(
-      _bigDiv,
-      _sqrtContract,
-      _whitelistAddress,
-      _beneficiary,
-      _control,
-      _feeCollector,
-      _autoBurn,
-      _revenueCommitmentBasisPoints,
-      _feeBasisPoints,
-      _minInvestment,
-      _openUntilAtLeast,
-      _name,
-      _symbol
-    );
+    // TODO stack too deep
+    // emit UpdateConfig(
+    //   _bigDiv,
+    //   _sqrtContract,
+    //   _whitelistAddress,
+    //   _beneficiary,
+    //   _control,
+    //   _feeCollector,
+    //   _autoBurn,
+    //   _revenueCommitmentBasisPoints,
+    //   _feeBasisPoints,
+    //   _minInvestment,
+    //   _openUntilAtLeast,
+    //   _name,
+    //   _symbol
+    // );
   }
 
   /**
@@ -662,7 +661,7 @@ contract DecentralizedAutonomousTrust
       tokenValue /= buySlopeNum;
       
       tokenValue += supply * supply;
-      tokenValue = sqrtContract.sqrtUint(tokenValue);
+      tokenValue = sqrtContract.sqrt(tokenValue);
 
       // Math: small chance of underflow due to possible rounding in sqrt
       if(tokenValue > supply)
@@ -730,8 +729,7 @@ contract DecentralizedAutonomousTrust
         // / MAX_BEFORE_SQUARE * 2
         uint beneficiaryContribution = bigDiv.bigDiv2x1(
           initInvestors[beneficiary], buySlopeNum * initGoal,
-          buySlopeDen * 2,
-          false
+          buySlopeDen * 2
         );
         _distributeInvestment(buybackReserve() - beneficiaryContribution);
       }
@@ -800,10 +798,9 @@ contract DecentralizedAutonomousTrust
       // Math: worst case
       // MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE
       // / MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE/2
-      currencyValue -= bigDiv.bigDiv2x1(
+      currencyValue -= bigDiv.bigDiv2x1RoundUp(
         _quantityToSell * _quantityToSell, reserve,
-        supply * supply,
-        true
+        supply * supply
       );
     }
     else if(state == STATE_CLOSE)
@@ -856,7 +853,7 @@ contract DecentralizedAutonomousTrust
     // Distribute funds
     if(_hasReceivedFunds)
     {
-      _burn(this, _quantityToSell, true);
+      _burn(address(this), _quantityToSell, true);
     }
     else
     {
@@ -905,12 +902,11 @@ contract DecentralizedAutonomousTrust
     // / 10000 * MAX_BEFORE_SQUARE
     uint tokenValue = bigDiv.bigDiv2x1(
       2 * _currencyValue * revenueCommitmentBasisPoints, buySlopeDen,
-      BASIS_POINTS_DEN * buySlopeNum,
-      false
+      BASIS_POINTS_DEN * buySlopeNum
     );
 
     tokenValue += supply * supply;
-    tokenValue = sqrtContract.sqrtUint(tokenValue);
+    tokenValue = sqrtContract.sqrt(tokenValue);
 
     if(tokenValue > supply)
     {
@@ -1022,15 +1018,13 @@ contract DecentralizedAutonomousTrust
       // MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE
       exitFee = bigDiv.bigDiv2x1(
         burnedSupply * buySlopeNum, totalSupply,
-        buySlopeDen,
-        false
+        buySlopeDen
       );
       // Math worst case:
       // MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE
       exitFee += bigDiv.bigDiv2x1(
         buySlopeNum * totalSupply, totalSupply,
-        buySlopeDen,
-        false
+        buySlopeDen
       );
       /// Math: this if condition avoids a potential overflow
       if(exitFee <= reserve)
