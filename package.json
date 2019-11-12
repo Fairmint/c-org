@@ -18,7 +18,9 @@
   },
   "dependencies": {
     "@openzeppelin/contracts": "2.4.0",
+    "@openzeppelin/contracts-ethereum-package": "^2.3.0",
     "@openzeppelin/test-helpers": "0.5.3",
+    "@openzeppelin/upgrades": "^2.6.0",
     "bignumber.js": "9.0.0",
     "ganache-cli": "6.7.0",
     "hardlydifficult-ethereum-contracts": "0.6.8",
