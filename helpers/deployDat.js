@@ -21,7 +21,9 @@ module.exports = async function deployDat(accounts, options, useProxy = true) {
       revenueCommitmentBasisPoints: "1000",
       control: accounts.length > 2 ? accounts[1] : accounts[0],
       beneficiary: accounts[0],
-      feeCollector: accounts.length > 2 ? accounts[2] : accounts[0]
+      feeCollector: accounts.length > 2 ? accounts[2] : accounts[0],
+      name: "Test org",
+      symbol: "TFO"
     },
     options
   );
