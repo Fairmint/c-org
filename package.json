@@ -10,7 +10,6 @@
     "lintNoFix": "eslint . && solium -d contracts/",
     "deploy": "truffle test scripts/deploy.js",
     "test": "truffle test",
-    "csvTests": "truffle test csvTests/csvTests.js",
     "coverage": "truffle run coverage && cat coverage/lcov.info | coveralls"
   },
   "repository": {
