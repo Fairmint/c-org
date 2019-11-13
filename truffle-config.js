@@ -124,10 +124,14 @@ module.exports = {
     reporter: "eth-gas-reporter",
     useColors: true,
     reporterOptions: {
-      currency: 'USD',
-      excludeContracts: ['Dependencies.sol', 'Migrations.sol', 'test-artifacts/'],
-      gasPrice: 5,
-    },
+      currency: "USD",
+      excludeContracts: [
+        "Dependencies.sol",
+        "Migrations.sol",
+        "test-artifacts/"
+      ],
+      gasPrice: 5
+    }
   },
 
   // Configure your compilers
