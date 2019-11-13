@@ -120,18 +120,18 @@ module.exports = {
   // Set default mocha options here, use special reporters etc.
   mocha: {
     // timeout: 100000,
-    enableTimeouts: false,
-    reporter: "eth-gas-reporter",
-    useColors: true,
-    reporterOptions: {
-      currency: "USD",
-      excludeContracts: [
-        "Dependencies.sol",
-        "Migrations.sol",
-        "test-artifacts/"
-      ],
-      gasPrice: 5
-    }
+    enableTimeouts: false
+    // reporter: "eth-gas-reporter",
+    // useColors: true,
+    // reporterOptions: {
+    //   currency: "USD",
+    //   excludeContracts: [
+    //     "Dependencies.sol",
+    //     "Migrations.sol",
+    //     "test-artifacts/"
+    //   ],
+    //   gasPrice: 5
+    // }
   },
   plugins: ["solidity-coverage"],
 
