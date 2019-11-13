@@ -96,7 +96,7 @@ contract DecentralizedAutonomousTrust
   /// @notice The denominator component for values specified in basis points.
   uint constant BASIS_POINTS_DEN = 10000;
 
-  /// @notice The max `totalSupply + burnedSupply`
+  /// @notice The max `totalSupply() + burnedSupply`
   /// @dev This limit ensures that the DAT's formulas do not overflow (<MAX_BEFORE_SQUARE/2)
   uint constant MAX_SUPPLY = 10 ** 38;
 
@@ -248,22 +248,16 @@ contract DecentralizedAutonomousTrust
   /// @dev Moves tokens from one account to another if authorized.
   /// We have disabled the call hooks for ERC-20 style transfers in order to ensure other contracts interfacing with
   /// FAIR tokens (e.g. Uniswap) remain secure.
-  function _send(
+  function _transfer(
     address _from,
     address _to,
     uint _amount
-  ) private
+  ) internal
   {
-    require(_from != address(0), "ERC20: send from the zero address");
-    require(_to != address(0), "ERC20: send to the zero address");
     require(state != STATE_INIT || _from == beneficiary, "Only the beneficiary can make transfers during STATE_INIT");
-
     _authorizeTransfer(_from, _to, _amount, false);
 
-    balanceOf[_from] -= _amount;
-    balanceOf[_to] += _amount;
-
-    emit Transfer(_from, _to, _amount);
+    super._transfer(_from, _to, _amount);
   }
 
   /// @dev Removes tokens from the circulating supply.
@@ -271,40 +265,30 @@ contract DecentralizedAutonomousTrust
     address _from,
     uint _amount,
     bool _isSell
-  ) private
+  ) internal
   {
-    require(_from != address(0), "ERC20: burn from the zero address");
-
-    balanceOf[_from] -= _amount;
-    totalSupply -= _amount;
-
     _authorizeTransfer(_from, address(0), _amount, _isSell);
+    super._burn(_from, _amount);
+
     if(!_isSell)
     {
       /// This is a burn
       require(state == STATE_RUN, "ONLY_DURING_RUN");
       burnedSupply += _amount;
     }
-
-    emit Transfer(_from, address(0), _amount);
   }
 
-  /// @notice Called by the owner, which is the DAT contract, in order to mint tokens on `buy`.
+  /// @notice Called to mint tokens on `buy`.
   function _mint(
     address _to,
     uint _quantity
-  ) private
+  ) internal
   {
-    require(_to != address(0), "INVALID_ADDRESS");
-    require(_quantity > 0, "INVALID_QUANTITY");
     _authorizeTransfer(address(0), _to, _quantity, false);
+    super._mint(_to, _quantity);
 
-    totalSupply += _quantity;
     /// Math: If this value got too large, the DAT may overflow on sell
-    require(totalSupply + burnedSupply <= MAX_SUPPLY, "EXCESSIVE_SUPPLY");
-    balanceOf[_to] += _quantity;
-
-    emit Transfer(address(0), _to, _quantity);
+    require(totalSupply() + burnedSupply <= MAX_SUPPLY, "EXCESSIVE_SUPPLY");
   }
 
   /**
@@ -341,7 +325,7 @@ contract DecentralizedAutonomousTrust
     else
     {
       // currency is ERC20
-      require(_msgValue == 0, "DO_NOT_SEND_ETH");
+      require(_msgValue == 0, "DO_NOT_transfer_ETH");
 
       bool success = currency.transferFrom(_from, address(this), _quantityToInvest);
       require(success, "ERC20_TRANSFER_FAILED");
@@ -349,7 +333,7 @@ contract DecentralizedAutonomousTrust
   }
 
   /// @dev Send `_amount` currency from the contract to the `_to` account.
-  function _sendCurrency(
+  function _transferCurrency(
     address _to,
     uint _amount
   ) private
@@ -481,12 +465,12 @@ contract DecentralizedAutonomousTrust
     if(beneficiary != _beneficiary)
     {
       require(_beneficiary != address(0), "INVALID_ADDRESS");
-      uint tokens = balanceOf[beneficiary];
+      uint tokens = balanceOf(beneficiary);
       initInvestors[_beneficiary] += initInvestors[beneficiary];
       initInvestors[beneficiary] = 0;
       if(tokens > 0)
       {
-        _send(beneficiary, _beneficiary, tokens);
+        _transfer(beneficiary, _beneficiary, tokens);
       }
       beneficiary = _beneficiary;
     }
@@ -539,8 +523,8 @@ contract DecentralizedAutonomousTrust
     fee /= BASIS_POINTS_DEN;
 
     // Math: since feeBasisPoints is <= BASIS_POINTS_DEN, this will never underflow.
-    _sendCurrency(beneficiary, reserve - fee);
-    _sendCurrency(feeCollector, fee);
+    _transferCurrency(beneficiary, reserve - fee);
+    _transferCurrency(feeCollector, fee);
   }
 
   /// @notice Calculate how many FAIR tokens you would buy with the given amount of currency if `buy` was called now.
@@ -573,7 +557,7 @@ contract DecentralizedAutonomousTrust
     }
     else if(state == STATE_RUN)
     {
-      uint supply = totalSupply + burnedSupply;
+      uint supply = totalSupply() + burnedSupply;
       // Math: worst case
       // 2 * MAX_BEFORE_SQUARE / 2 * MAX_BEFORE_SQUARE
       // / MAX_BEFORE_SQUARE
@@ -640,7 +624,7 @@ contract DecentralizedAutonomousTrust
       initInvestors[_to] += tokenValue;
       // Math worst case:
       // MAX_BEFORE_SQUARE + MAX_BEFORE_SQUARE
-      if(totalSupply + tokenValue - initReserve >= initGoal)
+      if(totalSupply() + tokenValue - initReserve >= initGoal)
       {
         emit StateChange(state, STATE_RUN);
         state = STATE_RUN;
@@ -687,7 +671,7 @@ contract DecentralizedAutonomousTrust
     uint currencyValue;
     if(state == STATE_RUN)
     {
-      uint supply = totalSupply + burnedSupply;
+      uint supply = totalSupply() + burnedSupply;
 
       // buyback_reserve = r
       // total_supply = t
@@ -702,7 +686,7 @@ contract DecentralizedAutonomousTrust
       // / MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE/2
       currencyValue = bigDiv.bigDiv2x2(
         _quantityToSell * reserve, burnedSupply * burnedSupply,
-        totalSupply, supply * supply
+        totalSupply(), supply * supply
       );
       // Math: worst case currencyValue is MAX_BEFORE_SQUARE (max reserve, 1 supply)
 
@@ -728,7 +712,7 @@ contract DecentralizedAutonomousTrust
       // Math worst case
       // MAX_BEFORE_SQUARE / 2 * MAX_BEFORE_SQUARE
       currencyValue = _quantityToSell * reserve;
-      currencyValue /= totalSupply;
+      currencyValue /= totalSupply();
     }
     else
     {
@@ -737,7 +721,7 @@ contract DecentralizedAutonomousTrust
       // MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE
       currencyValue = _quantityToSell * reserve;
       // Math: FAIR blocks initReserve from being burned unless we reach the RUN state which prevents an underflow
-      currencyValue /= totalSupply - initReserve;
+      currencyValue /= totalSupply() - initReserve;
     }
 
     return currencyValue;
@@ -780,7 +764,7 @@ contract DecentralizedAutonomousTrust
       _burn(_from, _quantityToSell, true);
     }
 
-    _sendCurrency(_to, currencyValue);
+    _transferCurrency(_to, currencyValue);
     emit Sell(_from, _to, currencyValue, _quantityToSell);
   }
 
@@ -815,7 +799,7 @@ contract DecentralizedAutonomousTrust
     //  + s^2
     // ) - s
 
-    uint supply = totalSupply + burnedSupply;
+    uint supply = totalSupply() + burnedSupply;
 
     // Math: worst case
     // 2 * MAX_BEFORE_SQUARE/2 * 10000 * MAX_BEFORE_SQUARE
@@ -881,7 +865,7 @@ contract DecentralizedAutonomousTrust
     }
 
     // Math: this will never underflow since investmentReserveBasisPoints is capped to BASIS_POINTS_DEN
-    _sendCurrency(beneficiary, _currencyValue - reserve);
+    _transferCurrency(beneficiary, _currencyValue - reserve);
 
     // Distribute tokens
     if(tokenValue > 0)
@@ -937,13 +921,13 @@ contract DecentralizedAutonomousTrust
       // Math worst case:
       // MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE
       exitFee = bigDiv.bigDiv2x1(
-        burnedSupply * buySlopeNum, totalSupply,
+        burnedSupply * buySlopeNum, totalSupply(),
         buySlopeDen
       );
       // Math worst case:
       // MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE
       exitFee += bigDiv.bigDiv2x1(
-        buySlopeNum * totalSupply, totalSupply,
+        buySlopeNum * totalSupply(), totalSupply(),
         buySlopeDen
       );
       /// Math: this if condition avoids a potential overflow
