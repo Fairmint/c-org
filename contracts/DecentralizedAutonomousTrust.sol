@@ -1,17 +1,14 @@
 pragma solidity 0.5.12;
 
+import "./Whitelist.sol";
 import "hardlydifficult-ethereum-contracts/contracts/math/BigDiv.sol";
 import "hardlydifficult-ethereum-contracts/contracts/math/Sqrt.sol";
-import "./Whitelist.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20Detailed.sol";
 
-// TODO ZOS ERC-20 and metadata
-// TODO safemath
-// TODO remove redundant private functions
-// TODO add burn event (for non-sell transfer to 0)
 // TODO stack too deep on event below
+// TODO safemath
 
 
 /**
@@ -246,8 +243,6 @@ contract DecentralizedAutonomousTrust
    */
 
   /// @dev Moves tokens from one account to another if authorized.
-  /// We have disabled the call hooks for ERC-20 style transfers in order to ensure other contracts interfacing with
-  /// FAIR tokens (e.g. Uniswap) remain secure.
   function _transfer(
     address _from,
     address _to,
@@ -275,6 +270,7 @@ contract DecentralizedAutonomousTrust
       /// This is a burn
       require(state == STATE_RUN, "ONLY_DURING_RUN");
       burnedSupply += _amount;
+      emit Burn(_from, _amount);
     }
   }
 
@@ -529,9 +525,9 @@ contract DecentralizedAutonomousTrust
 
   /// @notice Calculate how many FAIR tokens you would buy with the given amount of currency if `buy` was called now.
   /// @param _currencyValue How much currency to spend in order to buy FAIR.
-  function _estimateBuyValue(
+  function estimateBuyValue(
     uint _currencyValue
-  ) private view
+  ) public view
     returns (uint)
   {
     if(_currencyValue < minInvestment)
@@ -586,21 +582,13 @@ contract DecentralizedAutonomousTrust
     return tokenValue;
   }
 
-  function estimateBuyValue(
-    uint _currencyValue
-  ) public view
-    returns (uint)
-  {
-    return _estimateBuyValue(_currencyValue);
-  }
-
   /// @notice Purchase FAIR tokens with the given amount of currency.
   /// @param _to The account to receive the FAIR tokens from this purchase.
   /// @param _currencyValue How much currency to spend in order to buy FAIR.
   /// @param _minTokensBought Buy at least this many FAIR tokens or the transaction reverts.
   /// @dev _minTokensBought is necessary as the price will change if some elses transaction mines after
   /// yours was submitted.
-  function  buy(
+  function buy(
     address _to,
     uint _currencyValue,
     uint _minTokensBought
@@ -610,7 +598,7 @@ contract DecentralizedAutonomousTrust
     require(_minTokensBought > 0, "MUST_BUY_AT_LEAST_1");
 
     // Calculate the tokenValue for this investment
-    uint tokenValue = _estimateBuyValue(_currencyValue);
+    uint tokenValue = estimateBuyValue(_currencyValue);
     require(tokenValue >= _minTokensBought, "PRICE_SLIPPAGE");
 
     emit Buy(msg.sender, _to, _currencyValue, tokenValue);
@@ -660,9 +648,9 @@ contract DecentralizedAutonomousTrust
 
   /// Sell
 
-  function _estimateSellValue(
+  function estimateSellValue(
     uint _quantityToSell
-  ) private view
+  ) public view
     returns(uint)
   {
     uint reserve = buybackReserve();
@@ -727,14 +715,6 @@ contract DecentralizedAutonomousTrust
     return currencyValue;
   }
 
-  function estimateSellValue(
-    uint _quantityToSell
-  ) public view
-    returns(uint)
-  {
-    return _estimateSellValue(_quantityToSell);
-  }
-
   function _sell(
     address _from,
     address _to,
@@ -746,7 +726,7 @@ contract DecentralizedAutonomousTrust
     require(_from != beneficiary || state >= STATE_CLOSE, "BENEFICIARY_ONLY_SELL_IN_CLOSE_OR_CANCEL");
     require(_minCurrencyReturned > 0, "MUST_SELL_AT_LEAST_1");
 
-    uint currencyValue = _estimateSellValue(_quantityToSell);
+    uint currencyValue = estimateSellValue(_quantityToSell);
     require(currencyValue >= _minCurrencyReturned, "PRICE_SLIPPAGE");
 
     if(state == STATE_INIT || state == STATE_CANCEL)
@@ -785,9 +765,9 @@ contract DecentralizedAutonomousTrust
 
   /// Pay
 
-  function _estimatePayValue(
+  function estimatePayValue(
     uint _currencyValue
-  ) private view
+  ) public view
     returns (uint)
   {
     // buy_slope = n/d
@@ -824,14 +804,6 @@ contract DecentralizedAutonomousTrust
     return tokenValue;
   }
 
-  function estimatePayValue(
-    uint _currencyValue
-  ) public view
-    returns (uint)
-  {
-    return _estimatePayValue(_currencyValue);
-  }
-
   /// @dev Pay the organization on-chain.
   /// @param _from The account which issued the transaction and paid the currencyValue.
   /// @param _to The account which receives tokens for the contribution.
@@ -851,7 +823,7 @@ contract DecentralizedAutonomousTrust
     uint reserve = _currencyValue * investmentReserveBasisPoints;
     reserve /= BASIS_POINTS_DEN;
 
-    uint tokenValue = _estimatePayValue(_currencyValue);
+    uint tokenValue = estimatePayValue(_currencyValue);
 
     // Update the to address to the beneficiary if the currency value would fail
     address to = _to;
@@ -903,9 +875,9 @@ contract DecentralizedAutonomousTrust
 
   /// Close
 
-  function _estimateExitFee(
+  function estimateExitFee(
     uint _msgValue
-  ) private view
+  ) public view
     returns(uint)
   {
     uint exitFee;
@@ -942,14 +914,6 @@ contract DecentralizedAutonomousTrust
     }
 
     return exitFee;
-  }
-
-  function estimateExitFee(
-    uint _msgValue
-  ) public view
-    returns(uint)
-  {
-    return _estimateExitFee(_msgValue);
   }
 
   /// @notice Called by the beneficiary account to STATE_CLOSE or STATE_CANCEL the c-org,
