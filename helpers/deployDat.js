@@ -73,6 +73,8 @@ module.exports = async function deployDat(accounts, options, useProxy = true) {
     callOptions.buySlopeNum,
     callOptions.buySlopeDen,
     callOptions.investmentReserveBasisPoints,
+    callOptions.name,
+    callOptions.symbol,
     { from: callOptions.control }
   );
   // Whitelist
