@@ -11,9 +11,7 @@ module.exports = async function updateDatConfig(contracts, options) {
       autoBurn: await contracts.dat.autoBurn(),
       revenueCommitmentBasisPoints: await contracts.dat.revenueCommitmentBasisPoints(),
       minInvestment: await contracts.dat.minInvestment(),
-      openUntilAtLeast: await contracts.dat.openUntilAtLeast(),
-      name: await contracts.dat.name(),
-      symbol: await contracts.dat.symbol()
+      openUntilAtLeast: await contracts.dat.openUntilAtLeast()
     },
     options
   );
@@ -31,8 +29,6 @@ module.exports = async function updateDatConfig(contracts, options) {
     callOptions.revenueCommitmentBasisPoints,
     callOptions.minInvestment,
     callOptions.openUntilAtLeast,
-    callOptions.name,
-    callOptions.symbol,
     { from: await contracts.dat.control() }
   );
   return result;
