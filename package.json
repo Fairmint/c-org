@@ -19,17 +19,15 @@
   },
   "dependencies": {
     "@openzeppelin/contracts": "2.4.0",
-    "@openzeppelin/contracts-ethereum-package": "^2.3.0",
+    "@openzeppelin/contracts-ethereum-package": "2.3.0",
     "@openzeppelin/test-helpers": "0.5.3",
-    "@openzeppelin/upgrades": "^2.6.0",
+    "@openzeppelin/upgrades": "2.6.0",
     "bignumber.js": "9.0.0",
-    "eth-gas-reporter": "^0.2.12",
+    "eth-gas-reporter": "0.2.12",
     "ethlint": "1.2.5",
-    "ganache-cli": "6.7.0",
     "hardlydifficult-ethereum-contracts": "0.7.0",
     "papaparse": "5.1.0",
     "sleep": "6.1.0",
-    "solidity-coverage": "0.7.0-beta.2",
     "truffle": "5.0.41",
     "truffle-hdwallet-provider": "1.0.17",
     "zos-lib": "2.4.2"
@@ -37,13 +35,16 @@
   "devDependencies": {
     "@codechecks/client": "0.1.10",
     "chai": "4.2.0",
-    "coveralls": "^3.0.7",
+    "coveralls": "3.0.7",
+    "ganache-cli": "6.7.0",
+    "eth-gas-reporter": "0.2.12",
     "eslint": "6.6.0",
     "eslint-config-airbnb-base": "14.0.0",
     "eslint-config-prettier": "6.5.0",
     "eslint-plugin-import": "2.18.2",
     "eslint-plugin-prettier": "3.1.1",
-    "mocha-lcov-reporter": "^1.3.0",
-    "prettier": "1.19.1"
+    "mocha-lcov-reporter": "1.3.0",
+    "prettier": "1.19.1",
+    "solidity-coverage": "0.7.0-beta.2"
   }
 }
