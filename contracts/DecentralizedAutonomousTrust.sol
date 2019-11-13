@@ -11,7 +11,6 @@ import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20Deta
 // TODO safemath
 // TODO remove redundant private functions
 // TODO add burn event (for non-sell transfer to 0)
-// TODO stack too deep on event below
 
 
 /**
@@ -475,20 +474,19 @@ contract DecentralizedAutonomousTrust
       beneficiary = _beneficiary;
     }
 
-    // TODO stack too deep
-    // emit UpdateConfig(
-    //   _bigDiv,
-    //   _sqrtContract,
-    //   _whitelistAddress,
-    //   _beneficiary,
-    //   _control,
-    //   _feeCollector,
-    //   _autoBurn,
-    //   _revenueCommitmentBasisPoints,
-    //   _feeBasisPoints,
-    //   _minInvestment,
-    //   _openUntilAtLeast
-    // );
+    emit UpdateConfig(
+      _bigDiv,
+      _sqrtContract,
+      _whitelistAddress,
+      _beneficiary,
+      _control,
+      _feeCollector,
+      _autoBurn,
+      _revenueCommitmentBasisPoints,
+      _feeBasisPoints,
+      _minInvestment,
+      _openUntilAtLeast
+    );
   }
 
   /**
