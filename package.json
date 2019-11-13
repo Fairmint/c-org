@@ -22,6 +22,7 @@
     "@openzeppelin/test-helpers": "0.5.3",
     "@openzeppelin/upgrades": "^2.6.0",
     "bignumber.js": "9.0.0",
+    "eth-gas-reporter": "^0.2.12",
     "ganache-cli": "6.7.0",
     "hardlydifficult-ethereum-contracts": "0.7.0",
     "papaparse": "5.1.0",
