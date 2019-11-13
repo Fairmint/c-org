@@ -7,7 +7,6 @@ import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/IERC20.so
 import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20Detailed.sol";
 
-// TODO stack too deep on event below
 // TODO safemath
 
 
@@ -471,20 +470,19 @@ contract DecentralizedAutonomousTrust
       beneficiary = _beneficiary;
     }
 
-    // TODO stack too deep
-    // emit UpdateConfig(
-    //   _bigDiv,
-    //   _sqrtContract,
-    //   _whitelistAddress,
-    //   _beneficiary,
-    //   _control,
-    //   _feeCollector,
-    //   _autoBurn,
-    //   _revenueCommitmentBasisPoints,
-    //   _feeBasisPoints,
-    //   _minInvestment,
-    //   _openUntilAtLeast
-    // );
+    emit UpdateConfig(
+      _bigDiv,
+      _sqrtContract,
+      _whitelistAddress,
+      _beneficiary,
+      _control,
+      _feeCollector,
+      _autoBurn,
+      _revenueCommitmentBasisPoints,
+      _feeBasisPoints,
+      _minInvestment,
+      _openUntilAtLeast
+    );
   }
 
   /**
