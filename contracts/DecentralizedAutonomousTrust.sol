@@ -939,7 +939,7 @@ contract DecentralizedAutonomousTrust
       // Collect the exitFee and close the c-org.
       require(openUntilAtLeast <= block.timestamp, "TOO_EARLY");
 
-      exitFee = _estimateExitFee(msg.value);
+      exitFee = estimateExitFee(msg.value);
 
       emit StateChange(state, STATE_CLOSE);
       state = STATE_CLOSE;
