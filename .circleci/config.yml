@@ -48,6 +48,7 @@ jobs:
           at: ~/repo
       - run: npm run test
       - run: npm run lintNoFix
+      - run: npx codechecks
 
   TS1-3:
     context: docker-hub-credentials
