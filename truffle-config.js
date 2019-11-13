@@ -123,6 +123,7 @@ module.exports = {
     enableTimeouts: false
     //reporter: "eth-gas-reporter" (breaking deploy script and very slow)
   },
+  plugins: ["solidity-coverage"],
 
   // Configure your compilers
   compilers: {

@@ -49,7 +49,17 @@ jobs:
       - run: npm run test
       - run: npm run lintNoFix
 
-  TS1-3:
+  coverage:
+    context: docker-hub-credentials
+    docker:
+      - image: circleci/node:10
+    working_directory: ~/repo
+    steps:
+      - attach_workspace:
+          at: ~/repo
+      - run: npm run coverage
+
+  TS:
     context: docker-hub-credentials
     docker:
       - image: circleci/node:10
@@ -64,32 +74,10 @@ jobs:
       - run: export SHEET_ID=2 && npm run csvTests
       - run: export SHEET_ID=3 && npm run csvTests
       - run: export SHEET_ID=4 && npm run csvTests
-      
-  TS4-7:
-    context: docker-hub-credentials
-    docker:
-      - image: circleci/node:10
-      - image: trufflesuite/ganache-cli
-        command: ganache-cli -e 10000000000 -a 100
-    working_directory: ~/repo
-    steps:
-      - attach_workspace:
-          at: ~/repo
       - run: export SHEET_ID=5 && npm run csvTests
       - run: export SHEET_ID=6 && npm run csvTests
       - run: export SHEET_ID=7 && npm run csvTests
       - run: export SHEET_ID=8 && npm run csvTests
-
-  TS8-12:
-    context: docker-hub-credentials
-    docker:
-      - image: circleci/node:10
-      - image: trufflesuite/ganache-cli
-        command: ganache-cli -e 10000000000 -a 100
-    working_directory: ~/repo
-    steps:
-      - attach_workspace:
-          at: ~/repo
       - run: export SHEET_ID=9 && npm run csvTests
       - run: export SHEET_ID=10 && npm run csvTests
       - run: export SHEET_ID=11 && npm run csvTests
@@ -121,13 +109,10 @@ workflows:
       - test:
           requires:
             - build
-      - TS1-3:
+      - coverage:
           requires:
             - build
-      - TS4-7:
-          requires:
-            - build
-      - TS8-12:
+      - TS:
           requires:
             - build
       - publish:

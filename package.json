@@ -10,7 +10,8 @@
     "lintNoFix": "eslint .",
     "deploy": "truffle test scripts/deploy.js",
     "test": "truffle test",
-    "csvTests": "truffle test csvTests/csvTests.js"
+    "csvTests": "truffle test csvTests/csvTests.js",
+    "coverage": "truffle run coverage"
   },
   "repository": {
     "type": "git",
@@ -26,6 +27,7 @@
     "hardlydifficult-ethereum-contracts": "0.7.0",
     "papaparse": "5.1.0",
     "sleep": "6.1.0",
+    "solidity-coverage": "^0.7.0-beta.2",
     "truffle": "5.0.41",
     "truffle-hdwallet-provider": "1.0.17",
     "zos-lib": "2.4.2"
