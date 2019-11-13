@@ -13,7 +13,7 @@ contract Dependencies is TokenVesting, AdminUpgradeabilityProxy, ProxyAdmin, Big
 {
   constructor() internal
     TokenVesting()
-    AdminUpgradeabilityProxy(address(0), address(0), '')
+    AdminUpgradeabilityProxy(address(0), address(0), "")
     BigDiv()
     Sqrt()
   {}
