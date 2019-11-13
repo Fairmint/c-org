@@ -58,7 +58,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/repo
-      - run: npm run coverage && cat coverage/lcov.info | coveralls
+      - run: npm run coverage
 
   TS:
     context: docker-hub-credentials
