@@ -126,9 +126,10 @@ module.exports = {
     reporterOptions: {
       currency: "USD",
       excludeContracts: [
-        "Dependencies.sol",
-        "Migrations.sol",
-        "test-artifacts/"
+        "Dependencies",
+        "Migrations",
+        "MintableERC20",
+        "TestUsdc"
       ],
       gasPrice: 5
     }
