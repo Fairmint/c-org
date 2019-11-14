@@ -719,8 +719,7 @@ contract DecentralizedAutonomousTrust
     address _from,
     address _to,
     uint _quantityToSell,
-    uint _minCurrencyReturned,
-    bool _hasReceivedFunds
+    uint _minCurrencyReturned
   ) private
   {
     require(_from != beneficiary || state >= STATE_CLOSE, "BENEFICIARY_ONLY_SELL_IN_CLOSE_OR_CANCEL");
@@ -735,14 +734,7 @@ contract DecentralizedAutonomousTrust
     }
 
     // Distribute funds
-    if(_hasReceivedFunds)
-    {
-      _burn(address(this), _quantityToSell, true);
-    }
-    else
-    {
-      _burn(_from, _quantityToSell, true);
-    }
+    _burn(_from, _quantityToSell, true);
 
     _transferCurrency(_to, currencyValue);
     emit Sell(_from, _to, currencyValue, _quantityToSell);
@@ -760,7 +752,7 @@ contract DecentralizedAutonomousTrust
     uint _minCurrencyReturned
   ) public
   {
-    _sell(msg.sender, _to, _quantityToSell, _minCurrencyReturned, false);
+    _sell(msg.sender, _to, _quantityToSell, _minCurrencyReturned);
   }
 
   /// Pay
