@@ -126,10 +126,10 @@ module.exports = {
     reporterOptions: {
       currency: "USD",
       excludeContracts: [
-        "Dependencies.sol",
-        "Migrations.sol",
-        "test-artifacts/TestDai.sol",
-        "test-artifacts/TestUsdc.sol"
+        "Dependencies",
+        "Migrations",
+        "TestDai",
+        "TestUsdc"
       ],
       gasPrice: 5
     }
