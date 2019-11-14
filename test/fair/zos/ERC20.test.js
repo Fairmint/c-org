@@ -252,7 +252,7 @@ contract("ERC20", function(accounts) {
   });
 
   describe("_mint", function() {
-    const amount = new BN(50);
+    const amount = new BN("289827534923788771374");
     it("rejects a null account", async function() {
       await expectRevert(
         this.token.buy(ZERO_ADDRESS, "420000000000000000000", 1, {
@@ -356,18 +356,9 @@ contract("ERC20", function(accounts) {
       recipient,
       initialSupply,
       function(from, to, amount) {
-        return this.token.transferInternal(from, to, amount);
+        return this.token.transfer(to, amount, { from });
       }
     );
-
-    describe("when the sender is the zero address", function() {
-      it("reverts", async function() {
-        await expectRevert(
-          this.token.transferInternal(ZERO_ADDRESS, recipient, initialSupply),
-          "ERC20: transfer from the zero address"
-        );
-      });
-    });
   });
 
   describe("_approve", function() {
