@@ -6,8 +6,7 @@ import "hardlydifficult-ethereum-contracts/contracts/math/Sqrt.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20Detailed.sol";
-
-// TODO safemath
+import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
 
 
 /**
@@ -23,6 +22,8 @@ import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20Deta
 contract DecentralizedAutonomousTrust
   is ERC20, ERC20Detailed
 {
+  using SafeMath for uint;
+
   /**
    * Events
    */
@@ -266,8 +267,9 @@ contract DecentralizedAutonomousTrust
 
     if(!_isSell)
     {
-      /// This is a burn
+      // This is a burn
       require(state == STATE_RUN, "ONLY_DURING_RUN");
+      // SafeMath not required as we cap how high this value may get during mint
       burnedSupply += _amount;
       emit Burn(_from, _amount);
     }
@@ -282,8 +284,8 @@ contract DecentralizedAutonomousTrust
     _authorizeTransfer(address(0), _to, _quantity, false);
     super._mint(_to, _quantity);
 
-    /// Math: If this value got too large, the DAT may overflow on sell
-    require(totalSupply() + burnedSupply <= MAX_SUPPLY, "EXCESSIVE_SUPPLY");
+    // Math: If this value got too large, the DAT may overflow on sell
+    require(totalSupply().add(burnedSupply) <= MAX_SUPPLY, "EXCESSIVE_SUPPLY");
   }
 
   /**
@@ -304,7 +306,7 @@ contract DecentralizedAutonomousTrust
       if(_refundRemainder)
       {
         // Math: if _msgValue was not sufficient then revert
-        uint refund = _msgValue - _quantityToInvest;
+        uint refund = _msgValue.sub(_quantityToInvest);
         if(refund > 0)
         {
           // https://diligence.consensys.net/blog/2019/09/stop-using-soliditys-transfer-now/
@@ -461,7 +463,7 @@ contract DecentralizedAutonomousTrust
     {
       require(_beneficiary != address(0), "INVALID_ADDRESS");
       uint tokens = balanceOf(beneficiary);
-      initInvestors[_beneficiary] += initInvestors[beneficiary];
+      initInvestors[_beneficiary] = initInvestors[_beneficiary].add(initInvestors[beneficiary]);
       initInvestors[beneficiary] = 0;
       if(tokens > 0)
       {
@@ -509,11 +511,10 @@ contract DecentralizedAutonomousTrust
 
     // Math: if investment value is < (2^256 - 1) / 10000 this will never overflow.
     // Except maybe with a huge single investment, but they can try again with multiple smaller investments.
-    uint reserve = investmentReserveBasisPoints * _value;
+    uint reserve = investmentReserveBasisPoints.mul(_value);
     reserve /= BASIS_POINTS_DEN;
-    reserve = _value - reserve;
-    /// Math: since reserve is <= the investment value, this will never overflow.
-    uint fee = reserve * feeBasisPoints;
+    reserve = _value.sub(reserve);
+    uint fee = reserve.mul(feeBasisPoints);
     fee /= BASIS_POINTS_DEN;
 
     // Math: since feeBasisPoints is <= BASIS_POINTS_DEN, this will never underflow.
@@ -558,7 +559,8 @@ contract DecentralizedAutonomousTrust
       tokenValue = 2 * _currencyValue * buySlopeDen;
       tokenValue /= buySlopeNum;
 
-      tokenValue += supply * supply;
+      // Math: worst case MAX + (MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE)
+      tokenValue = tokenValue.add(supply * supply);
       tokenValue = sqrtContract.sqrt(tokenValue);
 
       // Math: small chance of underflow due to possible rounding in sqrt
@@ -621,7 +623,7 @@ contract DecentralizedAutonomousTrust
           initInvestors[beneficiary], buySlopeNum * initGoal,
           buySlopeDen * 2
         );
-        _distributeInvestment(buybackReserve() - beneficiaryContribution);
+        _distributeInvestment(buybackReserve().sub(beneficiaryContribution));
       }
     }
     else if(state == STATE_RUN)
@@ -729,7 +731,7 @@ contract DecentralizedAutonomousTrust
 
     if(state == STATE_INIT || state == STATE_CANCEL)
     {
-      initInvestors[_from] -= _quantityToSell;
+      initInvestors[_from] = initInvestors[_from].sub(_quantityToSell);
     }
 
     // Distribute funds
@@ -817,8 +819,8 @@ contract DecentralizedAutonomousTrust
     require(state == STATE_RUN, "INVALID_STATE");
 
     // Send a portion of the funds to the beneficiary, the rest is added to the buybackReserve
-    // Math: if _currencyValue is < (2^256 - 1) / 10000 this will never overflow
-    uint reserve = _currencyValue * investmentReserveBasisPoints;
+    // Math: if _currencyValue is < (2^256 - 1) / 10000 this will not overflow
+    uint reserve = _currencyValue.mul(investmentReserveBasisPoints);
     reserve /= BASIS_POINTS_DEN;
 
     uint tokenValue = estimatePayValue(_currencyValue);
@@ -883,7 +885,7 @@ contract DecentralizedAutonomousTrust
     if(state == STATE_RUN)
     {
       uint reserve = buybackReserve();
-      reserve -= _msgValue;
+      reserve = reserve.sub(_msgValue);
 
       // Source: t*(t+b)*(n/d)-r
       // Implementation: (b n t)/d + (n t^2)/d - r
