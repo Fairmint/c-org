@@ -1,4 +1,4 @@
-// Source: openzeppelin-contracts
+// Source: https://github.com/OpenZeppelin/openzeppelin-contracts
 
 const {
   BN,
@@ -106,9 +106,9 @@ function shouldBehaveLikeERC20(
               );
 
               expectEvent.inLogs(logs, "Transfer", {
-                _from: tokenOwner,
-                _to: to,
-                _value: amount
+                from: tokenOwner,
+                to: to,
+                value: amount
               });
             });
 
@@ -121,9 +121,9 @@ function shouldBehaveLikeERC20(
               );
 
               expectEvent.inLogs(logs, "Approval", {
-                _owner: tokenOwner,
-                _spender: spender,
-                _value: await this.token.allowance(tokenOwner, spender)
+                owner: tokenOwner,
+                spender: spender,
+                value: await this.token.allowance(tokenOwner, spender)
               });
             });
           });
@@ -132,10 +132,11 @@ function shouldBehaveLikeERC20(
             const amount = initialSupply.addn(1);
 
             it("reverts", async function() {
-              await expectRevert.unspecified(
+              await expectRevert(
                 this.token.transferFrom(tokenOwner, to, amount, {
                   from: spender
-                })
+                }),
+                "SafeMath: subtraction overflow -- Reason given: SafeMath: subtraction overflow."
               );
             });
           });
@@ -152,10 +153,11 @@ function shouldBehaveLikeERC20(
             const amount = initialSupply;
 
             it("reverts", async function() {
-              await expectRevert.unspecified(
+              await expectRevert(
                 this.token.transferFrom(tokenOwner, to, amount, {
                   from: spender
-                })
+                }),
+                "SafeMath: subtraction overflow -- Reason given: SafeMath: subtraction overflow."
               );
             });
           });
@@ -164,10 +166,11 @@ function shouldBehaveLikeERC20(
             const amount = initialSupply.addn(1);
 
             it("reverts", async function() {
-              await expectRevert.unspecified(
+              await expectRevert(
                 this.token.transferFrom(tokenOwner, to, amount, {
                   from: spender
-                })
+                }),
+                "SafeMath: subtraction overflow -- Reason given: SafeMath: subtraction overflow."
               );
             });
           });
@@ -185,7 +188,7 @@ function shouldBehaveLikeERC20(
         it("reverts", async function() {
           await expectRevert(
             this.token.transferFrom(tokenOwner, to, amount, { from: spender }),
-            `${errorPrefix}: send to the zero address`
+            `${errorPrefix}: transfer to the zero address`
           );
         });
       });
@@ -199,7 +202,7 @@ function shouldBehaveLikeERC20(
       it("reverts", async function() {
         await expectRevert(
           this.token.transferFrom(tokenOwner, to, amount, { from: spender }),
-          `${errorPrefix}: send from the zero address`
+          `${errorPrefix}: transfer from the zero address`
         );
       });
     });
@@ -230,7 +233,10 @@ function shouldBehaveLikeERC20Transfer(
       const amount = balance.addn(1);
 
       it("reverts", async function() {
-        await expectRevert.unspecified(transfer.call(this, from, to, amount));
+        await expectRevert(
+          transfer.call(this, from, to, amount),
+          "SafeMath: subtraction overflow -- Reason given: SafeMath: subtraction overflow."
+        );
       });
     });
 
@@ -249,9 +255,9 @@ function shouldBehaveLikeERC20Transfer(
         const { logs } = await transfer.call(this, from, to, amount);
 
         expectEvent.inLogs(logs, "Transfer", {
-          _from: from,
-          _to: to,
-          _value: amount
+          from,
+          to,
+          value: amount
         });
       });
     });
@@ -271,9 +277,9 @@ function shouldBehaveLikeERC20Transfer(
         const { logs } = await transfer.call(this, from, to, amount);
 
         expectEvent.inLogs(logs, "Transfer", {
-          _from: from,
-          _to: to,
-          _value: amount
+          from,
+          to,
+          value: amount
         });
       });
     });
@@ -283,7 +289,7 @@ function shouldBehaveLikeERC20Transfer(
     it("reverts", async function() {
       await expectRevert(
         transfer.call(this, from, ZERO_ADDRESS, balance),
-        `${errorPrefix}: send to the zero address`
+        `${errorPrefix}: transfer to the zero address`
       );
     });
   });
@@ -304,9 +310,9 @@ function shouldBehaveLikeERC20Approve(
         const { logs } = await approve.call(this, owner, spender, amount);
 
         expectEvent.inLogs(logs, "Approval", {
-          _owner: owner,
-          _spender: spender,
-          _value: amount
+          owner: owner,
+          spender: spender,
+          value: amount
         });
       });
 
@@ -342,9 +348,9 @@ function shouldBehaveLikeERC20Approve(
         const { logs } = await approve.call(this, owner, spender, amount);
 
         expectEvent.inLogs(logs, "Approval", {
-          _owner: owner,
-          _spender: spender,
-          _value: amount
+          owner: owner,
+          spender: spender,
+          value: amount
         });
       });
 
