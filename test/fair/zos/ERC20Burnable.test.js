@@ -15,7 +15,7 @@ contract("ERC20Burnable", function(accounts) {
   beforeEach(async function() {
     const contracts = await deployDat(accounts, {
       initGoal: 0,
-      control: owner,
+      beneficiary: owner,
       initReserve: initialBalance
     });
     await approveAll(contracts, accounts);
