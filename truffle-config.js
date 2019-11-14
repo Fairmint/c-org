@@ -128,9 +128,8 @@ module.exports = {
       excludeContracts: [
         "Dependencies.sol",
         "Migrations.sol",
-        "test-artifacts/",
-        "TestDai.sol",
-        "TestUsdc.sol"
+        "test-artifacts/TestDai.sol",
+        "test-artifacts/TestUsdc.sol"
       ],
       gasPrice: 5
     }
