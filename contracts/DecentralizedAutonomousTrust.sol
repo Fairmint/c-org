@@ -249,7 +249,7 @@ contract DecentralizedAutonomousTrust
     uint _amount
   ) internal
   {
-    require(state != STATE_INIT || _from == beneficiary, "Only the beneficiary can make transfers during STATE_INIT");
+    require(state != STATE_INIT || _from == beneficiary, "ONLY_BENEFICIAR_DURING_INIT");
     _authorizeTransfer(_from, _to, _amount, false);
 
     super._transfer(_from, _to, _amount);
@@ -311,7 +311,7 @@ contract DecentralizedAutonomousTrust
         {
           // https://diligence.consensys.net/blog/2019/09/stop-using-soliditys-transfer-now/
           (bool success, ) = _from.call.value(refund)("");
-          require(success, "Transfer failed.");
+          require(success, "TRANSFER_FAILED");
         }
       }
       else
@@ -322,7 +322,7 @@ contract DecentralizedAutonomousTrust
     else
     {
       // currency is ERC20
-      require(_msgValue == 0, "DO_NOT_transfer_ETH");
+      require(_msgValue == 0, "DO_NOT_SEND_ETH");
 
       bool success = currency.transferFrom(_from, address(this), _quantityToInvest);
       require(success, "ERC20_TRANSFER_FAILED");
@@ -341,7 +341,7 @@ contract DecentralizedAutonomousTrust
       {
         // https://diligence.consensys.net/blog/2019/09/stop-using-soliditys-transfer-now/
         (bool success, ) = _to.call.value(_amount)("");
-        require(success, "Transfer failed.");
+        require(success, "TRANSFER_FAILED");
       }
       else
       {
