@@ -1,7 +1,3 @@
-/**
- * Tests the ability to buy dat tokens
- */
-
 const { approveAll, deployDat } = require("../helpers");
 const { tokens } = require("hardlydifficult-ethereum-contracts");
 const { constants } = require("../helpers");
