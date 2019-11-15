@@ -4,6 +4,7 @@ import "./Whitelist.sol";
 import "hardlydifficult-ethereum-contracts/contracts/math/BigDiv.sol";
 import "hardlydifficult-ethereum-contracts/contracts/math/Sqrt.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/SafeERC20.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20Detailed.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
@@ -23,6 +24,7 @@ contract DecentralizedAutonomousTrust
   is ERC20, ERC20Detailed
 {
   using SafeMath for uint;
+  using SafeERC20 for IERC20;
 
   /**
    * Events
@@ -324,8 +326,7 @@ contract DecentralizedAutonomousTrust
       // currency is ERC20
       require(_msgValue == 0, "DO_NOT_SEND_ETH");
 
-      bool success = currency.transferFrom(_from, address(this), _quantityToInvest);
-      require(success, "ERC20_TRANSFER_FAILED");
+      currency.safeTransferFrom(_from, address(this), _quantityToInvest);
     }
   }
 
@@ -345,8 +346,7 @@ contract DecentralizedAutonomousTrust
       }
       else
       {
-        bool success = currency.transfer(_to, _amount);
-        require(success, "ERC20_TRANSFER_FAILED");
+        currency.safeTransfer(_to, _amount);
       }
     }
   }
