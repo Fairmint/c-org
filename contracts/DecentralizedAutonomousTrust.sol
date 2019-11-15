@@ -430,10 +430,8 @@ contract DecentralizedAutonomousTrust
     // This require(also confirms that initialize has been called.
     require(msg.sender == control, "CONTROL_ONLY");
 
-    require(_whitelistAddress != address(0), "INVALID_ADDRESS");
     whitelist = Whitelist(_whitelistAddress);
 
-    require(_bigDiv != address(0), "INVALID_ADDRESS");
     require(_bigDiv != address(0), "INVALID_ADDRESS");
     bigDiv = BigDiv(_bigDiv);
     sqrtContract = Sqrt(_sqrtContract);
