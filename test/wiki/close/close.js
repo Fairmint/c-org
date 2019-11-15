@@ -40,7 +40,8 @@ contract("wiki / close / close", accounts => {
       contracts.dat.close({
         from: await contracts.dat.beneficiary(),
         value: "10000000000000000000000"
-      })
+      }),
+      "INVALID_STATE"
     );
   });
 });

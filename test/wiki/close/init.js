@@ -24,6 +24,11 @@ contract("wiki / close / init", accounts => {
     assert.equal(state.toString(), constants.STATE.INIT);
   });
 
+  it("exitFee estimate is 0", async () => {
+    const fee = await contracts.dat.estimateExitFee(0);
+    assert.equal(fee, 0);
+  });
+
   describe("on close", () => {
     beforeEach(async () => {
       await contracts.dat.close({
