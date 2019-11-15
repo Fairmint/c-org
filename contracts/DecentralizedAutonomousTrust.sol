@@ -78,26 +78,26 @@ contract DecentralizedAutonomousTrust
    */
 
   /// @notice The default state
-  uint constant STATE_INIT = 0;
+  uint private constant STATE_INIT = 0;
 
   /// @notice The state after initGoal has been reached
-  uint constant STATE_RUN = 1;
+  uint private constant STATE_RUN = 1;
 
   /// @notice The state after closed by the `beneficiary` account from STATE_RUN
-  uint constant STATE_CLOSE = 2;
+  uint private constant STATE_CLOSE = 2;
 
   /// @notice The state after closed by the `beneficiary` account from STATE_INIT
-  uint constant STATE_CANCEL = 3;
+  uint private constant STATE_CANCEL = 3;
 
   /// @notice When multiplying 2 terms, the max value is 2^128-1
-  uint constant MAX_BEFORE_SQUARE = 340282366920938463463374607431768211455;
+  uint private constant MAX_BEFORE_SQUARE = 340282366920938463463374607431768211455;
 
   /// @notice The denominator component for values specified in basis points.
-  uint constant BASIS_POINTS_DEN = 10000;
+  uint private constant BASIS_POINTS_DEN = 10000;
 
   /// @notice The max `totalSupply() + burnedSupply`
   /// @dev This limit ensures that the DAT's formulas do not overflow (<MAX_BEFORE_SQUARE/2)
-  uint constant MAX_SUPPLY = 10 ** 38;
+  uint private constant MAX_SUPPLY = 10 ** 38;
 
   /**
    * Data specific to our token business logic
