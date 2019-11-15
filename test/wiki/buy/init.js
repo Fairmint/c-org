@@ -482,4 +482,14 @@ contract("wiki / buy / init", accounts => {
       assert.equal(buybackReserve.toFixed(), expected.toFixed());
     });
   });
+
+  it("shouldFail if minTokens == 0", async () => {
+    await shouldFail(
+      contracts.dat.buy(accounts[2], "100000000000000000000", 0, {
+        from: accounts[2],
+        value: "100000000000000000000"
+      }),
+      "MUST_BUY_AT_LEAST_1"
+    );
+  });
 });
