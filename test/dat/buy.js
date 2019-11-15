@@ -2,7 +2,7 @@
  * Tests the ability to buy dat tokens
  */
 
-const { approveAll, deployDat } = require("../helpers");
+const { approveAll, deployDat, shouldFail } = require("../helpers");
 
 contract("dat / buy", accounts => {
   let contracts;
@@ -16,6 +16,16 @@ contract("dat / buy", accounts => {
     const balance = await contracts.dat.balanceOf(accounts[1]);
 
     assert.equal(balance, 0);
+  });
+
+  it("shouldFail with INCORRECT_MSG_VALUE", async () => {
+    await shouldFail(
+      contracts.dat.buy(accounts[1], "100000000000000000001", 1, {
+        value: "100000000000000000000",
+        from: accounts[1]
+      }),
+      "INCORRECT_MSG_VALUE"
+    );
   });
 
   describe("can buy tokens", () => {
