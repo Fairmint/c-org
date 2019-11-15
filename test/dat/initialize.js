@@ -1,7 +1,3 @@
-/**
- * Tests the ability to buy dat tokens
- */
-
 const { deployDat, shouldFail, constants } = require("../helpers");
 
 contract("dat / initialize", accounts => {

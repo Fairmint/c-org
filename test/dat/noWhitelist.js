@@ -1,7 +1,3 @@
-/**
- * Tests the ability to buy dat tokens
- */
-
 const { constants, deployDat } = require("../helpers");
 
 contract("dat / noWhitelist", accounts => {
