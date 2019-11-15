@@ -795,16 +795,13 @@ contract DecentralizedAutonomousTrust
   }
 
   /// @dev Pay the organization on-chain.
-  /// @param _from The account which issued the transaction and paid the currencyValue.
   /// @param _to The account which receives tokens for the contribution.
   /// @param _currencyValue How much currency which was paid.
   function _pay(
-    address _from,
     address _to,
     uint _currencyValue
   ) private
   {
-    require(_from != address(0), "INVALID_ADDRESS");
     require(_currencyValue > 0, "MISSING_CURRENCY");
     require(state == STATE_RUN, "INVALID_STATE");
 
@@ -840,7 +837,7 @@ contract DecentralizedAutonomousTrust
       }
     }
 
-    emit Pay(_from, _to, _currencyValue, tokenValue);
+    emit Pay(msg.sender, _to, _currencyValue, tokenValue);
   }
 
   /// @dev Pay the organization on-chain.
@@ -853,14 +850,14 @@ contract DecentralizedAutonomousTrust
   ) public payable
   {
     _collectInvestment(msg.sender, _currencyValue, msg.value, false);
-    _pay(msg.sender, _to, _currencyValue);
+    _pay(_to, _currencyValue);
   }
 
   /// @dev Pay the organization on-chain with ETH (only works when currency is ETH)
   function () external payable
   {
     _collectInvestment(msg.sender, msg.value, msg.value, false);
-    _pay(msg.sender, msg.sender, msg.value);
+    _pay(msg.sender, msg.value);
   }
 
   /// Close

@@ -1,5 +1,13 @@
+const { tokens } = require("hardlydifficult-ethereum-contracts");
+
 const BigNumber = require("bignumber.js");
-const { approveAll, constants, deployDat, getGasCost } = require("../helpers");
+const {
+  approveAll,
+  constants,
+  deployDat,
+  getGasCost,
+  shouldFail
+} = require("../helpers");
 
 contract("dat / pay", accounts => {
   let contracts;
@@ -59,6 +67,30 @@ contract("dat / pay", accounts => {
       from: investor,
       value: "1"
     });
+  });
+
+  it("shouldFail if currencyValue is missing", async () => {
+    // Redeploy with an erc-20
+    const token = await tokens.dai.deploy(web3, accounts[0]);
+    await token.mint(accounts[0], constants.MAX_UINT, { from: accounts[0] });
+    contracts = await deployDat(
+      accounts,
+      {
+        initGoal: "0", // Start in the run state
+        currency: token.address
+      },
+      false
+    );
+    await token.approve(contracts.dat.address, constants.MAX_UINT, {
+      from: accounts[0]
+    });
+    await approveAll(contracts, accounts);
+    await shouldFail(
+      contracts.dat.pay(accounts[0], "0", {
+        from: accounts[0]
+      }),
+      "MISSING_CURRENCY"
+    );
   });
 
   describe("If trades are restricted", () => {
