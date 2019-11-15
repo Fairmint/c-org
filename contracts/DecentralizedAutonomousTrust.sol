@@ -296,7 +296,6 @@ contract DecentralizedAutonomousTrust
 
   /// @notice Confirms the transfer of `_quantityToInvest` currency to the contract.
   function _collectInvestment(
-    address _from,
     uint _quantityToInvest,
     uint _msgValue,
     bool _refundRemainder
@@ -312,7 +311,7 @@ contract DecentralizedAutonomousTrust
         if(refund > 0)
         {
           // https://diligence.consensys.net/blog/2019/09/stop-using-soliditys-transfer-now/
-          (bool success, ) = _from.call.value(refund)("");
+          (bool success, ) = msg.sender.call.value(refund)("");
           require(success, "TRANSFER_FAILED");
         }
       }
@@ -326,7 +325,7 @@ contract DecentralizedAutonomousTrust
       // currency is ERC20
       require(_msgValue == 0, "DO_NOT_SEND_ETH");
 
-      currency.safeTransferFrom(_from, address(this), _quantityToInvest);
+      currency.safeTransferFrom(msg.sender, address(this), _quantityToInvest);
     }
   }
 
@@ -594,7 +593,7 @@ contract DecentralizedAutonomousTrust
 
     emit Buy(msg.sender, _to, _currencyValue, tokenValue);
 
-    _collectInvestment(msg.sender, _currencyValue, msg.value, false);
+    _collectInvestment(_currencyValue, msg.value, false);
 
     // Update state, initInvestors, and distribute the investment when appropriate
     if(state == STATE_INIT)
@@ -706,31 +705,6 @@ contract DecentralizedAutonomousTrust
     return currencyValue;
   }
 
-  function _sell(
-    address _from,
-    address _to,
-    uint _quantityToSell,
-    uint _minCurrencyReturned
-  ) private
-  {
-    require(_from != beneficiary || state >= STATE_CLOSE, "BENEFICIARY_ONLY_SELL_IN_CLOSE_OR_CANCEL");
-    require(_minCurrencyReturned > 0, "MUST_SELL_AT_LEAST_1");
-
-    uint currencyValue = estimateSellValue(_quantityToSell);
-    require(currencyValue >= _minCurrencyReturned, "PRICE_SLIPPAGE");
-
-    if(state == STATE_INIT || state == STATE_CANCEL)
-    {
-      initInvestors[_from] = initInvestors[_from].sub(_quantityToSell);
-    }
-
-    // Distribute funds
-    _burn(_from, _quantityToSell, true);
-
-    _transferCurrency(_to, currencyValue);
-    emit Sell(_from, _to, currencyValue, _quantityToSell);
-  }
-
   /// @notice Sell FAIR tokens for at least the given amount of currency.
   /// @param _to The account to receive the currency from this sale.
   /// @param _quantityToSell How many FAIR tokens to sell for currency value.
@@ -743,7 +717,22 @@ contract DecentralizedAutonomousTrust
     uint _minCurrencyReturned
   ) public
   {
-    _sell(msg.sender, _to, _quantityToSell, _minCurrencyReturned);
+    require(msg.sender != beneficiary || state >= STATE_CLOSE, "BENEFICIARY_ONLY_SELL_IN_CLOSE_OR_CANCEL");
+    require(_minCurrencyReturned > 0, "MUST_SELL_AT_LEAST_1");
+
+    uint currencyValue = estimateSellValue(_quantityToSell);
+    require(currencyValue >= _minCurrencyReturned, "PRICE_SLIPPAGE");
+
+    if(state == STATE_INIT || state == STATE_CANCEL)
+    {
+      initInvestors[msg.sender] = initInvestors[msg.sender].sub(_quantityToSell);
+    }
+
+    // Distribute funds
+    _burn(msg.sender, _quantityToSell, true);
+
+    _transferCurrency(_to, currencyValue);
+    emit Sell(msg.sender, _to, currencyValue, _quantityToSell);
   }
 
   /// Pay
@@ -842,14 +831,14 @@ contract DecentralizedAutonomousTrust
     uint _currencyValue
   ) public payable
   {
-    _collectInvestment(msg.sender, _currencyValue, msg.value, false);
+    _collectInvestment(_currencyValue, msg.value, false);
     _pay(_to, _currencyValue);
   }
 
   /// @dev Pay the organization on-chain with ETH (only works when currency is ETH)
   function () external payable
   {
-    _collectInvestment(msg.sender, msg.value, msg.value, false);
+    _collectInvestment(msg.value, msg.value, false);
     _pay(msg.sender, msg.value);
   }
 
@@ -924,7 +913,7 @@ contract DecentralizedAutonomousTrust
       emit StateChange(state, STATE_CLOSE);
       state = STATE_CLOSE;
 
-      _collectInvestment(msg.sender, exitFee, msg.value, true);
+      _collectInvestment(exitFee, msg.value, true);
     }
     else
     {
