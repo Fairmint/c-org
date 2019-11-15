@@ -725,7 +725,7 @@ contract DecentralizedAutonomousTrust
 
     if(state == STATE_INIT || state == STATE_CANCEL)
     {
-      initInvestors[_from] = initInvestors[_from].sub(_quantityToSell);
+      initInvestors[msg.sender] = initInvestors[msg.sender].sub(_quantityToSell);
     }
 
     // Distribute funds
