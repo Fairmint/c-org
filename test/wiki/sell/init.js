@@ -155,4 +155,11 @@ contract("wiki / sell / init", accounts => {
       from: investor
     });
   });
+
+  it("shouldFail if minCurrency == 0", async () => {
+    await shouldFail(
+      contracts.dat.sell(investor, sellAmount, 0, { from: investor }),
+      "MUST_SELL_AT_LEAST_1"
+    );
+  });
 });
