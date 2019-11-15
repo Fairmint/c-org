@@ -129,6 +129,7 @@ module.exports = {
         "Dependencies",
         "Migrations",
         "MintableERC20",
+        "NoFallbackProxy",
         "TestUsdc"
       ],
       gasPrice: 5
