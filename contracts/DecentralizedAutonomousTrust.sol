@@ -892,7 +892,7 @@ contract DecentralizedAutonomousTrust
         buySlopeNum * totalSupply(), totalSupply(),
         buySlopeDen
       );
-      /// Math: this if condition avoids a potential overflow
+      // Math: this if condition avoids a potential overflow
       if(exitFee <= reserve)
       {
         exitFee = 0;
@@ -938,7 +938,7 @@ contract DecentralizedAutonomousTrust
     }
     else
     {
-      require(false, "INVALID_STATE");
+      revert("INVALID_STATE");
     }
 
     emit Close(exitFee);

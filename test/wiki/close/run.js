@@ -1,3 +1,5 @@
+const { tokens } = require("hardlydifficult-ethereum-contracts");
+
 const sleep = require("sleep");
 const BigNumber = require("bignumber.js");
 const {
@@ -161,6 +163,23 @@ contract("wiki / close / run", accounts => {
           .minus(gasCost)
           .toFixed()
       );
+    });
+  });
+
+  describe("when reserve is high", () => {
+    beforeEach(async () => {
+      // Redeploy using an ERC-20
+      const token = await tokens.dai.deploy(web3, accounts[0]);
+      contracts = await deployDat(accounts, { currency: token.address });
+      await approveAll(contracts, accounts);
+      await token.mint(contracts.dat.address, constants.MAX_UINT, {
+        from: accounts[0]
+      });
+    });
+
+    it("exitFee is 0", async () => {
+      const exitFee = new BigNumber(await contracts.dat.estimateExitFee(0));
+      assert.equal(exitFee, 0);
     });
   });
 });
