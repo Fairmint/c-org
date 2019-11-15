@@ -616,7 +616,7 @@ contract DecentralizedAutonomousTrust
         _distributeInvestment(buybackReserve().sub(beneficiaryContribution));
       }
     }
-    else if(state == STATE_RUN)
+    else // implied: if(state == STATE_RUN)
     {
       if(_to != beneficiary)
       {
