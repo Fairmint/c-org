@@ -562,14 +562,7 @@ contract DecentralizedAutonomousTrust
       tokenValue = sqrtContract.sqrt(tokenValue);
 
       // Math: small chance of underflow due to possible rounding in sqrt
-      if(tokenValue > supply)
-      {
-        tokenValue -= supply;
-      }
-      else
-      {
-        tokenValue = 0;
-      }
+      tokenValue = tokenValue.sub(supply);
     }
     else
     {
