@@ -73,7 +73,7 @@ contract("dat / pay", accounts => {
     // Redeploy with an erc-20
     const token = await tokens.dai.deploy(web3, accounts[0]);
     await token.mint(accounts[0], constants.MAX_UINT, { from: accounts[0] });
-    contracts = await deployDat(
+    const contracts = await deployDat(
       accounts,
       {
         initGoal: "0", // Start in the run state
