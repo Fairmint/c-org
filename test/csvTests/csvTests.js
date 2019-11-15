@@ -1,7 +1,7 @@
 const Papa = require("papaparse");
 const fs = require("fs");
 const BigNumber = require("bignumber.js");
-const { approveAll, constants, deployDat, getGasCost } = require("../helpers");
+const { constants, deployDat, getGasCost } = require("../helpers");
 const sheets = require("./test-data/script.json");
 
 const daiArtifact = artifacts.require("TestDai");
@@ -61,10 +61,6 @@ contract("dat / csvTests", accounts => {
               return console.log("Test skipped.");
             }
             await deployAndConfigDat(sheet);
-            await approveAll(contracts, accounts);
-            await contracts.whitelist.approve(ethBank, true, {
-              from: await contracts.dat.control()
-            });
             await runTestScript(sheet);
           });
         });
@@ -108,7 +104,8 @@ contract("dat / csvTests", accounts => {
           feeBasisPoints: new BigNumber(fee).toFixed(),
           minInvestment: new BigNumber(100)
             .shiftedBy(currencyDecimals)
-            .toFixed()
+            .toFixed(),
+          whitelistAddress: constants.ZERO_ADDRESS
         });
       }
 

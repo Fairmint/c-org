@@ -79,51 +79,55 @@ module.exports = async function deployDat(accounts, options, useProxy = true) {
     callOptions.symbol,
     { from: callOptions.control }
   );
-  // Whitelist
-  const whitelistContract = await whitelistArtifact.new({
-    from: callOptions.control
-  });
-  if (useProxy) {
-    const whitelistProxy = await proxyArtifact.new(
-      whitelistContract.address, // logic
-      contracts.proxyAdmin.address, // admin
-      [], // data
-      {
-        from: callOptions.control
-      }
-    );
-
-    contracts.whitelist = await whitelistArtifact.at(whitelistProxy.address);
-  } else {
-    contracts.whitelist = whitelistContract;
-  }
-  await contracts.whitelist.initialize(contracts.dat.address, {
-    from: callOptions.control
-  });
-  callOptions.whitelistAddress = contracts.whitelist.address;
-  // console.log(`Deployed whitelist: ${contracts.whitelist.address}`);
   let promises = [];
 
-  promises.push(
-    contracts.whitelist.approve(callOptions.control, true, {
+  if (callOptions.whitelistAddress === undefined) {
+    // Whitelist
+    const whitelistContract = await whitelistArtifact.new({
       from: callOptions.control
-    })
-  );
-  promises.push(
-    contracts.whitelist.approve(callOptions.beneficiary, true, {
+    });
+
+    if (useProxy) {
+      const whitelistProxy = await proxyArtifact.new(
+        whitelistContract.address, // logic
+        contracts.proxyAdmin.address, // admin
+        [], // data
+        {
+          from: callOptions.control
+        }
+      );
+
+      contracts.whitelist = await whitelistArtifact.at(whitelistProxy.address);
+    } else {
+      contracts.whitelist = whitelistContract;
+    }
+    await contracts.whitelist.initialize(contracts.dat.address, {
       from: callOptions.control
-    })
-  );
-  promises.push(
-    contracts.whitelist.approve(callOptions.feeCollector, true, {
-      from: callOptions.control
-    })
-  );
-  promises.push(
-    contracts.whitelist.approve(contracts.dat.address, true, {
-      from: callOptions.control
-    })
-  );
+    });
+    callOptions.whitelistAddress = contracts.whitelist.address;
+    // console.log(`Deployed whitelist: ${contracts.whitelist.address}`);
+
+    promises.push(
+      contracts.whitelist.approve(callOptions.control, true, {
+        from: callOptions.control
+      })
+    );
+    promises.push(
+      contracts.whitelist.approve(callOptions.beneficiary, true, {
+        from: callOptions.control
+      })
+    );
+    promises.push(
+      contracts.whitelist.approve(callOptions.feeCollector, true, {
+        from: callOptions.control
+      })
+    );
+    promises.push(
+      contracts.whitelist.approve(contracts.dat.address, true, {
+        from: callOptions.control
+      })
+    );
+  }
 
   // Update DAT (with new AUTH and other callOptions)
   promises.push(updateDatConfig(contracts, callOptions));
@@ -146,9 +150,11 @@ module.exports = async function deployDat(accounts, options, useProxy = true) {
       );
       contracts.vesting.push(contract);
 
-      await contracts.whitelist.approve(contracts.vesting[i].address, true, {
-        from: callOptions.control
-      });
+      if (contracts.whitelist) {
+        await contracts.whitelist.approve(contracts.vesting[i].address, true, {
+          from: callOptions.control
+        });
+      }
       await contracts.dat.transfer(
         contract.address,
         callOptions.vesting[i].value,
