@@ -50,7 +50,7 @@ contract("ERC20", function(accounts) {
               this.token.decreaseAllowance(spender, amount, {
                 from: initialHolder
               }),
-              "SafeMath: subtraction overflow -- Reason given: SafeMath: subtraction overflow."
+              "ERC20: decreased allowance below zero"
             );
           });
         });
@@ -106,7 +106,7 @@ contract("ERC20", function(accounts) {
               this.token.decreaseAllowance(spender, approvedAmount.addn(1), {
                 from: initialHolder
               }),
-              "SafeMath: subtraction overflow -- Reason given: SafeMath: subtraction overflow."
+              "ERC20: decreased allowance below zero"
             );
           });
         });
@@ -134,7 +134,7 @@ contract("ERC20", function(accounts) {
           this.token.decreaseAllowance(spender, amount, {
             from: initialHolder
           }),
-          "SafeMath: subtraction overflow -- Reason given: SafeMath: subtraction overflow."
+          "ERC20: decreased allowance below zero"
         );
       });
     });
@@ -306,7 +306,7 @@ contract("ERC20", function(accounts) {
       it("rejects burning more than balance", async function() {
         await expectRevert(
           this.token.burn(initialSupply.addn(1), { from: initialHolder }),
-          "SafeMath: subtraction overflow -- Reason given: SafeMath: subtraction overflow."
+          "ERC20: burn amount exceeds balance"
         );
       });
 
