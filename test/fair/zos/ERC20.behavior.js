@@ -136,7 +136,7 @@ function shouldBehaveLikeERC20(
                 this.token.transferFrom(tokenOwner, to, amount, {
                   from: spender
                 }),
-                "SafeMath: subtraction overflow -- Reason given: SafeMath: subtraction overflow."
+                "ERC20: transfer amount exceeds balance"
               );
             });
           });
@@ -157,7 +157,7 @@ function shouldBehaveLikeERC20(
                 this.token.transferFrom(tokenOwner, to, amount, {
                   from: spender
                 }),
-                "SafeMath: subtraction overflow -- Reason given: SafeMath: subtraction overflow."
+                "ERC20: transfer amount exceeds allowance"
               );
             });
           });
@@ -170,7 +170,7 @@ function shouldBehaveLikeERC20(
                 this.token.transferFrom(tokenOwner, to, amount, {
                   from: spender
                 }),
-                "SafeMath: subtraction overflow -- Reason given: SafeMath: subtraction overflow."
+                "ERC20: transfer amount exceeds balance"
               );
             });
           });
@@ -235,7 +235,7 @@ function shouldBehaveLikeERC20Transfer(
       it("reverts", async function() {
         await expectRevert(
           transfer.call(this, from, to, amount),
-          "SafeMath: subtraction overflow -- Reason given: SafeMath: subtraction overflow."
+          "ERC20: transfer amount exceeds balance"
         );
       });
     });
