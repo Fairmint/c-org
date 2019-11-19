@@ -8,6 +8,7 @@ import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/SafeERC20
 import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20Detailed.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/utils/Address.sol";
 
 
 /**
@@ -120,7 +121,7 @@ contract DecentralizedAutonomousTrust
 
   /// @notice The address of the beneficiary organization which receives the investments.
   /// Points to the wallet of the organization.
-  address public beneficiary;
+  address payable public beneficiary;
 
   /// @notice The BigMath library we use
   BigDiv public bigDiv;
@@ -146,7 +147,7 @@ contract DecentralizedAutonomousTrust
   IERC20 public currency;
 
   /// @notice The address where fees are sent.
-  address public feeCollector;
+  address payable public feeCollector;
 
   /// @notice The percent fee collected each time new FAIR are issued expressed in basis points.
   uint public feeBasisPoints;
@@ -310,9 +311,7 @@ contract DecentralizedAutonomousTrust
         uint refund = _msgValue.sub(_quantityToInvest);
         if(refund > 0)
         {
-          // https://diligence.consensys.net/blog/2019/09/stop-using-soliditys-transfer-now/
-          (bool success, ) = msg.sender.call.value(refund)("");
-          require(success, "TRANSFER_FAILED");
+          Address.sendValue(msg.sender, refund);
         }
       }
       else
@@ -331,7 +330,7 @@ contract DecentralizedAutonomousTrust
 
   /// @dev Send `_amount` currency from the contract to the `_to` account.
   function _transferCurrency(
-    address _to,
+    address payable _to,
     uint _amount
   ) private
   {
@@ -339,9 +338,7 @@ contract DecentralizedAutonomousTrust
     {
       if(address(currency) == address(0))
       {
-        // https://diligence.consensys.net/blog/2019/09/stop-using-soliditys-transfer-now/
-        (bool success, ) = _to.call.value(_amount)("");
-        require(success, "TRANSFER_FAILED");
+        Address.sendValue(_to, _amount);
       }
       else
       {
@@ -416,9 +413,9 @@ contract DecentralizedAutonomousTrust
     address _bigDiv,
     address _sqrtContract,
     address _whitelistAddress,
-    address _beneficiary,
+    address payable _beneficiary,
     address _control,
-    address _feeCollector,
+    address payable _feeCollector,
     uint _feeBasisPoints,
     bool _autoBurn,
     uint _revenueCommitmentBasisPoints,
@@ -712,7 +709,7 @@ contract DecentralizedAutonomousTrust
   /// @dev _minCurrencyReturned is necessary as the price will change if some elses transaction mines after
   /// yours was submitted.
   function sell(
-    address _to,
+    address payable _to,
     uint _quantityToSell,
     uint _minCurrencyReturned
   ) public
