@@ -1,8 +1,8 @@
 pragma solidity 0.5.13;
 
 import "./Whitelist.sol";
-import "hardlydifficult-ethereum-contracts/contracts/math/BigDiv.sol";
-import "hardlydifficult-ethereum-contracts/contracts/math/Sqrt.sol";
+import "./math/BigDiv.sol";
+import "./math/Sqrt.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/SafeERC20.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20.sol";
