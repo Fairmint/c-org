@@ -1,7 +1,7 @@
 pragma solidity ^0.5.0;
 
 
-import '@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol';
+import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
 
 /**
  * @title Reduces the size of terms before multiplication, to avoid an overflow, and then
