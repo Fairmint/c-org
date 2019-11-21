@@ -3,8 +3,8 @@ pragma solidity ^0.5.0;
 import "@openzeppelin/contracts-ethereum-package/contracts/drafts/TokenVesting.sol";
 import "zos-lib/contracts/upgradeability/AdminUpgradeabilityProxy.sol";
 import "zos-lib/contracts/upgradeability/ProxyAdmin.sol";
-import "hardlydifficult-ethereum-contracts/contracts/math/BigDiv.sol";
-import "hardlydifficult-ethereum-contracts/contracts/math/Sqrt.sol";
+import "./math/BigDiv.sol";
+import "./math/Sqrt.sol";
 
 /**
  * This creates the artifacts allowing us to use these 3rd party contracts directly
