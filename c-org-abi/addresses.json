@@ -2,31 +2,28 @@
   "mainnet": {
     "dai": "0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359",
     "usdc": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
-    "testDAI": "",
     "testUSDC": "0x7d9C10E2F7AF22200126A0EA6826c1A16F8F6d38",
-    "bigMath": "0x9FF457d924A941A0f37A40a7E7EFCaC9c39bdC25",
     "orgs": [
       {
         "name": "Fairmint",
-        "token": "0x9e9404849B9A6dd520bD6199AEe5CE7f76c09245",
-        "proxyAdmin": "0xDF0678877FF0BE818d4e74B245AE6331b1cCE57e"
+        "token": "0xCE4f951613077C142118D5D196B86Dc7aab1E7d7",
+        "proxyAdmin": "0x46247e483e1DD0Fa81dca7D17db7AD0216A305e2"
       }
     ]
   },
   "ropsten": {
-    "dai": "0xF836D97Db00f091c98977bBa4a25Cd99dF1A9021",
-    "usdc": "0x14039994048f873dc5F86a32075669652b9F0fA7",
-    "bigMath": "0x63c28a2C0CE1917b8A75bC4109E64BcFc775b37b",
+    "dai": "0xC6037Ea1d990999148d81E7eD671f9bF769F144f",
+    "usdc": "0xceB9eA4357f4713548AC302aEbAcB9E9C6D41Ffc",
     "orgs": [
       { 
         "name": "Fairmint",
-        "token": "0xA47807BE67E76E7E464dc1f3cEB58790059785a7",
-        "proxyAdmin": "0x677448852eeDd60803bdD9c5990cBB7B5d38Ff7E"
+        "token": "0xDBADDE4cdCDF08A847bBf9964a080deeE260DCDe",
+        "proxyAdmin": "0x50457d08239b9e03Cee084d6f35263403a48836A"
       },
       { 
         "name": "HardlyDifficult (test w/ DAI)",
-        "token": "0xb003DF166160097D83d27800d5927A3F2dd02D22",
-        "proxyAdmin": "0x4D46d6cF57187713dE20B1fb69081b111F4c3Cb2"
+        "token": "0x6368801fbBcb2D3bda93801B637D727aB73e25F6",
+        "proxyAdmin": "0x9e9404849B9A6dd520bD6199AEe5CE7f76c09245"
       }
     ]
   }
