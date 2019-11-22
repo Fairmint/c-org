@@ -27,7 +27,7 @@ contract Sqrt
     else if (x == MAX_UINT)
     {
       // Without this we fail on x + 1 below
-      return 340282366920938463463374607431768211455;
+      return 2**128 - 1;
     }
 
     uint z = (x + 1) / 2;

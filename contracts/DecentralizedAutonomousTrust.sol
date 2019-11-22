@@ -91,7 +91,7 @@ contract DecentralizedAutonomousTrust
   uint private constant STATE_CANCEL = 3;
 
   /// @notice When multiplying 2 terms, the max value is 2^128-1
-  uint private constant MAX_BEFORE_SQUARE = 340282366920938463463374607431768211455;
+  uint private constant MAX_BEFORE_SQUARE = 2**128 - 1;
 
   /// @notice The denominator component for values specified in basis points.
   uint private constant BASIS_POINTS_DEN = 10000;
@@ -252,7 +252,7 @@ contract DecentralizedAutonomousTrust
     uint _amount
   ) internal
   {
-    require(state != STATE_INIT || _from == beneficiary, "ONLY_BENEFICIAR_DURING_INIT");
+    require(state != STATE_INIT || _from == beneficiary, "ONLY_BENEFICIARY_DURING_INIT");
     _authorizeTransfer(_from, _to, _amount, false);
 
     super._transfer(_from, _to, _amount);
@@ -426,10 +426,13 @@ contract DecentralizedAutonomousTrust
     // This require(also confirms that initialize has been called.
     require(msg.sender == control, "CONTROL_ONLY");
 
+    // address(0) is okay
     whitelist = Whitelist(_whitelistAddress);
 
     require(_bigDiv != address(0), "INVALID_ADDRESS");
     bigDiv = BigDiv(_bigDiv);
+
+    require(_sqrtContract != address(0), "INVALID_ADDRESS");
     sqrtContract = Sqrt(_sqrtContract);
 
     require(_control != address(0), "INVALID_ADDRESS");
@@ -533,10 +536,10 @@ contract DecentralizedAutonomousTrust
     if(state == STATE_INIT)
     {
       // Math: worst case
-      // 2 * MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE
+      // MAX * 2 * MAX_BEFORE_SQUARE
       // / MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE
       tokenValue = bigDiv.bigDiv2x1(
-        2 * _currencyValue, buySlopeDen,
+        _currencyValue, 2 * buySlopeDen,
         initGoal * buySlopeNum
       );
       if(tokenValue > initGoal)
@@ -548,10 +551,12 @@ contract DecentralizedAutonomousTrust
     {
       uint supply = totalSupply() + burnedSupply;
       // Math: worst case
-      // 2 * MAX_BEFORE_SQUARE / 2 * MAX_BEFORE_SQUARE
+      // MAX * 2 * MAX_BEFORE_SQUARE
       // / MAX_BEFORE_SQUARE
-      tokenValue = 2 * _currencyValue * buySlopeDen;
-      tokenValue /= buySlopeNum;
+      tokenValue = bigDiv.bigDiv2x1(
+        _currencyValue, 2 * buySlopeDen,
+        buySlopeNum
+      );
 
       // Math: worst case MAX + (MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE)
       tokenValue = tokenValue.add(supply * supply);
@@ -623,13 +628,10 @@ contract DecentralizedAutonomousTrust
 
     _mint(_to, tokenValue);
 
-    if(state == STATE_RUN)
+    if(state == STATE_RUN && msg.sender == beneficiary && _to == beneficiary && autoBurn)
     {
-      if(msg.sender == beneficiary && _to == beneficiary && autoBurn)
-      {
-        // must mint before this call
-        _burn(beneficiary, tokenValue, false);
-      }
+      // must mint before this call
+      _burn(beneficiary, tokenValue, false);
     }
   }
 
@@ -657,17 +659,17 @@ contract DecentralizedAutonomousTrust
 
       // Math: burnedSupply is capped in FAIR such that the square will never overflow
       // Math worst case:
-      // MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE/2
+      // MAX * MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE/2
       // / MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE/2
       currencyValue = bigDiv.bigDiv2x2(
-        _quantityToSell * reserve, burnedSupply * burnedSupply,
+        _quantityToSell.mul(reserve), burnedSupply * burnedSupply,
         totalSupply(), supply * supply
       );
       // Math: worst case currencyValue is MAX_BEFORE_SQUARE (max reserve, 1 supply)
 
       // Math worst case:
-      // 2 * MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE
-      uint temp = 2 * _quantityToSell * reserve;
+      // MAX * 2 * MAX_BEFORE_SQUARE
+      uint temp = _quantityToSell.mul(2 * reserve);
       temp /= supply;
       // Math: worst-case temp is MAX_BEFORE_SQUARE (max reserve, 1 supply)
 
@@ -675,26 +677,26 @@ contract DecentralizedAutonomousTrust
       currencyValue += temp;
 
       // Math: worst case
-      // MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE
+      // MAX * MAX * MAX_BEFORE_SQUARE
       // / MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE/2
       currencyValue -= bigDiv.bigDiv2x1RoundUp(
-        _quantityToSell * _quantityToSell, reserve,
+        _quantityToSell.mul(_quantityToSell), reserve,
         supply * supply
       );
     }
     else if(state == STATE_CLOSE)
     {
       // Math worst case
-      // MAX_BEFORE_SQUARE / 2 * MAX_BEFORE_SQUARE
-      currencyValue = _quantityToSell * reserve;
+      // MAX * MAX_BEFORE_SQUARE
+      currencyValue = _quantityToSell.mul(reserve);
       currencyValue /= totalSupply();
     }
     else
     {
       // STATE_INIT or STATE_CANCEL
       // Math worst case:
-      // MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE
-      currencyValue = _quantityToSell * reserve;
+      // MAX * MAX_BEFORE_SQUARE
+      currencyValue = _quantityToSell.mul(reserve);
       // Math: FAIR blocks initReserve from being burned unless we reach the RUN state which prevents an underflow
       currencyValue /= totalSupply() - initReserve;
     }
@@ -751,14 +753,14 @@ contract DecentralizedAutonomousTrust
     uint supply = totalSupply() + burnedSupply;
 
     // Math: worst case
-    // 2 * MAX_BEFORE_SQUARE/2 * 10000 * MAX_BEFORE_SQUARE
+    // MAX * 2 * 10000 * MAX_BEFORE_SQUARE
     // / 10000 * MAX_BEFORE_SQUARE
     uint tokenValue = bigDiv.bigDiv2x1(
-      2 * _currencyValue * revenueCommitmentBasisPoints, buySlopeDen,
+      _currencyValue.mul(2 * revenueCommitmentBasisPoints), buySlopeDen,
       BASIS_POINTS_DEN * buySlopeNum
     );
 
-    tokenValue += supply * supply;
+    tokenValue = tokenValue.add(supply * supply);
     tokenValue = sqrtContract.sqrt(tokenValue);
 
     if(tokenValue > supply)
@@ -856,16 +858,18 @@ contract DecentralizedAutonomousTrust
       // Source: t*(t+b)*(n/d)-r
       // Implementation: (b n t)/d + (n t^2)/d - r
 
+      uint _totalSupply = totalSupply();
+
       // Math worst case:
       // MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE
       exitFee = bigDiv.bigDiv2x1(
-        burnedSupply * buySlopeNum, totalSupply(),
+        burnedSupply * buySlopeNum, _totalSupply,
         buySlopeDen
       );
       // Math worst case:
       // MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE
       exitFee += bigDiv.bigDiv2x1(
-        buySlopeNum * totalSupply(), totalSupply(),
+        buySlopeNum * _totalSupply, _totalSupply,
         buySlopeDen
       );
       // Math: this if condition avoids a potential overflow

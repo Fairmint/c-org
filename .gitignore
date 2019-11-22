@@ -14,3 +14,4 @@ contracts_development.json
 /.coverage_artifacts/
 /.coverage_contracts/
 coverage.json
+/bin/
