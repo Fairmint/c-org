@@ -6,24 +6,29 @@
     "orgs": [
       {
         "name": "Fairmint",
-        "token": "0xCE4f951613077C142118D5D196B86Dc7aab1E7d7",
-        "proxyAdmin": "0x46247e483e1DD0Fa81dca7D17db7AD0216A305e2"
+        "token": "0xcDEe7d4e4Fd9028a12Ba2C4237A3cf494750A690",
+        "proxyAdmin": "0x13fD62D1786d13f700Bc9f5e2136AbbA26Da5F28"
+      },
+      {
+        "name": "HardlyDifficult",
+        "token": "0x5a4A6c547c07D5D03Bf60Da9BFa5E7D93DC45a43",
+        "proxyAdmin": "0xEfc22088b2d2B530A0B18563A2ac1d03e848aea1"
       }
     ]
   },
   "ropsten": {
     "dai": "0xC6037Ea1d990999148d81E7eD671f9bF769F144f",
-    "usdc": "0xceB9eA4357f4713548AC302aEbAcB9E9C6D41Ffc",
+    "usdc": "0x14039994048f873dc5F86a32075669652b9F0fA7",
     "orgs": [
       { 
         "name": "Fairmint",
-        "token": "0xDBADDE4cdCDF08A847bBf9964a080deeE260DCDe",
-        "proxyAdmin": "0x50457d08239b9e03Cee084d6f35263403a48836A"
+        "token": "0xD818DEB9003e6e5bCA4bc1fd4641a211904CF7B4",
+        "proxyAdmin": "0x2853087C41C43299111dD7675E0De1642459dD61"
       },
       { 
         "name": "HardlyDifficult (test w/ DAI)",
-        "token": "0x6368801fbBcb2D3bda93801B637D727aB73e25F6",
-        "proxyAdmin": "0x9e9404849B9A6dd520bD6199AEe5CE7f76c09245"
+        "token": "0xBAb1aa538c5767431149a3864b9e319Ed0da822E",
+        "proxyAdmin": "0x7d1950EAa5049E35AA3265e7c74da9b186202FF9"
       }
     ]
   }
