@@ -64,6 +64,28 @@ contract("dat / updateConfig", accounts => {
     );
   });
 
+  it("shouldFail with INVALID_ADDRESS if sqrt is missing", async () => {
+    contracts = await deployDat(accounts);
+    console.log(await contracts.dat.control());
+    await shouldFail(
+      contracts.dat.updateConfig(
+        await contracts.dat.bigDiv(),
+        constants.ZERO_ADDRESS,
+        await contracts.dat.whitelist(),
+        await contracts.dat.beneficiary(),
+        await contracts.dat.control(),
+        await contracts.dat.feeCollector(),
+        await contracts.dat.feeBasisPoints(),
+        await contracts.dat.autoBurn(),
+        await contracts.dat.revenueCommitmentBasisPoints(),
+        await contracts.dat.minInvestment(),
+        await contracts.dat.openUntilAtLeast(),
+        { from: await contracts.dat.control() }
+      ),
+      "INVALID_ADDRESS"
+    );
+  });
+
   it("shouldFail with INVALID_ADDRESS if control is missing", async () => {
     contracts = await deployDat(accounts);
     await shouldFail(
