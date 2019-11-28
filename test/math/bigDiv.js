@@ -1,7 +1,7 @@
 const BigNumber = require("bignumber.js");
 const { constants } = require("hardlydifficult-ethereum-contracts");
 
-const bigDivArtifact = artifacts.require("BigDiv");
+const bigDivArtifact = artifacts.require("BigDivMock");
 
 contract("math / bigDiv", () => {
   let contract;

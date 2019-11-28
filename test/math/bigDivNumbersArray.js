@@ -1,4 +1,4 @@
-const bigDivArtifact = artifacts.require("BigDiv");
+const bigDivArtifact = artifacts.require("BigDivMock");
 const BigNumber = require("bignumber.js");
 
 // Goal is up to off by 1 + 0.00001% error for 2x1

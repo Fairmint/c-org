@@ -1,4 +1,4 @@
-const sqrtArtifact = artifacts.require("Sqrt");
+const sqrtArtifact = artifacts.require("SqrtMock");
 const BigNumber = require("bignumber.js");
 
 // Goal is up to off by 1 + 0.01% error

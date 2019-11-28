@@ -1,5 +1,5 @@
 const BigNumber = require("bignumber.js");
-const bigDivArtifact = artifacts.require("BigDiv");
+const bigDivArtifact = artifacts.require("BigDivMock");
 
 contract("bigDiv", accounts => {
   let contract;
