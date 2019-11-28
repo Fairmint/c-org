@@ -9,7 +9,7 @@ import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
  * @notice This effectively allows us to overflow values in the numerator and/or denominator
  * of a fraction, so long as the end result does not overflow as well.
 */
-contract BigDiv
+library BigDiv
 {
   using SafeMath for uint256;
 
@@ -37,7 +37,7 @@ contract BigDiv
     uint256 _numA,
     uint256 _numB,
     uint256 _den
-  ) public pure
+  ) internal pure
     returns(uint256)
   {
     if(_numA == 0 || _numB == 0)
@@ -122,7 +122,7 @@ contract BigDiv
     uint256 _numA,
     uint256 _numB,
     uint256 _den
-  ) public pure
+  ) internal pure
     returns(uint256)
   {
     // first get the rounded down result
@@ -165,7 +165,7 @@ contract BigDiv
     uint256 _numB,
     uint256 _denA,
     uint256 _denB
-  ) public pure
+  ) internal pure
     returns (uint256)
   {
     if(MAX_UINT / _denA >= _denB)

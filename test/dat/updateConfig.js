@@ -7,8 +7,6 @@ contract("dat / updateConfig", accounts => {
     contracts = await deployDat(accounts);
     await shouldFail(
       contracts.dat.updateConfig(
-        await contracts.dat.bigDiv(),
-        await contracts.dat.sqrtContract(),
         await contracts.dat.whitelist(),
         await contracts.dat.beneficiary(),
         await contracts.dat.control(),
@@ -27,8 +25,6 @@ contract("dat / updateConfig", accounts => {
   it("can remove the whitelist", async () => {
     contracts = await deployDat(accounts);
     await contracts.dat.updateConfig(
-      await contracts.dat.bigDiv(),
-      await contracts.dat.sqrtContract(),
       constants.ZERO_ADDRESS,
       await contracts.dat.beneficiary(),
       await contracts.dat.control(),
@@ -42,56 +38,10 @@ contract("dat / updateConfig", accounts => {
     );
   });
 
-  it("shouldFail with INVALID_ADDRESS if bigDiv is missing", async () => {
-    contracts = await deployDat(accounts);
-    console.log(await contracts.dat.control());
-    await shouldFail(
-      contracts.dat.updateConfig(
-        constants.ZERO_ADDRESS,
-        await contracts.dat.sqrtContract(),
-        await contracts.dat.whitelist(),
-        await contracts.dat.beneficiary(),
-        await contracts.dat.control(),
-        await contracts.dat.feeCollector(),
-        await contracts.dat.feeBasisPoints(),
-        await contracts.dat.autoBurn(),
-        await contracts.dat.revenueCommitmentBasisPoints(),
-        await contracts.dat.minInvestment(),
-        await contracts.dat.openUntilAtLeast(),
-        { from: await contracts.dat.control() }
-      ),
-      "INVALID_ADDRESS"
-    );
-  });
-
-  it("shouldFail with INVALID_ADDRESS if sqrt is missing", async () => {
-    contracts = await deployDat(accounts);
-    console.log(await contracts.dat.control());
-    await shouldFail(
-      contracts.dat.updateConfig(
-        await contracts.dat.bigDiv(),
-        constants.ZERO_ADDRESS,
-        await contracts.dat.whitelist(),
-        await contracts.dat.beneficiary(),
-        await contracts.dat.control(),
-        await contracts.dat.feeCollector(),
-        await contracts.dat.feeBasisPoints(),
-        await contracts.dat.autoBurn(),
-        await contracts.dat.revenueCommitmentBasisPoints(),
-        await contracts.dat.minInvestment(),
-        await contracts.dat.openUntilAtLeast(),
-        { from: await contracts.dat.control() }
-      ),
-      "INVALID_ADDRESS"
-    );
-  });
-
   it("shouldFail with INVALID_ADDRESS if control is missing", async () => {
     contracts = await deployDat(accounts);
     await shouldFail(
       contracts.dat.updateConfig(
-        await contracts.dat.bigDiv(),
-        await contracts.dat.sqrtContract(),
         await contracts.dat.whitelist(),
         await contracts.dat.beneficiary(),
         constants.ZERO_ADDRESS,
@@ -111,8 +61,6 @@ contract("dat / updateConfig", accounts => {
     contracts = await deployDat(accounts);
     await shouldFail(
       contracts.dat.updateConfig(
-        await contracts.dat.bigDiv(),
-        await contracts.dat.sqrtContract(),
         await contracts.dat.whitelist(),
         await contracts.dat.beneficiary(),
         await contracts.dat.control(),
@@ -133,8 +81,6 @@ contract("dat / updateConfig", accounts => {
       revenueCommitmentBasisPoints: 0
     });
     contracts.dat.updateConfig(
-      await contracts.dat.bigDiv(),
-      await contracts.dat.sqrtContract(),
       await contracts.dat.whitelist(),
       await contracts.dat.beneficiary(),
       await contracts.dat.control(),
@@ -148,8 +94,6 @@ contract("dat / updateConfig", accounts => {
     );
     await shouldFail(
       contracts.dat.updateConfig(
-        await contracts.dat.bigDiv(),
-        await contracts.dat.sqrtContract(),
         await contracts.dat.whitelist(),
         await contracts.dat.beneficiary(),
         await contracts.dat.control(),
@@ -169,8 +113,6 @@ contract("dat / updateConfig", accounts => {
     contracts = await deployDat(accounts);
     await shouldFail(
       contracts.dat.updateConfig(
-        await contracts.dat.bigDiv(),
-        await contracts.dat.sqrtContract(),
         await contracts.dat.whitelist(),
         await contracts.dat.beneficiary(),
         await contracts.dat.control(),
@@ -190,8 +132,6 @@ contract("dat / updateConfig", accounts => {
     contracts = await deployDat(accounts);
     await shouldFail(
       contracts.dat.updateConfig(
-        await contracts.dat.bigDiv(),
-        await contracts.dat.sqrtContract(),
         await contracts.dat.whitelist(),
         await contracts.dat.beneficiary(),
         await contracts.dat.control(),
@@ -211,8 +151,6 @@ contract("dat / updateConfig", accounts => {
     contracts = await deployDat(accounts);
     await shouldFail(
       contracts.dat.updateConfig(
-        await contracts.dat.bigDiv(),
-        await contracts.dat.sqrtContract(),
         await contracts.dat.whitelist(),
         await contracts.dat.beneficiary(),
         await contracts.dat.control(),
@@ -232,8 +170,6 @@ contract("dat / updateConfig", accounts => {
     contracts = await deployDat(accounts);
     await shouldFail(
       contracts.dat.updateConfig(
-        await contracts.dat.bigDiv(),
-        await contracts.dat.sqrtContract(),
         await contracts.dat.whitelist(),
         constants.ZERO_ADDRESS,
         await contracts.dat.control(),
@@ -252,8 +188,6 @@ contract("dat / updateConfig", accounts => {
   it("shouldFail with OPEN_UNTIL_MAY_NOT_BE_REDUCED", async () => {
     contracts = await deployDat(accounts);
     await contracts.dat.updateConfig(
-      await contracts.dat.bigDiv(),
-      await contracts.dat.sqrtContract(),
       await contracts.dat.whitelist(),
       await contracts.dat.beneficiary(),
       await contracts.dat.control(),
@@ -267,8 +201,6 @@ contract("dat / updateConfig", accounts => {
     );
     await shouldFail(
       contracts.dat.updateConfig(
-        await contracts.dat.bigDiv(),
-        await contracts.dat.sqrtContract(),
         await contracts.dat.whitelist(),
         await contracts.dat.beneficiary(),
         await contracts.dat.control(),
