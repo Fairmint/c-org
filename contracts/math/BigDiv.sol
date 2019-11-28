@@ -8,7 +8,9 @@ import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
  * restores the proper size after division.
  * @notice This effectively allows us to overflow values in the numerator and/or denominator
  * of a fraction, so long as the end result does not overflow as well.
-*/
+ * @dev Results may be off by 1 + 0.000001% for 2x1 calls and 2 + 0.00001% for 2x2 calls.
+ * Do not use if your contract expects very small result values to be accurate.
+ */
 library BigDiv
 {
   using SafeMath for uint256;

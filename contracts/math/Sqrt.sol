@@ -3,6 +3,10 @@ pragma solidity ^0.5.0;
 
 import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
 
+/**
+ * @title Calculates the square root of a given value.
+ * @dev Results may be off by 1.
+ */
 library Sqrt
 {
   using SafeMath for uint;
