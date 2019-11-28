@@ -25,6 +25,8 @@ contract DecentralizedAutonomousTrust
   is ERC20, ERC20Detailed
 {
   using SafeMath for uint;
+  using Sqrt for uint;
+  using BigDiv for uint;
   using SafeERC20 for IERC20;
 
   /**
@@ -61,8 +63,6 @@ contract DecentralizedAutonomousTrust
     uint _newState
   );
   event UpdateConfig(
-    address _bigDivAddress,
-    address _sqrtAddress,
     address _whitelistAddress,
     address indexed _beneficiary,
     address indexed _control,
@@ -122,12 +122,6 @@ contract DecentralizedAutonomousTrust
   /// @notice The address of the beneficiary organization which receives the investments.
   /// Points to the wallet of the organization.
   address payable public beneficiary;
-
-  /// @notice The BigMath library we use
-  BigDiv public bigDiv;
-
-  /// @notice The Sqrt library we use
-  Sqrt public sqrtContract;
 
   /// @notice The buy slope of the bonding curve.
   /// Does not affect the financial model, only the granularity of FAIR.
@@ -410,8 +404,6 @@ contract DecentralizedAutonomousTrust
   }
 
   function updateConfig(
-    address _bigDiv,
-    address _sqrtContract,
     address _whitelistAddress,
     address payable _beneficiary,
     address _control,
@@ -428,12 +420,6 @@ contract DecentralizedAutonomousTrust
 
     // address(0) is okay
     whitelist = Whitelist(_whitelistAddress);
-
-    require(_bigDiv != address(0), "INVALID_ADDRESS");
-    bigDiv = BigDiv(_bigDiv);
-
-    require(_sqrtContract != address(0), "INVALID_ADDRESS");
-    sqrtContract = Sqrt(_sqrtContract);
 
     require(_control != address(0), "INVALID_ADDRESS");
     control = _control;
@@ -470,8 +456,6 @@ contract DecentralizedAutonomousTrust
     }
 
     emit UpdateConfig(
-      _bigDiv,
-      _sqrtContract,
       _whitelistAddress,
       _beneficiary,
       _control,
@@ -538,8 +522,8 @@ contract DecentralizedAutonomousTrust
       // Math: worst case
       // MAX * 2 * MAX_BEFORE_SQUARE
       // / MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE
-      tokenValue = bigDiv.bigDiv2x1(
-        _currencyValue, 2 * buySlopeDen,
+      tokenValue = _currencyValue.bigDiv2x1(
+        2 * buySlopeDen,
         initGoal * buySlopeNum
       );
       if(tokenValue > initGoal)
@@ -553,14 +537,14 @@ contract DecentralizedAutonomousTrust
       // Math: worst case
       // MAX * 2 * MAX_BEFORE_SQUARE
       // / MAX_BEFORE_SQUARE
-      tokenValue = bigDiv.bigDiv2x1(
-        _currencyValue, 2 * buySlopeDen,
+      tokenValue = _currencyValue.bigDiv2x1(
+        2 * buySlopeDen,
         buySlopeNum
       );
 
       // Math: worst case MAX + (MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE)
       tokenValue = tokenValue.add(supply * supply);
-      tokenValue = sqrtContract.sqrt(tokenValue);
+      tokenValue = tokenValue.sqrt();
 
       // Math: small chance of underflow due to possible rounding in sqrt
       tokenValue = tokenValue.sub(supply);
@@ -611,8 +595,8 @@ contract DecentralizedAutonomousTrust
         // Math worst case:
         // MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE/2
         // / MAX_BEFORE_SQUARE * 2
-        uint beneficiaryContribution = bigDiv.bigDiv2x1(
-          initInvestors[beneficiary], buySlopeNum * initGoal,
+        uint beneficiaryContribution = initInvestors[beneficiary].bigDiv2x1(
+          buySlopeNum * initGoal,
           buySlopeDen * 2
         );
         _distributeInvestment(buybackReserve().sub(beneficiaryContribution));
@@ -661,8 +645,8 @@ contract DecentralizedAutonomousTrust
       // Math worst case:
       // MAX * MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE/2
       // / MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE/2
-      currencyValue = bigDiv.bigDiv2x2(
-        _quantityToSell.mul(reserve), burnedSupply * burnedSupply,
+      currencyValue = _quantityToSell.mul(reserve).bigDiv2x2(
+        burnedSupply * burnedSupply,
         totalSupply(), supply * supply
       );
       // Math: worst case currencyValue is MAX_BEFORE_SQUARE (max reserve, 1 supply)
@@ -679,8 +663,8 @@ contract DecentralizedAutonomousTrust
       // Math: worst case
       // MAX * MAX * MAX_BEFORE_SQUARE
       // / MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE/2
-      currencyValue -= bigDiv.bigDiv2x1RoundUp(
-        _quantityToSell.mul(_quantityToSell), reserve,
+      currencyValue -= _quantityToSell.mul(_quantityToSell).bigDiv2x1RoundUp(
+        reserve,
         supply * supply
       );
     }
@@ -755,13 +739,13 @@ contract DecentralizedAutonomousTrust
     // Math: worst case
     // MAX * 2 * 10000 * MAX_BEFORE_SQUARE
     // / 10000 * MAX_BEFORE_SQUARE
-    uint tokenValue = bigDiv.bigDiv2x1(
-      _currencyValue.mul(2 * revenueCommitmentBasisPoints), buySlopeDen,
+    uint tokenValue = _currencyValue.mul(2 * revenueCommitmentBasisPoints).bigDiv2x1(
+      buySlopeDen,
       BASIS_POINTS_DEN * buySlopeNum
     );
 
     tokenValue = tokenValue.add(supply * supply);
-    tokenValue = sqrtContract.sqrt(tokenValue);
+    tokenValue = tokenValue.sqrt();
 
     if(tokenValue > supply)
     {
@@ -861,15 +845,15 @@ contract DecentralizedAutonomousTrust
       uint _totalSupply = totalSupply();
 
       // Math worst case:
-      // MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE
-      exitFee = bigDiv.bigDiv2x1(
-        burnedSupply * buySlopeNum, _totalSupply,
+      // MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE
+      exitFee = _totalSupply.bigDiv2x1(
+        burnedSupply * buySlopeNum,
         buySlopeDen
       );
       // Math worst case:
       // MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE
-      exitFee += bigDiv.bigDiv2x1(
-        buySlopeNum * _totalSupply, _totalSupply,
+      exitFee += _totalSupply.bigDiv2x1(
+        buySlopeNum * _totalSupply,
         buySlopeDen
       );
       // Math: this if condition avoids a potential overflow
