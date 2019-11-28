@@ -11,7 +11,7 @@ import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
  * @dev Results may be off by 1 + 0.000001% for 2x1 calls and 2 + 0.00001% for 2x2 calls.
  * Do not use if your contract expects very small result values to be accurate.
  */
-contract BigDiv
+library BigDiv
 {
   using SafeMath for uint256;
 
@@ -39,7 +39,7 @@ contract BigDiv
     uint256 _numA,
     uint256 _numB,
     uint256 _den
-  ) public pure
+  ) internal pure
     returns(uint256)
   {
     if(_numA == 0 || _numB == 0)
@@ -124,7 +124,7 @@ contract BigDiv
     uint256 _numA,
     uint256 _numB,
     uint256 _den
-  ) public pure
+  ) internal pure
     returns(uint256)
   {
     // first get the rounded down result
@@ -167,7 +167,7 @@ contract BigDiv
     uint256 _numB,
     uint256 _denA,
     uint256 _denB
-  ) public pure
+  ) internal pure
     returns (uint256)
   {
     if(MAX_UINT / _denA >= _denB)

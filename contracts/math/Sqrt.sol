@@ -7,7 +7,7 @@ import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
  * @title Calculates the square root of a given value.
  * @dev Results may be off by 1.
  */
-contract Sqrt
+library Sqrt
 {
   using SafeMath for uint;
 
@@ -17,7 +17,7 @@ contract Sqrt
   // Source: https://github.com/ethereum/dapp-bin/pull/50
   function sqrt(
     uint x
-  ) public pure
+  ) internal pure
     returns (uint y)
   {
     if (x == 0)
