@@ -21,9 +21,9 @@ const numbers = [
   // MAX_UINT32.div('2').dp(0).minus('1'),
   // MAX_UINT32.div('2').dp(0),
   // MAX_UINT32.div('2').dp(0).plus('1'),
-  MAX_UINT32.minus("1"),
+  // MAX_UINT32.minus("1"),
   MAX_UINT32,
-  MAX_UINT32.plus("1"),
+  // MAX_UINT32.plus("1"),
   // MAX_UINT32.times('2').minus('1'),
   // MAX_UINT32.times('2'),
   // MAX_UINT32.times('2').plus('1'),
@@ -38,9 +38,9 @@ const numbers = [
   // MAX_UINT64.div("2")
   //   .dp(0)
   //   .plus("1"),
-  MAX_UINT64.minus("1"),
+  // MAX_UINT64.minus("1"),
   MAX_UINT64,
-  MAX_UINT64.plus("1"),
+  // MAX_UINT64.plus("1"),
   // MAX_UINT64.times("2").minus("1"),
   // MAX_UINT64.times("2"),
   // MAX_UINT64.times("2").plus("1"),
@@ -52,22 +52,22 @@ const numbers = [
   // new BigNumber('34028236692093842568444274447460650188'),
   // MAX_UINT128.div("1009").dp(0),
   // MAX_UINT128.div("10").dp(0),
-  MAX_UINT128.div("2")
-    .dp(0)
-    .minus("1"),
+  // MAX_UINT128.div("2")
+  //   .dp(0)
+  //   .minus("1"),
   MAX_UINT128.div("2").dp(0),
-  MAX_UINT128.div("2")
-    .dp(0)
-    .plus("1"),
+  // MAX_UINT128.div("2")
+  //   .dp(0)
+  //   .plus("1"),
   // MAX_UINT128.minus("2"),
-  MAX_UINT128.minus("1"),
+  // MAX_UINT128.minus("1"),
   MAX_UINT128,
-  MAX_UINT128.plus("1"),
+  // MAX_UINT128.plus("1"),
   // MAX_UINT128.plus("2"),
   // MAX_UINT128.plus("3"),
-  MAX_UINT128.times("2").minus("1"),
+  // MAX_UINT128.times("2").minus("1"),
   MAX_UINT128.times("2"),
-  MAX_UINT128.times("2").plus("1"),
+  // MAX_UINT128.times("2").plus("1"),
   // MAX_UINT128.times("10"),
   // MAX_UINT128.times("1009"),
   // new BigNumber('99993402823669209384634633746074317682114579999'),
@@ -83,16 +83,16 @@ const numbers = [
   // MAX_UINT192.div("2")
   //   .dp(0)
   //   .plus("1"),
-  MAX_UINT192.minus("1"),
+  // MAX_UINT192.minus("1"),
   MAX_UINT192,
-  MAX_UINT192.plus("1"),
+  // MAX_UINT192.plus("1"),
   // MAX_UINT192.times("2").minus("1"),
   // MAX_UINT192.times("2"),
   // MAX_UINT192.times("2").plus("1"),
   // MAX_UINT192.times('10'),
   // MAX_UINT192.times('1009'),
-  MAX_UINT256.div("1009").dp(0),
-  MAX_UINT256.div("10").dp(0),
+  // MAX_UINT256.div("1009").dp(0),
+  // MAX_UINT256.div("10").dp(0),
   MAX_UINT256.div("2")
     .dp(0)
     .minus("1"),
