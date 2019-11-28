@@ -1,6 +1,6 @@
 pragma solidity 0.5.13;
 
-import "./Whitelist.sol";
+import "./interfaces/IWhitelist.sol";
 import "./math/BigDiv.sol";
 import "./math/Sqrt.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/IERC20.sol";
@@ -105,7 +105,7 @@ contract DecentralizedAutonomousTrust
    */
 
   /// @notice The contract for transfer authorizations, if any.
-  Whitelist public whitelist;
+  IWhitelist public whitelist;
 
   /// @notice The total number of burned FAIR tokens, excluding tokens burned from a `Sell` action in the DAT.
   uint public burnedSupply;
@@ -427,7 +427,7 @@ contract DecentralizedAutonomousTrust
     require(msg.sender == control, "CONTROL_ONLY");
 
     // address(0) is okay
-    whitelist = Whitelist(_whitelistAddress);
+    whitelist = IWhitelist(_whitelistAddress);
 
     require(_bigDiv != address(0), "INVALID_ADDRESS");
     bigDiv = BigDiv(_bigDiv);

@@ -1,12 +1,13 @@
 pragma solidity 0.5.13;
 
 
-import "./interfaces/ERC1404.sol";
+import "./interfaces/IWhitelist.sol";
 
 /**
- * @title ERC-1404 whitelist implementation which manages KYC approvals for the org.
+ * @title whitelist implementation which manages KYC approvals for the org.
+ * @dev modeled after ERC-1404
  */
-contract Whitelist is ERC1404
+contract Whitelist is IWhitelist
 {
   /**
    * Emits when an operator KYC approves (or revokes) a trader.
@@ -85,6 +86,8 @@ contract Whitelist is ERC1404
   /**
    * @notice Called by the DAT contract before a transfer occurs.
    * @dev This call will revert when the transfer is not authorized.
+   * This is a mutable call to allow additional data to be recorded,
+   * such as when the user aquired their tokens.
    */
   function authorizeTransfer(
     address _from,
