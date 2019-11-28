@@ -3,7 +3,7 @@ pragma solidity ^0.5.0;
 
 import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
 
-contract Sqrt
+library Sqrt
 {
   using SafeMath for uint;
 
@@ -13,7 +13,7 @@ contract Sqrt
   // Source: https://github.com/ethereum/dapp-bin/pull/50
   function sqrt(
     uint x
-  ) public pure
+  ) internal pure
     returns (uint y)
   {
     if (x == 0)
