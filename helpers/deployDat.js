@@ -1,6 +1,4 @@
 const datArtifact = artifacts.require("DecentralizedAutonomousTrust");
-const bigDivArtifact = artifacts.require("BigDiv");
-const sqrtArtifact = artifacts.require("Sqrt");
 const whitelistArtifact = artifacts.require("Whitelist");
 const proxyArtifact = artifacts.require("AdminUpgradeabilityProxy");
 const proxyAdminArtifact = artifacts.require("ProxyAdmin");
@@ -36,20 +34,6 @@ module.exports = async function deployDat(accounts, options, useProxy = true) {
     });
   }
 
-  // BigMath
-  // if (callOptions.bigMathAddress) {
-  //   contracts.bigMath = await bigMathArtifact.at(callOptions.bigMathAddress);
-  // } else {
-  contracts.bigDiv = await bigDivArtifact.new({
-    from: callOptions.control
-  });
-  callOptions.bigDivAddress = contracts.bigDiv.address;
-  contracts.sqrt = await sqrtArtifact.new({
-    from: callOptions.control
-  });
-  callOptions.sqrtAddress = contracts.sqrt.address;
-  // console.log(`Deployed bigMath: ${contracts.bigMath.address}`);
-  // }
   // DAT
   const datContract = await datArtifact.new({
     from: callOptions.control

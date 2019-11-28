@@ -29,8 +29,6 @@ contract("dat / closeRefund", accounts => {
   it("shouldFail if the refund is rejected", async () => {
     // change beneficiary to the proxy
     await contracts.dat.updateConfig(
-      await contracts.dat.bigDiv(),
-      await contracts.dat.sqrtContract(),
       await contracts.dat.whitelist(),
       proxy.address,
       await contracts.dat.control(),
