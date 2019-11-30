@@ -533,7 +533,8 @@ contract DecentralizedAutonomousTrust
     }
     else if(state == STATE_RUN)
     {
-      uint supply = totalSupply() + burnedSupply;
+      // Math: totalSupply + burnedSupply is >= initReserve
+      uint supply = totalSupply() + burnedSupply - initReserve;
       // Math: worst case
       // MAX * 2 * MAX_BEFORE_SQUARE
       // / MAX_BEFORE_SQUARE
