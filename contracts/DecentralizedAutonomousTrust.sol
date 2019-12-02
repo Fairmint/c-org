@@ -178,6 +178,21 @@ contract DecentralizedAutonomousTrust
   /// @dev See the constants above for possible state values.
   uint public state;
 
+  modifier authorizeTransfer(
+    address _from,
+    address _to,
+    uint _value,
+    bool _isSell
+  )
+  {
+    if(address(whitelist) != address(0))
+    {
+      // This is not set for the minting of initialReserve
+      whitelist.authorizeTransfer(_from, _to, _value, _isSell);
+    }
+    _;
+  }
+
   /**
    * Buyback reserve
    */
@@ -220,21 +235,6 @@ contract DecentralizedAutonomousTrust
     return 0;
   }
 
-  function _authorizeTransfer(
-    address _from,
-    address _to,
-    uint _value,
-    bool _isSell
-  ) private
-  {
-    if(address(whitelist) != address(0))
-    {
-      // This is not set for the minting of initialReserve
-      whitelist.authorizeTransfer(_from, _to, _value, _isSell);
-    }
-  }
-
-
   /**
    * Functions required by the ERC-20 token standard
    */
@@ -245,10 +245,9 @@ contract DecentralizedAutonomousTrust
     address _to,
     uint _amount
   ) internal
+    authorizeTransfer(_from, _to, _amount, false)
   {
     require(state != STATE_INIT || _from == beneficiary, "ONLY_BENEFICIARY_DURING_INIT");
-    _authorizeTransfer(_from, _to, _amount, false);
-
     super._transfer(_from, _to, _amount);
   }
 
@@ -258,8 +257,8 @@ contract DecentralizedAutonomousTrust
     uint _amount,
     bool _isSell
   ) internal
+    authorizeTransfer(_from, address(0), _amount, _isSell)
   {
-    _authorizeTransfer(_from, address(0), _amount, _isSell);
     super._burn(_from, _amount);
 
     if(!_isSell)
@@ -277,8 +276,8 @@ contract DecentralizedAutonomousTrust
     address _to,
     uint _quantity
   ) internal
+    authorizeTransfer(address(0), _to, _quantity, false)
   {
-    _authorizeTransfer(address(0), _to, _quantity, false);
     super._mint(_to, _quantity);
 
     // Math: If this value got too large, the DAT may overflow on sell
