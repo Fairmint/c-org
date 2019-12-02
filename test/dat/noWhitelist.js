@@ -28,6 +28,6 @@ contract("dat / noWhitelist", accounts => {
   it("balanceOf should have increased", async () => {
     const balance = await contracts.dat.balanceOf(investor);
 
-    assert.equal(balance.toString(), "2478693751958338049");
+    assert.equal(balance.toString(), "2256682560881688309");
   });
 });
