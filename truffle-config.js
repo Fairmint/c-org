@@ -133,7 +133,8 @@ module.exports = {
         "TestUsdc"
       ],
       gasPrice: 5
-    }
+    },
+    bail: true
   },
   plugins: ["solidity-coverage"],
 
