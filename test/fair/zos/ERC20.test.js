@@ -252,7 +252,7 @@ contract("ERC20", function(accounts) {
   });
 
   describe("_mint", function() {
-    const amount = new BN("289827534923788771574");
+    const amount = new BN("289827534923788771474");
     it("rejects a null account", async function() {
       await expectRevert(
         this.token.buy(ZERO_ADDRESS, "420000000000000000000", 1, {
