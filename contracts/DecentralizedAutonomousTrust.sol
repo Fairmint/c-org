@@ -505,33 +505,6 @@ contract DecentralizedAutonomousTrust
     _transferCurrency(feeCollector, fee);
   }
 
-  // This is extracted for re-use below
-  function _estimateBuyValueDuringRUN(
-    uint _currencyValue
-  ) internal view
-    returns (uint)
-  {
-    // initReserve is reduced on sell as necessary to ensure that this line will not overflow
-    uint supply = totalSupply() + burnedSupply - initReserve;
-    // Math: worst case
-    // MAX * 2 * MAX_BEFORE_SQUARE
-    // / MAX_BEFORE_SQUARE
-    uint tokenValue = BigDiv.bigDiv2x1(
-      _currencyValue,
-      2 * buySlopeDen,
-      buySlopeNum
-    );
-
-    // Math: worst case MAX + (MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE)
-    tokenValue = tokenValue.add(supply * supply);
-    tokenValue = tokenValue.sqrt();
-
-    // Math: small chance of underflow due to possible rounding in sqrt
-    tokenValue = tokenValue.sub(supply);
-
-    return tokenValue;
-  }
-
   /// @notice Calculate how many FAIR tokens you would buy with the given amount of currency if `buy` was called now.
   /// @param _currencyValue How much currency to spend in order to buy FAIR.
   function estimateBuyValue(
@@ -578,12 +551,50 @@ contract DecentralizedAutonomousTrust
       if(currencyValue != _currencyValue)
       {
         currencyValue = _currencyValue - max;
-        tokenValue += _estimateBuyValueDuringRUN(currencyValue);
+        // ((2*next_amount/buy_slope)+(init_goal-init_reserve)^2)^(1/2)-(init_goal-init_reserve)
+        // a: next_amount | currencyValue
+        // n/d: buy_slope (MAX_BEFORE_SQUARE / MAX_BEFORE_SQUARE)
+        // g: init_goal (MAX_BEFORE_SQUARE/2)
+        // r: init_reserve (MAX_BEFORE_SQUARE/2)
+        // sqrt(((2*a/(n/d))+(g-r)^2)-(g-r)
+        // sqrt((2 a d + n (g - r)^2)/n) - g + r
+        uint temp = 2 * buySlopeDen;
+        currencyValue = temp.mul(currencyValue);
+        if(initGoal >= initReserve)
+        {
+          temp = initGoal - initReserve;
+        }
+        else
+        {
+          temp = initReserve - initGoal;
+        }
+        temp *= temp;
+        tokenValue = currencyValue.add(temp);
+        tokenValue /= buySlopeNum;
+        tokenValue = tokenValue.sqrt();
+        tokenValue += initReserve;
+        tokenValue -= initGoal;
       }
     }
     else if(state == STATE_RUN)
     {
-      tokenValue = _estimateBuyValueDuringRUN(_currencyValue);
+      // initReserve is reduced on sell as necessary to ensure that this line will not overflow
+      uint supply = totalSupply() + burnedSupply - initReserve;
+      // Math: worst case
+      // MAX * 2 * MAX_BEFORE_SQUARE
+      // / MAX_BEFORE_SQUARE
+      tokenValue = BigDiv.bigDiv2x1(
+        _currencyValue,
+        2 * buySlopeDen,
+        buySlopeNum
+      );
+
+      // Math: worst case MAX + (MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE)
+      tokenValue = tokenValue.add(supply * supply);
+      tokenValue = tokenValue.sqrt();
+
+      // Math: small chance of underflow due to possible rounding in sqrt
+      tokenValue = tokenValue.sub(supply);
     }
     else
     {
