@@ -516,7 +516,8 @@ contract DecentralizedAutonomousTrust
     // Math: worst case
     // MAX * 2 * MAX_BEFORE_SQUARE
     // / MAX_BEFORE_SQUARE
-    uint tokenValue = _currencyValue.bigDiv2x1(
+    uint tokenValue = BigDiv.bigDiv2x1(
+      _currencyValue,
       2 * buySlopeDen,
       buySlopeNum
     );
