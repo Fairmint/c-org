@@ -154,7 +154,7 @@ contract("dat / csvTests", accounts => {
           await executeAction(row);
           await loadAccount(row);
           await logState();
-          await checkPostConiditons(row);
+          await checkPostConditions(row);
         } else {
           console.log("\t(skipping no-op)");
         }
@@ -356,21 +356,24 @@ contract("dat / csvTests", accounts => {
         await assertBalance(currency, row.account.address, row.PreviousDAIBal);
       }
 
-      async function checkPostConiditons(row) {
+      async function checkPostConditions(row) {
         await assertBalance(
           contracts.dat,
           row.account.address,
-          row.FAIRBalanceOfAcct
+          row.FAIRBalanceOfAcct,
+          "FAIRBalanceOfAcct"
         );
         await assertBalance(
           currency,
           row.account.address,
-          row.DAIBalanceOfAcct
+          row.DAIBalanceOfAcct,
+          "DAIBalanceOfAcct"
         );
         await assertBalance(
           currency,
           feeCollector,
-          row.TotalDAISentToFeeCollector
+          row.TotalDAISentToFeeCollector,
+          "TotalDAISentToFeeCollector"
         );
         assertAlmostEqual(
           new BigNumber(await contracts.dat.totalSupply()),
@@ -477,7 +480,7 @@ contract("dat / csvTests", accounts => {
         return parseNumber(percentString.replace("%", "")).times(100);
       }
 
-      function assertAlmostEqual(a, b) {
+      function assertAlmostEqual(a, b, message) {
         const aStr = new BigNumber(a)
           .div(100000000000000000) // Rounding errors
           .dp(0)
@@ -503,11 +506,11 @@ contract("dat / csvTests", accounts => {
             .shiftedBy(-18)
             .toFormat()} vs ${new BigNumber(b)
             .shiftedBy(-18)
-            .toFormat()} (assuming 18 decimals)`
+            .toFormat()} (assuming 18 decimals): ${message}`
         );
       }
 
-      async function assertBalance(token, account, expectedBalance) {
+      async function assertBalance(token, account, expectedBalance, message) {
         expectedBalance = parseNumber(expectedBalance);
         expectedBalance = expectedBalance.shiftedBy(
           token == contracts.dat ? 18 : currencyDecimals
@@ -517,7 +520,7 @@ contract("dat / csvTests", accounts => {
             ? await token.balanceOf(account)
             : await web3.eth.getBalance(account)
         );
-        assertAlmostEqual(balance, expectedBalance);
+        assertAlmostEqual(balance, expectedBalance, message);
         return balance;
       }
 

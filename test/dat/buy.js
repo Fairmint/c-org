@@ -39,7 +39,7 @@ contract("dat / buy", accounts => {
     it("balanceOf should have increased", async () => {
       const balance = await contracts.dat.balanceOf(accounts[1]);
 
-      assert.equal(balance.toString(), "105526268847280212097");
+      assert.equal(balance.toString(), "141421356237309504880");
     });
   });
 });

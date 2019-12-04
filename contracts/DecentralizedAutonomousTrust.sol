@@ -154,7 +154,11 @@ contract DecentralizedAutonomousTrust
   mapping(address => uint) public initInvestors;
 
   /// @notice The initial number of FAIR created at initialization for the beneficiary.
-  /// @dev Most organizations will move these tokens into vesting contract(s)
+  /// Technically however, this variable is not a constant as we must always have
+  ///`init_reserve>=total_supply+burnt_supply` which means that `init_reserve` will be automatically
+  /// decreased to equal `total_supply+burnt_supply` in case `init_reserve>total_supply+burnt_supply`
+  /// after an investor sells his FAIRs.
+  /// @dev Organizations may move these tokens into vesting contract(s)
   uint public initReserve;
 
   /// @notice The investment reserve of the c-org. Defines the percentage of the value invested that is
@@ -507,12 +511,12 @@ contract DecentralizedAutonomousTrust
   ) internal view
     returns (uint)
   {
-    uint supply = totalSupply() + burnedSupply;
+    // initReserve is reduced on sell as necessary to ensure that this line will not overflow
+    uint supply = totalSupply() + burnedSupply - initReserve;
     // Math: worst case
     // MAX * 2 * MAX_BEFORE_SQUARE
     // / MAX_BEFORE_SQUARE
-    uint tokenValue = BigDiv.bigDiv2x1(
-      _currencyValue,
+    uint tokenValue = _currencyValue.bigDiv2x1(
       2 * buySlopeDen,
       buySlopeNum
     );
@@ -524,7 +528,7 @@ contract DecentralizedAutonomousTrust
     // Math: small chance of underflow due to possible rounding in sqrt
     tokenValue = tokenValue.sub(supply);
 
-    return tokenValue;
+    return tokenValue
   }
 
   /// @notice Calculate how many FAIR tokens you would buy with the given amount of currency if `buy` was called now.
@@ -745,8 +749,12 @@ contract DecentralizedAutonomousTrust
       initInvestors[msg.sender] = initInvestors[msg.sender].sub(_quantityToSell);
     }
 
-    // Distribute funds
     _burn(msg.sender, _quantityToSell, true);
+    uint supply = totalSupply() + burnedSupply;
+    if(supply < initReserve)
+    {
+      initReserve = supply;
+    }
 
     _transferCurrency(_to, currencyValue);
     emit Sell(msg.sender, _to, currencyValue, _quantityToSell);

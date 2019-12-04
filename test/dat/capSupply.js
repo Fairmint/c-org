@@ -28,7 +28,7 @@ contract("dat / capSupply", accounts => {
 
   it("supply is near cap", async () => {
     const reserve = await contracts.dat.totalSupply();
-    assert.equal(reserve.toString(), "77459666924148337703585307995647992228");
+    assert.equal(reserve.toString(), "77459666924148337745585307995647992216");
   });
 
   it("buying over cap shouldFail", async () => {
