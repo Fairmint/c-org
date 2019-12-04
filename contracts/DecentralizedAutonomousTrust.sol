@@ -528,7 +528,7 @@ contract DecentralizedAutonomousTrust
     // Math: small chance of underflow due to possible rounding in sqrt
     tokenValue = tokenValue.sub(supply);
 
-    return tokenValue
+    return tokenValue;
   }
 
   /// @notice Calculate how many FAIR tokens you would buy with the given amount of currency if `buy` was called now.
