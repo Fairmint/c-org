@@ -185,12 +185,15 @@ contract("wiki / buy / init", accounts => {
       });
     });
 
-    it("buy fails when amount is greater than max", async () => {
-      await shouldFail(
-        contracts.dat.buy(fromAccount, max.plus(100000000000).toFixed(), 1, {
+    it("buy does not fail when amount is large", async () => {
+      await contracts.dat.buy(
+        fromAccount,
+        max.plus(100000000000).toFixed(),
+        1,
+        {
           from: fromAccount,
           value: max.plus(100000000000).toFixed()
-        })
+        }
       );
     });
   });
