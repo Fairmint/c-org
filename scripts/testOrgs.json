@@ -14,7 +14,6 @@
     "minInvestment": "100000000",
     "openUntilAtLeast": "1735689599",
     "beneficiary": "0x3532adfb048AD60920a89F0d62AB90B1CF80bf81",
-    "control": "0xADec422B6a7511c7E7131b81d533F23993ED16bf",
     "feeCollector": "0x0000000000000000000000000000000000000000"
   }
 ]
