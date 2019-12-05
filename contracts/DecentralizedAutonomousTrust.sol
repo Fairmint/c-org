@@ -526,20 +526,20 @@ contract DecentralizedAutonomousTrust
       emit Log(0, currencyValue);
       uint _totalSupply = totalSupply();
       emit Log(1, _totalSupply);
-      // (buy_slope*(init_goal^2-(total_supply-init_reserve)^2)/2
+      // (buy_slope*init_goal)*(init_goal+init_reserve-total_supply)/2
       // n/d: buy_slope (MAX_BEFORE_SQUARE / MAX_BEFORE_SQUARE)
       // g: init_goal (MAX_BEFORE_SQUARE/2)
       // t: total_supply (MAX_BEFORE_SQUARE/2)
       // r: init_reserve (MAX_BEFORE_SQUARE/2)
-      // source: ((n/d))*(g^2-(t-r)^2)/2
-      // impl: (n (g + r - t) (g - r + t)) / (2 d)
+      // source: ((n/d)*g)*(g+r-t)/2
+      // impl: (g n (g + r - t))/(2 d)
       emit Log(2, buySlopeNum);
       emit Log(3, buySlopeDen);
       emit Log(4, initGoal);
       emit Log(5, initReserve);
       uint max = BigDiv.bigDiv2x1(
-        buySlopeNum * (initGoal + initReserve - _totalSupply),
-        initGoal + _totalSupply - initReserve,
+        initGoal * buySlopeNum,
+        initGoal + initReserve - _totalSupply,
         2 * buySlopeDen
       );
       emit Log(6, max);
