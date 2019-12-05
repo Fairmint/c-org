@@ -6,17 +6,14 @@
     "revenueCommitmentBasisPoints": "1000",
     "investmentReserveBasisPoints": "1000",
     "buySlopeNum": "1",
-    "buySlopeDen": "1000000000000000000000000000000000",
-    "initGoal": "15000000000000000000000",
-    "initReserve": "15000000000000000000000",
+    "buySlopeDen": "100000000000000000000000000000000000",
+    "initGoal": "141421360000000000000000",
+    "initReserve": "140000000000000000000000",
     "autoBurn": false,
     "feeBasisPoints": "0",
     "minInvestment": "100000000",
-    "openUntilAtLeast": "1887745909"
-  },
-  {
-    "currencyType": "testDAI",
-    "name": "Hardly Difficult",
-    "symbol": "HDY"
+    "openUntilAtLeast": "1735689599",
+    "beneficiary": "0x3532adfb048AD60920a89F0d62AB90B1CF80bf81",
+    "feeCollector": "0xADec422B6a7511c7E7131b81d533F23993ED16bf"
   }
 ]
