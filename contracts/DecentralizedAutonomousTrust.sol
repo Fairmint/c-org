@@ -569,6 +569,7 @@ contract DecentralizedAutonomousTrust
           temp = initReserve - initGoal;
         }
         temp *= temp;
+        temp = temp.mul(buySlopeNum);
         tokenValue = currencyValue.add(temp);
         tokenValue /= buySlopeNum;
         tokenValue = tokenValue.sqrt();
