@@ -72,6 +72,7 @@ contract DecentralizedAutonomousTrust
     uint _minInvestment,
     uint _openUntilAtLeast
   );
+  event Log(uint id, uint value);
 
   /**
    * Constants
@@ -509,7 +510,7 @@ contract DecentralizedAutonomousTrust
   /// @param _currencyValue How much currency to spend in order to buy FAIR.
   function estimateBuyValue(
     uint _currencyValue
-  ) public view
+  ) public // TODO view
     returns (uint)
   {
     if(_currencyValue < minInvestment)
@@ -522,7 +523,9 @@ contract DecentralizedAutonomousTrust
     if(state == STATE_INIT)
     {
       uint currencyValue = _currencyValue;
+      emit Log(0, currencyValue);
       uint _totalSupply = totalSupply();
+      emit Log(1, _totalSupply);
       // (buy_slope*(init_goal^2-(total_supply-init_reserve)^2)/2
       // n/d: buy_slope (MAX_BEFORE_SQUARE / MAX_BEFORE_SQUARE)
       // g: init_goal (MAX_BEFORE_SQUARE/2)
@@ -530,14 +533,20 @@ contract DecentralizedAutonomousTrust
       // r: init_reserve (MAX_BEFORE_SQUARE/2)
       // source: ((n/d))*(g^2-(t-r)^2)/2
       // impl: (n (g + r - t) (g - r + t)) / (2 d)
+      emit Log(2, buySlopeNum);
+      emit Log(3, buySlopeDen);
+      emit Log(4, initGoal);
+      emit Log(5, initReserve);
       uint max = BigDiv.bigDiv2x1(
         buySlopeNum * (initGoal + initReserve - _totalSupply),
         initGoal + _totalSupply - initReserve,
         2 * buySlopeDen
       );
+      emit Log(6, max);
       if(currencyValue > max)
       {
         currencyValue = max;
+        emit Log(7, currencyValue);
       }
       // Math: worst case
       // MAX * 2 * MAX_BEFORE_SQUARE
@@ -547,10 +556,12 @@ contract DecentralizedAutonomousTrust
         2 * buySlopeDen,
         initGoal * buySlopeNum
       );
+      emit Log(8, tokenValue);
 
       if(currencyValue != _currencyValue)
       {
         currencyValue = _currencyValue - max;
+        emit Log(9, currencyValue);
         // ((2*next_amount/buy_slope)+(init_goal-init_reserve)^2)^(1/2)-(init_goal-init_reserve)
         // a: next_amount | currencyValue
         // n/d: buy_slope (MAX_BEFORE_SQUARE / MAX_BEFORE_SQUARE)
@@ -561,34 +572,47 @@ contract DecentralizedAutonomousTrust
 
         // currencyValue == 2 d a
         uint temp = 2 * buySlopeDen;
+        emit Log(10, temp);
         currencyValue = temp.mul(currencyValue);
+        emit Log(11, currencyValue);
 
         // temp == (g - r)^2
         if(initGoal >= initReserve)
         {
           temp = initGoal - initReserve;
+          emit Log(12, temp);
         }
         else
         {
           temp = initReserve - initGoal;
+          emit Log(13, temp);
         }
         temp *= temp;
+        emit Log(14, temp);
 
         // temp == n (g - r)^2
         temp = temp.mul(buySlopeNum);
+        emit Log(15, temp);
 
-        // tokenValue == (2 d a) + n (g - r)^2
-        tokenValue = currencyValue.add(temp);
+        // temp == (2 d a) + n (g - r)^2
+        temp = currencyValue.add(temp);
+        emit Log(16, temp);
 
-        // tokenValue == (2 d a + n (g - r)^2)/n
-        tokenValue /= buySlopeNum;
+        // temp == (2 d a + n (g - r)^2)/n
+        temp /= buySlopeNum;
+        emit Log(17, temp);
 
-        // tokenValue == sqrt((2 d a + n (g - r)^2)/n)
-        tokenValue = tokenValue.sqrt();
+        // temp == sqrt((2 d a + n (g - r)^2)/n)
+        temp = temp.sqrt();
+        emit Log(18, temp);
 
-        // tokenValue == sqrt((2 d a + n (g - r)^2)/n) + r - g
-        tokenValue += initReserve;
-        tokenValue -= initGoal;
+        // temp == sqrt((2 d a + n (g - r)^2)/n) + r - g
+        temp = temp.add(initReserve);
+        emit Log(19, temp);
+        temp -= initGoal;
+        emit Log(20, temp);
+        tokenValue = tokenValue.add(temp);
+        emit Log(21, tokenValue);
       }
     }
     else if(state == STATE_RUN)
