@@ -481,8 +481,14 @@ contract("dat / csvTests", accounts => {
       }
 
       function assertAlmostEqual(a, b, message) {
-        const aStr = new BigNumber(a).toFixed();
-        const bStr = new BigNumber(b).toFixed();
+        const aStr = new BigNumber(a)
+          .div(100000) // Rounding errors
+          .dp(0)
+          .toFixed();
+        const bStr = new BigNumber(b)
+          .div(100000) // Rounding errors
+          .dp(0)
+          .toFixed();
         if ((aStr != "0" && aStr == bStr) || (aStr == "0" && bStr == "0"))
           return true;
 
