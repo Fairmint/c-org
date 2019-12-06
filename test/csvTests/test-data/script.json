@@ -63,6 +63,11 @@
       "id": 12,
       "name": "no-init-goal",
       "disabled": false
+    },
+    {
+      "id": "1bis",
+      "name": "buy_sell_no-pre-mint-bigReserve",
+      "disabled": false
     }
   ]
 
