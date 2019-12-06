@@ -482,11 +482,11 @@ contract("dat / csvTests", accounts => {
 
       function assertAlmostEqual(a, b, message) {
         const aStr = new BigNumber(a)
-          .div(10000000000000000) // Rounding errors
+          .div(100000000000000000) // Rounding errors
           .dp(0)
           .toFixed();
         const bStr = new BigNumber(b)
-          .div(10000000000000000) // Rounding errors
+          .div(100000000000000000) // Rounding errors
           .dp(0)
           .toFixed();
         if ((aStr != "0" && aStr == bStr) || (aStr == "0" && bStr == "0"))
