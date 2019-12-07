@@ -497,7 +497,7 @@ contract("dat / csvTests", accounts => {
             .div(b)
             .minus(1)
             .abs()
-            .lt(0.001) // Allow up to .1% error from expected value
+            .lt(0.00001) // Allow up to .001% error from expected value
         )
           return true;
 
