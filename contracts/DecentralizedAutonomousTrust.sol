@@ -551,44 +551,37 @@ contract DecentralizedAutonomousTrust
       if(currencyValue != _currencyValue)
       {
         currencyValue = _currencyValue - max;
-        // ((2*next_amount/buy_slope)+(init_goal-init_reserve)^2)^(1/2)-(init_goal-init_reserve)
+        // ((2*next_amount/buy_slope)+init_goal^2)^(1/2)-init_goal
         // a: next_amount | currencyValue
         // n/d: buy_slope (MAX_BEFORE_SQUARE / MAX_BEFORE_SQUARE)
         // g: init_goal (MAX_BEFORE_SQUARE/2)
         // r: init_reserve (MAX_BEFORE_SQUARE/2)
-        // sqrt(((2*a/(n/d))+(g-r)^2)-(g-r)
-        // sqrt((2 d a + n (g - r)^2)/n) + r - g
+        // sqrt(((2*a/(n/d))+g^2)-g
+        // sqrt((2 d a + n g^2)/n) - g
 
         // currencyValue == 2 d a
         uint temp = 2 * buySlopeDen;
         currencyValue = temp.mul(currencyValue);
 
-        // temp == (g - r)^2
-        if(initGoal >= initReserve)
-        {
-          temp = initGoal - initReserve;
-        }
-        else
-        {
-          temp = initReserve - initGoal;
-        }
+        // temp == g^2
+        temp = initGoal;
         temp *= temp;
 
-        // temp == n (g - r)^2
+        // temp == n g^2
         temp = temp.mul(buySlopeNum);
 
-        // temp == (2 d a) + n (g - r)^2
+        // temp == (2 d a) + n g^2
         temp = currencyValue.add(temp);
 
-        // temp == (2 d a + n (g - r)^2)/n
+        // temp == (2 d a + n g^2)/n
         temp /= buySlopeNum;
 
-        // temp == sqrt((2 d a + n (g - r)^2)/n)
+        // temp == sqrt((2 d a + n g^2)/n)
         temp = temp.sqrt();
 
-        // temp == sqrt((2 d a + n (g - r)^2)/n) + r - g
-        temp = temp.add(initReserve);
+        // temp == sqrt((2 d a + n g^2)/n) - g
         temp -= initGoal;
+
         tokenValue = tokenValue.add(temp);
       }
     }
