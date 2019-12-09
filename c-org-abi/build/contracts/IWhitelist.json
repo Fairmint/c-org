@@ -1,0 +1,918 @@
+{
+  "contractName": "IWhitelist",
+  "abi": [
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "value",
+          "type": "uint256"
+        }
+      ],
+      "name": "detectTransferRestriction",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "internalType": "uint8",
+          "name": "restrictionCode",
+          "type": "uint8"
+        }
+      ],
+      "name": "messageForTransferRestriction",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_from",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_value",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bool",
+          "name": "_isSell",
+          "type": "bool"
+        }
+      ],
+      "name": "authorizeTransfer",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.5.14+commit.01f1aaa4\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"_from\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_value\",\"type\":\"uint256\"},{\"internalType\":\"bool\",\"name\":\"_isSell\",\"type\":\"bool\"}],\"name\":\"authorizeTransfer\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"}],\"name\":\"detectTransferRestriction\",\"outputs\":[{\"internalType\":\"uint8\",\"name\":\"\",\"type\":\"uint8\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"restrictionCode\",\"type\":\"uint8\"}],\"name\":\"messageForTransferRestriction\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"pure\",\"type\":\"function\"}],\"devdoc\":{\"methods\":{\"authorizeTransfer(address,address,uint256,bool)\":{\"details\":\"This call will revert when the transfer is not authorized. This is a mutable call to allow additional data to be recorded, such as when the user aquired their tokens.\"},\"detectTransferRestriction(address,address,uint256)\":{\"details\":\"Overwrite with your custom transfer restriction logic\",\"params\":{\"from\":\"Sending address\",\"to\":\"Receiving address\",\"value\":\"Amount of tokens being transferred\"},\"return\":\"Code by which to reference message for rejection reasoning\"},\"messageForTransferRestriction(uint8)\":{\"details\":\"Overwrite with your custom message and restrictionCode handling\",\"params\":{\"restrictionCode\":\"Identifier for looking up a message\"},\"return\":\"Text showing the restriction's reasoning\"}}},\"userdoc\":{\"methods\":{\"authorizeTransfer(address,address,uint256,bool)\":{\"notice\":\"Called by the DAT contract before a transfer occurs.\"},\"detectTransferRestriction(address,address,uint256)\":{\"notice\":\"Detects if a transfer will be reverted and if so returns an appropriate reference code\"},\"messageForTransferRestriction(uint8)\":{\"notice\":\"Returns a human-readable message for a given restriction code\"}},\"notice\":\"Source: https://raw.githubusercontent.com/simple-restricted-token/reference-implementation/master/contracts/token/ERC1404/ERC1404.sol With ERC-20 APIs removed (will be implemented as a separate contract). And adding authorizeTransfer.\"}},\"settings\":{\"compilationTarget\":{\"/home/nick/git/c-org/contracts/interfaces/IWhitelist.sol\":\"IWhitelist\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"/home/nick/git/c-org/contracts/interfaces/IWhitelist.sol\":{\"keccak256\":\"0x772e69342d4af0adfa85e9dead1a7c6f28cb9ff9bfb88b2ba2c8ddfaed971f20\",\"urls\":[\"bzz-raw://d32d8ef47b4709a09a49ca66f6b20d0b36896461244db6d2defbb58bc14b045c\",\"dweb:/ipfs/QmT1scFJfe7YyH84iaZtrqkStwn2HQZpdYsBNrxeKtvaGN\"]}},\"version\":1}",
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "pragma solidity 0.5.14;\n\n\n/**\n * Source: https://raw.githubusercontent.com/simple-restricted-token/reference-implementation/master/contracts/token/ERC1404/ERC1404.sol\n * With ERC-20 APIs removed (will be implemented as a separate contract).\n * And adding authorizeTransfer.\n */\ninterface IWhitelist\n{\n  /**\n   * @notice Detects if a transfer will be reverted and if so returns an appropriate reference code\n   * @param from Sending address\n   * @param to Receiving address\n   * @param value Amount of tokens being transferred\n   * @return Code by which to reference message for rejection reasoning\n   * @dev Overwrite with your custom transfer restriction logic\n   */\n  function detectTransferRestriction(\n    address from,\n    address to,\n    uint value\n  ) external view\n    returns (uint8);\n\n  /**\n   * @notice Returns a human-readable message for a given restriction code\n   * @param restrictionCode Identifier for looking up a message\n   * @return Text showing the restriction's reasoning\n   * @dev Overwrite with your custom message and restrictionCode handling\n   */\n  function messageForTransferRestriction(\n    uint8 restrictionCode\n  ) external pure\n    returns (string memory);\n\n  /**\n   * @notice Called by the DAT contract before a transfer occurs.\n   * @dev This call will revert when the transfer is not authorized.\n   * This is a mutable call to allow additional data to be recorded,\n   * such as when the user aquired their tokens.\n   */\n  function authorizeTransfer(\n    address _from,\n    address _to,\n    uint _value,\n    bool _isSell\n  ) external;\n}",
+  "sourcePath": "/home/nick/git/c-org/contracts/interfaces/IWhitelist.sol",
+  "ast": {
+    "absolutePath": "/home/nick/git/c-org/contracts/interfaces/IWhitelist.sol",
+    "exportedSymbols": {
+      "IWhitelist": [
+        2041
+      ]
+    },
+    "id": 2042,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 2011,
+        "literals": [
+          "solidity",
+          "0.5",
+          ".14"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:23:4"
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "documentation": "Source: https://raw.githubusercontent.com/simple-restricted-token/reference-implementation/master/contracts/token/ERC1404/ERC1404.sol\nWith ERC-20 APIs removed (will be implemented as a separate contract).\nAnd adding authorizeTransfer.",
+        "fullyImplemented": false,
+        "id": 2041,
+        "linearizedBaseContracts": [
+          2041
+        ],
+        "name": "IWhitelist",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "body": null,
+            "documentation": "@notice Detects if a transfer will be reverted and if so returns an appropriate reference code\n@param from Sending address\n@param to Receiving address\n@param value Amount of tokens being transferred\n@return Code by which to reference message for rejection reasoning\n@dev Overwrite with your custom transfer restriction logic",
+            "id": 2022,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "detectTransferRestriction",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 2018,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 2013,
+                  "name": "from",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2022,
+                  "src": "710:12:4",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 2012,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "710:7:4",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 2015,
+                  "name": "to",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2022,
+                  "src": "728:10:4",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 2014,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "728:7:4",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 2017,
+                  "name": "value",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2022,
+                  "src": "744:10:4",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 2016,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "744:4:4",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "704:54:4"
+            },
+            "returnParameters": {
+              "id": 2021,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 2020,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2022,
+                  "src": "786:5:4",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint8",
+                    "typeString": "uint8"
+                  },
+                  "typeName": {
+                    "id": 2019,
+                    "name": "uint8",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "786:5:4",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint8",
+                      "typeString": "uint8"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "785:7:4"
+            },
+            "scope": 2041,
+            "src": "670:123:4",
+            "stateMutability": "view",
+            "superFunction": null,
+            "visibility": "external"
+          },
+          {
+            "body": null,
+            "documentation": "@notice Returns a human-readable message for a given restriction code\n@param restrictionCode Identifier for looking up a message\n@return Text showing the restriction's reasoning\n@dev Overwrite with your custom message and restrictionCode handling",
+            "id": 2029,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "messageForTransferRestriction",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 2025,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 2024,
+                  "name": "restrictionCode",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2029,
+                  "src": "1120:21:4",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint8",
+                    "typeString": "uint8"
+                  },
+                  "typeName": {
+                    "id": 2023,
+                    "name": "uint8",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1120:5:4",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint8",
+                      "typeString": "uint8"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1114:31:4"
+            },
+            "returnParameters": {
+              "id": 2028,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 2027,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2029,
+                  "src": "1173:13:4",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 2026,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1173:6:4",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1172:15:4"
+            },
+            "scope": 2041,
+            "src": "1076:112:4",
+            "stateMutability": "pure",
+            "superFunction": null,
+            "visibility": "external"
+          },
+          {
+            "body": null,
+            "documentation": "@notice Called by the DAT contract before a transfer occurs.\n@dev This call will revert when the transfer is not authorized.\nThis is a mutable call to allow additional data to be recorded,\nsuch as when the user aquired their tokens.",
+            "id": 2040,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "authorizeTransfer",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 2038,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 2031,
+                  "name": "_from",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2040,
+                  "src": "1489:13:4",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 2030,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1489:7:4",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 2033,
+                  "name": "_to",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2040,
+                  "src": "1508:11:4",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 2032,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1508:7:4",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 2035,
+                  "name": "_value",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2040,
+                  "src": "1525:11:4",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 2034,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1525:4:4",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 2037,
+                  "name": "_isSell",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2040,
+                  "src": "1542:12:4",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 2036,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1542:4:4",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1483:75:4"
+            },
+            "returnParameters": {
+              "id": 2039,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1567:0:4"
+            },
+            "scope": 2041,
+            "src": "1457:111:4",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "external"
+          }
+        ],
+        "scope": 2042,
+        "src": "278:1292:4"
+      }
+    ],
+    "src": "0:1570:4"
+  },
+  "legacyAST": {
+    "absolutePath": "/home/nick/git/c-org/contracts/interfaces/IWhitelist.sol",
+    "exportedSymbols": {
+      "IWhitelist": [
+        2041
+      ]
+    },
+    "id": 2042,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 2011,
+        "literals": [
+          "solidity",
+          "0.5",
+          ".14"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:23:4"
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "documentation": "Source: https://raw.githubusercontent.com/simple-restricted-token/reference-implementation/master/contracts/token/ERC1404/ERC1404.sol\nWith ERC-20 APIs removed (will be implemented as a separate contract).\nAnd adding authorizeTransfer.",
+        "fullyImplemented": false,
+        "id": 2041,
+        "linearizedBaseContracts": [
+          2041
+        ],
+        "name": "IWhitelist",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "body": null,
+            "documentation": "@notice Detects if a transfer will be reverted and if so returns an appropriate reference code\n@param from Sending address\n@param to Receiving address\n@param value Amount of tokens being transferred\n@return Code by which to reference message for rejection reasoning\n@dev Overwrite with your custom transfer restriction logic",
+            "id": 2022,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "detectTransferRestriction",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 2018,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 2013,
+                  "name": "from",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2022,
+                  "src": "710:12:4",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 2012,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "710:7:4",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 2015,
+                  "name": "to",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2022,
+                  "src": "728:10:4",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 2014,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "728:7:4",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 2017,
+                  "name": "value",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2022,
+                  "src": "744:10:4",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 2016,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "744:4:4",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "704:54:4"
+            },
+            "returnParameters": {
+              "id": 2021,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 2020,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2022,
+                  "src": "786:5:4",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint8",
+                    "typeString": "uint8"
+                  },
+                  "typeName": {
+                    "id": 2019,
+                    "name": "uint8",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "786:5:4",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint8",
+                      "typeString": "uint8"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "785:7:4"
+            },
+            "scope": 2041,
+            "src": "670:123:4",
+            "stateMutability": "view",
+            "superFunction": null,
+            "visibility": "external"
+          },
+          {
+            "body": null,
+            "documentation": "@notice Returns a human-readable message for a given restriction code\n@param restrictionCode Identifier for looking up a message\n@return Text showing the restriction's reasoning\n@dev Overwrite with your custom message and restrictionCode handling",
+            "id": 2029,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "messageForTransferRestriction",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 2025,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 2024,
+                  "name": "restrictionCode",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2029,
+                  "src": "1120:21:4",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint8",
+                    "typeString": "uint8"
+                  },
+                  "typeName": {
+                    "id": 2023,
+                    "name": "uint8",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1120:5:4",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint8",
+                      "typeString": "uint8"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1114:31:4"
+            },
+            "returnParameters": {
+              "id": 2028,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 2027,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2029,
+                  "src": "1173:13:4",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 2026,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1173:6:4",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1172:15:4"
+            },
+            "scope": 2041,
+            "src": "1076:112:4",
+            "stateMutability": "pure",
+            "superFunction": null,
+            "visibility": "external"
+          },
+          {
+            "body": null,
+            "documentation": "@notice Called by the DAT contract before a transfer occurs.\n@dev This call will revert when the transfer is not authorized.\nThis is a mutable call to allow additional data to be recorded,\nsuch as when the user aquired their tokens.",
+            "id": 2040,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "authorizeTransfer",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 2038,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 2031,
+                  "name": "_from",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2040,
+                  "src": "1489:13:4",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 2030,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1489:7:4",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 2033,
+                  "name": "_to",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2040,
+                  "src": "1508:11:4",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 2032,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1508:7:4",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 2035,
+                  "name": "_value",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2040,
+                  "src": "1525:11:4",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 2034,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1525:4:4",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 2037,
+                  "name": "_isSell",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2040,
+                  "src": "1542:12:4",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 2036,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1542:4:4",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1483:75:4"
+            },
+            "returnParameters": {
+              "id": 2039,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1567:0:4"
+            },
+            "scope": 2041,
+            "src": "1457:111:4",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "external"
+          }
+        ],
+        "scope": 2042,
+        "src": "278:1292:4"
+      }
+    ],
+    "src": "0:1570:4"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.5.14+commit.01f1aaa4.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.0.19",
+  "updatedAt": "2019-12-09T20:14:07.395Z",
+  "devdoc": {
+    "methods": {
+      "authorizeTransfer(address,address,uint256,bool)": {
+        "details": "This call will revert when the transfer is not authorized. This is a mutable call to allow additional data to be recorded, such as when the user aquired their tokens."
+      },
+      "detectTransferRestriction(address,address,uint256)": {
+        "details": "Overwrite with your custom transfer restriction logic",
+        "params": {
+          "from": "Sending address",
+          "to": "Receiving address",
+          "value": "Amount of tokens being transferred"
+        },
+        "return": "Code by which to reference message for rejection reasoning"
+      },
+      "messageForTransferRestriction(uint8)": {
+        "details": "Overwrite with your custom message and restrictionCode handling",
+        "params": {
+          "restrictionCode": "Identifier for looking up a message"
+        },
+        "return": "Text showing the restriction's reasoning"
+      }
+    }
+  },
+  "userdoc": {
+    "methods": {
+      "authorizeTransfer(address,address,uint256,bool)": {
+        "notice": "Called by the DAT contract before a transfer occurs."
+      },
+      "detectTransferRestriction(address,address,uint256)": {
+        "notice": "Detects if a transfer will be reverted and if so returns an appropriate reference code"
+      },
+      "messageForTransferRestriction(uint8)": {
+        "notice": "Returns a human-readable message for a given restriction code"
+      }
+    },
+    "notice": "Source: https://raw.githubusercontent.com/simple-restricted-token/reference-implementation/master/contracts/token/ERC1404/ERC1404.sol With ERC-20 APIs removed (will be implemented as a separate contract). And adding authorizeTransfer."
+  }
+}

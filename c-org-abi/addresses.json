@@ -3,32 +3,28 @@
     "dai": "0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359",
     "usdc": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
     "testUSDC": "0x7d9C10E2F7AF22200126A0EA6826c1A16F8F6d38",
+    "datTemplate": "0xf178A187e0dE98F5996B9ff4E0AF310f49185029",
+    "whitelistTemplate": "0x17Be50c473804B589733a214E7CBCD9616988b24",
     "orgs": [
       {
         "name": "Fairmint",
-        "token": "0xcDEe7d4e4Fd9028a12Ba2C4237A3cf494750A690",
-        "proxyAdmin": "0x13fD62D1786d13f700Bc9f5e2136AbbA26Da5F28"
-      },
-      {
-        "name": "HardlyDifficult",
-        "token": "0x5a4A6c547c07D5D03Bf60Da9BFa5E7D93DC45a43",
-        "proxyAdmin": "0xEfc22088b2d2B530A0B18563A2ac1d03e848aea1"
+        "token": "0xA63834bf136D1840969A7Db0b4F24d0D80755E9d",
+        "proxyAdmin": "0xF79155CC8E63c73982A06b6f91A6e3Dd32a61c10",
+        "whitelist": "0x918593E65Da96733F0D6B76aF7AF59b0121284d5"
       }
     ]
   },
   "ropsten": {
-    "dai": "0xC6037Ea1d990999148d81E7eD671f9bF769F144f",
-    "usdc": "0x14039994048f873dc5F86a32075669652b9F0fA7",
+    "testDAI": "0xC6037Ea1d990999148d81E7eD671f9bF769F144f",
+    "testUSDC": "0x14039994048f873dc5F86a32075669652b9F0fA7",
+    "datTemplate": "0x524366bE2322308DbBE1AB081cE27D3Dc59C4dA7",
+    "whitelistTemplate": "0x66697026DdfB8fc386569460a246ea1B20706b25",
     "orgs": [
       { 
         "name": "Fairmint",
-        "token": "0xD818DEB9003e6e5bCA4bc1fd4641a211904CF7B4",
-        "proxyAdmin": "0x2853087C41C43299111dD7675E0De1642459dD61"
-      },
-      { 
-        "name": "HardlyDifficult (test w/ DAI)",
-        "token": "0xBAb1aa538c5767431149a3864b9e319Ed0da822E",
-        "proxyAdmin": "0x7d1950EAa5049E35AA3265e7c74da9b186202FF9"
+        "token": "0x2fcC03c5cf588Ae7455a2F96816ff19EEEF6036C",
+        "proxyAdmin": "0x7a62bd21cb26fA13DC3505337B7644E0E4Cca17D",
+        "whitelist": "0x1b780aE42b2EE646Fd6CB58Dac5209266B42981d"
       }
     ]
   }

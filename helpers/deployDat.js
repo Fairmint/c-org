@@ -32,12 +32,14 @@ module.exports = async function deployDat(accounts, options, useProxy = true) {
     contracts.proxyAdmin = await proxyAdminArtifact.new({
       from: callOptions.control
     });
+    console.log(`ProxyAdmin deployed ${contracts.proxyAdmin.address}`);
   }
 
   // DAT
   const datContract = await datArtifact.new({
     from: callOptions.control
   });
+  console.log(`DAT template deployed ${datContract.address}`);
   if (useProxy) {
     const datProxy = await proxyArtifact.new(
       datContract.address, // logic
@@ -47,11 +49,11 @@ module.exports = async function deployDat(accounts, options, useProxy = true) {
         from: callOptions.control
       }
     );
+    console.log(`DAT proxy deployed ${datProxy.address}`);
     contracts.dat = await datArtifact.at(datProxy.address);
   } else {
     contracts.dat = datContract;
   }
-  console.log(`Deployed DAT: ${contracts.dat.address}`);
   await contracts.dat.initialize(
     callOptions.initReserve,
     callOptions.currency,
@@ -69,6 +71,7 @@ module.exports = async function deployDat(accounts, options, useProxy = true) {
     const whitelistContract = await whitelistArtifact.new({
       from: callOptions.control
     });
+    console.log(`Whitelist template deployed ${whitelistContract.address}`);
     if (useProxy) {
       const whitelistProxy = await proxyArtifact.new(
         whitelistContract.address, // logic
@@ -78,6 +81,7 @@ module.exports = async function deployDat(accounts, options, useProxy = true) {
           from: callOptions.control
         }
       );
+      console.log(`Whitelist proxy deployed ${whitelistProxy.address}`);
 
       contracts.whitelist = await whitelistArtifact.at(whitelistProxy.address);
     } else {
@@ -130,6 +134,7 @@ module.exports = async function deployDat(accounts, options, useProxy = true) {
           from: callOptions.control
         }
       );
+      console.log(`Vesting contract deployed ${contract.address}`);
       contracts.vesting.push(contract);
 
       if (contracts.whitelist) {
@@ -146,5 +151,7 @@ module.exports = async function deployDat(accounts, options, useProxy = true) {
       );
     }
   }
+
+  console.log(`===============================`);
   return contracts;
 };
