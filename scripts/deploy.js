@@ -13,7 +13,7 @@ contract("deploy script", accounts => {
   it("deploy", async () => {
     const abiJson = {};
     const bytecodeJson = {};
- 
+
     let network = await web3.eth.net.getNetworkType();
     if (network === "main") {
       network = "mainnet";
