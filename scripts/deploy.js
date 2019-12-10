@@ -30,12 +30,12 @@ contract("deploy script", accounts => {
       let currencyToken;
       let currencyDecimals = 18;
       if (addresses[callOptions.currencyType]) {
-        if (callOptions.currencyType.toLowerCase().includes("dai")) {
+        if (callOptions.currencyType && callOptions.currencyType.toLowerCase().includes("dai")) {
           currencyToken = await tokens.dai.getToken(
             web3,
             addresses[callOptions.currencyType]
           );
-        } else if (callOptions.currencyType.toLowerCase().includes("usdc")) {
+        } else if (callOptions.currencyType && callOptions.currencyType.toLowerCase().includes("usdc")) {
           currencyToken = await tokens.usdc.getToken(
             web3,
             addresses[callOptions.currencyType]
