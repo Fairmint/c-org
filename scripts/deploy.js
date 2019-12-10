@@ -14,7 +14,11 @@ contract("deploy script", accounts => {
     const abiJson = {};
     const bytecodeJson = {};
 
-    const network = await web3.eth.net.getNetworkType();
+    let network = await web3.eth.net.getNetworkType();
+    if (network === "main") {
+      network = "mainnet";
+    }
+
     const addresses =
       JSON.parse(fs.readFileSync("c-org-abi/addresses.json", "utf-8"))[
         network
