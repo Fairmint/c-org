@@ -13,8 +13,12 @@ contract("deploy script", accounts => {
   it("deploy", async () => {
     const abiJson = {};
     const bytecodeJson = {};
+ 
+    let network = await web3.eth.net.getNetworkType();
+    if (network === "main") {
+      network = "mainnet";
+    }
 
-    const network = await web3.eth.net.getNetworkType();
     const addresses =
       JSON.parse(fs.readFileSync("c-org-abi/addresses.json", "utf-8"))[
         network
