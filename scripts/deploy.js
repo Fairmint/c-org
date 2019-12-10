@@ -27,12 +27,18 @@ contract("deploy script", accounts => {
       let currencyToken;
       let currencyDecimals = 18;
       if (addresses[callOptions.currencyType]) {
-        if (callOptions.currencyType === "dai") {
+        if (
+          callOptions.currencyType &&
+          callOptions.currencyType.toLowerCase().includes("dai")
+        ) {
           currencyToken = await tokens.dai.getToken(
             web3,
             addresses[callOptions.currencyType]
           );
-        } else if (callOptions.currencyType === "usdc") {
+        } else if (
+          callOptions.currencyType &&
+          callOptions.currencyType.toLowerCase().includes("usdc")
+        ) {
           currencyToken = await tokens.usdc.getToken(
             web3,
             addresses[callOptions.currencyType]
@@ -88,7 +94,6 @@ contract("deploy script", accounts => {
       abiJson.proxy = proxyArtifact.abi;
       bytecodeJson.proxyAdmin = proxyAdminArtifact.bytecode;
       bytecodeJson.proxy = proxyArtifact.bytecode;
-      console.log(`ProxyAdmin: ${contracts.proxyAdmin.address}`);
       abiJson.dat = contracts.dat.abi;
       bytecodeJson.dat = datArtifact.bytecode;
       if (!abiJson.erc20) {
