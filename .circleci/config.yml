@@ -8,7 +8,7 @@ jobs:
     docker:
       - image: circleci/python:3.7.4
       - image: trufflesuite/ganache-cli
-        command: ganache-cli -e 10000000000 -a 100
+        command: ganache-cli -e 10000000000 -a 100 -k istanbul
     working_directory: ~/repo
     steps:
       - checkout
