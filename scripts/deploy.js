@@ -18,6 +18,7 @@ contract("deploy script", accounts => {
     if (network === "main") {
       network = "mainnet";
     }
+
     const addresses =
       JSON.parse(fs.readFileSync("c-org-abi/addresses.json", "utf-8"))[
         network
@@ -30,12 +31,18 @@ contract("deploy script", accounts => {
       let currencyToken;
       let currencyDecimals = 18;
       if (addresses[callOptions.currencyType]) {
-        if (callOptions.currencyType && callOptions.currencyType.toLowerCase().includes("dai")) {
+        if (
+          callOptions.currencyType &&
+          callOptions.currencyType.toLowerCase().includes("dai")
+        ) {
           currencyToken = await tokens.dai.getToken(
             web3,
             addresses[callOptions.currencyType]
           );
-        } else if (callOptions.currencyType && callOptions.currencyType.toLowerCase().includes("usdc")) {
+        } else if (
+          callOptions.currencyType &&
+          callOptions.currencyType.toLowerCase().includes("usdc")
+        ) {
           currencyToken = await tokens.usdc.getToken(
             web3,
             addresses[callOptions.currencyType]
