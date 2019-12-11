@@ -156,5 +156,7 @@ module.exports = async function deployDat(accounts, options, useProxy = true) {
       );
     }
   }
+
+  console.log(`===============================`);
   return contracts;
 };

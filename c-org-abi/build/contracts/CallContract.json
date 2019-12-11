@@ -1,0 +1,671 @@
+{
+  "contractName": "CallContract",
+  "abi": [],
+  "metadata": "{\"compiler\":{\"version\":\"0.5.14+commit.01f1aaa4\"},\"language\":\"Solidity\",\"output\":{\"abi\":[],\"devdoc\":{\"methods\":{},\"title\":\"Calls an arbitrary contract function.\"},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"hardlydifficult-ethereum-contracts/contracts/proxies/CallContract.sol\":\"CallContract\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"hardlydifficult-ethereum-contracts/contracts/proxies/CallContract.sol\":{\"keccak256\":\"0xd0464d4550cd39c1f1063d5e75e163acdf8f1624cb15e1c4c6c9b0554ad0beb0\",\"urls\":[\"bzz-raw://05df910c2f2af60d4b74ffa8eafecc47fc9f0b8bd6e11caadfff53df4250cf8e\",\"dweb:/ipfs/QmcxM9LY56jfk6kxwwfdrTnTNJgxHUEgP1H5pKkgKh2jWz\"]}},\"version\":1}",
+  "bytecode": "0x6080604052348015600f57600080fd5b50603e80601d6000396000f3fe6080604052600080fdfea265627a7a723158200453979883e1e57791aa9f162f5c8f5fc938c0ecb06215dfe30acf2ed042d33364736f6c634300050e0032",
+  "deployedBytecode": "0x6080604052600080fdfea265627a7a723158200453979883e1e57791aa9f162f5c8f5fc938c0ecb06215dfe30acf2ed042d33364736f6c634300050e0032",
+  "sourceMap": "81:422:28:-;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;81:422:28;;;;;;;",
+  "deployedSourceMap": "81:422:28:-;;;;;",
+  "source": "pragma solidity ^0.5.0;\n\n/**\n * @title Calls an arbitrary contract function.\n */\ncontract CallContract\n{\n  function _call(\n    address _contract,\n    uint _value,\n    bytes memory _callData\n  ) internal\n  {\n    bool result;\n    // solium-disable-next-line\n    assembly\n    {\n      result := call(\n        gas,\n        _contract,\n        _value,\n        add(_callData, 32),\n        mload(_callData),\n        mload(0x40),\n        0\n      )\n    }\n    require(result, 'INTERNAL_CONTRACT_CALL_FAILED');\n  }\n}",
+  "sourcePath": "hardlydifficult-ethereum-contracts/contracts/proxies/CallContract.sol",
+  "ast": {
+    "absolutePath": "hardlydifficult-ethereum-contracts/contracts/proxies/CallContract.sol",
+    "exportedSymbols": {
+      "CallContract": [
+        5251
+      ]
+    },
+    "id": 5252,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 5231,
+        "literals": [
+          "solidity",
+          "^",
+          "0.5",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:23:28"
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": "@title Calls an arbitrary contract function.",
+        "fullyImplemented": true,
+        "id": 5251,
+        "linearizedBaseContracts": [
+          5251
+        ],
+        "name": "CallContract",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "body": {
+              "id": 5249,
+              "nodeType": "Block",
+              "src": "205:296:28",
+              "statements": [
+                {
+                  "assignments": [
+                    5241
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 5241,
+                      "name": "result",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 5249,
+                      "src": "211:11:28",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bool",
+                        "typeString": "bool"
+                      },
+                      "typeName": {
+                        "id": 5240,
+                        "name": "bool",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "211:4:28",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        }
+                      },
+                      "value": null,
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 5242,
+                  "initialValue": null,
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "211:11:28"
+                },
+                {
+                  "externalReferences": [
+                    {
+                      "result": {
+                        "declaration": 5241,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "281:6:28",
+                        "valueSize": 1
+                      }
+                    },
+                    {
+                      "_callData": {
+                        "declaration": 5237,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "387:9:28",
+                        "valueSize": 1
+                      }
+                    },
+                    {
+                      "_callData": {
+                        "declaration": 5237,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "357:9:28",
+                        "valueSize": 1
+                      }
+                    },
+                    {
+                      "_contract": {
+                        "declaration": 5233,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "318:9:28",
+                        "valueSize": 1
+                      }
+                    },
+                    {
+                      "_value": {
+                        "declaration": 5235,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "337:6:28",
+                        "valueSize": 1
+                      }
+                    }
+                  ],
+                  "id": 5243,
+                  "nodeType": "InlineAssembly",
+                  "operations": "{\n    result := call(gas(), _contract, _value, add(_callData, 32), mload(_callData), mload(0x40), 0)\n}",
+                  "src": "260:183:28"
+                },
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "id": 5245,
+                        "name": "result",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 5241,
+                        "src": "456:6:28",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "hexValue": "494e5445524e414c5f434f4e54524143545f43414c4c5f4641494c4544",
+                        "id": 5246,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "string",
+                        "lValueRequested": false,
+                        "nodeType": "Literal",
+                        "src": "464:31:28",
+                        "subdenomination": null,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_stringliteral_ddf638174fc17ca90a5b28ed70027a57af4c383bef9c2359a73583c8bd399756",
+                          "typeString": "literal_string \"INTERNAL_CONTRACT_CALL_FAILED\""
+                        },
+                        "value": "INTERNAL_CONTRACT_CALL_FAILED"
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        },
+                        {
+                          "typeIdentifier": "t_stringliteral_ddf638174fc17ca90a5b28ed70027a57af4c383bef9c2359a73583c8bd399756",
+                          "typeString": "literal_string \"INTERNAL_CONTRACT_CALL_FAILED\""
+                        }
+                      ],
+                      "id": 5244,
+                      "name": "require",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [
+                        5849,
+                        5850
+                      ],
+                      "referencedDeclaration": 5850,
+                      "src": "448:7:28",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
+                        "typeString": "function (bool,string memory) pure"
+                      }
+                    },
+                    "id": 5247,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "448:48:28",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 5248,
+                  "nodeType": "ExpressionStatement",
+                  "src": "448:48:28"
+                }
+              ]
+            },
+            "documentation": null,
+            "id": 5250,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "_call",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 5238,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5233,
+                  "name": "_contract",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5250,
+                  "src": "127:17:28",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 5232,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "127:7:28",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5235,
+                  "name": "_value",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5250,
+                  "src": "150:11:28",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5234,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "150:4:28",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5237,
+                  "name": "_callData",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5250,
+                  "src": "167:22:28",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_memory_ptr",
+                    "typeString": "bytes"
+                  },
+                  "typeName": {
+                    "id": 5236,
+                    "name": "bytes",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "167:5:28",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes_storage_ptr",
+                      "typeString": "bytes"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "121:72:28"
+            },
+            "returnParameters": {
+              "id": 5239,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "205:0:28"
+            },
+            "scope": 5251,
+            "src": "107:394:28",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "internal"
+          }
+        ],
+        "scope": 5252,
+        "src": "81:422:28"
+      }
+    ],
+    "src": "0:503:28"
+  },
+  "legacyAST": {
+    "absolutePath": "hardlydifficult-ethereum-contracts/contracts/proxies/CallContract.sol",
+    "exportedSymbols": {
+      "CallContract": [
+        5251
+      ]
+    },
+    "id": 5252,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 5231,
+        "literals": [
+          "solidity",
+          "^",
+          "0.5",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:23:28"
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": "@title Calls an arbitrary contract function.",
+        "fullyImplemented": true,
+        "id": 5251,
+        "linearizedBaseContracts": [
+          5251
+        ],
+        "name": "CallContract",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "body": {
+              "id": 5249,
+              "nodeType": "Block",
+              "src": "205:296:28",
+              "statements": [
+                {
+                  "assignments": [
+                    5241
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 5241,
+                      "name": "result",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 5249,
+                      "src": "211:11:28",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bool",
+                        "typeString": "bool"
+                      },
+                      "typeName": {
+                        "id": 5240,
+                        "name": "bool",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "211:4:28",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        }
+                      },
+                      "value": null,
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 5242,
+                  "initialValue": null,
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "211:11:28"
+                },
+                {
+                  "externalReferences": [
+                    {
+                      "result": {
+                        "declaration": 5241,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "281:6:28",
+                        "valueSize": 1
+                      }
+                    },
+                    {
+                      "_callData": {
+                        "declaration": 5237,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "387:9:28",
+                        "valueSize": 1
+                      }
+                    },
+                    {
+                      "_callData": {
+                        "declaration": 5237,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "357:9:28",
+                        "valueSize": 1
+                      }
+                    },
+                    {
+                      "_contract": {
+                        "declaration": 5233,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "318:9:28",
+                        "valueSize": 1
+                      }
+                    },
+                    {
+                      "_value": {
+                        "declaration": 5235,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "337:6:28",
+                        "valueSize": 1
+                      }
+                    }
+                  ],
+                  "id": 5243,
+                  "nodeType": "InlineAssembly",
+                  "operations": "{\n    result := call(gas(), _contract, _value, add(_callData, 32), mload(_callData), mload(0x40), 0)\n}",
+                  "src": "260:183:28"
+                },
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "id": 5245,
+                        "name": "result",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 5241,
+                        "src": "456:6:28",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "hexValue": "494e5445524e414c5f434f4e54524143545f43414c4c5f4641494c4544",
+                        "id": 5246,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "string",
+                        "lValueRequested": false,
+                        "nodeType": "Literal",
+                        "src": "464:31:28",
+                        "subdenomination": null,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_stringliteral_ddf638174fc17ca90a5b28ed70027a57af4c383bef9c2359a73583c8bd399756",
+                          "typeString": "literal_string \"INTERNAL_CONTRACT_CALL_FAILED\""
+                        },
+                        "value": "INTERNAL_CONTRACT_CALL_FAILED"
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        },
+                        {
+                          "typeIdentifier": "t_stringliteral_ddf638174fc17ca90a5b28ed70027a57af4c383bef9c2359a73583c8bd399756",
+                          "typeString": "literal_string \"INTERNAL_CONTRACT_CALL_FAILED\""
+                        }
+                      ],
+                      "id": 5244,
+                      "name": "require",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [
+                        5849,
+                        5850
+                      ],
+                      "referencedDeclaration": 5850,
+                      "src": "448:7:28",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
+                        "typeString": "function (bool,string memory) pure"
+                      }
+                    },
+                    "id": 5247,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "448:48:28",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 5248,
+                  "nodeType": "ExpressionStatement",
+                  "src": "448:48:28"
+                }
+              ]
+            },
+            "documentation": null,
+            "id": 5250,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "_call",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 5238,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5233,
+                  "name": "_contract",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5250,
+                  "src": "127:17:28",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 5232,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "127:7:28",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5235,
+                  "name": "_value",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5250,
+                  "src": "150:11:28",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5234,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "150:4:28",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5237,
+                  "name": "_callData",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5250,
+                  "src": "167:22:28",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_memory_ptr",
+                    "typeString": "bytes"
+                  },
+                  "typeName": {
+                    "id": 5236,
+                    "name": "bytes",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "167:5:28",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes_storage_ptr",
+                      "typeString": "bytes"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "121:72:28"
+            },
+            "returnParameters": {
+              "id": 5239,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "205:0:28"
+            },
+            "scope": 5251,
+            "src": "107:394:28",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "internal"
+          }
+        ],
+        "scope": 5252,
+        "src": "81:422:28"
+      }
+    ],
+    "src": "0:503:28"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.5.14+commit.01f1aaa4.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.0.19",
+  "updatedAt": "2019-12-09T20:14:07.445Z",
+  "devdoc": {
+    "methods": {},
+    "title": "Calls an arbitrary contract function."
+  },
+  "userdoc": {
+    "methods": {}
+  }
+}
