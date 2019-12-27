@@ -2,12 +2,13 @@ pragma solidity 0.5.14;
 
 
 import "./interfaces/IWhitelist.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol";
 
 /**
  * @title whitelist implementation which manages KYC approvals for the org.
  * @dev modeled after ERC-1404
  */
-contract Whitelist is IWhitelist
+contract Whitelist is IWhitelist, Ownable
 {
   /**
    * Emits when an operator KYC approves (or revokes) a trader.
@@ -16,7 +17,6 @@ contract Whitelist is IWhitelist
 
   mapping(address => bool) public approved;
   address public dat;
-  address public owner;
 
   /**
    * @notice Called once to complete configuration for this contract.
@@ -25,12 +25,10 @@ contract Whitelist is IWhitelist
    */
   function initialize(
     address _dat
-  ) external
+  ) public
   {
-    require(owner == address(0), "ALREADY_INITIALIZED");
-
+    Ownable.initialize(msg.sender);
     dat = _dat;
-    owner = msg.sender;
 
     // Setting 0 to approved allows mint/burn actions
     approved[address(0)] = true;
@@ -77,7 +75,7 @@ contract Whitelist is IWhitelist
     bool _isApproved
   ) external
   {
-    require(msg.sender == owner, "OWNER_ONLY");
+    require(msg.sender == owner(), "OWNER_ONLY");
 
     approved[_trader] = _isApproved;
     emit Approve(_trader, _isApproved);
