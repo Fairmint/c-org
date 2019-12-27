@@ -35,7 +35,7 @@ contract("deploy script", accounts => {
           callOptions.currencyType &&
           callOptions.currencyType.toLowerCase().includes("dai")
         ) {
-          currencyToken = await tokens.dai.getToken(
+          currencyToken = await tokens.sai.getToken(
             web3,
             addresses[callOptions.currencyType]
           );
@@ -55,7 +55,7 @@ contract("deploy script", accounts => {
           callOptions.currencyType === "dai" ||
           callOptions.currencyType === "testDAI"
         ) {
-          currencyToken = await tokens.dai.deploy(web3, accounts[0]);
+          currencyToken = await tokens.sai.deploy(web3, accounts[0]);
         } else if (
           callOptions.currencyType === "usdc" ||
           callOptions.currencyType === "testUSDC"

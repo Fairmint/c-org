@@ -7,7 +7,7 @@ contract("dat / buybackReserve", accounts => {
   let token;
 
   before(async () => {
-    token = await tokens.dai.deploy(web3, accounts[0]);
+    token = await tokens.sai.deploy(web3, accounts[0]);
     contracts = await deployDat(accounts, { currency: token.address });
     await approveAll(contracts, accounts);
   });
