@@ -169,7 +169,7 @@ contract("wiki / close / run", accounts => {
   describe("when reserve is high", () => {
     beforeEach(async () => {
       // Redeploy using an ERC-20
-      const token = await tokens.dai.deploy(web3, accounts[0]);
+      const token = await tokens.sai.deploy(web3, accounts[0]);
       contracts = await deployDat(accounts, { currency: token.address });
       await approveAll(contracts, accounts);
       await token.mint(contracts.dat.address, constants.MAX_UINT, {
