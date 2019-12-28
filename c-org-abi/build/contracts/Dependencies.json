@@ -539,15 +539,15 @@
       "type": "function"
     }
   ],
-  "metadata": "{\"compiler\":{\"version\":\"0.5.14+commit.01f1aaa4\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"previousAdmin\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"newAdmin\",\"type\":\"address\"}],\"name\":\"AdminChanged\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"}],\"name\":\"TokenVestingRevoked\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"TokensReleased\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"implementation\",\"type\":\"address\"}],\"name\":\"Upgraded\",\"type\":\"event\"},{\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"fallback\"},{\"constant\":false,\"inputs\":[],\"name\":\"admin\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"beneficiary\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"newAdmin\",\"type\":\"address\"}],\"name\":\"changeAdmin\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"contract AdminUpgradeabilityProxy\",\"name\":\"proxy\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"newAdmin\",\"type\":\"address\"}],\"name\":\"changeProxyAdmin\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"cliff\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"duration\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"contract AdminUpgradeabilityProxy\",\"name\":\"proxy\",\"type\":\"address\"}],\"name\":\"getProxyAdmin\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"contract AdminUpgradeabilityProxy\",\"name\":\"proxy\",\"type\":\"address\"}],\"name\":\"getProxyImplementation\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"implementation\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"beneficiary\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"start\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"cliffDuration\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"duration\",\"type\":\"uint256\"},{\"internalType\":\"bool\",\"name\":\"revocable\",\"type\":\"bool\"},{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"initialize\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"initialize\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"isOwner\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"contract IERC20\",\"name\":\"token\",\"type\":\"address\"}],\"name\":\"release\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"}],\"name\":\"released\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"revocable\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"contract IERC20\",\"name\":\"token\",\"type\":\"address\"}],\"name\":\"revoke\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"}],\"name\":\"revoked\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"start\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"contract AdminUpgradeabilityProxy\",\"name\":\"proxy\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"implementation\",\"type\":\"address\"}],\"name\":\"upgrade\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"contract AdminUpgradeabilityProxy\",\"name\":\"proxy\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"implementation\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"name\":\"upgradeAndCall\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"newImplementation\",\"type\":\"address\"}],\"name\":\"upgradeTo\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"newImplementation\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"name\":\"upgradeToAndCall\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"}],\"devdoc\":{\"methods\":{\"admin()\":{\"return\":\"The address of the proxy admin.\"},\"beneficiary()\":{\"return\":\"the beneficiary of the tokens.\"},\"changeAdmin(address)\":{\"details\":\"Changes the admin of the proxy. Only the current admin can call this function.\",\"params\":{\"newAdmin\":\"Address to transfer proxy administration to.\"}},\"changeProxyAdmin(address,address)\":{\"details\":\"Changes the admin of a proxy.\",\"params\":{\"newAdmin\":\"Address to transfer proxy administration to.\",\"proxy\":\"Proxy to change admin.\"}},\"cliff()\":{\"return\":\"the cliff time of the token vesting.\"},\"duration()\":{\"return\":\"the duration of the token vesting.\"},\"getProxyAdmin(address)\":{\"details\":\"Returns the admin of a proxy. Only the admin can query it.\",\"return\":\"The address of the current admin of the proxy.\"},\"getProxyImplementation(address)\":{\"details\":\"Returns the current implementation of a proxy. This is needed because only the proxy admin can query it.\",\"return\":\"The address of the current implementation of the proxy.\"},\"implementation()\":{\"return\":\"The address of the implementation.\"},\"initialize(address)\":{\"details\":\"Initializes the contract setting the deployer as the initial owner.\"},\"initialize(address,uint256,uint256,uint256,bool,address)\":{\"details\":\"Creates a vesting contract that vests its balance of any ERC20 token to the beneficiary, gradually in a linear fashion until start + duration. By then all of the balance will have vested.\",\"params\":{\"beneficiary\":\"address of the beneficiary to whom vested tokens are transferred\",\"cliffDuration\":\"duration in seconds of the cliff in which tokens will begin to vest\",\"duration\":\"duration in seconds of the period in which the tokens will vest\",\"revocable\":\"whether the vesting is revocable or not\",\"start\":\"the time (as Unix time) at which point vesting starts\"}},\"isOwner()\":{\"return\":\"true if `msg.sender` is the owner of the contract.\"},\"owner()\":{\"return\":\"the address of the owner.\"},\"release(address)\":{\"params\":{\"token\":\"ERC20 token which is being vested\"}},\"released(address)\":{\"return\":\"the amount of the token released.\"},\"renounceOwnership()\":{\"details\":\"Allows the current owner to relinquish control of the contract.\"},\"revocable()\":{\"return\":\"true if the vesting is revocable.\"},\"revoke(address)\":{\"params\":{\"token\":\"ERC20 token which is being vested\"}},\"revoked(address)\":{\"return\":\"true if the token is revoked.\"},\"start()\":{\"return\":\"the start time of the token vesting.\"},\"transferOwnership(address)\":{\"details\":\"Allows the current owner to transfer control of the contract to a newOwner.\",\"params\":{\"newOwner\":\"The address to transfer ownership to.\"}},\"upgrade(address,address)\":{\"details\":\"Upgrades a proxy to the newest implementation of a contract.\",\"params\":{\"implementation\":\"the address of the Implementation.\",\"proxy\":\"Proxy to be upgraded.\"}},\"upgradeAndCall(address,address,bytes)\":{\"details\":\"Upgrades a proxy to the newest implementation of a contract and forwards a function call to it. This is useful to initialize the proxied contract.\",\"params\":{\"data\":\"Data to send as msg.data in the low level call. It should include the signature and the parameters of the function to be called, as described in https://solidity.readthedocs.io/en/v0.4.24/abi-spec.html#function-selector-and-argument-encoding.\",\"implementation\":\"Address of the Implementation.\",\"proxy\":\"Proxy to be upgraded.\"}},\"upgradeTo(address)\":{\"details\":\"Upgrade the backing implementation of the proxy. Only the admin can call this function.\",\"params\":{\"newImplementation\":\"Address of the new implementation.\"}},\"upgradeToAndCall(address,bytes)\":{\"details\":\"Upgrade the backing implementation of the proxy and call a function on the new implementation. This is useful to initialize the proxied contract.\",\"params\":{\"data\":\"Data to send as msg.data in the low level call. It should include the signature and the parameters of the function to be called, as described in https://solidity.readthedocs.io/en/v0.4.24/abi-spec.html#function-selector-and-argument-encoding.\",\"newImplementation\":\"Address of the new implementation.\"}}}},\"userdoc\":{\"methods\":{\"release(address)\":{\"notice\":\"Transfers vested tokens to beneficiary.\"},\"renounceOwnership()\":{\"notice\":\"Renouncing to ownership will leave the contract without an owner. It will not be possible to call the functions with the `onlyOwner` modifier anymore.\"},\"revoke(address)\":{\"notice\":\"Allows the owner to revoke the vesting. Tokens already vested remain in the contract, the rest are returned to the owner.\"}},\"notice\":\"This creates the artifacts allowing us to use these 3rd party contracts directly\"}},\"settings\":{\"compilationTarget\":{\"/home/nick/git/c-org/contracts/Dependencies.sol\":\"Dependencies\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"/home/nick/git/c-org/contracts/Dependencies.sol\":{\"keccak256\":\"0x1d192d96eb7562f588712e3d1725f19c05de543ff3303d29218e007ba82836c6\",\"urls\":[\"bzz-raw://37d4c382fdaa94785c9626bfecad8c39a5d7954abf43dd32e8ea4f6eef09aed8\",\"dweb:/ipfs/QmZRafGG7VQ94qDjNvToDJmniAESsgLfyGgsE58hyQD3gY\"]},\"@openzeppelin/contracts-ethereum-package/contracts/GSN/Context.sol\":{\"keccak256\":\"0x3491510fa4862af1a43f6c860d9cf7392240196540cd3c0eea79d374d419c5a1\",\"urls\":[\"bzz-raw://3e51386d74eb723d3acaaddafce1dd0b4082ad4c10ddba6b9fc154aad2930d02\",\"dweb:/ipfs/QmcA8Huap1c7YjdVjx5TGasxKNMLgsa3XyLvQUaMa1nMt8\"]},\"@openzeppelin/contracts-ethereum-package/contracts/drafts/TokenVesting.sol\":{\"keccak256\":\"0x57185c2adb58f692e4b01697a5e5c93c4e7b43e8b4e162154615035c0d29aff7\",\"urls\":[\"bzz-raw://0f212f0861ddcec68873001b23020cc39353f0d0fd07b78b12be3021b1629173\",\"dweb:/ipfs/QmfTRhwfiYyQWBS28odZbiw7gVLR7FLBMpRrqbap712crG\"]},\"@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol\":{\"keccak256\":\"0x640b6dee7a4b830bdfd52b5031a07fc2b12209f5b2e29e5d364a7d37f69d8076\",\"urls\":[\"bzz-raw://31113152e1ddb78fe7a4197f247591ca894e93f916867beb708d8e747b6cc74f\",\"dweb:/ipfs/QmbZaJyXdpsYGykVhHH9qpVGQg9DGCxE2QufbCUy3daTgq\"]},\"@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol\":{\"keccak256\":\"0xd7e8ab76fa35c4d8d35a06a6ed538cadab8b75a1aa00594ced1568b2c0cadde3\",\"urls\":[\"bzz-raw://a3f816aa3e6161b4cf882ad34755673848d835f7fb964db49bcef9df14570cef\",\"dweb:/ipfs/QmQACSH1W7pKQnqTAqpuEP8ychp3PvosfnyondLaLE1nVq\"]},\"@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/IERC20.sol\":{\"keccak256\":\"0xe5bb0f57cff3e299f360052ba50f1ea0fff046df2be070b6943e0e3c3fdad8a9\",\"urls\":[\"bzz-raw://59fd025151435da35faa8093a5c7a17de02de9d08ad27275c5cdf05050820d91\",\"dweb:/ipfs/QmQMvwEcPhoRXzbXyrdoeRtvLoifUW9Qh7Luho7bmUPRkc\"]},\"@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/SafeERC20.sol\":{\"keccak256\":\"0x6f2c9955d65c522b80f4b8792f076512d2df947d2112cbc4d98a4781ed42ede2\",\"urls\":[\"bzz-raw://7d8ec81683520c06baeef3f7e06cd82bd6fd5fa611f26857f475f6c829540aff\",\"dweb:/ipfs/QmTDkFzKnrpiV1UKnSoiZAHPuguWzokrr4pFbSPvyaSo56\"]},\"@openzeppelin/contracts-ethereum-package/contracts/utils/Address.sol\":{\"keccak256\":\"0x70df50e240407aa50915ad14f61b1a901fa335b37de20955b99ed647be756af0\",\"urls\":[\"bzz-raw://9404711f3206610c08ea97fa52c7b6b4d2e9d536e96fc4b7210aa7e24f796c36\",\"dweb:/ipfs/QmZDzpVzjoap13SuPEq5pVCrmdjoKVZnTsQPLKXAbynTTW\"]},\"@openzeppelin/upgrades/contracts/Initializable.sol\":{\"keccak256\":\"0xf79d9851c085aa8412e87d7a26d3485488fe12538ecb4e317ce41fc1f2c3a16a\",\"urls\":[\"bzz-raw://6af1a35ad6aed2169ce9f44095438b3192cd6066903908f769d5c49a06a0caf8\",\"dweb:/ipfs/QmaH41CwJ7WrMQwSnbfCKuL2pd8bxF7sbGSLPZb6JaHBFF\"]},\"zos-lib/contracts/ownership/Ownable.sol\":{\"keccak256\":\"0xc9d544a3cebcfc3296f61806d553c1de1710f42fe3daf505104cc1ab2539e65e\",\"urls\":[\"bzz-raw://b3cccb46d014cd7fa8d0fe205464f4187641e7b208fcbde543911483e47f50ae\",\"dweb:/ipfs/QmUpo17shBZ7Pn23ufpsSDsH2rHphPe4e3G97BAhwNsEzC\"]},\"zos-lib/contracts/upgradeability/AdminUpgradeabilityProxy.sol\":{\"keccak256\":\"0xf7f07ced031558180e343e9e4e8e69c6798878af971a8de1c682c1f3e6ce76b4\",\"urls\":[\"bzz-raw://1f76c92c10fb24d31c6914eb982775680b9e367aa98ea2ec8411c45e4e5452ff\",\"dweb:/ipfs/QmUUQfkCSRiLTrtufGEwenp9vtdhe2GTmZTaRV8bs6T9ZU\"]},\"zos-lib/contracts/upgradeability/BaseAdminUpgradeabilityProxy.sol\":{\"keccak256\":\"0xa0d3cc9124f7055e1c182eed8b6921b4707ae31853c9acb02aa194522537101d\",\"urls\":[\"bzz-raw://69db617e0b4cae0976cc41ea2a6c5a1d4687d46700fdab74dd3f7713e8fd731e\",\"dweb:/ipfs/QmeckYMPp7SZS5kC3w24o3k9Abp4ZFFHezSb3gFz5UkYjE\"]},\"zos-lib/contracts/upgradeability/BaseUpgradeabilityProxy.sol\":{\"keccak256\":\"0xc4bbf786e15395b2840d90edfa5599a2246d8b9e35786cbd012833989ba94353\",\"urls\":[\"bzz-raw://483629ea48c7905b41210bc4510936d3234430e18a1fbfa07bb286555ea49c71\",\"dweb:/ipfs/Qmev9DAjRsabvP5J7gErBh1vj3LJpTRQnpTq4hrK7afPmK\"]},\"zos-lib/contracts/upgradeability/Proxy.sol\":{\"keccak256\":\"0xd8074ae5fa7ee6384ca8196a896612fb044bbf4ff4b7336d03cd97845000ac21\",\"urls\":[\"bzz-raw://3a111e1dc777d80e6c2ad41c6ff2bfb3ae8f61658fd6580ddf9ba9ab0d25a354\",\"dweb:/ipfs/QmSfwvUqqiownzHeMmUiYkejWs6FXR2KLtHQnSzP6FivTj\"]},\"zos-lib/contracts/upgradeability/ProxyAdmin.sol\":{\"keccak256\":\"0xcfd89764ff54941e0bfa9127a294fd9678b0318d2f67a85c99090ab4be77c551\",\"urls\":[\"bzz-raw://85c2842a71bd9cc8e52c4914f4546667a270da15387613f6489d3afdc64e2254\",\"dweb:/ipfs/QmYVRH5ErNV4hJxUBV8RYwQSWTsaueKAPA4WucDVNq44gd\"]},\"zos-lib/contracts/upgradeability/UpgradeabilityProxy.sol\":{\"keccak256\":\"0x3ba28ba575772b5d4afb895eeabcdf344531cd877a0ef5220785a605b16dc372\",\"urls\":[\"bzz-raw://0e0004d3e3af545281873d704c51c9e026164e7fbc1998bf03ad4dfdb5d442f2\",\"dweb:/ipfs/QmWJXbG2ybkRocPpBqXGswn3r15Cf6NDzxqncEVnUqBwJK\"]},\"zos-lib/contracts/utils/Address.sol\":{\"keccak256\":\"0x4296cea43a884099c0d3f532883e8d3997fa07b559131fc5c4ae656a5da3df24\",\"urls\":[\"bzz-raw://53d28819ddbaf7886d2711ae7a2cd3580907f0f4f73a3efc202fa243e8e1f015\",\"dweb:/ipfs/QmZm2ybiRskHHWCyidfvx9dyZprRneWkSWKvEgXnEQuVqr\"]}},\"version\":1}",
+  "metadata": "{\"compiler\":{\"version\":\"0.5.15+commit.6a57276f\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"previousAdmin\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"newAdmin\",\"type\":\"address\"}],\"name\":\"AdminChanged\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"}],\"name\":\"TokenVestingRevoked\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"TokensReleased\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"implementation\",\"type\":\"address\"}],\"name\":\"Upgraded\",\"type\":\"event\"},{\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"fallback\"},{\"constant\":false,\"inputs\":[],\"name\":\"admin\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"beneficiary\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"newAdmin\",\"type\":\"address\"}],\"name\":\"changeAdmin\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"contract AdminUpgradeabilityProxy\",\"name\":\"proxy\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"newAdmin\",\"type\":\"address\"}],\"name\":\"changeProxyAdmin\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"cliff\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"duration\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"contract AdminUpgradeabilityProxy\",\"name\":\"proxy\",\"type\":\"address\"}],\"name\":\"getProxyAdmin\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"contract AdminUpgradeabilityProxy\",\"name\":\"proxy\",\"type\":\"address\"}],\"name\":\"getProxyImplementation\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"implementation\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"beneficiary\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"start\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"cliffDuration\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"duration\",\"type\":\"uint256\"},{\"internalType\":\"bool\",\"name\":\"revocable\",\"type\":\"bool\"},{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"initialize\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"initialize\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"isOwner\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"contract IERC20\",\"name\":\"token\",\"type\":\"address\"}],\"name\":\"release\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"}],\"name\":\"released\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"revocable\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"contract IERC20\",\"name\":\"token\",\"type\":\"address\"}],\"name\":\"revoke\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"}],\"name\":\"revoked\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"start\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"contract AdminUpgradeabilityProxy\",\"name\":\"proxy\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"implementation\",\"type\":\"address\"}],\"name\":\"upgrade\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"contract AdminUpgradeabilityProxy\",\"name\":\"proxy\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"implementation\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"name\":\"upgradeAndCall\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"newImplementation\",\"type\":\"address\"}],\"name\":\"upgradeTo\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"newImplementation\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"name\":\"upgradeToAndCall\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"}],\"devdoc\":{\"methods\":{\"admin()\":{\"return\":\"The address of the proxy admin.\"},\"beneficiary()\":{\"return\":\"the beneficiary of the tokens.\"},\"changeAdmin(address)\":{\"details\":\"Changes the admin of the proxy. Only the current admin can call this function.\",\"params\":{\"newAdmin\":\"Address to transfer proxy administration to.\"}},\"changeProxyAdmin(address,address)\":{\"details\":\"Changes the admin of a proxy.\",\"params\":{\"newAdmin\":\"Address to transfer proxy administration to.\",\"proxy\":\"Proxy to change admin.\"}},\"cliff()\":{\"return\":\"the cliff time of the token vesting.\"},\"duration()\":{\"return\":\"the duration of the token vesting.\"},\"getProxyAdmin(address)\":{\"details\":\"Returns the admin of a proxy. Only the admin can query it.\",\"return\":\"The address of the current admin of the proxy.\"},\"getProxyImplementation(address)\":{\"details\":\"Returns the current implementation of a proxy. This is needed because only the proxy admin can query it.\",\"return\":\"The address of the current implementation of the proxy.\"},\"implementation()\":{\"return\":\"The address of the implementation.\"},\"initialize(address)\":{\"details\":\"Initializes the contract setting the deployer as the initial owner.\"},\"initialize(address,uint256,uint256,uint256,bool,address)\":{\"details\":\"Creates a vesting contract that vests its balance of any ERC20 token to the beneficiary, gradually in a linear fashion until start + duration. By then all of the balance will have vested.\",\"params\":{\"beneficiary\":\"address of the beneficiary to whom vested tokens are transferred\",\"cliffDuration\":\"duration in seconds of the cliff in which tokens will begin to vest\",\"duration\":\"duration in seconds of the period in which the tokens will vest\",\"revocable\":\"whether the vesting is revocable or not\",\"start\":\"the time (as Unix time) at which point vesting starts\"}},\"isOwner()\":{\"return\":\"true if `msg.sender` is the owner of the contract.\"},\"owner()\":{\"return\":\"the address of the owner.\"},\"release(address)\":{\"params\":{\"token\":\"ERC20 token which is being vested\"}},\"released(address)\":{\"return\":\"the amount of the token released.\"},\"renounceOwnership()\":{\"details\":\"Allows the current owner to relinquish control of the contract.\"},\"revocable()\":{\"return\":\"true if the vesting is revocable.\"},\"revoke(address)\":{\"params\":{\"token\":\"ERC20 token which is being vested\"}},\"revoked(address)\":{\"return\":\"true if the token is revoked.\"},\"start()\":{\"return\":\"the start time of the token vesting.\"},\"transferOwnership(address)\":{\"details\":\"Allows the current owner to transfer control of the contract to a newOwner.\",\"params\":{\"newOwner\":\"The address to transfer ownership to.\"}},\"upgrade(address,address)\":{\"details\":\"Upgrades a proxy to the newest implementation of a contract.\",\"params\":{\"implementation\":\"the address of the Implementation.\",\"proxy\":\"Proxy to be upgraded.\"}},\"upgradeAndCall(address,address,bytes)\":{\"details\":\"Upgrades a proxy to the newest implementation of a contract and forwards a function call to it. This is useful to initialize the proxied contract.\",\"params\":{\"data\":\"Data to send as msg.data in the low level call. It should include the signature and the parameters of the function to be called, as described in https://solidity.readthedocs.io/en/v0.4.24/abi-spec.html#function-selector-and-argument-encoding.\",\"implementation\":\"Address of the Implementation.\",\"proxy\":\"Proxy to be upgraded.\"}},\"upgradeTo(address)\":{\"details\":\"Upgrade the backing implementation of the proxy. Only the admin can call this function.\",\"params\":{\"newImplementation\":\"Address of the new implementation.\"}},\"upgradeToAndCall(address,bytes)\":{\"details\":\"Upgrade the backing implementation of the proxy and call a function on the new implementation. This is useful to initialize the proxied contract.\",\"params\":{\"data\":\"Data to send as msg.data in the low level call. It should include the signature and the parameters of the function to be called, as described in https://solidity.readthedocs.io/en/v0.4.24/abi-spec.html#function-selector-and-argument-encoding.\",\"newImplementation\":\"Address of the new implementation.\"}}}},\"userdoc\":{\"methods\":{\"release(address)\":{\"notice\":\"Transfers vested tokens to beneficiary.\"},\"renounceOwnership()\":{\"notice\":\"Renouncing to ownership will leave the contract without an owner. It will not be possible to call the functions with the `onlyOwner` modifier anymore.\"},\"revoke(address)\":{\"notice\":\"Allows the owner to revoke the vesting. Tokens already vested remain in the contract, the rest are returned to the owner.\"}},\"notice\":\"This creates the artifacts allowing us to use these 3rd party contracts directly\"}},\"settings\":{\"compilationTarget\":{\"/D/c-org/contracts/Dependencies.sol\":\"Dependencies\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"/D/c-org/contracts/Dependencies.sol\":{\"keccak256\":\"0x08c2d6b8de3e02ddfbe81e3195f1d2e661a000489195ba8dffb4863b87c6c5fd\",\"urls\":[\"bzz-raw://786a960d94c5239f080040824582f030c4261f83f3c9a5079699035356e421e8\",\"dweb:/ipfs/QmZFWYaDMGag8hGRj4rJwmYP9QRhPPfgCu51ScXWGY8jyC\"]},\"@openzeppelin/contracts-ethereum-package/contracts/GSN/Context.sol\":{\"keccak256\":\"0x3491510fa4862af1a43f6c860d9cf7392240196540cd3c0eea79d374d419c5a1\",\"urls\":[\"bzz-raw://3e51386d74eb723d3acaaddafce1dd0b4082ad4c10ddba6b9fc154aad2930d02\",\"dweb:/ipfs/QmcA8Huap1c7YjdVjx5TGasxKNMLgsa3XyLvQUaMa1nMt8\"]},\"@openzeppelin/contracts-ethereum-package/contracts/drafts/TokenVesting.sol\":{\"keccak256\":\"0x57185c2adb58f692e4b01697a5e5c93c4e7b43e8b4e162154615035c0d29aff7\",\"urls\":[\"bzz-raw://0f212f0861ddcec68873001b23020cc39353f0d0fd07b78b12be3021b1629173\",\"dweb:/ipfs/QmfTRhwfiYyQWBS28odZbiw7gVLR7FLBMpRrqbap712crG\"]},\"@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol\":{\"keccak256\":\"0x640b6dee7a4b830bdfd52b5031a07fc2b12209f5b2e29e5d364a7d37f69d8076\",\"urls\":[\"bzz-raw://31113152e1ddb78fe7a4197f247591ca894e93f916867beb708d8e747b6cc74f\",\"dweb:/ipfs/QmbZaJyXdpsYGykVhHH9qpVGQg9DGCxE2QufbCUy3daTgq\"]},\"@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol\":{\"keccak256\":\"0xd7e8ab76fa35c4d8d35a06a6ed538cadab8b75a1aa00594ced1568b2c0cadde3\",\"urls\":[\"bzz-raw://a3f816aa3e6161b4cf882ad34755673848d835f7fb964db49bcef9df14570cef\",\"dweb:/ipfs/QmQACSH1W7pKQnqTAqpuEP8ychp3PvosfnyondLaLE1nVq\"]},\"@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/IERC20.sol\":{\"keccak256\":\"0xe5bb0f57cff3e299f360052ba50f1ea0fff046df2be070b6943e0e3c3fdad8a9\",\"urls\":[\"bzz-raw://59fd025151435da35faa8093a5c7a17de02de9d08ad27275c5cdf05050820d91\",\"dweb:/ipfs/QmQMvwEcPhoRXzbXyrdoeRtvLoifUW9Qh7Luho7bmUPRkc\"]},\"@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/SafeERC20.sol\":{\"keccak256\":\"0x6f2c9955d65c522b80f4b8792f076512d2df947d2112cbc4d98a4781ed42ede2\",\"urls\":[\"bzz-raw://7d8ec81683520c06baeef3f7e06cd82bd6fd5fa611f26857f475f6c829540aff\",\"dweb:/ipfs/QmTDkFzKnrpiV1UKnSoiZAHPuguWzokrr4pFbSPvyaSo56\"]},\"@openzeppelin/contracts-ethereum-package/contracts/utils/Address.sol\":{\"keccak256\":\"0x70df50e240407aa50915ad14f61b1a901fa335b37de20955b99ed647be756af0\",\"urls\":[\"bzz-raw://9404711f3206610c08ea97fa52c7b6b4d2e9d536e96fc4b7210aa7e24f796c36\",\"dweb:/ipfs/QmZDzpVzjoap13SuPEq5pVCrmdjoKVZnTsQPLKXAbynTTW\"]},\"@openzeppelin/upgrades/contracts/Initializable.sol\":{\"keccak256\":\"0xf79d9851c085aa8412e87d7a26d3485488fe12538ecb4e317ce41fc1f2c3a16a\",\"urls\":[\"bzz-raw://6af1a35ad6aed2169ce9f44095438b3192cd6066903908f769d5c49a06a0caf8\",\"dweb:/ipfs/QmaH41CwJ7WrMQwSnbfCKuL2pd8bxF7sbGSLPZb6JaHBFF\"]},\"zos-lib/contracts/ownership/Ownable.sol\":{\"keccak256\":\"0xc9d544a3cebcfc3296f61806d553c1de1710f42fe3daf505104cc1ab2539e65e\",\"urls\":[\"bzz-raw://b3cccb46d014cd7fa8d0fe205464f4187641e7b208fcbde543911483e47f50ae\",\"dweb:/ipfs/QmUpo17shBZ7Pn23ufpsSDsH2rHphPe4e3G97BAhwNsEzC\"]},\"zos-lib/contracts/upgradeability/AdminUpgradeabilityProxy.sol\":{\"keccak256\":\"0xf7f07ced031558180e343e9e4e8e69c6798878af971a8de1c682c1f3e6ce76b4\",\"urls\":[\"bzz-raw://1f76c92c10fb24d31c6914eb982775680b9e367aa98ea2ec8411c45e4e5452ff\",\"dweb:/ipfs/QmUUQfkCSRiLTrtufGEwenp9vtdhe2GTmZTaRV8bs6T9ZU\"]},\"zos-lib/contracts/upgradeability/BaseAdminUpgradeabilityProxy.sol\":{\"keccak256\":\"0xa0d3cc9124f7055e1c182eed8b6921b4707ae31853c9acb02aa194522537101d\",\"urls\":[\"bzz-raw://69db617e0b4cae0976cc41ea2a6c5a1d4687d46700fdab74dd3f7713e8fd731e\",\"dweb:/ipfs/QmeckYMPp7SZS5kC3w24o3k9Abp4ZFFHezSb3gFz5UkYjE\"]},\"zos-lib/contracts/upgradeability/BaseUpgradeabilityProxy.sol\":{\"keccak256\":\"0xc4bbf786e15395b2840d90edfa5599a2246d8b9e35786cbd012833989ba94353\",\"urls\":[\"bzz-raw://483629ea48c7905b41210bc4510936d3234430e18a1fbfa07bb286555ea49c71\",\"dweb:/ipfs/Qmev9DAjRsabvP5J7gErBh1vj3LJpTRQnpTq4hrK7afPmK\"]},\"zos-lib/contracts/upgradeability/Proxy.sol\":{\"keccak256\":\"0xd8074ae5fa7ee6384ca8196a896612fb044bbf4ff4b7336d03cd97845000ac21\",\"urls\":[\"bzz-raw://3a111e1dc777d80e6c2ad41c6ff2bfb3ae8f61658fd6580ddf9ba9ab0d25a354\",\"dweb:/ipfs/QmSfwvUqqiownzHeMmUiYkejWs6FXR2KLtHQnSzP6FivTj\"]},\"zos-lib/contracts/upgradeability/ProxyAdmin.sol\":{\"keccak256\":\"0xcfd89764ff54941e0bfa9127a294fd9678b0318d2f67a85c99090ab4be77c551\",\"urls\":[\"bzz-raw://85c2842a71bd9cc8e52c4914f4546667a270da15387613f6489d3afdc64e2254\",\"dweb:/ipfs/QmYVRH5ErNV4hJxUBV8RYwQSWTsaueKAPA4WucDVNq44gd\"]},\"zos-lib/contracts/upgradeability/UpgradeabilityProxy.sol\":{\"keccak256\":\"0x3ba28ba575772b5d4afb895eeabcdf344531cd877a0ef5220785a605b16dc372\",\"urls\":[\"bzz-raw://0e0004d3e3af545281873d704c51c9e026164e7fbc1998bf03ad4dfdb5d442f2\",\"dweb:/ipfs/QmWJXbG2ybkRocPpBqXGswn3r15Cf6NDzxqncEVnUqBwJK\"]},\"zos-lib/contracts/utils/Address.sol\":{\"keccak256\":\"0x4296cea43a884099c0d3f532883e8d3997fa07b559131fc5c4ae656a5da3df24\",\"urls\":[\"bzz-raw://53d28819ddbaf7886d2711ae7a2cd3580907f0f4f73a3efc202fa243e8e1f015\",\"dweb:/ipfs/QmZm2ybiRskHHWCyidfvx9dyZprRneWkSWKvEgXnEQuVqr\"]}},\"version\":1}",
   "bytecode": "0x",
   "deployedBytecode": "0x",
   "sourceMap": "",
   "deployedSourceMap": "",
-  "source": "pragma solidity ^0.5.0;\n\nimport \"@openzeppelin/contracts-ethereum-package/contracts/drafts/TokenVesting.sol\";\nimport \"zos-lib/contracts/upgradeability/AdminUpgradeabilityProxy.sol\";\nimport \"zos-lib/contracts/upgradeability/ProxyAdmin.sol\";\n\n/**\n * This creates the artifacts allowing us to use these 3rd party contracts directly\n */\ncontract Dependencies is TokenVesting, AdminUpgradeabilityProxy, ProxyAdmin\n{\n  constructor() internal\n    TokenVesting()\n    AdminUpgradeabilityProxy(address(0), address(0), \"\")\n  {}\n}\n",
-  "sourcePath": "/home/nick/git/c-org/contracts/Dependencies.sol",
+  "source": "pragma solidity ^0.5.0;\r\n\r\nimport \"@openzeppelin/contracts-ethereum-package/contracts/drafts/TokenVesting.sol\";\r\nimport \"zos-lib/contracts/upgradeability/AdminUpgradeabilityProxy.sol\";\r\nimport \"zos-lib/contracts/upgradeability/ProxyAdmin.sol\";\r\n\r\n/**\r\n * This creates the artifacts allowing us to use these 3rd party contracts directly\r\n */\r\ncontract Dependencies is TokenVesting, AdminUpgradeabilityProxy, ProxyAdmin\r\n{\r\n  constructor() internal\r\n    TokenVesting()\r\n    AdminUpgradeabilityProxy(address(0), address(0), \"\")\r\n  {}\r\n}\r\n",
+  "sourcePath": "D:/c-org/contracts/Dependencies.sol",
   "ast": {
-    "absolutePath": "/home/nick/git/c-org/contracts/Dependencies.sol",
+    "absolutePath": "/D/c-org/contracts/Dependencies.sol",
     "exportedSymbols": {
       "Dependencies": [
         1793
@@ -573,8 +573,8 @@
         "id": 1769,
         "nodeType": "ImportDirective",
         "scope": 1794,
-        "sourceUnit": 3267,
-        "src": "25:84:1",
+        "sourceUnit": 3264,
+        "src": "27:84:1",
         "symbolAliases": [],
         "unitAlias": ""
       },
@@ -584,8 +584,8 @@
         "id": 1770,
         "nodeType": "ImportDirective",
         "scope": 1794,
-        "sourceUnit": 5395,
-        "src": "110:71:1",
+        "sourceUnit": 5423,
+        "src": "113:71:1",
         "symbolAliases": [],
         "unitAlias": ""
       },
@@ -595,8 +595,8 @@
         "id": 1771,
         "nodeType": "ImportDirective",
         "scope": 1794,
-        "sourceUnit": 5770,
-        "src": "182:57:1",
+        "sourceUnit": 5798,
+        "src": "186:57:1",
         "symbolAliases": [],
         "unitAlias": ""
       },
@@ -609,16 +609,16 @@
               "id": 1772,
               "name": "TokenVesting",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 3266,
-              "src": "358:12:1",
+              "referencedDeclaration": 3263,
+              "src": "367:12:1",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_TokenVesting_$3266",
+                "typeIdentifier": "t_contract$_TokenVesting_$3263",
                 "typeString": "contract TokenVesting"
               }
             },
             "id": 1773,
             "nodeType": "InheritanceSpecifier",
-            "src": "358:12:1"
+            "src": "367:12:1"
           },
           {
             "arguments": null,
@@ -627,16 +627,16 @@
               "id": 1774,
               "name": "AdminUpgradeabilityProxy",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 5394,
-              "src": "372:24:1",
+              "referencedDeclaration": 5422,
+              "src": "381:24:1",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_AdminUpgradeabilityProxy_$5394",
+                "typeIdentifier": "t_contract$_AdminUpgradeabilityProxy_$5422",
                 "typeString": "contract AdminUpgradeabilityProxy"
               }
             },
             "id": 1775,
             "nodeType": "InheritanceSpecifier",
-            "src": "372:24:1"
+            "src": "381:24:1"
           },
           {
             "arguments": null,
@@ -645,30 +645,30 @@
               "id": 1776,
               "name": "ProxyAdmin",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 5769,
-              "src": "398:10:1",
+              "referencedDeclaration": 5797,
+              "src": "407:10:1",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_ProxyAdmin_$5769",
+                "typeIdentifier": "t_contract$_ProxyAdmin_$5797",
                 "typeString": "contract ProxyAdmin"
               }
             },
             "id": 1777,
             "nodeType": "InheritanceSpecifier",
-            "src": "398:10:1"
+            "src": "407:10:1"
           }
         ],
         "contractDependencies": [
-          2872,
-          3266,
-          3577,
-          5229,
-          5360,
-          5394,
-          5550,
-          5608,
-          5646,
-          5769,
-          5812
+          2869,
+          3263,
+          3574,
+          5226,
+          5388,
+          5422,
+          5578,
+          5636,
+          5674,
+          5797,
+          5840
         ],
         "contractKind": "contract",
         "documentation": "This creates the artifacts allowing us to use these 3rd party contracts directly",
@@ -676,17 +676,17 @@
         "id": 1793,
         "linearizedBaseContracts": [
           1793,
-          5769,
-          5360,
-          5394,
-          5812,
-          5550,
-          5608,
-          5646,
-          3266,
-          3577,
-          2872,
-          5229
+          5797,
+          5388,
+          5422,
+          5840,
+          5578,
+          5636,
+          5674,
+          3263,
+          3574,
+          2869,
+          5226
         ],
         "name": "Dependencies",
         "nodeType": "ContractDefinition",
@@ -695,7 +695,7 @@
             "body": {
               "id": 1791,
               "nodeType": "Block",
-              "src": "514:2:1",
+              "src": "528:2:1",
               "statements": []
             },
             "documentation": null,
@@ -712,15 +712,15 @@
                   "name": "TokenVesting",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 3266,
-                  "src": "440:12:1",
+                  "referencedDeclaration": 3263,
+                  "src": "452:12:1",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_type$_t_contract$_TokenVesting_$3266_$",
+                    "typeIdentifier": "t_type$_t_contract$_TokenVesting_$3263_$",
                     "typeString": "type(contract TokenVesting)"
                   }
                 },
                 "nodeType": "ModifierInvocation",
-                "src": "440:14:1"
+                "src": "452:14:1"
               },
               {
                 "arguments": [
@@ -737,7 +737,7 @@
                         "kind": "number",
                         "lValueRequested": false,
                         "nodeType": "Literal",
-                        "src": "492:1:1",
+                        "src": "505:1:1",
                         "subdenomination": null,
                         "typeDescriptions": {
                           "typeIdentifier": "t_rational_0_by_1",
@@ -759,7 +759,7 @@
                       "isPure": true,
                       "lValueRequested": false,
                       "nodeType": "ElementaryTypeNameExpression",
-                      "src": "484:7:1",
+                      "src": "497:7:1",
                       "typeDescriptions": {
                         "typeIdentifier": "t_type$_t_address_$",
                         "typeString": "type(address)"
@@ -774,7 +774,7 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "484:10:1",
+                    "src": "497:10:1",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address_payable",
                       "typeString": "address payable"
@@ -793,7 +793,7 @@
                         "kind": "number",
                         "lValueRequested": false,
                         "nodeType": "Literal",
-                        "src": "504:1:1",
+                        "src": "517:1:1",
                         "subdenomination": null,
                         "typeDescriptions": {
                           "typeIdentifier": "t_rational_0_by_1",
@@ -815,7 +815,7 @@
                       "isPure": true,
                       "lValueRequested": false,
                       "nodeType": "ElementaryTypeNameExpression",
-                      "src": "496:7:1",
+                      "src": "509:7:1",
                       "typeDescriptions": {
                         "typeIdentifier": "t_type$_t_address_$",
                         "typeString": "type(address)"
@@ -830,7 +830,7 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "496:10:1",
+                    "src": "509:10:1",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address_payable",
                       "typeString": "address payable"
@@ -846,7 +846,7 @@
                     "kind": "string",
                     "lValueRequested": false,
                     "nodeType": "Literal",
-                    "src": "508:2:1",
+                    "src": "521:2:1",
                     "subdenomination": null,
                     "typeDescriptions": {
                       "typeIdentifier": "t_stringliteral_c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470",
@@ -862,15 +862,15 @@
                   "name": "AdminUpgradeabilityProxy",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 5394,
-                  "src": "459:24:1",
+                  "referencedDeclaration": 5422,
+                  "src": "472:24:1",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_type$_t_contract$_AdminUpgradeabilityProxy_$5394_$",
+                    "typeIdentifier": "t_type$_t_contract$_AdminUpgradeabilityProxy_$5422_$",
                     "typeString": "type(contract AdminUpgradeabilityProxy)"
                   }
                 },
                 "nodeType": "ModifierInvocation",
-                "src": "459:52:1"
+                "src": "472:52:1"
               }
             ],
             "name": "",
@@ -879,29 +879,29 @@
               "id": 1778,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "424:2:1"
+              "src": "435:2:1"
             },
             "returnParameters": {
               "id": 1790,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "514:0:1"
+              "src": "528:0:1"
             },
             "scope": 1793,
-            "src": "413:103:1",
+            "src": "424:106:1",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "internal"
           }
         ],
         "scope": 1794,
-        "src": "333:185:1"
+        "src": "342:191:1"
       }
     ],
-    "src": "0:519:1"
+    "src": "0:535:1"
   },
   "legacyAST": {
-    "absolutePath": "/home/nick/git/c-org/contracts/Dependencies.sol",
+    "absolutePath": "/D/c-org/contracts/Dependencies.sol",
     "exportedSymbols": {
       "Dependencies": [
         1793
@@ -927,8 +927,8 @@
         "id": 1769,
         "nodeType": "ImportDirective",
         "scope": 1794,
-        "sourceUnit": 3267,
-        "src": "25:84:1",
+        "sourceUnit": 3264,
+        "src": "27:84:1",
         "symbolAliases": [],
         "unitAlias": ""
       },
@@ -938,8 +938,8 @@
         "id": 1770,
         "nodeType": "ImportDirective",
         "scope": 1794,
-        "sourceUnit": 5395,
-        "src": "110:71:1",
+        "sourceUnit": 5423,
+        "src": "113:71:1",
         "symbolAliases": [],
         "unitAlias": ""
       },
@@ -949,8 +949,8 @@
         "id": 1771,
         "nodeType": "ImportDirective",
         "scope": 1794,
-        "sourceUnit": 5770,
-        "src": "182:57:1",
+        "sourceUnit": 5798,
+        "src": "186:57:1",
         "symbolAliases": [],
         "unitAlias": ""
       },
@@ -963,16 +963,16 @@
               "id": 1772,
               "name": "TokenVesting",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 3266,
-              "src": "358:12:1",
+              "referencedDeclaration": 3263,
+              "src": "367:12:1",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_TokenVesting_$3266",
+                "typeIdentifier": "t_contract$_TokenVesting_$3263",
                 "typeString": "contract TokenVesting"
               }
             },
             "id": 1773,
             "nodeType": "InheritanceSpecifier",
-            "src": "358:12:1"
+            "src": "367:12:1"
           },
           {
             "arguments": null,
@@ -981,16 +981,16 @@
               "id": 1774,
               "name": "AdminUpgradeabilityProxy",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 5394,
-              "src": "372:24:1",
+              "referencedDeclaration": 5422,
+              "src": "381:24:1",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_AdminUpgradeabilityProxy_$5394",
+                "typeIdentifier": "t_contract$_AdminUpgradeabilityProxy_$5422",
                 "typeString": "contract AdminUpgradeabilityProxy"
               }
             },
             "id": 1775,
             "nodeType": "InheritanceSpecifier",
-            "src": "372:24:1"
+            "src": "381:24:1"
           },
           {
             "arguments": null,
@@ -999,30 +999,30 @@
               "id": 1776,
               "name": "ProxyAdmin",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 5769,
-              "src": "398:10:1",
+              "referencedDeclaration": 5797,
+              "src": "407:10:1",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_ProxyAdmin_$5769",
+                "typeIdentifier": "t_contract$_ProxyAdmin_$5797",
                 "typeString": "contract ProxyAdmin"
               }
             },
             "id": 1777,
             "nodeType": "InheritanceSpecifier",
-            "src": "398:10:1"
+            "src": "407:10:1"
           }
         ],
         "contractDependencies": [
-          2872,
-          3266,
-          3577,
-          5229,
-          5360,
-          5394,
-          5550,
-          5608,
-          5646,
-          5769,
-          5812
+          2869,
+          3263,
+          3574,
+          5226,
+          5388,
+          5422,
+          5578,
+          5636,
+          5674,
+          5797,
+          5840
         ],
         "contractKind": "contract",
         "documentation": "This creates the artifacts allowing us to use these 3rd party contracts directly",
@@ -1030,17 +1030,17 @@
         "id": 1793,
         "linearizedBaseContracts": [
           1793,
-          5769,
-          5360,
-          5394,
-          5812,
-          5550,
-          5608,
-          5646,
-          3266,
-          3577,
-          2872,
-          5229
+          5797,
+          5388,
+          5422,
+          5840,
+          5578,
+          5636,
+          5674,
+          3263,
+          3574,
+          2869,
+          5226
         ],
         "name": "Dependencies",
         "nodeType": "ContractDefinition",
@@ -1049,7 +1049,7 @@
             "body": {
               "id": 1791,
               "nodeType": "Block",
-              "src": "514:2:1",
+              "src": "528:2:1",
               "statements": []
             },
             "documentation": null,
@@ -1066,15 +1066,15 @@
                   "name": "TokenVesting",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 3266,
-                  "src": "440:12:1",
+                  "referencedDeclaration": 3263,
+                  "src": "452:12:1",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_type$_t_contract$_TokenVesting_$3266_$",
+                    "typeIdentifier": "t_type$_t_contract$_TokenVesting_$3263_$",
                     "typeString": "type(contract TokenVesting)"
                   }
                 },
                 "nodeType": "ModifierInvocation",
-                "src": "440:14:1"
+                "src": "452:14:1"
               },
               {
                 "arguments": [
@@ -1091,7 +1091,7 @@
                         "kind": "number",
                         "lValueRequested": false,
                         "nodeType": "Literal",
-                        "src": "492:1:1",
+                        "src": "505:1:1",
                         "subdenomination": null,
                         "typeDescriptions": {
                           "typeIdentifier": "t_rational_0_by_1",
@@ -1113,7 +1113,7 @@
                       "isPure": true,
                       "lValueRequested": false,
                       "nodeType": "ElementaryTypeNameExpression",
-                      "src": "484:7:1",
+                      "src": "497:7:1",
                       "typeDescriptions": {
                         "typeIdentifier": "t_type$_t_address_$",
                         "typeString": "type(address)"
@@ -1128,7 +1128,7 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "484:10:1",
+                    "src": "497:10:1",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address_payable",
                       "typeString": "address payable"
@@ -1147,7 +1147,7 @@
                         "kind": "number",
                         "lValueRequested": false,
                         "nodeType": "Literal",
-                        "src": "504:1:1",
+                        "src": "517:1:1",
                         "subdenomination": null,
                         "typeDescriptions": {
                           "typeIdentifier": "t_rational_0_by_1",
@@ -1169,7 +1169,7 @@
                       "isPure": true,
                       "lValueRequested": false,
                       "nodeType": "ElementaryTypeNameExpression",
-                      "src": "496:7:1",
+                      "src": "509:7:1",
                       "typeDescriptions": {
                         "typeIdentifier": "t_type$_t_address_$",
                         "typeString": "type(address)"
@@ -1184,7 +1184,7 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "496:10:1",
+                    "src": "509:10:1",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address_payable",
                       "typeString": "address payable"
@@ -1200,7 +1200,7 @@
                     "kind": "string",
                     "lValueRequested": false,
                     "nodeType": "Literal",
-                    "src": "508:2:1",
+                    "src": "521:2:1",
                     "subdenomination": null,
                     "typeDescriptions": {
                       "typeIdentifier": "t_stringliteral_c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470",
@@ -1216,15 +1216,15 @@
                   "name": "AdminUpgradeabilityProxy",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 5394,
-                  "src": "459:24:1",
+                  "referencedDeclaration": 5422,
+                  "src": "472:24:1",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_type$_t_contract$_AdminUpgradeabilityProxy_$5394_$",
+                    "typeIdentifier": "t_type$_t_contract$_AdminUpgradeabilityProxy_$5422_$",
                     "typeString": "type(contract AdminUpgradeabilityProxy)"
                   }
                 },
                 "nodeType": "ModifierInvocation",
-                "src": "459:52:1"
+                "src": "472:52:1"
               }
             ],
             "name": "",
@@ -1233,34 +1233,34 @@
               "id": 1778,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "424:2:1"
+              "src": "435:2:1"
             },
             "returnParameters": {
               "id": 1790,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "514:0:1"
+              "src": "528:0:1"
             },
             "scope": 1793,
-            "src": "413:103:1",
+            "src": "424:106:1",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "internal"
           }
         ],
         "scope": 1794,
-        "src": "333:185:1"
+        "src": "342:191:1"
       }
     ],
-    "src": "0:519:1"
+    "src": "0:535:1"
   },
   "compiler": {
     "name": "solc",
-    "version": "0.5.14+commit.01f1aaa4.Emscripten.clang"
+    "version": "0.5.15+commit.6a57276f.Emscripten.clang"
   },
   "networks": {},
-  "schemaVersion": "3.0.19",
-  "updatedAt": "2019-12-09T20:14:07.389Z",
+  "schemaVersion": "3.0.20",
+  "updatedAt": "2019-12-27T23:45:12.624Z",
   "devdoc": {
     "methods": {
       "admin()": {
