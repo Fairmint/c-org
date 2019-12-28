@@ -17,6 +17,6 @@ contract NoFallbackProxy
     bytes memory _callData
   ) public payable
   {
-    _contract._call(msg.value, _callData);
+    _contract._call(_callData, msg.value);
   }
 }
