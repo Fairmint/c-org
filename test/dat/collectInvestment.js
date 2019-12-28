@@ -4,7 +4,7 @@ const { constants, shouldFail } = require("../helpers");
 
 contract("dat / collectInvestment", accounts => {
   it("shouldFail with DO_NOT_SEND_ETH", async () => {
-    const token = await tokens.sai.deploy(web3, accounts[0]);
+    const token = await tokens.dai.deploy(web3, accounts[0]);
     const contracts = await deployDat(accounts, { currency: token.address });
     await approveAll(contracts, accounts);
     await token.mint(accounts[1], constants.MAX_UINT, {
