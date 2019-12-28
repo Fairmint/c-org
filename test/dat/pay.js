@@ -71,7 +71,7 @@ contract("dat / pay", accounts => {
 
   it("shouldFail if currencyValue is missing", async () => {
     // Redeploy with an erc-20
-    const token = await tokens.sai.deploy(web3, accounts[0]);
+    const token = await tokens.dai.deploy(web3, accounts[0]);
     await token.mint(accounts[0], constants.MAX_UINT, { from: accounts[0] });
     const contracts = await deployDat(
       accounts,
