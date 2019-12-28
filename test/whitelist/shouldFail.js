@@ -12,7 +12,7 @@ contract("dat / whitelist / shouldFail", accounts => {
       contracts.whitelist.initialize(constants.ZERO_ADDRESS, {
         from: accounts[0]
       }),
-      "ALREADY_INITIALIZED"
+      "Contract instance has already been initialized"
     );
   });
 
