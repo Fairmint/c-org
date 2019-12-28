@@ -75,8 +75,6 @@ contract Whitelist is IWhitelist, Ownable
     bool _isApproved
   ) external onlyOwner
   {
-    require(msg.sender == owner(), "OWNER_ONLY");
-
     approved[_trader] = _isApproved;
     emit Approve(_trader, _isApproved);
   }
