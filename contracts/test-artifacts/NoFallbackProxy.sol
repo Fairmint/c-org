@@ -3,8 +3,10 @@ pragma solidity ^0.5.0;
 import "hardlydifficult-ethereum-contracts/contracts/proxies/CallContract.sol";
 
 
-contract NoFallbackProxy is CallContract
+contract NoFallbackProxy
 {
+  using CallContract for address;
+
   function() external payable
   {
     revert("NO_FALLBACK");
@@ -15,6 +17,6 @@ contract NoFallbackProxy is CallContract
     bytes memory _callData
   ) public payable
   {
-    _call(_contract, msg.value, _callData);
+    _contract._call(msg.value, _callData);
   }
 }
