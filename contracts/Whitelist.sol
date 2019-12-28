@@ -73,7 +73,7 @@ contract Whitelist is IWhitelist, Ownable
   function approve(
     address _trader,
     bool _isApproved
-  ) external
+  ) external onlyOwner
   {
     require(msg.sender == owner(), "OWNER_ONLY");
 
