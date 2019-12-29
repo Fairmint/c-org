@@ -95,14 +95,14 @@
     "absolutePath": "/D/c-org/contracts/interfaces/IWhitelist.sol",
     "exportedSymbols": {
       "IWhitelist": [
-        2036
+        2038
       ]
     },
-    "id": 2037,
+    "id": 2039,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 2006,
+        "id": 2008,
         "literals": [
           "solidity",
           "0.5",
@@ -117,9 +117,9 @@
         "contractKind": "interface",
         "documentation": "Source: https://raw.githubusercontent.com/simple-restricted-token/reference-implementation/master/contracts/token/ERC1404/ERC1404.sol\nWith ERC-20 APIs removed (will be implemented as a separate contract).\nAnd adding authorizeTransfer.",
         "fullyImplemented": false,
-        "id": 2036,
+        "id": 2038,
         "linearizedBaseContracts": [
-          2036
+          2038
         ],
         "name": "IWhitelist",
         "nodeType": "ContractDefinition",
@@ -127,22 +127,22 @@
           {
             "body": null,
             "documentation": "@notice Detects if a transfer will be reverted and if so returns an appropriate reference code\n@param from Sending address\n@param to Receiving address\n@param value Amount of tokens being transferred\n@return Code by which to reference message for rejection reasoning\n@dev Overwrite with your custom transfer restriction logic",
-            "id": 2017,
+            "id": 2019,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "detectTransferRestriction",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 2013,
+              "id": 2015,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2008,
+                  "id": 2010,
                   "name": "from",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2017,
+                  "scope": 2019,
                   "src": "729:12:4",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -151,7 +151,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 2007,
+                    "id": 2009,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "729:7:4",
@@ -166,10 +166,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 2010,
+                  "id": 2012,
                   "name": "to",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2017,
+                  "scope": 2019,
                   "src": "748:10:4",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -178,7 +178,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 2009,
+                    "id": 2011,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "748:7:4",
@@ -193,10 +193,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 2012,
+                  "id": 2014,
                   "name": "value",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2017,
+                  "scope": 2019,
                   "src": "765:10:4",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -205,7 +205,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2011,
+                    "id": 2013,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
                     "src": "765:4:4",
@@ -221,15 +221,15 @@
               "src": "722:58:4"
             },
             "returnParameters": {
-              "id": 2016,
+              "id": 2018,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2015,
+                  "id": 2017,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2017,
+                  "scope": 2019,
                   "src": "809:5:4",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -238,7 +238,7 @@
                     "typeString": "uint8"
                   },
                   "typeName": {
-                    "id": 2014,
+                    "id": 2016,
                     "name": "uint8",
                     "nodeType": "ElementaryTypeName",
                     "src": "809:5:4",
@@ -253,7 +253,7 @@
               ],
               "src": "808:7:4"
             },
-            "scope": 2036,
+            "scope": 2038,
             "src": "688:128:4",
             "stateMutability": "view",
             "superFunction": null,
@@ -262,22 +262,22 @@
           {
             "body": null,
             "documentation": "@notice Returns a human-readable message for a given restriction code\n@param restrictionCode Identifier for looking up a message\n@return Text showing the restriction's reasoning\n@dev Overwrite with your custom message and restrictionCode handling",
-            "id": 2024,
+            "id": 2026,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "messageForTransferRestriction",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 2020,
+              "id": 2022,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2019,
+                  "id": 2021,
                   "name": "restrictionCode",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2024,
+                  "scope": 2026,
                   "src": "1152:21:4",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -286,7 +286,7 @@
                     "typeString": "uint8"
                   },
                   "typeName": {
-                    "id": 2018,
+                    "id": 2020,
                     "name": "uint8",
                     "nodeType": "ElementaryTypeName",
                     "src": "1152:5:4",
@@ -302,15 +302,15 @@
               "src": "1145:33:4"
             },
             "returnParameters": {
-              "id": 2023,
+              "id": 2025,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2022,
+                  "id": 2024,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2024,
+                  "scope": 2026,
                   "src": "1207:13:4",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -319,7 +319,7 @@
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 2021,
+                    "id": 2023,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
                     "src": "1207:6:4",
@@ -334,7 +334,7 @@
               ],
               "src": "1206:15:4"
             },
-            "scope": 2036,
+            "scope": 2038,
             "src": "1107:115:4",
             "stateMutability": "pure",
             "superFunction": null,
@@ -343,22 +343,22 @@
           {
             "body": null,
             "documentation": "@notice Called by the DAT contract before a transfer occurs.\n@dev This call will revert when the transfer is not authorized.\nThis is a mutable call to allow additional data to be recorded,\nsuch as when the user aquired their tokens.",
-            "id": 2035,
+            "id": 2037,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "authorizeTransfer",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 2033,
+              "id": 2035,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2026,
+                  "id": 2028,
                   "name": "_from",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2035,
+                  "scope": 2037,
                   "src": "1532:13:4",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -367,7 +367,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 2025,
+                    "id": 2027,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1532:7:4",
@@ -382,10 +382,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 2028,
+                  "id": 2030,
                   "name": "_to",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2035,
+                  "scope": 2037,
                   "src": "1552:11:4",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -394,7 +394,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 2027,
+                    "id": 2029,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1552:7:4",
@@ -409,10 +409,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 2030,
+                  "id": 2032,
                   "name": "_value",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2035,
+                  "scope": 2037,
                   "src": "1570:11:4",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -421,7 +421,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2029,
+                    "id": 2031,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
                     "src": "1570:4:4",
@@ -435,10 +435,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 2032,
+                  "id": 2034,
                   "name": "_isSell",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2035,
+                  "scope": 2037,
                   "src": "1588:12:4",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -447,7 +447,7 @@
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 2031,
+                    "id": 2033,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
                     "src": "1588:4:4",
@@ -463,19 +463,19 @@
               "src": "1525:80:4"
             },
             "returnParameters": {
-              "id": 2034,
+              "id": 2036,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1614:0:4"
             },
-            "scope": 2036,
+            "scope": 2038,
             "src": "1499:116:4",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
           }
         ],
-        "scope": 2037,
+        "scope": 2039,
         "src": "286:1332:4"
       }
     ],
@@ -485,14 +485,14 @@
     "absolutePath": "/D/c-org/contracts/interfaces/IWhitelist.sol",
     "exportedSymbols": {
       "IWhitelist": [
-        2036
+        2038
       ]
     },
-    "id": 2037,
+    "id": 2039,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 2006,
+        "id": 2008,
         "literals": [
           "solidity",
           "0.5",
@@ -507,9 +507,9 @@
         "contractKind": "interface",
         "documentation": "Source: https://raw.githubusercontent.com/simple-restricted-token/reference-implementation/master/contracts/token/ERC1404/ERC1404.sol\nWith ERC-20 APIs removed (will be implemented as a separate contract).\nAnd adding authorizeTransfer.",
         "fullyImplemented": false,
-        "id": 2036,
+        "id": 2038,
         "linearizedBaseContracts": [
-          2036
+          2038
         ],
         "name": "IWhitelist",
         "nodeType": "ContractDefinition",
@@ -517,22 +517,22 @@
           {
             "body": null,
             "documentation": "@notice Detects if a transfer will be reverted and if so returns an appropriate reference code\n@param from Sending address\n@param to Receiving address\n@param value Amount of tokens being transferred\n@return Code by which to reference message for rejection reasoning\n@dev Overwrite with your custom transfer restriction logic",
-            "id": 2017,
+            "id": 2019,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "detectTransferRestriction",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 2013,
+              "id": 2015,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2008,
+                  "id": 2010,
                   "name": "from",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2017,
+                  "scope": 2019,
                   "src": "729:12:4",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -541,7 +541,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 2007,
+                    "id": 2009,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "729:7:4",
@@ -556,10 +556,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 2010,
+                  "id": 2012,
                   "name": "to",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2017,
+                  "scope": 2019,
                   "src": "748:10:4",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -568,7 +568,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 2009,
+                    "id": 2011,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "748:7:4",
@@ -583,10 +583,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 2012,
+                  "id": 2014,
                   "name": "value",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2017,
+                  "scope": 2019,
                   "src": "765:10:4",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -595,7 +595,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2011,
+                    "id": 2013,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
                     "src": "765:4:4",
@@ -611,15 +611,15 @@
               "src": "722:58:4"
             },
             "returnParameters": {
-              "id": 2016,
+              "id": 2018,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2015,
+                  "id": 2017,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2017,
+                  "scope": 2019,
                   "src": "809:5:4",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -628,7 +628,7 @@
                     "typeString": "uint8"
                   },
                   "typeName": {
-                    "id": 2014,
+                    "id": 2016,
                     "name": "uint8",
                     "nodeType": "ElementaryTypeName",
                     "src": "809:5:4",
@@ -643,7 +643,7 @@
               ],
               "src": "808:7:4"
             },
-            "scope": 2036,
+            "scope": 2038,
             "src": "688:128:4",
             "stateMutability": "view",
             "superFunction": null,
@@ -652,22 +652,22 @@
           {
             "body": null,
             "documentation": "@notice Returns a human-readable message for a given restriction code\n@param restrictionCode Identifier for looking up a message\n@return Text showing the restriction's reasoning\n@dev Overwrite with your custom message and restrictionCode handling",
-            "id": 2024,
+            "id": 2026,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "messageForTransferRestriction",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 2020,
+              "id": 2022,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2019,
+                  "id": 2021,
                   "name": "restrictionCode",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2024,
+                  "scope": 2026,
                   "src": "1152:21:4",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -676,7 +676,7 @@
                     "typeString": "uint8"
                   },
                   "typeName": {
-                    "id": 2018,
+                    "id": 2020,
                     "name": "uint8",
                     "nodeType": "ElementaryTypeName",
                     "src": "1152:5:4",
@@ -692,15 +692,15 @@
               "src": "1145:33:4"
             },
             "returnParameters": {
-              "id": 2023,
+              "id": 2025,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2022,
+                  "id": 2024,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2024,
+                  "scope": 2026,
                   "src": "1207:13:4",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -709,7 +709,7 @@
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 2021,
+                    "id": 2023,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
                     "src": "1207:6:4",
@@ -724,7 +724,7 @@
               ],
               "src": "1206:15:4"
             },
-            "scope": 2036,
+            "scope": 2038,
             "src": "1107:115:4",
             "stateMutability": "pure",
             "superFunction": null,
@@ -733,22 +733,22 @@
           {
             "body": null,
             "documentation": "@notice Called by the DAT contract before a transfer occurs.\n@dev This call will revert when the transfer is not authorized.\nThis is a mutable call to allow additional data to be recorded,\nsuch as when the user aquired their tokens.",
-            "id": 2035,
+            "id": 2037,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "authorizeTransfer",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 2033,
+              "id": 2035,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2026,
+                  "id": 2028,
                   "name": "_from",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2035,
+                  "scope": 2037,
                   "src": "1532:13:4",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -757,7 +757,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 2025,
+                    "id": 2027,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1532:7:4",
@@ -772,10 +772,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 2028,
+                  "id": 2030,
                   "name": "_to",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2035,
+                  "scope": 2037,
                   "src": "1552:11:4",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -784,7 +784,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 2027,
+                    "id": 2029,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1552:7:4",
@@ -799,10 +799,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 2030,
+                  "id": 2032,
                   "name": "_value",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2035,
+                  "scope": 2037,
                   "src": "1570:11:4",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -811,7 +811,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2029,
+                    "id": 2031,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
                     "src": "1570:4:4",
@@ -825,10 +825,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 2032,
+                  "id": 2034,
                   "name": "_isSell",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2035,
+                  "scope": 2037,
                   "src": "1588:12:4",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -837,7 +837,7 @@
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 2031,
+                    "id": 2033,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
                     "src": "1588:4:4",
@@ -853,19 +853,19 @@
               "src": "1525:80:4"
             },
             "returnParameters": {
-              "id": 2034,
+              "id": 2036,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1614:0:4"
             },
-            "scope": 2036,
+            "scope": 2038,
             "src": "1499:116:4",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
           }
         ],
-        "scope": 2037,
+        "scope": 2039,
         "src": "286:1332:4"
       }
     ],
@@ -876,8 +876,8 @@
     "version": "0.5.15+commit.6a57276f.Emscripten.clang"
   },
   "networks": {},
-  "schemaVersion": "3.0.20",
-  "updatedAt": "2019-12-27T23:45:12.628Z",
+  "schemaVersion": "3.0.19",
+  "updatedAt": "2019-12-28T20:38:42.684Z",
   "devdoc": {
     "methods": {
       "authorizeTransfer(address,address,uint256,bool)": {

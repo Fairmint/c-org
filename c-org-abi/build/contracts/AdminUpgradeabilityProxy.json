@@ -152,14 +152,14 @@
     "absolutePath": "zos-lib/contracts/upgradeability/AdminUpgradeabilityProxy.sol",
     "exportedSymbols": {
       "AdminUpgradeabilityProxy": [
-        5422
+        5424
       ]
     },
-    "id": 5423,
+    "id": 5425,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 5390,
+        "id": 5392,
         "literals": [
           "solidity",
           "^",
@@ -172,10 +172,10 @@
       {
         "absolutePath": "zos-lib/contracts/upgradeability/BaseAdminUpgradeabilityProxy.sol",
         "file": "./BaseAdminUpgradeabilityProxy.sol",
-        "id": 5391,
+        "id": 5393,
         "nodeType": "ImportDirective",
-        "scope": 5423,
-        "sourceUnit": 5579,
+        "scope": 5425,
+        "sourceUnit": 5581,
         "src": "25:44:30",
         "symbolAliases": [],
         "unitAlias": ""
@@ -186,17 +186,17 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 5392,
+              "id": 5394,
               "name": "BaseAdminUpgradeabilityProxy",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 5578,
+              "referencedDeclaration": 5580,
               "src": "283:28:30",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_BaseAdminUpgradeabilityProxy_$5578",
+                "typeIdentifier": "t_contract$_BaseAdminUpgradeabilityProxy_$5580",
                 "typeString": "contract BaseAdminUpgradeabilityProxy"
               }
             },
-            "id": 5393,
+            "id": 5395,
             "nodeType": "InheritanceSpecifier",
             "src": "283:28:30"
           },
@@ -204,44 +204,44 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 5394,
+              "id": 5396,
               "name": "UpgradeabilityProxy",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 5840,
+              "referencedDeclaration": 5842,
               "src": "313:19:30",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_UpgradeabilityProxy_$5840",
+                "typeIdentifier": "t_contract$_UpgradeabilityProxy_$5842",
                 "typeString": "contract UpgradeabilityProxy"
               }
             },
-            "id": 5395,
+            "id": 5397,
             "nodeType": "InheritanceSpecifier",
             "src": "313:19:30"
           }
         ],
         "contractDependencies": [
-          5578,
-          5636,
-          5674,
-          5840
+          5580,
+          5638,
+          5676,
+          5842
         ],
         "contractKind": "contract",
         "documentation": "@title AdminUpgradeabilityProxy\n@dev Extends from BaseAdminUpgradeabilityProxy with a constructor for \ninitializing the implementation, admin, and init data.",
         "fullyImplemented": true,
-        "id": 5422,
+        "id": 5424,
         "linearizedBaseContracts": [
-          5422,
-          5840,
-          5578,
-          5636,
-          5674
+          5424,
+          5842,
+          5580,
+          5638,
+          5676
         ],
         "name": "AdminUpgradeabilityProxy",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "body": {
-              "id": 5420,
+              "id": 5422,
               "nodeType": "Block",
               "src": "1023:95:30",
               "statements": [
@@ -255,18 +255,18 @@
                           "typeIdentifier": "t_bytes32",
                           "typeString": "bytes32"
                         },
-                        "id": 5413,
+                        "id": 5415,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": true,
                         "lValueRequested": false,
                         "leftExpression": {
                           "argumentTypes": null,
-                          "id": 5409,
+                          "id": 5411,
                           "name": "ADMIN_SLOT",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 5436,
+                          "referencedDeclaration": 5438,
                           "src": "1036:10:30",
                           "typeDescriptions": {
                             "typeIdentifier": "t_bytes32",
@@ -281,7 +281,7 @@
                             {
                               "argumentTypes": null,
                               "hexValue": "6f72672e7a657070656c696e6f732e70726f78792e61646d696e",
-                              "id": 5411,
+                              "id": 5413,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": true,
@@ -304,18 +304,18 @@
                                 "typeString": "literal_string \"org.zeppelinos.proxy.admin\""
                               }
                             ],
-                            "id": 5410,
+                            "id": 5412,
                             "name": "keccak256",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 5868,
+                            "referencedDeclaration": 5870,
                             "src": "1050:9:30",
                             "typeDescriptions": {
                               "typeIdentifier": "t_function_keccak256_pure$_t_bytes_memory_ptr_$returns$_t_bytes32_$",
                               "typeString": "function (bytes memory) pure returns (bytes32)"
                             }
                           },
-                          "id": 5412,
+                          "id": 5414,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
@@ -343,18 +343,18 @@
                           "typeString": "bool"
                         }
                       ],
-                      "id": 5408,
+                      "id": 5410,
                       "name": "assert",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 5863,
+                      "referencedDeclaration": 5865,
                       "src": "1029:6:30",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_assert_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
-                    "id": 5414,
+                    "id": 5416,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -368,7 +368,7 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 5415,
+                  "id": 5417,
                   "nodeType": "ExpressionStatement",
                   "src": "1029:61:30"
                 },
@@ -378,11 +378,11 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 5417,
+                        "id": 5419,
                         "name": "_admin",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 5399,
+                        "referencedDeclaration": 5401,
                         "src": "1106:6:30",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -397,18 +397,18 @@
                           "typeString": "address"
                         }
                       ],
-                      "id": 5416,
+                      "id": 5418,
                       "name": "_setAdmin",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 5559,
+                      "referencedDeclaration": 5561,
                       "src": "1096:9:30",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_nonpayable$_t_address_$returns$__$",
                         "typeString": "function (address)"
                       }
                     },
-                    "id": 5418,
+                    "id": 5420,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -422,14 +422,14 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 5419,
+                  "id": 5421,
                   "nodeType": "ExpressionStatement",
                   "src": "1096:17:30"
                 }
               ]
             },
             "documentation": "Contract constructor.\n@param _logic address of the initial implementation.\n@param _admin Address of the proxy administrator.\n@param _data Data to send as msg.data to the implementation to initialize the proxied contract.\nIt should include the signature and the parameters of the function to be called, as described in\nhttps://solidity.readthedocs.io/en/v0.4.24/abi-spec.html#function-selector-and-argument-encoding.\nThis parameter is optional, if no data is given the initialization call to proxied contract will be skipped.",
-            "id": 5421,
+            "id": 5423,
             "implemented": true,
             "kind": "constructor",
             "modifiers": [
@@ -437,11 +437,11 @@
                 "arguments": [
                   {
                     "argumentTypes": null,
-                    "id": 5404,
+                    "id": 5406,
                     "name": "_logic",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 5397,
+                    "referencedDeclaration": 5399,
                     "src": "993:6:30",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -450,11 +450,11 @@
                   },
                   {
                     "argumentTypes": null,
-                    "id": 5405,
+                    "id": 5407,
                     "name": "_data",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 5401,
+                    "referencedDeclaration": 5403,
                     "src": "1001:5:30",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_memory_ptr",
@@ -462,17 +462,17 @@
                     }
                   }
                 ],
-                "id": 5406,
+                "id": 5408,
                 "modifierName": {
                   "argumentTypes": null,
-                  "id": 5403,
+                  "id": 5405,
                   "name": "UpgradeabilityProxy",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 5840,
+                  "referencedDeclaration": 5842,
                   "src": "973:19:30",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_type$_t_contract$_UpgradeabilityProxy_$5840_$",
+                    "typeIdentifier": "t_type$_t_contract$_UpgradeabilityProxy_$5842_$",
                     "typeString": "type(contract UpgradeabilityProxy)"
                   }
                 },
@@ -483,15 +483,15 @@
             "name": "",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 5402,
+              "id": 5404,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 5397,
+                  "id": 5399,
                   "name": "_logic",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5421,
+                  "scope": 5423,
                   "src": "921:14:30",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -500,7 +500,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 5396,
+                    "id": 5398,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "921:7:30",
@@ -515,10 +515,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 5399,
+                  "id": 5401,
                   "name": "_admin",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5421,
+                  "scope": 5423,
                   "src": "937:14:30",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -527,7 +527,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 5398,
+                    "id": 5400,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "937:7:30",
@@ -542,10 +542,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 5401,
+                  "id": 5403,
                   "name": "_data",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5421,
+                  "scope": 5423,
                   "src": "953:18:30",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -554,7 +554,7 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 5400,
+                    "id": 5402,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "953:5:30",
@@ -570,19 +570,19 @@
               "src": "920:52:30"
             },
             "returnParameters": {
-              "id": 5407,
+              "id": 5409,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1023:0:30"
             },
-            "scope": 5422,
+            "scope": 5424,
             "src": "909:209:30",
             "stateMutability": "payable",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 5423,
+        "scope": 5425,
         "src": "246:874:30"
       }
     ],
@@ -592,14 +592,14 @@
     "absolutePath": "zos-lib/contracts/upgradeability/AdminUpgradeabilityProxy.sol",
     "exportedSymbols": {
       "AdminUpgradeabilityProxy": [
-        5422
+        5424
       ]
     },
-    "id": 5423,
+    "id": 5425,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 5390,
+        "id": 5392,
         "literals": [
           "solidity",
           "^",
@@ -612,10 +612,10 @@
       {
         "absolutePath": "zos-lib/contracts/upgradeability/BaseAdminUpgradeabilityProxy.sol",
         "file": "./BaseAdminUpgradeabilityProxy.sol",
-        "id": 5391,
+        "id": 5393,
         "nodeType": "ImportDirective",
-        "scope": 5423,
-        "sourceUnit": 5579,
+        "scope": 5425,
+        "sourceUnit": 5581,
         "src": "25:44:30",
         "symbolAliases": [],
         "unitAlias": ""
@@ -626,17 +626,17 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 5392,
+              "id": 5394,
               "name": "BaseAdminUpgradeabilityProxy",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 5578,
+              "referencedDeclaration": 5580,
               "src": "283:28:30",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_BaseAdminUpgradeabilityProxy_$5578",
+                "typeIdentifier": "t_contract$_BaseAdminUpgradeabilityProxy_$5580",
                 "typeString": "contract BaseAdminUpgradeabilityProxy"
               }
             },
-            "id": 5393,
+            "id": 5395,
             "nodeType": "InheritanceSpecifier",
             "src": "283:28:30"
           },
@@ -644,44 +644,44 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 5394,
+              "id": 5396,
               "name": "UpgradeabilityProxy",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 5840,
+              "referencedDeclaration": 5842,
               "src": "313:19:30",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_UpgradeabilityProxy_$5840",
+                "typeIdentifier": "t_contract$_UpgradeabilityProxy_$5842",
                 "typeString": "contract UpgradeabilityProxy"
               }
             },
-            "id": 5395,
+            "id": 5397,
             "nodeType": "InheritanceSpecifier",
             "src": "313:19:30"
           }
         ],
         "contractDependencies": [
-          5578,
-          5636,
-          5674,
-          5840
+          5580,
+          5638,
+          5676,
+          5842
         ],
         "contractKind": "contract",
         "documentation": "@title AdminUpgradeabilityProxy\n@dev Extends from BaseAdminUpgradeabilityProxy with a constructor for \ninitializing the implementation, admin, and init data.",
         "fullyImplemented": true,
-        "id": 5422,
+        "id": 5424,
         "linearizedBaseContracts": [
-          5422,
-          5840,
-          5578,
-          5636,
-          5674
+          5424,
+          5842,
+          5580,
+          5638,
+          5676
         ],
         "name": "AdminUpgradeabilityProxy",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "body": {
-              "id": 5420,
+              "id": 5422,
               "nodeType": "Block",
               "src": "1023:95:30",
               "statements": [
@@ -695,18 +695,18 @@
                           "typeIdentifier": "t_bytes32",
                           "typeString": "bytes32"
                         },
-                        "id": 5413,
+                        "id": 5415,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": true,
                         "lValueRequested": false,
                         "leftExpression": {
                           "argumentTypes": null,
-                          "id": 5409,
+                          "id": 5411,
                           "name": "ADMIN_SLOT",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 5436,
+                          "referencedDeclaration": 5438,
                           "src": "1036:10:30",
                           "typeDescriptions": {
                             "typeIdentifier": "t_bytes32",
@@ -721,7 +721,7 @@
                             {
                               "argumentTypes": null,
                               "hexValue": "6f72672e7a657070656c696e6f732e70726f78792e61646d696e",
-                              "id": 5411,
+                              "id": 5413,
                               "isConstant": false,
                               "isLValue": false,
                               "isPure": true,
@@ -744,18 +744,18 @@
                                 "typeString": "literal_string \"org.zeppelinos.proxy.admin\""
                               }
                             ],
-                            "id": 5410,
+                            "id": 5412,
                             "name": "keccak256",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 5868,
+                            "referencedDeclaration": 5870,
                             "src": "1050:9:30",
                             "typeDescriptions": {
                               "typeIdentifier": "t_function_keccak256_pure$_t_bytes_memory_ptr_$returns$_t_bytes32_$",
                               "typeString": "function (bytes memory) pure returns (bytes32)"
                             }
                           },
-                          "id": 5412,
+                          "id": 5414,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
@@ -783,18 +783,18 @@
                           "typeString": "bool"
                         }
                       ],
-                      "id": 5408,
+                      "id": 5410,
                       "name": "assert",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 5863,
+                      "referencedDeclaration": 5865,
                       "src": "1029:6:30",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_assert_pure$_t_bool_$returns$__$",
                         "typeString": "function (bool) pure"
                       }
                     },
-                    "id": 5414,
+                    "id": 5416,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -808,7 +808,7 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 5415,
+                  "id": 5417,
                   "nodeType": "ExpressionStatement",
                   "src": "1029:61:30"
                 },
@@ -818,11 +818,11 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 5417,
+                        "id": 5419,
                         "name": "_admin",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 5399,
+                        "referencedDeclaration": 5401,
                         "src": "1106:6:30",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -837,18 +837,18 @@
                           "typeString": "address"
                         }
                       ],
-                      "id": 5416,
+                      "id": 5418,
                       "name": "_setAdmin",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 5559,
+                      "referencedDeclaration": 5561,
                       "src": "1096:9:30",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_nonpayable$_t_address_$returns$__$",
                         "typeString": "function (address)"
                       }
                     },
-                    "id": 5418,
+                    "id": 5420,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -862,14 +862,14 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 5419,
+                  "id": 5421,
                   "nodeType": "ExpressionStatement",
                   "src": "1096:17:30"
                 }
               ]
             },
             "documentation": "Contract constructor.\n@param _logic address of the initial implementation.\n@param _admin Address of the proxy administrator.\n@param _data Data to send as msg.data to the implementation to initialize the proxied contract.\nIt should include the signature and the parameters of the function to be called, as described in\nhttps://solidity.readthedocs.io/en/v0.4.24/abi-spec.html#function-selector-and-argument-encoding.\nThis parameter is optional, if no data is given the initialization call to proxied contract will be skipped.",
-            "id": 5421,
+            "id": 5423,
             "implemented": true,
             "kind": "constructor",
             "modifiers": [
@@ -877,11 +877,11 @@
                 "arguments": [
                   {
                     "argumentTypes": null,
-                    "id": 5404,
+                    "id": 5406,
                     "name": "_logic",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 5397,
+                    "referencedDeclaration": 5399,
                     "src": "993:6:30",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -890,11 +890,11 @@
                   },
                   {
                     "argumentTypes": null,
-                    "id": 5405,
+                    "id": 5407,
                     "name": "_data",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 5401,
+                    "referencedDeclaration": 5403,
                     "src": "1001:5:30",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_memory_ptr",
@@ -902,17 +902,17 @@
                     }
                   }
                 ],
-                "id": 5406,
+                "id": 5408,
                 "modifierName": {
                   "argumentTypes": null,
-                  "id": 5403,
+                  "id": 5405,
                   "name": "UpgradeabilityProxy",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 5840,
+                  "referencedDeclaration": 5842,
                   "src": "973:19:30",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_type$_t_contract$_UpgradeabilityProxy_$5840_$",
+                    "typeIdentifier": "t_type$_t_contract$_UpgradeabilityProxy_$5842_$",
                     "typeString": "type(contract UpgradeabilityProxy)"
                   }
                 },
@@ -923,15 +923,15 @@
             "name": "",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 5402,
+              "id": 5404,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 5397,
+                  "id": 5399,
                   "name": "_logic",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5421,
+                  "scope": 5423,
                   "src": "921:14:30",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -940,7 +940,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 5396,
+                    "id": 5398,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "921:7:30",
@@ -955,10 +955,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 5399,
+                  "id": 5401,
                   "name": "_admin",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5421,
+                  "scope": 5423,
                   "src": "937:14:30",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -967,7 +967,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 5398,
+                    "id": 5400,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "937:7:30",
@@ -982,10 +982,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 5401,
+                  "id": 5403,
                   "name": "_data",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5421,
+                  "scope": 5423,
                   "src": "953:18:30",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -994,7 +994,7 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 5400,
+                    "id": 5402,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "953:5:30",
@@ -1010,19 +1010,19 @@
               "src": "920:52:30"
             },
             "returnParameters": {
-              "id": 5407,
+              "id": 5409,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1023:0:30"
             },
-            "scope": 5422,
+            "scope": 5424,
             "src": "909:209:30",
             "stateMutability": "payable",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 5423,
+        "scope": 5425,
         "src": "246:874:30"
       }
     ],
@@ -1033,8 +1033,8 @@
     "version": "0.5.15+commit.6a57276f.Emscripten.clang"
   },
   "networks": {},
-  "schemaVersion": "3.0.20",
-  "updatedAt": "2019-12-27T23:45:12.655Z",
+  "schemaVersion": "3.0.19",
+  "updatedAt": "2019-12-28T20:38:42.718Z",
   "devdoc": {
     "details": "Extends from BaseAdminUpgradeabilityProxy with a constructor for  initializing the implementation, admin, and init data.",
     "methods": {

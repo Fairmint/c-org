@@ -111,14 +111,14 @@
     "absolutePath": "/D/c-org/contracts/test-artifacts/BigDivMock.sol",
     "exportedSymbols": {
       "BigDivMock": [
-        2713
+        2715
       ]
     },
-    "id": 2714,
+    "id": 2716,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 2651,
+        "id": 2653,
         "literals": [
           "solidity",
           "^",
@@ -131,10 +131,10 @@
       {
         "absolutePath": "/D/c-org/contracts/math/BigDiv.sol",
         "file": "../math/BigDiv.sol",
-        "id": 2652,
+        "id": 2654,
         "nodeType": "ImportDirective",
-        "scope": 2714,
-        "sourceUnit": 2574,
+        "scope": 2716,
+        "sourceUnit": 2576,
         "src": "26:28:7",
         "symbolAliases": [],
         "unitAlias": ""
@@ -145,16 +145,16 @@
         "contractKind": "contract",
         "documentation": "@title Used for testing only.",
         "fullyImplemented": true,
-        "id": 2713,
+        "id": 2715,
         "linearizedBaseContracts": [
-          2713
+          2715
         ],
         "name": "BigDivMock",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "body": {
-              "id": 2670,
+              "id": 2672,
               "nodeType": "Block",
               "src": "235:54:7",
               "statements": [
@@ -164,11 +164,11 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 2665,
+                        "id": 2667,
                         "name": "_numA",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2654,
+                        "referencedDeclaration": 2656,
                         "src": "265:5:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -177,11 +177,11 @@
                       },
                       {
                         "argumentTypes": null,
-                        "id": 2666,
+                        "id": 2668,
                         "name": "_numB",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2656,
+                        "referencedDeclaration": 2658,
                         "src": "272:5:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -190,11 +190,11 @@
                       },
                       {
                         "argumentTypes": null,
-                        "id": 2667,
+                        "id": 2669,
                         "name": "_den",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2658,
+                        "referencedDeclaration": 2660,
                         "src": "279:4:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -219,32 +219,32 @@
                       ],
                       "expression": {
                         "argumentTypes": null,
-                        "id": 2663,
+                        "id": 2665,
                         "name": "BigDiv",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2573,
+                        "referencedDeclaration": 2575,
                         "src": "248:6:7",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_type$_t_contract$_BigDiv_$2573_$",
+                          "typeIdentifier": "t_type$_t_contract$_BigDiv_$2575_$",
                           "typeString": "type(library BigDiv)"
                         }
                       },
-                      "id": 2664,
+                      "id": 2666,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "bigDiv2x1",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 2279,
+                      "referencedDeclaration": 2281,
                       "src": "248:16:7",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$_t_uint256_$returns$_t_uint256_$",
                         "typeString": "function (uint256,uint256,uint256) pure returns (uint256)"
                       }
                     },
-                    "id": 2668,
+                    "id": 2670,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -258,30 +258,30 @@
                       "typeString": "uint256"
                     }
                   },
-                  "functionReturnParameters": 2662,
-                  "id": 2669,
+                  "functionReturnParameters": 2664,
+                  "id": 2671,
                   "nodeType": "Return",
                   "src": "241:43:7"
                 }
               ]
             },
             "documentation": null,
-            "id": 2671,
+            "id": 2673,
             "implemented": true,
             "kind": "function",
             "modifiers": [],
             "name": "bigDiv2x1",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 2659,
+              "id": 2661,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2654,
+                  "id": 2656,
                   "name": "_numA",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2671,
+                  "scope": 2673,
                   "src": "145:13:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -290,7 +290,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2653,
+                    "id": 2655,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "145:7:7",
@@ -304,10 +304,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 2656,
+                  "id": 2658,
                   "name": "_numB",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2671,
+                  "scope": 2673,
                   "src": "164:13:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -316,7 +316,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2655,
+                    "id": 2657,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "164:7:7",
@@ -330,10 +330,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 2658,
+                  "id": 2660,
                   "name": "_den",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2671,
+                  "scope": 2673,
                   "src": "183:12:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -342,7 +342,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2657,
+                    "id": 2659,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "183:7:7",
@@ -358,15 +358,15 @@
               "src": "139:60:7"
             },
             "returnParameters": {
-              "id": 2662,
+              "id": 2664,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2661,
+                  "id": 2663,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2671,
+                  "scope": 2673,
                   "src": "224:7:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -375,7 +375,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2660,
+                    "id": 2662,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "224:7:7",
@@ -390,7 +390,7 @@
               ],
               "src": "223:9:7"
             },
-            "scope": 2713,
+            "scope": 2715,
             "src": "121:168:7",
             "stateMutability": "pure",
             "superFunction": null,
@@ -398,7 +398,7 @@
           },
           {
             "body": {
-              "id": 2689,
+              "id": 2691,
               "nodeType": "Block",
               "src": "414:61:7",
               "statements": [
@@ -408,11 +408,11 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 2684,
+                        "id": 2686,
                         "name": "_numA",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2673,
+                        "referencedDeclaration": 2675,
                         "src": "451:5:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -421,11 +421,11 @@
                       },
                       {
                         "argumentTypes": null,
-                        "id": 2685,
+                        "id": 2687,
                         "name": "_numB",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2675,
+                        "referencedDeclaration": 2677,
                         "src": "458:5:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -434,11 +434,11 @@
                       },
                       {
                         "argumentTypes": null,
-                        "id": 2686,
+                        "id": 2688,
                         "name": "_den",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2677,
+                        "referencedDeclaration": 2679,
                         "src": "465:4:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -463,32 +463,32 @@
                       ],
                       "expression": {
                         "argumentTypes": null,
-                        "id": 2682,
+                        "id": 2684,
                         "name": "BigDiv",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2573,
+                        "referencedDeclaration": 2575,
                         "src": "427:6:7",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_type$_t_contract$_BigDiv_$2573_$",
+                          "typeIdentifier": "t_type$_t_contract$_BigDiv_$2575_$",
                           "typeString": "type(library BigDiv)"
                         }
                       },
-                      "id": 2683,
+                      "id": 2685,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "bigDiv2x1RoundUp",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 2335,
+                      "referencedDeclaration": 2337,
                       "src": "427:23:7",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$_t_uint256_$returns$_t_uint256_$",
                         "typeString": "function (uint256,uint256,uint256) pure returns (uint256)"
                       }
                     },
-                    "id": 2687,
+                    "id": 2689,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -502,30 +502,30 @@
                       "typeString": "uint256"
                     }
                   },
-                  "functionReturnParameters": 2681,
-                  "id": 2688,
+                  "functionReturnParameters": 2683,
+                  "id": 2690,
                   "nodeType": "Return",
                   "src": "420:50:7"
                 }
               ]
             },
             "documentation": null,
-            "id": 2690,
+            "id": 2692,
             "implemented": true,
             "kind": "function",
             "modifiers": [],
             "name": "bigDiv2x1RoundUp",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 2678,
+              "id": 2680,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2673,
+                  "id": 2675,
                   "name": "_numA",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2690,
+                  "scope": 2692,
                   "src": "324:13:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -534,7 +534,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2672,
+                    "id": 2674,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "324:7:7",
@@ -548,10 +548,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 2675,
+                  "id": 2677,
                   "name": "_numB",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2690,
+                  "scope": 2692,
                   "src": "343:13:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -560,7 +560,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2674,
+                    "id": 2676,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "343:7:7",
@@ -574,10 +574,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 2677,
+                  "id": 2679,
                   "name": "_den",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2690,
+                  "scope": 2692,
                   "src": "362:12:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -586,7 +586,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2676,
+                    "id": 2678,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "362:7:7",
@@ -602,15 +602,15 @@
               "src": "318:60:7"
             },
             "returnParameters": {
-              "id": 2681,
+              "id": 2683,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2680,
+                  "id": 2682,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2690,
+                  "scope": 2692,
                   "src": "403:7:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -619,7 +619,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2679,
+                    "id": 2681,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "403:7:7",
@@ -634,7 +634,7 @@
               ],
               "src": "402:9:7"
             },
-            "scope": 2713,
+            "scope": 2715,
             "src": "293:182:7",
             "stateMutability": "pure",
             "superFunction": null,
@@ -642,7 +642,7 @@
           },
           {
             "body": {
-              "id": 2711,
+              "id": 2713,
               "nodeType": "Block",
               "src": "614:62:7",
               "statements": [
@@ -652,11 +652,11 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 2705,
+                        "id": 2707,
                         "name": "_numA",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2692,
+                        "referencedDeclaration": 2694,
                         "src": "644:5:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -665,11 +665,11 @@
                       },
                       {
                         "argumentTypes": null,
-                        "id": 2706,
+                        "id": 2708,
                         "name": "_numB",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2694,
+                        "referencedDeclaration": 2696,
                         "src": "651:5:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -678,11 +678,11 @@
                       },
                       {
                         "argumentTypes": null,
-                        "id": 2707,
+                        "id": 2709,
                         "name": "_denA",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2696,
+                        "referencedDeclaration": 2698,
                         "src": "658:5:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -691,11 +691,11 @@
                       },
                       {
                         "argumentTypes": null,
-                        "id": 2708,
+                        "id": 2710,
                         "name": "_denB",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2698,
+                        "referencedDeclaration": 2700,
                         "src": "665:5:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -724,32 +724,32 @@
                       ],
                       "expression": {
                         "argumentTypes": null,
-                        "id": 2703,
+                        "id": 2705,
                         "name": "BigDiv",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2573,
+                        "referencedDeclaration": 2575,
                         "src": "627:6:7",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_type$_t_contract$_BigDiv_$2573_$",
+                          "typeIdentifier": "t_type$_t_contract$_BigDiv_$2575_$",
                           "typeString": "type(library BigDiv)"
                         }
                       },
-                      "id": 2704,
+                      "id": 2706,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "bigDiv2x2",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 2572,
+                      "referencedDeclaration": 2574,
                       "src": "627:16:7",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$_t_uint256_$_t_uint256_$returns$_t_uint256_$",
                         "typeString": "function (uint256,uint256,uint256,uint256) pure returns (uint256)"
                       }
                     },
-                    "id": 2709,
+                    "id": 2711,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -763,30 +763,30 @@
                       "typeString": "uint256"
                     }
                   },
-                  "functionReturnParameters": 2702,
-                  "id": 2710,
+                  "functionReturnParameters": 2704,
+                  "id": 2712,
                   "nodeType": "Return",
                   "src": "620:51:7"
                 }
               ]
             },
             "documentation": null,
-            "id": 2712,
+            "id": 2714,
             "implemented": true,
             "kind": "function",
             "modifiers": [],
             "name": "bigDiv2x2",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 2699,
+              "id": 2701,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2692,
+                  "id": 2694,
                   "name": "_numA",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2712,
+                  "scope": 2714,
                   "src": "503:13:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -795,7 +795,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2691,
+                    "id": 2693,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "503:7:7",
@@ -809,10 +809,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 2694,
+                  "id": 2696,
                   "name": "_numB",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2712,
+                  "scope": 2714,
                   "src": "522:13:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -821,7 +821,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2693,
+                    "id": 2695,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "522:7:7",
@@ -835,10 +835,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 2696,
+                  "id": 2698,
                   "name": "_denA",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2712,
+                  "scope": 2714,
                   "src": "541:13:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -847,7 +847,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2695,
+                    "id": 2697,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "541:7:7",
@@ -861,10 +861,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 2698,
+                  "id": 2700,
                   "name": "_denB",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2712,
+                  "scope": 2714,
                   "src": "560:13:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -873,7 +873,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2697,
+                    "id": 2699,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "560:7:7",
@@ -889,15 +889,15 @@
               "src": "497:80:7"
             },
             "returnParameters": {
-              "id": 2702,
+              "id": 2704,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2701,
+                  "id": 2703,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2712,
+                  "scope": 2714,
                   "src": "603:7:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -906,7 +906,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2700,
+                    "id": 2702,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "603:7:7",
@@ -921,14 +921,14 @@
               ],
               "src": "602:9:7"
             },
-            "scope": 2713,
+            "scope": 2715,
             "src": "479:197:7",
             "stateMutability": "pure",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 2714,
+        "scope": 2716,
         "src": "97:581:7"
       }
     ],
@@ -938,14 +938,14 @@
     "absolutePath": "/D/c-org/contracts/test-artifacts/BigDivMock.sol",
     "exportedSymbols": {
       "BigDivMock": [
-        2713
+        2715
       ]
     },
-    "id": 2714,
+    "id": 2716,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 2651,
+        "id": 2653,
         "literals": [
           "solidity",
           "^",
@@ -958,10 +958,10 @@
       {
         "absolutePath": "/D/c-org/contracts/math/BigDiv.sol",
         "file": "../math/BigDiv.sol",
-        "id": 2652,
+        "id": 2654,
         "nodeType": "ImportDirective",
-        "scope": 2714,
-        "sourceUnit": 2574,
+        "scope": 2716,
+        "sourceUnit": 2576,
         "src": "26:28:7",
         "symbolAliases": [],
         "unitAlias": ""
@@ -972,16 +972,16 @@
         "contractKind": "contract",
         "documentation": "@title Used for testing only.",
         "fullyImplemented": true,
-        "id": 2713,
+        "id": 2715,
         "linearizedBaseContracts": [
-          2713
+          2715
         ],
         "name": "BigDivMock",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "body": {
-              "id": 2670,
+              "id": 2672,
               "nodeType": "Block",
               "src": "235:54:7",
               "statements": [
@@ -991,11 +991,11 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 2665,
+                        "id": 2667,
                         "name": "_numA",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2654,
+                        "referencedDeclaration": 2656,
                         "src": "265:5:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -1004,11 +1004,11 @@
                       },
                       {
                         "argumentTypes": null,
-                        "id": 2666,
+                        "id": 2668,
                         "name": "_numB",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2656,
+                        "referencedDeclaration": 2658,
                         "src": "272:5:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -1017,11 +1017,11 @@
                       },
                       {
                         "argumentTypes": null,
-                        "id": 2667,
+                        "id": 2669,
                         "name": "_den",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2658,
+                        "referencedDeclaration": 2660,
                         "src": "279:4:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -1046,32 +1046,32 @@
                       ],
                       "expression": {
                         "argumentTypes": null,
-                        "id": 2663,
+                        "id": 2665,
                         "name": "BigDiv",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2573,
+                        "referencedDeclaration": 2575,
                         "src": "248:6:7",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_type$_t_contract$_BigDiv_$2573_$",
+                          "typeIdentifier": "t_type$_t_contract$_BigDiv_$2575_$",
                           "typeString": "type(library BigDiv)"
                         }
                       },
-                      "id": 2664,
+                      "id": 2666,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "bigDiv2x1",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 2279,
+                      "referencedDeclaration": 2281,
                       "src": "248:16:7",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$_t_uint256_$returns$_t_uint256_$",
                         "typeString": "function (uint256,uint256,uint256) pure returns (uint256)"
                       }
                     },
-                    "id": 2668,
+                    "id": 2670,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1085,30 +1085,30 @@
                       "typeString": "uint256"
                     }
                   },
-                  "functionReturnParameters": 2662,
-                  "id": 2669,
+                  "functionReturnParameters": 2664,
+                  "id": 2671,
                   "nodeType": "Return",
                   "src": "241:43:7"
                 }
               ]
             },
             "documentation": null,
-            "id": 2671,
+            "id": 2673,
             "implemented": true,
             "kind": "function",
             "modifiers": [],
             "name": "bigDiv2x1",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 2659,
+              "id": 2661,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2654,
+                  "id": 2656,
                   "name": "_numA",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2671,
+                  "scope": 2673,
                   "src": "145:13:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1117,7 +1117,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2653,
+                    "id": 2655,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "145:7:7",
@@ -1131,10 +1131,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 2656,
+                  "id": 2658,
                   "name": "_numB",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2671,
+                  "scope": 2673,
                   "src": "164:13:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1143,7 +1143,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2655,
+                    "id": 2657,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "164:7:7",
@@ -1157,10 +1157,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 2658,
+                  "id": 2660,
                   "name": "_den",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2671,
+                  "scope": 2673,
                   "src": "183:12:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1169,7 +1169,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2657,
+                    "id": 2659,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "183:7:7",
@@ -1185,15 +1185,15 @@
               "src": "139:60:7"
             },
             "returnParameters": {
-              "id": 2662,
+              "id": 2664,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2661,
+                  "id": 2663,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2671,
+                  "scope": 2673,
                   "src": "224:7:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1202,7 +1202,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2660,
+                    "id": 2662,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "224:7:7",
@@ -1217,7 +1217,7 @@
               ],
               "src": "223:9:7"
             },
-            "scope": 2713,
+            "scope": 2715,
             "src": "121:168:7",
             "stateMutability": "pure",
             "superFunction": null,
@@ -1225,7 +1225,7 @@
           },
           {
             "body": {
-              "id": 2689,
+              "id": 2691,
               "nodeType": "Block",
               "src": "414:61:7",
               "statements": [
@@ -1235,11 +1235,11 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 2684,
+                        "id": 2686,
                         "name": "_numA",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2673,
+                        "referencedDeclaration": 2675,
                         "src": "451:5:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -1248,11 +1248,11 @@
                       },
                       {
                         "argumentTypes": null,
-                        "id": 2685,
+                        "id": 2687,
                         "name": "_numB",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2675,
+                        "referencedDeclaration": 2677,
                         "src": "458:5:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -1261,11 +1261,11 @@
                       },
                       {
                         "argumentTypes": null,
-                        "id": 2686,
+                        "id": 2688,
                         "name": "_den",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2677,
+                        "referencedDeclaration": 2679,
                         "src": "465:4:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -1290,32 +1290,32 @@
                       ],
                       "expression": {
                         "argumentTypes": null,
-                        "id": 2682,
+                        "id": 2684,
                         "name": "BigDiv",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2573,
+                        "referencedDeclaration": 2575,
                         "src": "427:6:7",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_type$_t_contract$_BigDiv_$2573_$",
+                          "typeIdentifier": "t_type$_t_contract$_BigDiv_$2575_$",
                           "typeString": "type(library BigDiv)"
                         }
                       },
-                      "id": 2683,
+                      "id": 2685,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "bigDiv2x1RoundUp",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 2335,
+                      "referencedDeclaration": 2337,
                       "src": "427:23:7",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$_t_uint256_$returns$_t_uint256_$",
                         "typeString": "function (uint256,uint256,uint256) pure returns (uint256)"
                       }
                     },
-                    "id": 2687,
+                    "id": 2689,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1329,30 +1329,30 @@
                       "typeString": "uint256"
                     }
                   },
-                  "functionReturnParameters": 2681,
-                  "id": 2688,
+                  "functionReturnParameters": 2683,
+                  "id": 2690,
                   "nodeType": "Return",
                   "src": "420:50:7"
                 }
               ]
             },
             "documentation": null,
-            "id": 2690,
+            "id": 2692,
             "implemented": true,
             "kind": "function",
             "modifiers": [],
             "name": "bigDiv2x1RoundUp",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 2678,
+              "id": 2680,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2673,
+                  "id": 2675,
                   "name": "_numA",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2690,
+                  "scope": 2692,
                   "src": "324:13:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1361,7 +1361,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2672,
+                    "id": 2674,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "324:7:7",
@@ -1375,10 +1375,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 2675,
+                  "id": 2677,
                   "name": "_numB",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2690,
+                  "scope": 2692,
                   "src": "343:13:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1387,7 +1387,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2674,
+                    "id": 2676,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "343:7:7",
@@ -1401,10 +1401,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 2677,
+                  "id": 2679,
                   "name": "_den",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2690,
+                  "scope": 2692,
                   "src": "362:12:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1413,7 +1413,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2676,
+                    "id": 2678,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "362:7:7",
@@ -1429,15 +1429,15 @@
               "src": "318:60:7"
             },
             "returnParameters": {
-              "id": 2681,
+              "id": 2683,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2680,
+                  "id": 2682,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2690,
+                  "scope": 2692,
                   "src": "403:7:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1446,7 +1446,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2679,
+                    "id": 2681,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "403:7:7",
@@ -1461,7 +1461,7 @@
               ],
               "src": "402:9:7"
             },
-            "scope": 2713,
+            "scope": 2715,
             "src": "293:182:7",
             "stateMutability": "pure",
             "superFunction": null,
@@ -1469,7 +1469,7 @@
           },
           {
             "body": {
-              "id": 2711,
+              "id": 2713,
               "nodeType": "Block",
               "src": "614:62:7",
               "statements": [
@@ -1479,11 +1479,11 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 2705,
+                        "id": 2707,
                         "name": "_numA",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2692,
+                        "referencedDeclaration": 2694,
                         "src": "644:5:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -1492,11 +1492,11 @@
                       },
                       {
                         "argumentTypes": null,
-                        "id": 2706,
+                        "id": 2708,
                         "name": "_numB",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2694,
+                        "referencedDeclaration": 2696,
                         "src": "651:5:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -1505,11 +1505,11 @@
                       },
                       {
                         "argumentTypes": null,
-                        "id": 2707,
+                        "id": 2709,
                         "name": "_denA",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2696,
+                        "referencedDeclaration": 2698,
                         "src": "658:5:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -1518,11 +1518,11 @@
                       },
                       {
                         "argumentTypes": null,
-                        "id": 2708,
+                        "id": 2710,
                         "name": "_denB",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2698,
+                        "referencedDeclaration": 2700,
                         "src": "665:5:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -1551,32 +1551,32 @@
                       ],
                       "expression": {
                         "argumentTypes": null,
-                        "id": 2703,
+                        "id": 2705,
                         "name": "BigDiv",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2573,
+                        "referencedDeclaration": 2575,
                         "src": "627:6:7",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_type$_t_contract$_BigDiv_$2573_$",
+                          "typeIdentifier": "t_type$_t_contract$_BigDiv_$2575_$",
                           "typeString": "type(library BigDiv)"
                         }
                       },
-                      "id": 2704,
+                      "id": 2706,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "bigDiv2x2",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 2572,
+                      "referencedDeclaration": 2574,
                       "src": "627:16:7",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$_t_uint256_$_t_uint256_$returns$_t_uint256_$",
                         "typeString": "function (uint256,uint256,uint256,uint256) pure returns (uint256)"
                       }
                     },
-                    "id": 2709,
+                    "id": 2711,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1590,30 +1590,30 @@
                       "typeString": "uint256"
                     }
                   },
-                  "functionReturnParameters": 2702,
-                  "id": 2710,
+                  "functionReturnParameters": 2704,
+                  "id": 2712,
                   "nodeType": "Return",
                   "src": "620:51:7"
                 }
               ]
             },
             "documentation": null,
-            "id": 2712,
+            "id": 2714,
             "implemented": true,
             "kind": "function",
             "modifiers": [],
             "name": "bigDiv2x2",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 2699,
+              "id": 2701,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2692,
+                  "id": 2694,
                   "name": "_numA",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2712,
+                  "scope": 2714,
                   "src": "503:13:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1622,7 +1622,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2691,
+                    "id": 2693,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "503:7:7",
@@ -1636,10 +1636,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 2694,
+                  "id": 2696,
                   "name": "_numB",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2712,
+                  "scope": 2714,
                   "src": "522:13:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1648,7 +1648,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2693,
+                    "id": 2695,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "522:7:7",
@@ -1662,10 +1662,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 2696,
+                  "id": 2698,
                   "name": "_denA",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2712,
+                  "scope": 2714,
                   "src": "541:13:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1674,7 +1674,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2695,
+                    "id": 2697,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "541:7:7",
@@ -1688,10 +1688,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 2698,
+                  "id": 2700,
                   "name": "_denB",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2712,
+                  "scope": 2714,
                   "src": "560:13:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1700,7 +1700,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2697,
+                    "id": 2699,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "560:7:7",
@@ -1716,15 +1716,15 @@
               "src": "497:80:7"
             },
             "returnParameters": {
-              "id": 2702,
+              "id": 2704,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2701,
+                  "id": 2703,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2712,
+                  "scope": 2714,
                   "src": "603:7:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1733,7 +1733,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2700,
+                    "id": 2702,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "603:7:7",
@@ -1748,14 +1748,14 @@
               ],
               "src": "602:9:7"
             },
-            "scope": 2713,
+            "scope": 2715,
             "src": "479:197:7",
             "stateMutability": "pure",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 2714,
+        "scope": 2716,
         "src": "97:581:7"
       }
     ],
@@ -1766,8 +1766,8 @@
     "version": "0.5.15+commit.6a57276f.Emscripten.clang"
   },
   "networks": {},
-  "schemaVersion": "3.0.20",
-  "updatedAt": "2019-12-27T23:45:12.635Z",
+  "schemaVersion": "3.0.19",
+  "updatedAt": "2019-12-28T20:38:42.697Z",
   "devdoc": {
     "methods": {},
     "title": "Used for testing only."

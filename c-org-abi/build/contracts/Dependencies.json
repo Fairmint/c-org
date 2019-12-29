@@ -573,7 +573,7 @@
         "id": 1769,
         "nodeType": "ImportDirective",
         "scope": 1794,
-        "sourceUnit": 3264,
+        "sourceUnit": 3266,
         "src": "27:84:1",
         "symbolAliases": [],
         "unitAlias": ""
@@ -584,7 +584,7 @@
         "id": 1770,
         "nodeType": "ImportDirective",
         "scope": 1794,
-        "sourceUnit": 5423,
+        "sourceUnit": 5425,
         "src": "113:71:1",
         "symbolAliases": [],
         "unitAlias": ""
@@ -595,7 +595,7 @@
         "id": 1771,
         "nodeType": "ImportDirective",
         "scope": 1794,
-        "sourceUnit": 5798,
+        "sourceUnit": 5800,
         "src": "186:57:1",
         "symbolAliases": [],
         "unitAlias": ""
@@ -609,10 +609,10 @@
               "id": 1772,
               "name": "TokenVesting",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 3263,
+              "referencedDeclaration": 3265,
               "src": "367:12:1",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_TokenVesting_$3263",
+                "typeIdentifier": "t_contract$_TokenVesting_$3265",
                 "typeString": "contract TokenVesting"
               }
             },
@@ -627,10 +627,10 @@
               "id": 1774,
               "name": "AdminUpgradeabilityProxy",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 5422,
+              "referencedDeclaration": 5424,
               "src": "381:24:1",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_AdminUpgradeabilityProxy_$5422",
+                "typeIdentifier": "t_contract$_AdminUpgradeabilityProxy_$5424",
                 "typeString": "contract AdminUpgradeabilityProxy"
               }
             },
@@ -645,10 +645,10 @@
               "id": 1776,
               "name": "ProxyAdmin",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 5797,
+              "referencedDeclaration": 5799,
               "src": "407:10:1",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_ProxyAdmin_$5797",
+                "typeIdentifier": "t_contract$_ProxyAdmin_$5799",
                 "typeString": "contract ProxyAdmin"
               }
             },
@@ -658,17 +658,17 @@
           }
         ],
         "contractDependencies": [
-          2869,
-          3263,
-          3574,
-          5226,
-          5388,
-          5422,
-          5578,
-          5636,
-          5674,
-          5797,
-          5840
+          2871,
+          3265,
+          3576,
+          5228,
+          5390,
+          5424,
+          5580,
+          5638,
+          5676,
+          5799,
+          5842
         ],
         "contractKind": "contract",
         "documentation": "This creates the artifacts allowing us to use these 3rd party contracts directly",
@@ -676,17 +676,17 @@
         "id": 1793,
         "linearizedBaseContracts": [
           1793,
-          5797,
-          5388,
-          5422,
-          5840,
-          5578,
-          5636,
-          5674,
-          3263,
-          3574,
-          2869,
-          5226
+          5799,
+          5390,
+          5424,
+          5842,
+          5580,
+          5638,
+          5676,
+          3265,
+          3576,
+          2871,
+          5228
         ],
         "name": "Dependencies",
         "nodeType": "ContractDefinition",
@@ -712,10 +712,10 @@
                   "name": "TokenVesting",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 3263,
+                  "referencedDeclaration": 3265,
                   "src": "452:12:1",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_type$_t_contract$_TokenVesting_$3263_$",
+                    "typeIdentifier": "t_type$_t_contract$_TokenVesting_$3265_$",
                     "typeString": "type(contract TokenVesting)"
                   }
                 },
@@ -862,10 +862,10 @@
                   "name": "AdminUpgradeabilityProxy",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 5422,
+                  "referencedDeclaration": 5424,
                   "src": "472:24:1",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_type$_t_contract$_AdminUpgradeabilityProxy_$5422_$",
+                    "typeIdentifier": "t_type$_t_contract$_AdminUpgradeabilityProxy_$5424_$",
                     "typeString": "type(contract AdminUpgradeabilityProxy)"
                   }
                 },
@@ -927,7 +927,7 @@
         "id": 1769,
         "nodeType": "ImportDirective",
         "scope": 1794,
-        "sourceUnit": 3264,
+        "sourceUnit": 3266,
         "src": "27:84:1",
         "symbolAliases": [],
         "unitAlias": ""
@@ -938,7 +938,7 @@
         "id": 1770,
         "nodeType": "ImportDirective",
         "scope": 1794,
-        "sourceUnit": 5423,
+        "sourceUnit": 5425,
         "src": "113:71:1",
         "symbolAliases": [],
         "unitAlias": ""
@@ -949,7 +949,7 @@
         "id": 1771,
         "nodeType": "ImportDirective",
         "scope": 1794,
-        "sourceUnit": 5798,
+        "sourceUnit": 5800,
         "src": "186:57:1",
         "symbolAliases": [],
         "unitAlias": ""
@@ -963,10 +963,10 @@
               "id": 1772,
               "name": "TokenVesting",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 3263,
+              "referencedDeclaration": 3265,
               "src": "367:12:1",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_TokenVesting_$3263",
+                "typeIdentifier": "t_contract$_TokenVesting_$3265",
                 "typeString": "contract TokenVesting"
               }
             },
@@ -981,10 +981,10 @@
               "id": 1774,
               "name": "AdminUpgradeabilityProxy",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 5422,
+              "referencedDeclaration": 5424,
               "src": "381:24:1",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_AdminUpgradeabilityProxy_$5422",
+                "typeIdentifier": "t_contract$_AdminUpgradeabilityProxy_$5424",
                 "typeString": "contract AdminUpgradeabilityProxy"
               }
             },
@@ -999,10 +999,10 @@
               "id": 1776,
               "name": "ProxyAdmin",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 5797,
+              "referencedDeclaration": 5799,
               "src": "407:10:1",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_ProxyAdmin_$5797",
+                "typeIdentifier": "t_contract$_ProxyAdmin_$5799",
                 "typeString": "contract ProxyAdmin"
               }
             },
@@ -1012,17 +1012,17 @@
           }
         ],
         "contractDependencies": [
-          2869,
-          3263,
-          3574,
-          5226,
-          5388,
-          5422,
-          5578,
-          5636,
-          5674,
-          5797,
-          5840
+          2871,
+          3265,
+          3576,
+          5228,
+          5390,
+          5424,
+          5580,
+          5638,
+          5676,
+          5799,
+          5842
         ],
         "contractKind": "contract",
         "documentation": "This creates the artifacts allowing us to use these 3rd party contracts directly",
@@ -1030,17 +1030,17 @@
         "id": 1793,
         "linearizedBaseContracts": [
           1793,
-          5797,
-          5388,
-          5422,
-          5840,
-          5578,
-          5636,
-          5674,
-          3263,
-          3574,
-          2869,
-          5226
+          5799,
+          5390,
+          5424,
+          5842,
+          5580,
+          5638,
+          5676,
+          3265,
+          3576,
+          2871,
+          5228
         ],
         "name": "Dependencies",
         "nodeType": "ContractDefinition",
@@ -1066,10 +1066,10 @@
                   "name": "TokenVesting",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 3263,
+                  "referencedDeclaration": 3265,
                   "src": "452:12:1",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_type$_t_contract$_TokenVesting_$3263_$",
+                    "typeIdentifier": "t_type$_t_contract$_TokenVesting_$3265_$",
                     "typeString": "type(contract TokenVesting)"
                   }
                 },
@@ -1216,10 +1216,10 @@
                   "name": "AdminUpgradeabilityProxy",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 5422,
+                  "referencedDeclaration": 5424,
                   "src": "472:24:1",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_type$_t_contract$_AdminUpgradeabilityProxy_$5422_$",
+                    "typeIdentifier": "t_type$_t_contract$_AdminUpgradeabilityProxy_$5424_$",
                     "typeString": "type(contract AdminUpgradeabilityProxy)"
                   }
                 },
@@ -1259,8 +1259,8 @@
     "version": "0.5.15+commit.6a57276f.Emscripten.clang"
   },
   "networks": {},
-  "schemaVersion": "3.0.20",
-  "updatedAt": "2019-12-27T23:45:12.624Z",
+  "schemaVersion": "3.0.19",
+  "updatedAt": "2019-12-28T20:38:42.665Z",
   "devdoc": {
     "methods": {
       "admin()": {

@@ -19,7 +19,7 @@ contract("dat / whitelist / shouldFail", accounts => {
   it("shouldFail to approve by a non-owner", async () => {
     await shouldFail(
       contracts.whitelist.approve(accounts[1], true, { from: accounts[5] }),
-      "OWNER_ONLY"
+      "Ownable: caller is not the owner"
     );
   });
 
