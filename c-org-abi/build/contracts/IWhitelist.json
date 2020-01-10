@@ -877,7 +877,7 @@
   },
   "networks": {},
   "schemaVersion": "3.0.19",
-  "updatedAt": "2019-12-28T20:38:42.684Z",
+  "updatedAt": "2020-01-10T22:34:33.114Z",
   "devdoc": {
     "methods": {
       "authorizeTransfer(address,address,uint256,bool)": {
