@@ -249,7 +249,7 @@
                             "name": "abi",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 5863,
+                            "referencedDeclaration": 5875,
                             "src": "770:3:20",
                             "typeDescriptions": {
                               "typeIdentifier": "t_magic_abi",
@@ -570,7 +570,7 @@
                             "name": "abi",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 5863,
+                            "referencedDeclaration": 5875,
                             "src": "968:3:20",
                             "typeDescriptions": {
                               "typeIdentifier": "t_magic_abi",
@@ -898,7 +898,7 @@
                                         "name": "this",
                                         "nodeType": "Identifier",
                                         "overloadedDeclarations": [],
-                                        "referencedDeclaration": 5902,
+                                        "referencedDeclaration": 5914,
                                         "src": "1455:4:20",
                                         "typeDescriptions": {
                                           "typeIdentifier": "t_contract$_SafeERC20_$4344",
@@ -1086,10 +1086,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        5879,
-                        5880
+                        5891,
+                        5892
                       ],
-                      "referencedDeclaration": 5880,
+                      "referencedDeclaration": 5892,
                       "src": "1406:7:20",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
@@ -1227,7 +1227,7 @@
                             "name": "abi",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 5863,
+                            "referencedDeclaration": 5875,
                             "src": "1592:3:20",
                             "typeDescriptions": {
                               "typeIdentifier": "t_magic_abi",
@@ -1487,7 +1487,7 @@
                                 "name": "this",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 5902,
+                                "referencedDeclaration": 5914,
                                 "src": "1811:4:20",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_contract$_SafeERC20_$4344",
@@ -1739,7 +1739,7 @@
                             "name": "abi",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 5863,
+                            "referencedDeclaration": 5875,
                             "src": "1873:3:20",
                             "typeDescriptions": {
                               "typeIdentifier": "t_magic_abi",
@@ -2021,7 +2021,7 @@
                                 "name": "this",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 5902,
+                                "referencedDeclaration": 5914,
                                 "src": "2099:4:20",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_contract$_SafeERC20_$4344",
@@ -2273,7 +2273,7 @@
                             "name": "abi",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 5863,
+                            "referencedDeclaration": 5875,
                             "src": "2206:3:20",
                             "typeDescriptions": {
                               "typeIdentifier": "t_magic_abi",
@@ -2586,10 +2586,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        5879,
-                        5880
+                        5891,
+                        5892
                       ],
-                      "referencedDeclaration": 5880,
+                      "referencedDeclaration": 5892,
                       "src": "3253:7:20",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
@@ -2831,10 +2831,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        5879,
-                        5880
+                        5891,
+                        5892
                       ],
-                      "referencedDeclaration": 5880,
+                      "referencedDeclaration": 5892,
                       "src": "3471:7:20",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
@@ -3005,7 +3005,7 @@
                                   "name": "abi",
                                   "nodeType": "Identifier",
                                   "overloadedDeclarations": [],
-                                  "referencedDeclaration": 5863,
+                                  "referencedDeclaration": 5875,
                                   "src": "3667:3:20",
                                   "typeDescriptions": {
                                     "typeIdentifier": "t_magic_abi",
@@ -3074,10 +3074,10 @@
                             "name": "require",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [
-                              5879,
-                              5880
+                              5891,
+                              5892
                             ],
-                            "referencedDeclaration": 5880,
+                            "referencedDeclaration": 5892,
                             "src": "3659:7:20",
                             "typeDescriptions": {
                               "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
@@ -3435,7 +3435,7 @@
                             "name": "abi",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 5863,
+                            "referencedDeclaration": 5875,
                             "src": "770:3:20",
                             "typeDescriptions": {
                               "typeIdentifier": "t_magic_abi",
@@ -3756,7 +3756,7 @@
                             "name": "abi",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 5863,
+                            "referencedDeclaration": 5875,
                             "src": "968:3:20",
                             "typeDescriptions": {
                               "typeIdentifier": "t_magic_abi",
@@ -4084,7 +4084,7 @@
                                         "name": "this",
                                         "nodeType": "Identifier",
                                         "overloadedDeclarations": [],
-                                        "referencedDeclaration": 5902,
+                                        "referencedDeclaration": 5914,
                                         "src": "1455:4:20",
                                         "typeDescriptions": {
                                           "typeIdentifier": "t_contract$_SafeERC20_$4344",
@@ -4272,10 +4272,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        5879,
-                        5880
+                        5891,
+                        5892
                       ],
-                      "referencedDeclaration": 5880,
+                      "referencedDeclaration": 5892,
                       "src": "1406:7:20",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
@@ -4413,7 +4413,7 @@
                             "name": "abi",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 5863,
+                            "referencedDeclaration": 5875,
                             "src": "1592:3:20",
                             "typeDescriptions": {
                               "typeIdentifier": "t_magic_abi",
@@ -4673,7 +4673,7 @@
                                 "name": "this",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 5902,
+                                "referencedDeclaration": 5914,
                                 "src": "1811:4:20",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_contract$_SafeERC20_$4344",
@@ -4925,7 +4925,7 @@
                             "name": "abi",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 5863,
+                            "referencedDeclaration": 5875,
                             "src": "1873:3:20",
                             "typeDescriptions": {
                               "typeIdentifier": "t_magic_abi",
@@ -5207,7 +5207,7 @@
                                 "name": "this",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 5902,
+                                "referencedDeclaration": 5914,
                                 "src": "2099:4:20",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_contract$_SafeERC20_$4344",
@@ -5459,7 +5459,7 @@
                             "name": "abi",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 5863,
+                            "referencedDeclaration": 5875,
                             "src": "2206:3:20",
                             "typeDescriptions": {
                               "typeIdentifier": "t_magic_abi",
@@ -5772,10 +5772,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        5879,
-                        5880
+                        5891,
+                        5892
                       ],
-                      "referencedDeclaration": 5880,
+                      "referencedDeclaration": 5892,
                       "src": "3253:7:20",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
@@ -6017,10 +6017,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        5879,
-                        5880
+                        5891,
+                        5892
                       ],
-                      "referencedDeclaration": 5880,
+                      "referencedDeclaration": 5892,
                       "src": "3471:7:20",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
@@ -6191,7 +6191,7 @@
                                   "name": "abi",
                                   "nodeType": "Identifier",
                                   "overloadedDeclarations": [],
-                                  "referencedDeclaration": 5863,
+                                  "referencedDeclaration": 5875,
                                   "src": "3667:3:20",
                                   "typeDescriptions": {
                                     "typeIdentifier": "t_magic_abi",
@@ -6260,10 +6260,10 @@
                             "name": "require",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [
-                              5879,
-                              5880
+                              5891,
+                              5892
                             ],
-                            "referencedDeclaration": 5880,
+                            "referencedDeclaration": 5892,
                             "src": "3659:7:20",
                             "typeDescriptions": {
                               "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
@@ -6386,7 +6386,7 @@
   },
   "networks": {},
   "schemaVersion": "3.0.19",
-  "updatedAt": "2019-12-28T20:38:42.713Z",
+  "updatedAt": "2020-01-10T22:34:33.136Z",
   "devdoc": {
     "details": "Wrappers around ERC20 operations that throw on failure (when the token contract returns false). Tokens that return no value (and instead revert or throw on failure) are also supported, non-reverting calls are assumed to be successful. To use this library you can add a `using SafeERC20 for ERC20;` statement to your contract, which allows you to call the safe operations as `token.safeTransfer(...)`, etc.",
     "methods": {},

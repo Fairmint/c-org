@@ -11,7 +11,7 @@
     "deploy": "truffle test scripts/deploy.js",
     "test": "truffle test",
     "coverage": "truffle run coverage && cat coverage/lcov.info | coveralls",
-    "flatten": "(truffle-flattener contracts/DecentralizedAutonomousTrust.sol > build/DecentralizedAutonomousTrust-Flattened.sol) && (truffle-flattener contracts/Whitelist.sol > build/Whitelist-Flattened.sol) && (echo Wrote flattened files: build/*-Flattened.sol)"
+    "flatten": "(truffle-flattener contracts/DecentralizedAutonomousTrust.sol > build/DecentralizedAutonomousTrust-Flattened.sol) && (truffle-flattener contracts/Whitelist.sol > build/Whitelist-Flattened.sol) && (truffle-flattener node_modules/@openzeppelin/upgrades/contracts/upgradeability/ProxyAdmin.sol > build/ProxyAdmin-Flattened.sol)  && (truffle-flattener node_modules/@openzeppelin/upgrades/contracts/upgradeability/AdminUpgradeabilityProxy.sol > build/AdminUpgradeabilityProxy-Flattened.sol) && (echo Wrote flattened files: build/*-Flattened.sol)"
   },
   "repository": {
     "type": "git",
@@ -27,8 +27,7 @@
     "papaparse": "5.1.1",
     "sleep": "6.1.0",
     "truffle-flattener": "1.4.2",
-    "truffle-hdwallet-provider": "1.0.17",
-    "zos-lib": "2.4.2"
+    "truffle-hdwallet-provider": "1.0.17"
   },
   "devDependencies": {
     "@codechecks/client": "0.1.10",

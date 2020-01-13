@@ -13762,7 +13762,7 @@
   },
   "networks": {},
   "schemaVersion": "3.0.19",
-  "updatedAt": "2019-12-28T20:38:42.686Z",
+  "updatedAt": "2020-01-10T22:34:33.114Z",
   "devdoc": {
     "details": "Results may be off by 1 + 0.000001% for 2x1 calls and 2 + 0.00001% for 2x2 calls. Do not use if your contract expects very small result values to be accurate.",
     "methods": {},
