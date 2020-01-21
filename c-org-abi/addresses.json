@@ -5,7 +5,26 @@
     "testUSDC": "0x7d9C10E2F7AF22200126A0EA6826c1A16F8F6d38",
     "datTemplate": "0xf58d3023f6b5894da1e161a29d91fac6d07db567",
     "whitelistTemplate": "0x1ddcabb4ff6e0bf552b034a0ec4ae399bbdb1f6f",
-    "orgs": []
+    "orgs": [
+      { 
+        "name": "Fairmint Dev Init",
+        "token": "0x7de2b6745c3a4ab23de9b459f0639e049c275fd0",
+        "proxyAdmin": "0xf2d73f7d202537038b71acc07e65c1516e8518f3",
+        "whitelist": "0xfad84f50c23b822bb74bc581e954a0237a190a1f"
+      },
+      { 
+        "name": "Fairmint Stage Init",
+        "token": "0x0382f5ca67a15a4fd91959904e9681a8319a4c7a",
+        "proxyAdmin": "0x3e82f194d288c6f6e9b9c6c99f7b7be8fa5c23fc",
+        "whitelist": "0xb08d8009640fffe175e7fe4196c98e3415654329"
+      },
+      { 
+        "name": "Fairmint [PRODUCTION]",
+        "token": "0x3983c6da8235f59e16a034ee773e60a69e8f14b2",
+        "proxyAdmin": "0xd7518fc37378d1866bdf2b300bc3a48c51454e09",
+        "whitelist": "0xd8dfe8859df3e6349f47567916320f0020893b4e"
+      }
+    ]
   },
   "ropsten": {
     "testDAI": "0xC6037Ea1d990999148d81E7eD671f9bF769F144f",
@@ -14,7 +33,7 @@
     "whitelistTemplate": "0xd134b326358bb5334d93973ba71575b79605288a",
     "orgs": [
       { 
-        "name": "Test Fair Org",
+        "name": "Testnet Fair Org",
         "token": "0xe30d7e27932c0c88b89d12e868eada3ab2eeff48",
         "proxyAdmin": "0xde14cf4a88c85b0d0ed4bd784fa0265c38a3d935",
         "whitelist": "0xb818e72016ab6985199d9210225026937881f792"
