@@ -3,7 +3,7 @@
     "dai": "0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359",
     "usdc": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
     "testUSDC": "0x7d9C10E2F7AF22200126A0EA6826c1A16F8F6d38",
-    "datTemplate": "0xf58d3023f6b5894da1e161a29d91fac6d07db567",
+    "datTemplate": "0x93380689ebcaae0bded9c822e2921399069fbecd",
     "whitelistTemplate": "0x1ddcabb4ff6e0bf552b034a0ec4ae399bbdb1f6f",
     "orgs": [
       { 
@@ -29,14 +29,14 @@
   "ropsten": {
     "testDAI": "0xC6037Ea1d990999148d81E7eD671f9bF769F144f",
     "testUSDC": "0x14039994048f873dc5F86a32075669652b9F0fA7",
-    "datTemplate": "0x07248a51129646632ad443bc31e76c76f390369a",
-    "whitelistTemplate": "0xd134b326358bb5334d93973ba71575b79605288a",
+    "datTemplate": "0xa739f0be88a9df5a02a6c4e790ee0ff8356adcdf",
+    "whitelistTemplate": "0x110eee1f892057a97e5205cd405f5718241f9446",
     "orgs": [
       { 
         "name": "Testnet Fair Org",
-        "token": "0xe30d7e27932c0c88b89d12e868eada3ab2eeff48",
-        "proxyAdmin": "0xde14cf4a88c85b0d0ed4bd784fa0265c38a3d935",
-        "whitelist": "0xb818e72016ab6985199d9210225026937881f792"
+        "token": "0xef7b6b4f78b2f14740413bd2676a87230de2008a",
+        "proxyAdmin": "0x63434a746d37534793f1da8d16f426d9e9ae9ecd",
+        "whitelist": "0x342bce9a2a74b23ff968e7508c0251fa905fd67d"
       }
     ]
   }
