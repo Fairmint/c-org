@@ -29,7 +29,7 @@
   "ropsten": {
     "testDAI": "0xC6037Ea1d990999148d81E7eD671f9bF769F144f",
     "testUSDC": "0x14039994048f873dc5F86a32075669652b9F0fA7",
-    "datTemplate": "0xa739f0be88a9df5a02a6c4e790ee0ff8356adcdf",
+    "datTemplate": "0x0580012061bcB2cf18A2500f150ac31082f99d25",
     "whitelistTemplate": "0x110eee1f892057a97e5205cd405f5718241f9446",
     "orgs": [
       { 
