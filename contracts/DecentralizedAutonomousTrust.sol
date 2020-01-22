@@ -914,13 +914,6 @@ contract DecentralizedAutonomousTrust
     _pay(_to, _currencyValue);
   }
 
-  /// @dev Pay the organization on-chain with ETH (only works when currency is ETH)
-  function () external payable
-  {
-    _collectInvestment(msg.value, msg.value, false);
-    _pay(msg.sender, msg.value);
-  }
-
   /// Close
 
   function estimateExitFee(
