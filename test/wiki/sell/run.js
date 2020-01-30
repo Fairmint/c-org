@@ -54,7 +54,7 @@ contract("wiki / sell / run", accounts => {
       feeBasisPoints: "10"
     });
 
-    await contracts.whitelist.approve(investor, true, {
+    await contracts.whitelist.approveNewUsers([investor], [4], {
       from: await contracts.dat.control()
     });
 
@@ -72,10 +72,10 @@ contract("wiki / sell / run", accounts => {
       feeBasisPoints: "10"
     });
 
-    await contracts.whitelist.approve(investor, true, {
+    await contracts.whitelist.approveNewUsers([investor], [4], {
       from: await contracts.dat.control()
     });
-    await contracts.whitelist.approve(accounts[9], true, {
+    await contracts.whitelist.approveNewUsers([accounts[9]], [4], {
       from: await contracts.dat.control()
     });
 
@@ -182,9 +182,13 @@ contract("wiki / sell / run", accounts => {
 
   describe("If investor is not authorized, then the function exits.", () => {
     beforeEach(async () => {
-      await contracts.whitelist.approve(investor, false, {
-        from: await contracts.dat.control()
-      });
+      await contracts.whitelist.updateJurisdictionsForUserIds(
+        [investor],
+        [-1],
+        {
+          from: await contracts.dat.control()
+        }
+      );
     });
 
     it("Sell fails", async () => {

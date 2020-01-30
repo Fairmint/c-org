@@ -95,7 +95,7 @@ contract("wiki / buy / init", accounts => {
     it("beneficiary can transfer to a vesting contract", async () => {
       const vesting = await vestingArtifact.new(
         accounts[0], // beneficiary
-        Math.round(Date.now() / 1000) + 100, // startTime is seconds
+        Math.round(Date.now() / 1000) + 100, // startDate is seconds
         120, // cliffDuration in seconds
         200, // duration in seconds
         false, // non-revocable
@@ -103,7 +103,7 @@ contract("wiki / buy / init", accounts => {
           from: accounts[1] // control
         }
       );
-      await contracts.whitelist.approve(vesting.address, true, {
+      await contracts.whitelist.approveNewUsers([vesting.address], [4], {
         from: await contracts.dat.control()
       });
 
@@ -200,9 +200,13 @@ contract("wiki / buy / init", accounts => {
 
   describe("If investor is not allowed to buy FAIR, then the function exits.", () => {
     beforeEach(async () => {
-      await contracts.whitelist.approve(accounts[5], false, {
-        from: await contracts.dat.control()
-      });
+      await contracts.whitelist.updateJurisdictionsForUserIds(
+        [accounts[5]],
+        [-1],
+        {
+          from: await contracts.dat.control()
+        }
+      );
     });
 
     it("Buy fails", async () => {

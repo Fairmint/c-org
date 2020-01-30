@@ -16,17 +16,19 @@ contract("dat / whitelist / shouldFail", accounts => {
     );
   });
 
-  it("shouldFail to approve by a non-owner", async () => {
+  it("shouldFail to approve by a non-operator", async () => {
     await shouldFail(
-      contracts.whitelist.approve(accounts[1], true, { from: accounts[5] }),
-      "Ownable: caller is not the owner"
+      contracts.whitelist.approveNewUsers([accounts[1]], [1], {
+        from: accounts[5]
+      }),
+      "OperatorRole: caller does not have the Operator role"
     );
   });
 
   it("shouldFail if called directly", async () => {
     await shouldFail(
       contracts.whitelist.authorizeTransfer(accounts[1], accounts[1], 1, true),
-      "CALL_VIA_DAT_ONLY"
+      "CALL_VIA_CONTRACT_ONLY"
     );
   });
 });

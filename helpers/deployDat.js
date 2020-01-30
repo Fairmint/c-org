@@ -94,26 +94,41 @@ module.exports = async function deployDat(accounts, options, useProxy = true) {
     await contracts.whitelist.initialize(contracts.dat.address, {
       from: callOptions.control
     });
+    await contracts.whitelist.updateJurisdictionFlows(
+      [1, 4, 4],
+      [4, 1, 4],
+      [true, true, true],
+      {
+        from: callOptions.control
+      }
+    );
     callOptions.whitelistAddress = contracts.whitelist.address;
     // console.log(`Deployed whitelist: ${contracts.whitelist.address}`);
 
     promises.push(
-      contracts.whitelist.approve(callOptions.control, true, {
+      contracts.whitelist.approveNewUsers([callOptions.control], [4], {
         from: callOptions.control
       })
     );
+    if (callOptions.control != callOptions.beneficiary) {
+      promises.push(
+        contracts.whitelist.approveNewUsers([callOptions.beneficiary], [4], {
+          from: callOptions.control
+        })
+      );
+    }
+    if (
+      callOptions.feeCollector != callOptions.control &&
+      callOptions.feeCollector != callOptions.beneficiary
+    ) {
+      promises.push(
+        contracts.whitelist.approveNewUsers([callOptions.feeCollector], [4], {
+          from: callOptions.control
+        })
+      );
+    }
     promises.push(
-      contracts.whitelist.approve(callOptions.beneficiary, true, {
-        from: callOptions.control
-      })
-    );
-    promises.push(
-      contracts.whitelist.approve(callOptions.feeCollector, true, {
-        from: callOptions.control
-      })
-    );
-    promises.push(
-      contracts.whitelist.approve(contracts.dat.address, true, {
+      contracts.whitelist.approveNewUsers([web3.utils.padLeft(0, 40)], [1], {
         from: callOptions.control
       })
     );
@@ -130,7 +145,7 @@ module.exports = async function deployDat(accounts, options, useProxy = true) {
       const vestingBeneficiary = callOptions.vesting[i].address;
       const contract = await vestingArtifact.new(
         vestingBeneficiary, // beneficiary
-        Math.round(Date.now() / 1000) + 100, // startTime is seconds
+        Math.round(Date.now() / 1000) + 100, // startDate is seconds
         120, // cliffDuration in seconds
         200, // duration in seconds
         false, // non-revocable
@@ -143,9 +158,17 @@ module.exports = async function deployDat(accounts, options, useProxy = true) {
       contracts.vesting.push(contract);
 
       if (contracts.whitelist) {
-        await contracts.whitelist.approve(contracts.vesting[i].address, true, {
-          from: callOptions.control
-        });
+        await contracts.whitelist.approveNewUsers(
+          [contracts.vesting[i].address],
+          [4],
+          {
+            from: callOptions.control
+          }
+        );
+        await contracts.whitelist.addApprovedUserWallets(
+          [callOptions.beneficiary],
+          [contracts.vesting[i].address]
+        );
       }
       await contracts.dat.transfer(
         contract.address,

@@ -136,7 +136,7 @@ function shouldBehaveLikeERC20(
                 this.token.transferFrom(tokenOwner, to, amount, {
                   from: spender
                 }),
-                "ERC20: transfer amount exceeds balance"
+                "INSUFFICIENT_BALANCE"
               );
             });
           });
@@ -170,7 +170,7 @@ function shouldBehaveLikeERC20(
                 this.token.transferFrom(tokenOwner, to, amount, {
                   from: spender
                 }),
-                "ERC20: transfer amount exceeds balance"
+                "INSUFFICIENT_BALANCE"
               );
             });
           });
@@ -235,7 +235,7 @@ function shouldBehaveLikeERC20Transfer(
       it("reverts", async function() {
         await expectRevert(
           transfer.call(this, from, to, amount),
-          "ERC20: transfer amount exceeds balance"
+          "INSUFFICIENT_BALANCE"
         );
       });
     });

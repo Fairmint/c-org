@@ -110,12 +110,9 @@ contract("wiki / pay / run", accounts => {
     beforeEach(async () => {
       x = new BigNumber(await contracts.dat.estimatePayValue(payAmount));
 
-      await contracts.whitelist.approve(investor, false, {
-        from: await contracts.dat.control()
-      });
-      await contracts.whitelist.approve(
-        await contracts.dat.beneficiary(),
-        true,
+      await contracts.whitelist.updateJurisdictionsForUserIds(
+        [investor],
+        [-1],
         {
           from: await contracts.dat.control()
         }
@@ -162,17 +159,14 @@ contract("wiki / pay / run", accounts => {
       burnedSupplyBefore = new BigNumber(await contracts.dat.burnedSupply());
       //(x+investor_balance)-(burn_threshold*(total_supply+burnt_supply)
       expectedBurn = x;
-      await contracts.whitelist.approve(
-        await contracts.dat.beneficiary(),
-        true,
+
+      await contracts.whitelist.updateJurisdictionsForUserIds(
+        [investor],
+        [-1],
         {
           from: await contracts.dat.control()
         }
       );
-
-      await contracts.whitelist.approve(investor, false, {
-        from: await contracts.dat.control()
-      });
 
       await contracts.dat.pay(investor, payAmount, {
         from: investor,

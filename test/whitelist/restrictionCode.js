@@ -3,7 +3,7 @@ const { approveAll, deployDat } = require("../helpers");
 contract("dat / whitelist / restrictionCode", accounts => {
   let contracts;
 
-  before(async () => {
+  beforeEach(async () => {
     contracts = await deployDat(accounts);
     await approveAll(contracts, accounts);
   });
@@ -19,9 +19,13 @@ contract("dat / whitelist / restrictionCode", accounts => {
 
   describe("when restriction applies", () => {
     beforeEach(async () => {
-      await contracts.whitelist.approve(accounts[1], false, {
-        from: await contracts.dat.control()
-      });
+      await contracts.whitelist.updateJurisdictionsForUserIds(
+        [accounts[1]],
+        [-1],
+        {
+          from: await contracts.dat.control()
+        }
+      );
     });
 
     it("Can read status 1", async () => {

@@ -33,7 +33,9 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/repo
-      - run: npm run test
+      - run:
+          command: npm run test
+          no_output_timeout: 60m
       - run: npm run lintNoFix
 
   coverage:

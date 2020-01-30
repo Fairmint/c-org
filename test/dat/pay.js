@@ -95,16 +95,20 @@ contract("dat / pay", accounts => {
 
   describe("If trades are restricted", () => {
     beforeEach(async () => {
-      await contracts.whitelist.approve(
-        await contracts.dat.beneficiary(),
-        true,
+      await contracts.whitelist.updateJurisdictionsForUserIds(
+        [await contracts.dat.beneficiary()],
+        [4],
         {
           from: await contracts.dat.control()
         }
       );
-      await contracts.whitelist.approve(investor, false, {
-        from: await contracts.dat.control()
-      });
+      await contracts.whitelist.updateJurisdictionsForUserIds(
+        [investor],
+        [-1],
+        {
+          from: await contracts.dat.control()
+        }
+      );
     });
 
     it("Can pay even if account is restricted", async () => {
