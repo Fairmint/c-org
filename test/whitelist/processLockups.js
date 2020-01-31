@@ -116,10 +116,17 @@ contract("dat / whitelist / processLockups", accounts => {
 
       it("before processing transferable token count is correct", async () => {
         await sleep((5 + readyToFreeCount) * 1000);
+        // mine a block to update the ganache time
+        await web3.eth.sendTransaction({
+          from: accounts[0],
+          to: accounts[1],
+          value: 1
+        });
+
         let lockedTokens = await contracts.whitelist.getLockedTokenCount(
           trader
         );
-        assert.equal(lockedTokens, 42 * notReadToFreeCount);
+        assert.equal(lockedTokens.toString(), 42 * notReadToFreeCount);
         const price = web3.utils.toWei("1000000", "ether");
         await contracts.dat.buy(trader, price, 1, {
           from: trader,

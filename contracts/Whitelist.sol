@@ -169,22 +169,15 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
   {
     UserInfo memory info = authorizedUserIdInfo[_userId];
     lockedTokens = info.totalTokensLocked;
-    uint index = info.startIndex;
-    while(true)
+    for(uint i = info.startIndex; i < info.endIndex; i++)
     {
-      if(info.startIndex >= info.endIndex)
-      {
-        // no more entries for this userId
-        break;
-      }
-      Lockup memory lockup = userIdLockups[_userId][index];
+      Lockup memory lockup = userIdLockups[_userId][i];
       if(lockup.lockupExpirationDate > now)
       {
         // no more eligable entries
         break;
       }
       lockedTokens -= lockup.numberOfTokensLocked;
-      index++;
     }
   }
 
