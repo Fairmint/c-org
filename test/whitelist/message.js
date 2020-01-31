@@ -14,11 +14,16 @@ contract("dat / whitelist / message", accounts => {
 
   it("Can read message for 1", async () => {
     const reason = await contracts.whitelist.messageForTransferRestriction(1);
-    assert.equal(reason, "DENIED");
+    assert.equal(reason, "DENIED: JURISDICTION_FLOW");
+  });
+
+  it("Can read message for 2", async () => {
+    const reason = await contracts.whitelist.messageForTransferRestriction(2);
+    assert.equal(reason, "DENIED: LOCKUP");
   });
 
   it("Can read message for huge numbers", async () => {
     const reason = await contracts.whitelist.messageForTransferRestriction(-1);
-    assert.equal(reason, "UNKNOWN_ERROR");
+    assert.equal(reason, "DENIED: UNKNOWN_ERROR");
   });
 });

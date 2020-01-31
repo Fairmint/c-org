@@ -26,9 +26,13 @@ contract("wiki / buy / run", accounts => {
 
   describe("If investor is not allowed to buy FAIR, then the function exits.", () => {
     beforeEach(async () => {
-      await contracts.whitelist.approve(accounts[5], false, {
-        from: await contracts.dat.control()
-      });
+      await contracts.whitelist.updateJurisdictionsForUserIds(
+        [accounts[5]],
+        [-1],
+        {
+          from: await contracts.dat.control()
+        }
+      );
     });
 
     it("Buy fails", async () => {

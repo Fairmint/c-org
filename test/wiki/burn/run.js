@@ -111,17 +111,19 @@ contract("wiki / burn / run", accounts => {
 
   describe("If trades are restricted", () => {
     beforeEach(async () => {
-      await contracts.whitelist.approve(investor, false, {
-        from: await contracts.dat.control()
-      });
+      await contracts.whitelist.updateJurisdictionsForUserIds(
+        [investor],
+        [-1],
+        {
+          from: await contracts.dat.control()
+        }
+      );
     });
 
-    it("Can't burn if account is restricted", async () => {
-      await shouldFail(
-        contracts.dat.burn(burnAmount, {
-          from: investor
-        })
-      );
+    it("Can burn even if account is restricted", async () => {
+      await contracts.dat.burn(burnAmount, {
+        from: investor
+      });
     });
   });
 });

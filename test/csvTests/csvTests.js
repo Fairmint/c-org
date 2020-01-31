@@ -62,7 +62,7 @@ contract("dat / csvTests", accounts => {
             }
             await deployAndConfigDat(sheet);
             await approveAll(contracts, accounts);
-            await contracts.whitelist.approve(ethBank, true, {
+            await contracts.whitelist.approveNewUsers([ethBank], [4], {
               from: await contracts.dat.control()
             });
             await runTestScript(sheet);

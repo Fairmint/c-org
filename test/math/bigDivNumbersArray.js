@@ -202,7 +202,7 @@ contract("math / bigDivNumbersArray", () => {
     checkBounds(res2x2, contractRes, false, true);
   };
 
-  it.skip("test", async () => {
+  it("test", async () => {
     await check2x2(
       new BigNumber(
         "6277101735386680763835789423207666416102355444464034512896"
