@@ -34,7 +34,7 @@
     "@codechecks/client": "0.1.10",
     "chai": "4.2.0",
     "coveralls": "3.0.9",
-    "ganache-cli": "6.8.0-istanbul.0",
+    "ganache-cli": "6.9.0",
     "eth-gas-reporter": "0.2.14",
     "ethlint": "1.2.5",
     "eslint": "6.8.0",
