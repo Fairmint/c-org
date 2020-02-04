@@ -137,7 +137,7 @@ contract("dat / whitelist / authorizeTransfer", accounts => {
       await contracts.dat.burn(await contracts.dat.balanceOf(trader), {
         from: trader
       });
-      await contracts.whitelist.updateLockupLengths([4], [30], {
+      await contracts.whitelist.updateJurisdictionFlows([1], [4], [30], {
         from: ownerAccount
       });
       const price = web3.utils.toWei("100", "ether");

@@ -43,37 +43,9 @@ contract("dat / whitelist / readOnly", accounts => {
     });
   });
 
-  it("lockupLength default", async () => {
-    const lockupLength = await contracts.whitelist.lockupLength(42);
-    assert.equal(lockupLength, 0);
-  });
-
-  describe("after updateLockupLengths", () => {
-    beforeEach(async () => {
-      await contracts.whitelist.updateLockupLengths([42, 43], [99, 100], {
-        from: control
-      });
-    });
-
-    it("lockupLength updated 1", async () => {
-      const lockupLength = await contracts.whitelist.lockupLength(42);
-      assert.equal(lockupLength, 99);
-    });
-
-    it("lockupLength updated 2", async () => {
-      const lockupLength = await contracts.whitelist.lockupLength(43);
-      assert.equal(lockupLength, 100);
-    });
-
-    it("lockupLength default", async () => {
-      const lockupLength = await contracts.whitelist.lockupLength(1);
-      assert.equal(lockupLength, 0);
-    });
-  });
-
   it("getJurisdictionFlow default", async () => {
     const accepted = await contracts.whitelist.getJurisdictionFlow(42, 1);
-    assert.equal(accepted, false);
+    assert.equal(accepted, 0);
   });
 
   describe("after updateJurisdictionFlows", () => {
@@ -81,7 +53,7 @@ contract("dat / whitelist / readOnly", accounts => {
       await contracts.whitelist.updateJurisdictionFlows(
         [42, 43],
         [1, 2],
-        [true, true],
+        [1, 1],
         {
           from: control
         }
@@ -90,34 +62,34 @@ contract("dat / whitelist / readOnly", accounts => {
 
     it("getJurisdictionFlow updated 1", async () => {
       const accepted = await contracts.whitelist.getJurisdictionFlow(42, 1);
-      assert.equal(accepted, true);
+      assert.equal(accepted, 1);
     });
 
     it("getJurisdictionFlow updated 1", async () => {
       const accepted = await contracts.whitelist.getJurisdictionFlow(43, 2);
-      assert.equal(accepted, true);
+      assert.equal(accepted, 1);
     });
 
     it("getJurisdictionFlow is single directional", async () => {
       const accepted = await contracts.whitelist.getJurisdictionFlow(1, 42);
-      assert.equal(accepted, false);
+      assert.equal(accepted, 0);
     });
 
     it("getJurisdictionFlow wires not crossed", async () => {
       const accepted = await contracts.whitelist.getJurisdictionFlow(43, 1);
-      assert.equal(accepted, false);
+      assert.equal(accepted, 0);
     });
 
     describe("after updateJurisdictionFlows to clear entries", () => {
       beforeEach(async () => {
-        await contracts.whitelist.updateJurisdictionFlows([42], [1], [false], {
+        await contracts.whitelist.updateJurisdictionFlows([42], [1], [0], {
           from: control
         });
       });
 
       it("getJurisdictionFlow updated", async () => {
         const accepted = await contracts.whitelist.getJurisdictionFlow(42, 1);
-        assert.equal(accepted, false);
+        assert.equal(accepted, 0);
       });
     });
   });
@@ -219,7 +191,8 @@ contract("dat / whitelist / readOnly", accounts => {
       let expectedTokens;
 
       beforeEach(async () => {
-        await contracts.whitelist.updateLockupLengths(
+        await contracts.whitelist.updateJurisdictionFlows(
+          [1, 1],
           [4, 5],
           [100000000, 100000000],
           {
