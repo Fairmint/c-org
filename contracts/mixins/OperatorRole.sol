@@ -7,6 +7,11 @@ import "@openzeppelin/contracts-ethereum-package/contracts/GSN/Context.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/access/Roles.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol";
 
+
+/**
+ * @notice allows a single owner to manage a group of operators which may
+ * have some special permissions in the contract.
+ */
 contract OperatorRole is Initializable, Context, Ownable
 {
   using Roles for Roles.Role;

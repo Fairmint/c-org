@@ -8,13 +8,14 @@ import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/IERC20.so
 import "./mixins/OperatorRole.sol";
 
 /**
- * @title whitelist implementation which manages KYC approvals for the org.
- * @dev modeled after ERC-1404
+ * @notice whitelist which manages KYC approvals, token lockup, and transfer
+ * restrictions for a DAT token.
  */
 contract Whitelist is IWhitelist, Ownable, OperatorRole
 {
   using SafeMath for uint;
 
+  // uint8 status codes as suggested by the ERC-1404 spec
   uint8 constant private STATUS_SUCCESS = 0;
   uint8 constant private STATUS_ERROR_JURISDICTION_FLOW = 1;
   uint8 constant private STATUS_ERROR_LOCKUP = 2;
@@ -22,80 +23,97 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
   event ConfigWhitelist(
     uint _startDate,
     uint _lockupGranularity,
-    address _operator
+    address indexed _operator
   );
   event UpdateJurisdictionFlow(
-    uint _fromJurisdictionId,
-    uint _toJurisdictionId,
+    uint indexed _fromJurisdictionId,
+    uint indexed _toJurisdictionId,
     uint _lockupLength,
-    address _operator
+    address indexed _operator
   );
   event ApproveNewUser(
-    address _trader,
-    uint _jurisdictionId,
-    address _operator
+    address indexed _trader,
+    uint indexed _jurisdictionId,
+    address indexed _operator
   );
-  event AddApprovedUser(
-    address _userId,
-    address _newWallet,
-    address _operator
+  event AddApprovedUserWallet(
+    address indexed _userId,
+    address indexed _newWallet,
+    address indexed _operator
+  );
+  event RevokeUserWallet(
+    address indexed _wallet,
+    address indexed _operator
   );
   event UpdateJurisdictionForUserId(
-    address _userId,
-    uint _jurisdictionId,
-    address _operator
+    address indexed _userId,
+    uint indexed _jurisdictionId,
+    address indexed _operator
   );
   event AddLockup(
-    address _userId,
+    address indexed _userId,
     uint _lockupExpirationDate,
     uint _numberOfTokensLocked,
-    address _operator
+    address indexed _operator
   );
   event UnlockTokens(
-    address _userId,
+    address indexed _userId,
     uint _tokensUnlocked,
-    address _operator
+    address indexed _operator
   );
 
   /**
    * @notice the address of the contract this whitelist manages.
+   * @dev this cannot change after initialization
    */
   IERC20 public callingContract;
 
   /**
    * @notice blocks all new purchases until now >= startDate.
+   * @dev this can be changed by the owner at any time
    */
   uint public startDate;
 
   /**
    * @notice Merges lockup entries when the time delta between
    * them is less than this value.
+   * @dev this can be changed by the owner at any time
    */
   uint public lockupGranularity;
 
   /**
-   * @notice Maps the from jurisdiction to the to jurisdiction to determine if
-   * transfers between these entities are allowed.
-   * - 0 is not supported (the default)
+   * @notice Maps the `from` jurisdiction to the `to` jurisdiction to determine if
+   * transfers between these entities are allowed and if a token lockup should apply:
+   * - 0 means transfers between these jurisdictions is blocked (the default)
    * - 1 is supported with no token lockup required
-   * - >1 is supported and this value defines the lockup length in seconds.
-   * @dev You can read data externally with `getJurisdictionFlow`
+   * - >1 is supported and this value defines the lockup length in seconds
+   * @dev You can read data externally with `getJurisdictionFlow`.
+   * This configuration can be modified by the owner at any time
    */
   mapping(uint => mapping(uint => uint)) internal jurisdictionFlows;
 
   /**
-   * @notice Maps KYC'd user addresses to their userId.
+   * @notice Maps a KYC'd user addresses to their userId.
    * @dev The first entry for each user should set userId = user address.
    * Future entries can use the same userId for shared accounts
-   * (e.g. I have multiple wallets or we support multiple DEX's).
+   * (e.g. a single user with multiple wallets).
+   *
+   * All wallets with the same userId share the same token lockup.
    */
   mapping(address => address) public authorizedWalletToUserId;
 
+  /**
+   * @notice info stored for each userId.
+   */
   struct UserInfo
   {
+    // The user's current jurisdictionId or 0 for unknown (the default)
     uint jurisdictionId;
+    // The number of tokens locked, with details tracked in userIdLockups
     uint totalTokensLocked;
+    // The first applicable entry in userIdLockups
     uint startIndex;
+    // The last applicable entry in userIdLockups + 1
     uint endIndex;
   }
 
@@ -105,28 +123,47 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
    */
   mapping(address => UserInfo) internal authorizedUserIdInfo;
 
+  /**
+   * @notice info stored for each token lockup.
+   */
   struct Lockup
   {
+    // The date/time that this lockup entry has expired and the tokens may be transferred
     uint lockupExpirationDate;
+    // How many tokens locked until the given expiration date.
     uint numberOfTokensLocked;
   }
 
   /**
-   * @notice Maps the userId to lockup entry index to Lockup
+   * @notice Maps the userId -> lockup entry index -> a Lockup entry
    * @dev Indexes are tracked by the UserInfo entries.
    * You can read data externally with `getUserIdLockup`.
+   * We assume lockups are always added in order of expiration date -
+   * if that assumption does not hold, some tokens may remain locked
+   * until older lockup entries from that user have expired.
    */
   mapping(address => mapping(uint => Lockup)) internal userIdLockups;
 
+  /**
+   * @notice checks for transfer restrictions between jurisdictions.
+   * @return if transfers between these jurisdictions are allowed and if a
+   * token lockup should apply:
+   * - 0 means transfers between these jurisdictions is blocked (the default)
+   * - 1 is supported with no token lockup required
+   * - >1 is supported and this value defines the lockup length in seconds
+   */
   function getJurisdictionFlow(
     uint _fromJurisdictionId,
     uint _toJurisdictionId
   ) external view
-    returns (uint)
+    returns (uint lockupLength)
   {
     return jurisdictionFlows[_fromJurisdictionId][_toJurisdictionId];
   }
 
+  /**
+   * @notice checks details for a given userId.
+   */
   function getAuthorizedUserIdInfo(
     address _userId
   ) external view
@@ -141,6 +178,10 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
     return (info.jurisdictionId, info.totalTokensLocked, info.startIndex, info.endIndex);
   }
 
+  /**
+   * @notice gets a specific lockup entry for a userId.
+   * @dev use `getAuthorizedUserIdInfo` to determine the range of applicable lockupIndex.
+   */
   function getUserIdLockup(
     address _userId,
     uint _lockupIndex
@@ -152,8 +193,9 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
   }
 
   /**
-   * @notice Returns the number of unlocked tokens
-   * a given userId has available.
+   * @notice Returns the number of unlocked tokens a given userId has available.
+   * @dev this is a `view`-only way to determine how many tokens are still locked
+   * (info.totalTokensLocked is only accurate after processing lockups which changes state)
    */
   function getLockedTokenCount(
     address _userId
@@ -170,6 +212,7 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
         // no more eligable entries
         break;
       }
+      // this lockup entry has expired and would be processed on the next tx
       lockedTokens -= lockup.numberOfTokensLocked;
     }
   }
@@ -177,13 +220,15 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
   /**
    * @notice Checks if there is a transfer restriction for the given addresses.
    * Does not consider tokenLockup. Use `getLockedTokenCount` for that.
+   * @dev this function is from the erc-1404 standard and currently in use by the DAT
+   * for the `pay` feature.
    */
   function detectTransferRestriction(
     address _from,
     address _to,
     uint /* _value */
   ) external view
-    returns(uint8)
+    returns(uint8 status)
   {
     address fromUserId = authorizedWalletToUserId[_from];
     uint fromJurisdictionId = authorizedUserIdInfo[fromUserId].jurisdictionId;
@@ -251,6 +296,8 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
    * - 0 is not supported (the default)
    * - 1 is supported with no token lockup required
    * - >1 is supported and this value defines the lockup length in seconds.
+   * @dev note that this can be called with a partial list, only including entries
+   * to be added or which have changed.
    */
   function updateJurisdictionFlows(
     uint[] calldata _fromJurisdictionIds,
@@ -273,7 +320,7 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
   }
 
   /**
-   * @notice Called by an operator to add a new trader.
+   * @notice Called by an operator to add new traders.
    * @dev The trader will be assigned a userId equal to their wallet address.
    */
   function approveNewUsers(
@@ -286,7 +333,7 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
     for(uint i = 0; i < length; i++)
     {
       address trader = _traders[i];
-      require(authorizedWalletToUserId[trader] == address(0), "USER_ALREADY_ADDED");
+      require(authorizedWalletToUserId[trader] == address(0), "USER_ID_ALREADY_ADDED");
       uint jurisdictionId = _jurisdictionIds[i];
       require(jurisdictionId != 0, "INVALID_JURISDICTION_ID");
 
@@ -314,7 +361,27 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
       require(authorizedUserIdInfo[userId].jurisdictionId != 0, "USER_ID_UNKNOWN");
 
       authorizedWalletToUserId[newWallet] = userId;
-      emit AddApprovedUser(userId, newWallet, msg.sender);
+      emit AddApprovedUserWallet(userId, newWallet, msg.sender);
+    }
+  }
+
+  /**
+   * @notice Called by an operator to revoke approval for the given wallets.
+   * @dev If this is called in error, you can restore access with `addApprovedUserWallets`.
+   */
+  function revokeUserWallets(
+    address[] calldata _wallets
+  ) external
+    onlyOperator()
+  {
+    uint length = _wallets.length;
+    for(uint i = 0; i < length; i++)
+    {
+      address wallet = _wallets[i];
+      require(authorizedWalletToUserId[wallet] != address(0), "WALLET_NOT_FOUND");
+
+      authorizedWalletToUserId[wallet] = address(0);
+      emit RevokeUserWallet(wallet, msg.sender);
     }
   }
 
@@ -341,6 +408,12 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
     }
   }
 
+  /**
+   * @notice Adds a tokenLockup for the userId.
+   * @dev A no-op if lockup is not required for this transfer.
+   * The lockup entry is merged with the most recent lockup for that user
+   * if the expiration date is <= `lockupGranularity` from the previous entry.
+   */
   function _addLockup(
     address _userId,
     uint _lockupExpirationDate,
@@ -395,9 +468,16 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
     }
   }
 
+  /**
+   * @notice Checks the next lockup entry for a given user and unlocks
+   * those tokens if applicable.
+   * @param _ignoreExpiration bypasses the recorded expiration date and
+   * removes the lockup entry if there are any remaining for this user.
+   */
   function _processLockup(
     UserInfo storage info,
-    address _userId
+    address _userId,
+    bool _ignoreExpiration
   ) internal
     returns (bool isDone)
   {
@@ -407,7 +487,7 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
       return true;
     }
     Lockup storage lockup = userIdLockups[_userId][info.startIndex];
-    if(lockup.lockupExpirationDate > now)
+    if(lockup.lockupExpirationDate > now && !_ignoreExpiration)
     {
       // no more eligable entries
       return true;
@@ -434,7 +514,29 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
     UserInfo storage info = authorizedUserIdInfo[_userId];
     for(uint i = 0; i < _maxCount; i++)
     {
-      if(_processLockup(info, _userId))
+      if(_processLockup(info, _userId, false))
+      {
+        break;
+      }
+    }
+  }
+
+  /**
+   * @notice Allows operators to remove lockup entries, bypassing the
+   * recorded expiration date.
+   * @dev This should generally remain unused. It could be used in combination with
+   * `addLockups` to fix an incorrect lockup expiration date or quantity.
+   */
+  function forceUnlock(
+    address _userId,
+    uint _maxCount
+  ) external
+    onlyOperator()
+  {
+    UserInfo storage info = authorizedUserIdInfo[_userId];
+    for(uint i = 0; i < _maxCount; i++)
+    {
+      if(_processLockup(info, _userId, true))
       {
         break;
       }
@@ -471,8 +573,11 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
     uint lockupLength = jurisdictionFlows[fromJurisdictionId][toJurisdictionId];
     require(lockupLength > 0, "DENIED: JURISDICTION_FLOW");
 
-    if(lockupLength > 1)
+    // If the lockupLength is 1 then we interpret this as approved without any lockup
+    // This means any token lockup period must be at least 2 seconds long in order to apply.
+    if(lockupLength > 1 && _to != address(0))
     {
+      // Lockup may apply for any action other than burn/sell (e.g. buy/pay/transfer)
       uint lockupExpirationDate = now + lockupLength;
       _addLockup(toUserId, lockupExpirationDate, _value);
     }
@@ -488,12 +593,14 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
       UserInfo storage info = authorizedUserIdInfo[fromUserId];
       while(true)
       {
-        if(_processLockup(info, fromUserId))
+        if(_processLockup(info, fromUserId, false))
         {
           break;
         }
       }
       uint balance = callingContract.balanceOf(_from);
+      // This first require is redundant, but allows us to provide
+      // a more clear error message.
       require(
         balance >= _value,
         "INSUFFICIENT_BALANCE"
