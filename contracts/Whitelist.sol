@@ -26,14 +26,14 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
     address indexed _operator
   );
   event UpdateJurisdictionFlow(
-    uint _fromJurisdictionId,
-    uint _toJurisdictionId,
+    uint indexed _fromJurisdictionId,
+    uint indexed _toJurisdictionId,
     uint _lockupLength,
     address indexed _operator
   );
   event ApproveNewUser(
     address indexed _trader,
-    uint _jurisdictionId,
+    uint indexed _jurisdictionId,
     address indexed _operator
   );
   event AddApprovedUserWallet(
@@ -47,7 +47,7 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
   );
   event UpdateJurisdictionForUserId(
     address indexed _userId,
-    uint _jurisdictionId,
+    uint indexed _jurisdictionId,
     address indexed _operator
   );
   event AddLockup(
