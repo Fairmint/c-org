@@ -16,7 +16,7 @@ contract("dat / whitelist / updateJurisdictionFlows", accounts => {
 
   it("Operator cannot updateJurisdictionFlows", async () => {
     await reverts(
-      contracts.whitelist.updateJurisdictionFlows([0], [0], [true], {
+      contracts.whitelist.updateJurisdictionFlows([0], [0], [1], {
         from: operatorAccount
       }),
       "Ownable: caller is not the owner"

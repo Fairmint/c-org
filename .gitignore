@@ -15,3 +15,4 @@ contracts_development.json
 /.coverage_contracts/
 coverage.json
 /bin/
+yarn.lock

@@ -24,15 +24,10 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
     uint _lockupGranularity,
     address _operator
   );
-  event UpdateLockupLength(
-    uint _jurisdictionId,
-    uint _lockupLength,
-    address _operator
-  );
   event UpdateJurisdictionFlow(
     uint _fromJurisdictionId,
     uint _toJurisdictionId,
-    bool _accepted,
+    uint _lockupLength,
     address _operator
   );
   event ApproveNewUser(
@@ -56,7 +51,7 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
     uint _numberOfTokensLocked,
     address _operator
   );
-  event UnlockedTokens(
+  event UnlockTokens(
     address _userId,
     uint _tokensUnlocked,
     address _operator
@@ -79,16 +74,14 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
   uint public lockupGranularity;
 
   /**
-   * @notice Maps the jurisdiction id to lockup in seconds.
-   */
-  mapping(uint => uint) public lockupLength;
-
-  /**
    * @notice Maps the from jurisdiction to the to jurisdiction to determine if
    * transfers between these entities are allowed.
+   * - 0 is not supported (the default)
+   * - 1 is supported with no token lockup required
+   * - >1 is supported and this value defines the lockup length in seconds.
    * @dev You can read data externally with `getJurisdictionFlow`
    */
-  mapping(uint => mapping(uint => bool)) internal jurisdictionFlows;
+  mapping(uint => mapping(uint => uint)) internal jurisdictionFlows;
 
   /**
    * @notice Maps KYC'd user addresses to their userId.
@@ -129,7 +122,7 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
     uint _fromJurisdictionId,
     uint _toJurisdictionId
   ) external view
-    returns (bool)
+    returns (uint)
   {
     return jurisdictionFlows[_fromJurisdictionId][_toJurisdictionId];
   }
@@ -196,7 +189,7 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
     uint fromJurisdictionId = authorizedUserIdInfo[fromUserId].jurisdictionId;
     address toUserId = authorizedWalletToUserId[_to];
     uint toJurisdictionId = authorizedUserIdInfo[toUserId].jurisdictionId;
-    if(!jurisdictionFlows[fromJurisdictionId][toJurisdictionId])
+    if(jurisdictionFlows[fromJurisdictionId][toJurisdictionId] == 0)
     {
       return STATUS_ERROR_JURISDICTION_FLOW;
     }
@@ -253,43 +246,27 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
   }
 
   /**
-   * @notice Called by the owner to define or update the lockup length
-   * for the given jurisdictions.
-   */
-  function updateLockupLengths(
-    uint[] calldata _jurisdictionIds,
-    uint[] calldata _lockupLengths
-  ) external
-    onlyOwner()
-  {
-    uint count = _jurisdictionIds.length;
-    for(uint i = 0; i < count; i++)
-    {
-      uint length = _lockupLengths[i];
-      require(length < 2 ** 128 - 1, "EXCESSIVE_LENGTH");
-      lockupLength[_jurisdictionIds[i]] = length;
-      emit UpdateLockupLength(_jurisdictionIds[i], length, msg.sender);
-    }
-  }
-
-  /**
    * @notice Called by the owner to define or update jurisdiction flows.
+   * @param _lockupLengths defines transfer restrictions where:
+   * - 0 is not supported (the default)
+   * - 1 is supported with no token lockup required
+   * - >1 is supported and this value defines the lockup length in seconds.
    */
   function updateJurisdictionFlows(
     uint[] calldata _fromJurisdictionIds,
     uint[] calldata _toJurisdictionIds,
-    bool[] calldata _accepted
+    uint[] calldata _lockupLengths
   ) external
     onlyOwner()
   {
     uint count = _fromJurisdictionIds.length;
     for(uint i = 0; i < count; i++)
     {
-      jurisdictionFlows[_fromJurisdictionIds[i]][_toJurisdictionIds[i]] = _accepted[i];
+      jurisdictionFlows[_fromJurisdictionIds[i]][_toJurisdictionIds[i]] = _lockupLengths[i];
       emit UpdateJurisdictionFlow(
         _fromJurisdictionIds[i],
         _toJurisdictionIds[i],
-        _accepted[i],
+        _lockupLengths[i],
         msg.sender
       );
     }
@@ -435,7 +412,7 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
       // no more eligable entries
       return true;
     }
-    emit UnlockedTokens(_userId, lockup.numberOfTokensLocked, msg.sender);
+    emit UnlockTokens(_userId, lockup.numberOfTokensLocked, msg.sender);
     info.totalTokensLocked -= lockup.numberOfTokensLocked;
     info.startIndex++;
     // Free up space we don't need anymore
@@ -491,14 +468,19 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
     uint fromJurisdictionId = authorizedUserIdInfo[fromUserId].jurisdictionId;
     address toUserId = authorizedWalletToUserId[_to];
     uint toJurisdictionId = authorizedUserIdInfo[toUserId].jurisdictionId;
-    require(jurisdictionFlows[fromJurisdictionId][toJurisdictionId], "DENIED: JURISDICTION_FLOW");
+    uint lockupLength = jurisdictionFlows[fromJurisdictionId][toJurisdictionId];
+    require(lockupLength > 0, "DENIED: JURISDICTION_FLOW");
+
+    if(lockupLength > 1)
+    {
+      uint lockupExpirationDate = now + lockupLength;
+      _addLockup(toUserId, lockupExpirationDate, _value);
+    }
 
     if(_from == address(0))
     {
       // This is minting (buy or pay)
       require(now >= startDate, "WAIT_FOR_START_DATE");
-      uint lockupExpirationDate = now + lockupLength[toJurisdictionId];
-      _addLockup(toUserId, lockupExpirationDate, _value);
     }
     else
     {

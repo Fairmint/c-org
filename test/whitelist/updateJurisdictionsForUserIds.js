@@ -66,7 +66,7 @@ contract("dat / whitelist / updateJurisdictionsForUserIds", accounts => {
       await contracts.whitelist.updateJurisdictionFlows(
         [42, 1],
         [1, 42],
-        [true, true],
+        [1, 1],
         {
           from: ownerAccount
         }
@@ -87,7 +87,8 @@ contract("dat / whitelist / updateJurisdictionsForUserIds", accounts => {
     });
 
     it("can buy", async () => {
-      await contracts.whitelist.updateLockupLengths(
+      await contracts.whitelist.updateJurisdictionFlows(
+        [1, 1, 1],
         [4, 5, 42],
         [100000000, 100000000, 100000000],
         {
@@ -106,7 +107,8 @@ contract("dat / whitelist / updateJurisdictionsForUserIds", accounts => {
       let expectedTokens;
 
       beforeEach(async () => {
-        await contracts.whitelist.updateLockupLengths(
+        await contracts.whitelist.updateJurisdictionFlows(
+          [1, 1, 1],
           [4, 5, 42],
           [100000000, 100000000, 100000000],
           {

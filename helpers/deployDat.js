@@ -97,7 +97,7 @@ module.exports = async function deployDat(accounts, options, useProxy = true) {
     await contracts.whitelist.updateJurisdictionFlows(
       [1, 4, 4],
       [4, 1, 4],
-      [true, true, true],
+      [1, 1, 1],
       {
         from: callOptions.control
       }
