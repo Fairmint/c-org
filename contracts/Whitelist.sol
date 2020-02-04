@@ -23,43 +23,43 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
   event ConfigWhitelist(
     uint _startDate,
     uint _lockupGranularity,
-    address _operator
+    address indexed _operator
   );
   event UpdateJurisdictionFlow(
     uint _fromJurisdictionId,
     uint _toJurisdictionId,
     uint _lockupLength,
-    address _operator
+    address indexed _operator
   );
   event ApproveNewUser(
-    address _trader,
+    address indexed _trader,
     uint _jurisdictionId,
-    address _operator
+    address indexed _operator
   );
   event AddApprovedUserWallet(
-    address _userId,
-    address _newWallet,
-    address _operator
+    address indexed _userId,
+    address indexed _newWallet,
+    address indexed _operator
   );
   event RevokeUserWallet(
-    address _wallet,
-    address _operator
+    address indexed _wallet,
+    address indexed _operator
   );
   event UpdateJurisdictionForUserId(
-    address _userId,
+    address indexed _userId,
     uint _jurisdictionId,
-    address _operator
+    address indexed _operator
   );
   event AddLockup(
-    address _userId,
+    address indexed _userId,
     uint _lockupExpirationDate,
     uint _numberOfTokensLocked,
-    address _operator
+    address indexed _operator
   );
   event UnlockTokens(
-    address _userId,
+    address indexed _userId,
     uint _tokensUnlocked,
-    address _operator
+    address indexed _operator
   );
 
   /**
