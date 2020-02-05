@@ -594,7 +594,7 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
     address toUserId = authorizedWalletToUserId[_to];
     require(toUserId != address(0) || _to == address(0), "TO_USER_UNKNOWN");
 
-    // A single user can move funds between wallets they control without lockup
+    // A single user can move funds between wallets they control without restriction
     if(fromUserId != toUserId)
     {
       uint fromJurisdictionId = authorizedUserIdInfo[fromUserId].jurisdictionId;
@@ -610,35 +610,35 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
         uint lockupExpirationDate = now + lockupLength;
         _addLockup(toUserId, lockupExpirationDate, _value);
       }
-    }
 
-    if(_from == address(0))
-    {
-      // This is minting (buy or pay)
-      require(now >= startDate, "WAIT_FOR_START_DATE");
-    }
-    else
-    {
-      // This is a transfer (or sell)
-      UserInfo storage info = authorizedUserIdInfo[fromUserId];
-      while(true)
+      if(_from == address(0))
       {
-        if(_processLockup(info, fromUserId, false))
-        {
-          break;
-        }
+        // This is minting (buy or pay)
+        require(now >= startDate, "WAIT_FOR_START_DATE");
       }
-      uint balance = callingContract.balanceOf(_from);
-      // This first require is redundant, but allows us to provide
-      // a more clear error message.
-      require(
-        balance >= _value,
-        "INSUFFICIENT_BALANCE"
-      );
-      require(
-        balance >= info.totalTokensLocked.add(_value),
-        "INSUFFICIENT_TRANSFERABLE_BALANCE"
-      );
+      else
+      {
+        // This is a transfer (or sell)
+        UserInfo storage info = authorizedUserIdInfo[fromUserId];
+        while(true)
+        {
+          if(_processLockup(info, fromUserId, false))
+          {
+            break;
+          }
+        }
+        uint balance = callingContract.balanceOf(_from);
+        // This first require is redundant, but allows us to provide
+        // a more clear error message.
+        require(
+          balance >= _value,
+          "INSUFFICIENT_BALANCE"
+        );
+        require(
+          balance >= info.totalTokensLocked.add(_value),
+          "INSUFFICIENT_TRANSFERABLE_BALANCE"
+        );
+      }
     }
   }
 }
