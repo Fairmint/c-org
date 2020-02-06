@@ -1,5 +1,6 @@
 const BigNumber = require("bignumber.js");
 const { deployDat } = require("../helpers");
+const { reverts } = require("truffle-assertions");
 
 async function sleep(ms) {
   return new Promise(resolve => {
@@ -39,10 +40,13 @@ contract("dat / whitelist / processLockups", accounts => {
     });
   });
 
-  it("anyone can processLockups for a userId that does not exist", async () => {
-    await contracts.whitelist.processLockups(accounts[8], -1, {
-      from: accounts[8]
-    });
+  it("should fail to for a userId that does not exist", async () => {
+    await reverts(
+      contracts.whitelist.processLockups(accounts[8], -1, {
+        from: accounts[8]
+      }),
+      "USER_ID_UNKNOWN"
+    );
   });
 
   it("sanity check: has 1 lockup", async () => {

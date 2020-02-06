@@ -76,7 +76,7 @@ contract("dat / whitelist / approveNewUsers", accounts => {
         contracts.whitelist.approveNewUsers([accounts[5]], [4], {
           from: operatorAccount
         }),
-        "USER_ID_ALREADY_ADDED"
+        "USER_WALLET_ALREADY_ADDED"
       );
     });
   });
