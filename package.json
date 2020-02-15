@@ -10,12 +10,8 @@
     "lintNoFix": "eslint . && solium -d contracts/",
     "deploy": "truffle test scripts/deploy.js",
     "test": "truffle test",
-<<<<<<< Updated upstream
     "coverage": "truffle run coverage && cat coverage/lcov.info | coveralls",
     "flatten": "(truffle-flattener contracts/DecentralizedAutonomousTrust.sol > build/DecentralizedAutonomousTrust-Flattened.sol) && (truffle-flattener contracts/Whitelist.sol > build/Whitelist-Flattened.sol) && (truffle-flattener node_modules/@openzeppelin/upgrades/contracts/upgradeability/ProxyAdmin.sol > build/ProxyAdmin-Flattened.sol)  && (truffle-flattener node_modules/@openzeppelin/upgrades/contracts/upgradeability/AdminUpgradeabilityProxy.sol > build/AdminUpgradeabilityProxy-Flattened.sol) && (echo Wrote flattened files: build/*-Flattened.sol)"
-=======
-    "coverage": "truffle run coverage"
->>>>>>> Stashed changes
   },
   "repository": {
     "type": "git",
