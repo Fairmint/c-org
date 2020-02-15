@@ -474,7 +474,7 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
     }
     emit UnlockTokens(_userId, numberOfTokensLocked, msg.sender);
     info.totalTokensLocked -= numberOfTokensLocked;
-    lockupHeap.removeMax();
+    lockupHeap.removeMin();
     // There may be another entry
     return false;
   }

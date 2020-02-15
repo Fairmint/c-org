@@ -25,7 +25,7 @@ library MinKeyValueHeap
     uint _value
   ) internal
   {
-    // On first insert, start the heap at 0
+    // On first insert, initialize the heap with 1 entry
     if(_heap.keys.length == 0)
     {
       _heap.keys.push(0);
@@ -33,8 +33,9 @@ library MinKeyValueHeap
     }
 
     // Add the value to the end of our array
-    _heap.keys.push(_key);
+    _heap.keys.push(_key); // TODO do we get currentIndex from this
     _heap.values.push(_value);
+
     // Start at the end of the array
     uint currentIndex = _heap.keys.length - 1;
 
@@ -54,8 +55,8 @@ library MinKeyValueHeap
     }
   }
 
-  // RemoveMax pops off the root element of the heap (the highest value here) and rebalances the heap
-  function removeMax(
+  // RemoveMax pops off the root element of the heap (the smallest value here) and rebalances the heap
+  function removeMin(
     Heap storage _heap
   ) internal
   {
@@ -73,10 +74,10 @@ library MinKeyValueHeap
     uint currentIndex = 1;
 
     // Bubble down
-    while(currentIndex.mul(2) < _heap.keys.length.sub(1))
+    while(currentIndex * 2 < _heap.keys.length.sub(1))
     {
       // get the current index of the children
-      uint j = currentIndex.mul(2);
+      uint j = currentIndex * 2;
 
       // left child value
       uint leftChild = _heap.keys[j];
@@ -137,5 +138,21 @@ library MinKeyValueHeap
   {
     uint index = _heap.keys.length - 1;
     _heap.values[index] = _value;
+  }
+
+  function getHeapKeys(
+    Heap storage _heap
+  ) internal view
+    returns(uint[] memory)
+  {
+    return _heap.keys;
+  }
+
+  function getHeapValues(
+    Heap storage _heap
+  ) internal view
+    returns(uint[] memory)
+  {
+    return _heap.values;
   }
 }
