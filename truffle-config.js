@@ -123,7 +123,7 @@ module.exports = {
     enableTimeouts: false,
     reporter: "eth-gas-reporter",
     useColors: true,
-    bail: false,
+    bail: true,
     reporterOptions: {
       currency: "USD",
       excludeContracts: [

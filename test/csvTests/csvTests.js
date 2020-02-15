@@ -4,8 +4,7 @@ const BigNumber = require("bignumber.js");
 const { approveAll, constants, deployDat, getGasCost } = require("../helpers");
 const sheets = require("./test-data/script.json");
 
-const daiArtifact = artifacts.require("TestDai");
-const usdcArtifact = artifacts.require("TestUsdc");
+const { tokens } = require("hardlydifficult-ethereum-contracts");
 
 contract("dat / csvTests", accounts => {
   const beneficiary = accounts[0];
@@ -15,7 +14,7 @@ contract("dat / csvTests", accounts => {
   const TRANSFER_GAS_COST = new BigNumber("22000").times("100000000000");
   const GAS_COST_BUFFER = new BigNumber("2200000").times("100000000000");
 
-  const tokenType = [undefined, daiArtifact, usdcArtifact];
+  const tokenType = [undefined, "dai", "usdc"];
 
   let initComplete;
   sheets.forEach(sheet => {
@@ -31,7 +30,11 @@ contract("dat / csvTests", accounts => {
           currencyString = "ETH";
           currencyDecimals = 18;
         } else {
-          currency = await tokenArtifact.new({ from: control });
+          if (tokenArtifact == "usdc") {
+            currency = await tokens.usdc.deploy(web3, accounts[80], control);
+          } else {
+            currency = await tokens.dai.deploy(web3, control);
+          }
           currencyString = await currency.symbol();
           currencyDecimals = parseInt((await currency.decimals()).toString());
         }
