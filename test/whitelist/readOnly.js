@@ -212,7 +212,7 @@ contract("dat / whitelist / readOnly", accounts => {
         const {
           lockupExpirationDate,
           numberOfTokensLocked
-        } = await contracts.whitelist.getUserIdLockup(accounts[4], 0);
+        } = await contracts.whitelist.getUserIdLockup(accounts[4], 1);
         assert.notEqual(lockupExpirationDate, 0);
         assert.equal(
           numberOfTokensLocked.toString(),

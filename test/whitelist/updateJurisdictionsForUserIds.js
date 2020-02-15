@@ -132,7 +132,7 @@ contract("dat / whitelist / updateJurisdictionsForUserIds", accounts => {
         const {
           lockupExpirationDate,
           numberOfTokensLocked
-        } = await contracts.whitelist.getUserIdLockup(accounts[5], 0);
+        } = await contracts.whitelist.getUserIdLockup(accounts[5], 1);
         assert.notEqual(lockupExpirationDate, 0);
         assert.equal(
           numberOfTokensLocked.toString(),
