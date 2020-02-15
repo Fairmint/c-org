@@ -52,14 +52,10 @@ contract("dat / whitelist / processLockups", accounts => {
   it("sanity check: has 1 lockup", async () => {
     const {
       jurisdictionId,
-      totalTokensLocked,
-      startIndex,
-      endIndex
+      totalTokensLocked
     } = await contracts.whitelist.getAuthorizedUserIdInfo(trader);
     assert.equal(jurisdictionId, 4);
     assert.equal(totalTokensLocked.toString(), 42);
-    assert.equal(startIndex, 0);
-    assert.equal(endIndex, 1);
   });
 
   describe("on processLockups", () => {
@@ -73,14 +69,10 @@ contract("dat / whitelist / processLockups", accounts => {
     it("has no more lockup", async () => {
       const {
         jurisdictionId,
-        totalTokensLocked,
-        startIndex,
-        endIndex
+        totalTokensLocked
       } = await contracts.whitelist.getAuthorizedUserIdInfo(trader);
       assert.equal(jurisdictionId, 4);
       assert.equal(totalTokensLocked.toString(), 0);
-      assert.equal(startIndex, 1);
-      assert.equal(endIndex, 1);
     });
 
     describe("process many lockups", () => {
@@ -105,17 +97,13 @@ contract("dat / whitelist / processLockups", accounts => {
       it("has lots of lockups", async () => {
         const {
           jurisdictionId,
-          totalTokensLocked,
-          startIndex,
-          endIndex
+          totalTokensLocked
         } = await contracts.whitelist.getAuthorizedUserIdInfo(trader);
         assert.equal(jurisdictionId, 4);
         assert.equal(
           totalTokensLocked.toString(),
           42 * (readyToFreeCount + notReadToFreeCount)
         );
-        assert.equal(startIndex, 1);
-        assert.equal(endIndex, 1 + readyToFreeCount + notReadToFreeCount);
       });
 
       it("before processing transferable token count is correct", async () => {
@@ -154,14 +142,10 @@ contract("dat / whitelist / processLockups", accounts => {
         it("most lockups were freed", async () => {
           const {
             jurisdictionId,
-            totalTokensLocked,
-            startIndex,
-            endIndex
+            totalTokensLocked
           } = await contracts.whitelist.getAuthorizedUserIdInfo(trader);
           assert.equal(jurisdictionId, 4);
           assert.equal(totalTokensLocked.toString(), 42 * notReadToFreeCount);
-          assert.equal(startIndex, 1 + readyToFreeCount);
-          assert.equal(endIndex, 1 + readyToFreeCount + notReadToFreeCount);
         });
       });
     });

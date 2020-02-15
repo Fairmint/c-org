@@ -155,27 +155,19 @@ contract("dat / whitelist / readOnly", accounts => {
     it("getAuthorizedUserIdInfo default no entry", async () => {
       const {
         jurisdictionId,
-        totalTokensLocked,
-        startIndex,
-        endIndex
+        totalTokensLocked
       } = await contracts.whitelist.getAuthorizedUserIdInfo(accounts[9]);
       assert.equal(jurisdictionId, 0);
       assert.equal(totalTokensLocked, 0);
-      assert.equal(startIndex, 0);
-      assert.equal(endIndex, 0);
     });
 
     it("getAuthorizedUserIdInfo default entry", async () => {
       const {
         jurisdictionId,
-        totalTokensLocked,
-        startIndex,
-        endIndex
+        totalTokensLocked
       } = await contracts.whitelist.getAuthorizedUserIdInfo(accounts[4]);
       assert.equal(jurisdictionId, 4);
       assert.equal(totalTokensLocked, 0);
-      assert.equal(startIndex, 0);
-      assert.equal(endIndex, 0);
     });
 
     it("default getUserIdLockup", async () => {
@@ -210,14 +202,10 @@ contract("dat / whitelist / readOnly", accounts => {
       it("getAuthorizedUserIdInfo updated", async () => {
         const {
           jurisdictionId,
-          totalTokensLocked,
-          startIndex,
-          endIndex
+          totalTokensLocked
         } = await contracts.whitelist.getAuthorizedUserIdInfo(accounts[4]);
         assert.equal(jurisdictionId, 4);
         assert.equal(totalTokensLocked.toString(), expectedTokens.toString());
-        assert.equal(startIndex, 0);
-        assert.equal(endIndex, 1);
       });
 
       it("getUserIdLockup updated", async () => {

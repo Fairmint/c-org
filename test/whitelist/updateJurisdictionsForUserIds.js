@@ -76,14 +76,10 @@ contract("dat / whitelist / updateJurisdictionsForUserIds", accounts => {
     it("getAuthorizedUserIdInfo updated", async () => {
       const {
         jurisdictionId,
-        totalTokensLocked,
-        startIndex,
-        endIndex
+        totalTokensLocked
       } = await contracts.whitelist.getAuthorizedUserIdInfo(accounts[5]);
       assert.equal(jurisdictionId, 42);
       assert.equal(totalTokensLocked, 0);
-      assert.equal(startIndex, 0);
-      assert.equal(endIndex, 0);
     });
 
     it("can buy", async () => {
@@ -126,14 +122,10 @@ contract("dat / whitelist / updateJurisdictionsForUserIds", accounts => {
       it("getAuthorizedUserIdInfo updated", async () => {
         const {
           jurisdictionId,
-          totalTokensLocked,
-          startIndex,
-          endIndex
+          totalTokensLocked
         } = await contracts.whitelist.getAuthorizedUserIdInfo(accounts[5]);
         assert.equal(jurisdictionId, 42);
         assert.equal(totalTokensLocked.toString(), expectedTokens.toString());
-        assert.equal(startIndex, 0);
-        assert.equal(endIndex, 1);
       });
 
       it("getUserIdLockup updated", async () => {
@@ -162,14 +154,10 @@ contract("dat / whitelist / updateJurisdictionsForUserIds", accounts => {
         it("getAuthorizedUserIdInfo information is not lost", async () => {
           const {
             jurisdictionId,
-            totalTokensLocked,
-            startIndex,
-            endIndex
+            totalTokensLocked
           } = await contracts.whitelist.getAuthorizedUserIdInfo(accounts[5]);
           assert.equal(jurisdictionId.toString(), 69);
           assert.equal(totalTokensLocked.toString(), expectedTokens.toString());
-          assert.equal(startIndex, 0);
-          assert.equal(endIndex, 1);
         });
       });
     });

@@ -119,14 +119,10 @@ contract("dat / whitelist / authorizeTransfer", accounts => {
     it("has no lockup", async () => {
       const {
         jurisdictionId,
-        totalTokensLocked,
-        startIndex,
-        endIndex
+        totalTokensLocked
       } = await contracts.whitelist.getAuthorizedUserIdInfo(trader);
       assert.equal(jurisdictionId, 4);
       assert.equal(totalTokensLocked.toString(), 0);
-      assert.equal(startIndex, 0);
-      assert.equal(endIndex, 0);
     });
   });
 
@@ -151,14 +147,10 @@ contract("dat / whitelist / authorizeTransfer", accounts => {
     it("has a lockup", async () => {
       const {
         jurisdictionId,
-        totalTokensLocked,
-        startIndex,
-        endIndex
+        totalTokensLocked
       } = await contracts.whitelist.getAuthorizedUserIdInfo(trader);
       assert.equal(jurisdictionId, 4);
       assert.equal(totalTokensLocked.toString(), tokenCount);
-      assert.equal(startIndex, 0);
-      assert.equal(endIndex, 1);
     });
 
     it("cannot transfer: lockup", async () => {
