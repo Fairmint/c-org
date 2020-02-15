@@ -6,6 +6,7 @@ import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/IERC20.sol";
 import "./mixins/OperatorRole.sol";
+import "./math/MinKeyValueHeap.sol";
 
 /**
  * @notice whitelist which manages KYC approvals, token lockup, and transfer
@@ -14,6 +15,7 @@ import "./mixins/OperatorRole.sol";
 contract Whitelist is IWhitelist, Ownable, OperatorRole
 {
   using SafeMath for uint;
+  using MinKeyValueHeap for MinKeyValueHeap.Heap;
 
   // uint8 status codes as suggested by the ERC-1404 spec
   uint8 constant private STATUS_SUCCESS = 0;
@@ -112,10 +114,8 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
     uint jurisdictionId;
     // The number of tokens locked, with details tracked in userIdLockups
     uint totalTokensLocked;
-    // The first applicable entry in userIdLockups
-    uint startIndex;
-    // The last applicable entry in userIdLockups + 1
-    uint endIndex;
+    // A collection of lockup entries for this user
+    MinKeyValueHeap.Heap lockupHeap;
   }
 
   /**
@@ -125,25 +125,12 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
   mapping(address => UserInfo) internal authorizedUserIdInfo;
 
   /**
-   * @notice info stored for each token lockup.
-   */
-  struct Lockup
-  {
-    // The date/time that this lockup entry has expired and the tokens may be transferred
-    uint lockupExpirationDate;
-    // How many tokens locked until the given expiration date.
-    uint numberOfTokensLocked;
-  }
-
-  /**
-   * @notice Maps the userId -> lockup entry index -> a Lockup entry
-   * @dev Indexes are tracked by the UserInfo entries.
+   * @notice Maps the userId -> heap of lockup entries for that user.
+    // Key: `lockupExpirationDate`: The date/time that this lockup entry has expired and the tokens may be transferred
+    // Value: `numberOfTokensLocked`: How many tokens locked until the given expiration date.
    * You can read data externally with `getUserIdLockup`.
-   * We assume lockups are always added in order of expiration date -
-   * if that assumption does not hold, some tokens may remain locked
-   * until older lockup entries from that user have expired.
    */
-  mapping(address => mapping(uint => Lockup)) internal userIdLockups;
+  mapping(address => MinKeyValueHeap.Heap) internal userIdLockups;
 
   /**
    * @notice checks for transfer restrictions between jurisdictions.
@@ -170,13 +157,11 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
   ) external view
     returns (
       uint jurisdictionId,
-      uint totalTokensLocked,
-      uint startIndex,
-      uint endIndex
+      uint totalTokensLocked
     )
   {
     UserInfo memory info = authorizedUserIdInfo[_userId];
-    return (info.jurisdictionId, info.totalTokensLocked, info.startIndex, info.endIndex);
+    return (info.jurisdictionId, info.totalTokensLocked);
   }
 
   /**
@@ -189,34 +174,8 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
   ) external view
     returns (uint lockupExpirationDate, uint numberOfTokensLocked)
   {
-    Lockup memory lockup = userIdLockups[_userId][_lockupIndex];
-    return (lockup.lockupExpirationDate, lockup.numberOfTokensLocked);
-  }
-
-  /**
-   * @notice Returns the number of unlocked tokens a given userId has available.
-   * @dev this is a `view`-only way to determine how many tokens are still locked
-   * (info.totalTokensLocked is only accurate after processing lockups which changes state)
-   */
-  function getLockedTokenCount(
-    address _userId
-  ) external view
-    returns (uint lockedTokens)
-  {
-    UserInfo memory info = authorizedUserIdInfo[_userId];
-    lockedTokens = info.totalTokensLocked;
-    uint endIndex = info.endIndex;
-    for(uint i = info.startIndex; i < endIndex; i++)
-    {
-      Lockup memory lockup = userIdLockups[_userId][i];
-      if(lockup.lockupExpirationDate > now)
-      {
-        // no more eligable entries
-        break;
-      }
-      // this lockup entry has expired and would be processed on the next tx
-      lockedTokens -= lockup.numberOfTokensLocked;
-    }
+    MinKeyValueHeap.Heap memory lockupHeap = userIdLockups[_userId];
+    return (lockupHeap.keys[_lockupIndex], lockupHeap.values[_lockupIndex]);
   }
 
   /**
@@ -449,20 +408,20 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
     UserInfo storage info = authorizedUserIdInfo[_userId];
     require(info.jurisdictionId != 0, "USER_ID_UNKNOWN");
     info.totalTokensLocked = info.totalTokensLocked.add(_numberOfTokensLocked);
-    if(info.endIndex > 0)
+    MinKeyValueHeap.Heap storage lockupHeap = userIdLockups[_userId];
+    if(!lockupHeap.isEmpty())
     {
-      Lockup storage lockup = userIdLockups[_userId][info.endIndex - 1];
-      if(lockup.lockupExpirationDate + lockupGranularity >= _lockupExpirationDate)
+      (uint lockupExpirationDate, uint numberOfTokensLocked) = lockupHeap.getMax();
+      if(lockupExpirationDate + lockupGranularity >= _lockupExpirationDate)
       {
         // Merge with the previous entry
         // if totalTokensLocked can't overflow then this value will not either
-        lockup.numberOfTokensLocked += _numberOfTokensLocked;
+        lockupHeap.setMaxValue(numberOfTokensLocked + _numberOfTokensLocked);
         return;
       }
     }
     // Add a new lockup entry
-    userIdLockups[_userId][info.endIndex] = Lockup(_lockupExpirationDate, _numberOfTokensLocked);
-    info.endIndex++;
+    lockupHeap.insert(_lockupExpirationDate, _numberOfTokensLocked);
   }
 
   /**
@@ -501,23 +460,21 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
   ) internal
     returns (bool isDone)
   {
-    if(info.startIndex >= info.endIndex)
+    MinKeyValueHeap.Heap storage lockupHeap = info.lockupHeap;
+    if(lockupHeap.isEmpty())
     {
       // no lockups for this user
       return true;
     }
-    Lockup storage lockup = userIdLockups[_userId][info.startIndex];
-    if(lockup.lockupExpirationDate > now && !_ignoreExpiration)
+    (uint lockupExpirationDate, uint numberOfTokensLocked) = lockupHeap.getMin();
+    if(lockupExpirationDate > now && !_ignoreExpiration)
     {
       // no more eligable entries
       return true;
     }
-    emit UnlockTokens(_userId, lockup.numberOfTokensLocked, msg.sender);
-    info.totalTokensLocked -= lockup.numberOfTokensLocked;
-    info.startIndex++;
-    // Free up space we don't need anymore
-    lockup.numberOfTokensLocked = 0;
-    lockup.lockupExpirationDate = 0;
+    emit UnlockTokens(_userId, numberOfTokensLocked, msg.sender);
+    info.totalTokensLocked -= numberOfTokensLocked;
+    lockupHeap.removeMax();
     // There may be another entry
     return false;
   }

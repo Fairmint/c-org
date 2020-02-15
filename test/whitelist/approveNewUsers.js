@@ -48,27 +48,19 @@ contract("dat / whitelist / approveNewUsers", accounts => {
     it("getAuthorizedUserIdInfo updated", async () => {
       const {
         jurisdictionId,
-        totalTokensLocked,
-        startIndex,
-        endIndex
+        totalTokensLocked
       } = await contracts.whitelist.getAuthorizedUserIdInfo(accounts[5]);
       assert.equal(jurisdictionId, 4);
       assert.equal(totalTokensLocked, 0);
-      assert.equal(startIndex, 0);
-      assert.equal(endIndex, 0);
     });
 
     it("getAuthorizedUserIdInfo updated", async () => {
       const {
         jurisdictionId,
-        totalTokensLocked,
-        startIndex,
-        endIndex
+        totalTokensLocked
       } = await contracts.whitelist.getAuthorizedUserIdInfo(accounts[5]);
       assert.equal(jurisdictionId, 4);
       assert.equal(totalTokensLocked, 0);
-      assert.equal(startIndex, 0);
-      assert.equal(endIndex, 0);
     });
 
     it("should fail to approve a known user", async () => {

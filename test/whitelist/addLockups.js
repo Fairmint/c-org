@@ -36,7 +36,7 @@ contract("dat / whitelist / addLockups", accounts => {
     await contracts.whitelist.addLockups(
       [trader],
       [Math.round(Date.now() / 1000) + 1000],
-      [4],
+      [41],
       {
         from: operatorAccount
       }
@@ -72,23 +72,14 @@ contract("dat / whitelist / addLockups", accounts => {
     it("getAuthorizedUserIdInfo not changed", async () => {
       const {
         jurisdictionId,
-        totalTokensLocked,
-        startIndex,
-        endIndex
+        totalTokensLocked
       } = await contracts.whitelist.getAuthorizedUserIdInfo(trader);
       assert.equal(jurisdictionId, 4);
       assert.equal(totalTokensLocked.toString(), 0);
-      assert.equal(startIndex, 0);
-      assert.equal(endIndex, 0);
     });
 
     it("getUserIdLockup not changed", async () => {
-      const {
-        lockupExpirationDate,
-        numberOfTokensLocked
-      } = await contracts.whitelist.getUserIdLockup(trader, 0);
-      assert.equal(lockupExpirationDate, 0);
-      assert.equal(numberOfTokensLocked, 0);
+      await reverts(contracts.whitelist.getUserIdLockup(trader, 1));
     });
   });
 
@@ -107,23 +98,14 @@ contract("dat / whitelist / addLockups", accounts => {
     it("getAuthorizedUserIdInfo not changed", async () => {
       const {
         jurisdictionId,
-        totalTokensLocked,
-        startIndex,
-        endIndex
+        totalTokensLocked
       } = await contracts.whitelist.getAuthorizedUserIdInfo(trader);
       assert.equal(jurisdictionId, 4);
       assert.equal(totalTokensLocked.toString(), 0);
-      assert.equal(startIndex, 0);
-      assert.equal(endIndex, 0);
     });
 
     it("getUserIdLockup not changed", async () => {
-      const {
-        lockupExpirationDate,
-        numberOfTokensLocked
-      } = await contracts.whitelist.getUserIdLockup(trader, 0);
-      assert.equal(lockupExpirationDate, 0);
-      assert.equal(numberOfTokensLocked, 0);
+      await reverts(contracts.whitelist.getUserIdLockup(trader, 1));
     });
   });
 
@@ -146,21 +128,17 @@ contract("dat / whitelist / addLockups", accounts => {
     it("getAuthorizedUserIdInfo updated", async () => {
       const {
         jurisdictionId,
-        totalTokensLocked,
-        startIndex,
-        endIndex
+        totalTokensLocked
       } = await contracts.whitelist.getAuthorizedUserIdInfo(trader);
       assert.equal(jurisdictionId, 4);
       assert.equal(totalTokensLocked.toString(), locked1Count);
-      assert.equal(startIndex, 0);
-      assert.equal(endIndex, 1);
     });
 
     it("getUserIdLockup updated", async () => {
       const {
         lockupExpirationDate,
         numberOfTokensLocked
-      } = await contracts.whitelist.getUserIdLockup(trader, 0);
+      } = await contracts.whitelist.getUserIdLockup(trader, 1);
       assert.equal(lockupExpirationDate, locked1Expiration);
       assert.equal(numberOfTokensLocked, locked1Count);
     });
@@ -184,30 +162,26 @@ contract("dat / whitelist / addLockups", accounts => {
       it("getAuthorizedUserIdInfo updated", async () => {
         const {
           jurisdictionId,
-          totalTokensLocked,
-          startIndex,
-          endIndex
+          totalTokensLocked
         } = await contracts.whitelist.getAuthorizedUserIdInfo(trader);
         assert.equal(jurisdictionId, 4);
         assert.equal(totalTokensLocked.toString(), locked1Count + locked2Count);
-        assert.equal(startIndex, 0);
-        assert.equal(endIndex, 2);
       });
 
-      it("getUserIdLockup 0 not changed", async () => {
-        const {
-          lockupExpirationDate,
-          numberOfTokensLocked
-        } = await contracts.whitelist.getUserIdLockup(trader, 0);
-        assert.equal(lockupExpirationDate, locked1Expiration);
-        assert.equal(numberOfTokensLocked, locked1Count);
-      });
-
-      it("getUserIdLockup 1 updated", async () => {
+      it("getUserIdLockup 1 not changed", async () => {
         const {
           lockupExpirationDate,
           numberOfTokensLocked
         } = await contracts.whitelist.getUserIdLockup(trader, 1);
+        assert.equal(lockupExpirationDate, locked1Expiration);
+        assert.equal(numberOfTokensLocked, locked1Count);
+      });
+
+      it("getUserIdLockup 2 updated", async () => {
+        const {
+          lockupExpirationDate,
+          numberOfTokensLocked
+        } = await contracts.whitelist.getUserIdLockup(trader, 2);
         assert.equal(lockupExpirationDate, locked2Expiration);
         assert.equal(numberOfTokensLocked, locked2Count);
       });
@@ -235,21 +209,17 @@ contract("dat / whitelist / addLockups", accounts => {
       it("getAuthorizedUserIdInfo updated", async () => {
         const {
           jurisdictionId,
-          totalTokensLocked,
-          startIndex,
-          endIndex
+          totalTokensLocked
         } = await contracts.whitelist.getAuthorizedUserIdInfo(trader);
         assert.equal(jurisdictionId, 4);
         assert.equal(totalTokensLocked.toString(), locked1Count + locked2Count);
-        assert.equal(startIndex, 0);
-        assert.equal(endIndex, 1); // not changed
       });
 
-      it("getUserIdLockup 0 updated", async () => {
+      it("getUserIdLockup 1 updated", async () => {
         const {
           lockupExpirationDate,
           numberOfTokensLocked
-        } = await contracts.whitelist.getUserIdLockup(trader, 0);
+        } = await contracts.whitelist.getUserIdLockup(trader, 1);
         assert.equal(lockupExpirationDate, locked1Expiration);
         assert.equal(
           numberOfTokensLocked.toString(),
@@ -257,13 +227,8 @@ contract("dat / whitelist / addLockups", accounts => {
         );
       });
 
-      it("getUserIdLockup 1 not defined", async () => {
-        const {
-          lockupExpirationDate,
-          numberOfTokensLocked
-        } = await contracts.whitelist.getUserIdLockup(trader, 1);
-        assert.equal(lockupExpirationDate, 0);
-        assert.equal(numberOfTokensLocked, 0);
+      it("getUserIdLockup 2 not defined", async () => {
+        await reverts(contracts.whitelist.getUserIdLockup(trader, 2));
       });
 
       describe("adding another lockup after granularity window", () => {
@@ -285,33 +250,29 @@ contract("dat / whitelist / addLockups", accounts => {
         it("getAuthorizedUserIdInfo updated", async () => {
           const {
             jurisdictionId,
-            totalTokensLocked,
-            startIndex,
-            endIndex
+            totalTokensLocked
           } = await contracts.whitelist.getAuthorizedUserIdInfo(trader);
           assert.equal(jurisdictionId, 4);
           assert.equal(
             totalTokensLocked.toString(),
             locked1Count + locked2Count + locked3Count
           );
-          assert.equal(startIndex, 0);
-          assert.equal(endIndex, 2);
         });
 
-        it("getUserIdLockup 0 not changed", async () => {
-          const {
-            lockupExpirationDate,
-            numberOfTokensLocked
-          } = await contracts.whitelist.getUserIdLockup(trader, 0);
-          assert.equal(lockupExpirationDate, locked1Expiration);
-          assert.equal(numberOfTokensLocked, locked1Count + locked2Count);
-        });
-
-        it("getUserIdLockup 1 updated", async () => {
+        it("getUserIdLockup 1 not changed", async () => {
           const {
             lockupExpirationDate,
             numberOfTokensLocked
           } = await contracts.whitelist.getUserIdLockup(trader, 1);
+          assert.equal(lockupExpirationDate, locked1Expiration);
+          assert.equal(numberOfTokensLocked, locked1Count + locked2Count);
+        });
+
+        it("getUserIdLockup 2 updated", async () => {
+          const {
+            lockupExpirationDate,
+            numberOfTokensLocked
+          } = await contracts.whitelist.getUserIdLockup(trader, 2);
           assert.equal(lockupExpirationDate, locked3Expiration);
           assert.equal(numberOfTokensLocked, locked3Count);
         });
