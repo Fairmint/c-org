@@ -211,7 +211,7 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
       Lockup memory lockup = userIdLockups[_userId][i];
       if(lockup.lockupExpirationDate > now)
       {
-        // no more eligable entries
+        // no more eligible entries
         break;
       }
       // this lockup entry has expired and would be processed on the next tx
