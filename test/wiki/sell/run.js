@@ -4,10 +4,10 @@ const {
   constants,
   deployDat,
   getGasCost,
-  shouldFail
+  shouldFail,
 } = require("../../helpers");
 
-contract("wiki / sell / run", accounts => {
+contract("wiki / sell / run", (accounts) => {
   const initReserve = "1000000000000000000000";
   const buyAmount = "100000000000000000000";
   const sellAmount = "1000000000000000000";
@@ -19,7 +19,7 @@ contract("wiki / sell / run", accounts => {
     contracts = await deployDat(accounts, {
       initGoal: 0,
       initReserve,
-      feeBasisPoints: "10"
+      feeBasisPoints: "10",
     });
 
     await approveAll(contracts, accounts);
@@ -30,7 +30,7 @@ contract("wiki / sell / run", accounts => {
     for (let i = 0; i < 5; i++) {
       await contracts.dat.buy(accounts[i], buyAmount, 1, {
         from: accounts[i],
-        value: buyAmount
+        value: buyAmount,
       });
     }
   });
@@ -51,11 +51,11 @@ contract("wiki / sell / run", accounts => {
     contracts = await deployDat(accounts, {
       initGoal: 0,
       initReserve,
-      feeBasisPoints: "10"
+      feeBasisPoints: "10",
     });
 
     await contracts.whitelist.approveNewUsers([investor], [4], {
-      from: await contracts.dat.control()
+      from: await contracts.dat.control(),
     });
 
     await contracts.dat.transfer(investor, sellAmount, { from: beneficiary });
@@ -69,20 +69,20 @@ contract("wiki / sell / run", accounts => {
     contracts = await deployDat(accounts, {
       initGoal: 0,
       initReserve,
-      feeBasisPoints: "10"
+      feeBasisPoints: "10",
     });
 
     await contracts.whitelist.approveNewUsers([investor], [4], {
-      from: await contracts.dat.control()
+      from: await contracts.dat.control(),
     });
     await contracts.whitelist.approveNewUsers([accounts[9]], [4], {
-      from: await contracts.dat.control()
+      from: await contracts.dat.control(),
     });
 
     await contracts.dat.transfer(investor, sellAmount, { from: beneficiary });
     await contracts.dat.buy(accounts[9], buyAmount, 1, {
       from: accounts[9],
-      value: buyAmount
+      value: buyAmount,
     });
     await contracts.dat.sell(investor, sellAmount, 1, { from: investor });
   });
@@ -94,7 +94,7 @@ contract("wiki / sell / run", accounts => {
 
     await shouldFail(
       contracts.dat.sell(investor, sellAmount, x.plus(1).toFixed(), {
-        from: investor
+        from: investor,
       })
     );
   });
@@ -119,7 +119,7 @@ contract("wiki / sell / run", accounts => {
       x = new BigNumber(await contracts.dat.estimateSellValue(sellAmount));
 
       const tx = await contracts.dat.sell(investor, sellAmount, 1, {
-        from: investor
+        from: investor,
       });
       gasCost = await getGasCost(tx);
     });
@@ -136,10 +136,7 @@ contract("wiki / sell / run", accounts => {
       const balance = new BigNumber(await web3.eth.getBalance(investor));
       assert.equal(
         balance.toFixed(),
-        investorCurrencyBalanceBefore
-          .plus(x)
-          .minus(gasCost)
-          .toFixed()
+        investorCurrencyBalanceBefore.plus(x).minus(gasCost).toFixed()
       );
       assert.notEqual(x.toFixed(), 0);
     });
@@ -166,7 +163,7 @@ contract("wiki / sell / run", accounts => {
 
     await shouldFail(
       contracts.dat.sell(investor, sellAmount, x.plus(1).toFixed(), {
-        from: investor
+        from: investor,
       })
     );
   });
@@ -176,7 +173,7 @@ contract("wiki / sell / run", accounts => {
     const x = new BigNumber(await contracts.dat.estimateSellValue(sellAmount));
 
     await contracts.dat.sell(investor, sellAmount, x.toFixed(), {
-      from: investor
+      from: investor,
     });
   });
 
@@ -186,7 +183,7 @@ contract("wiki / sell / run", accounts => {
         [investor],
         [-1],
         {
-          from: await contracts.dat.control()
+          from: await contracts.dat.control(),
         }
       );
     });
@@ -194,7 +191,7 @@ contract("wiki / sell / run", accounts => {
     it("Sell fails", async () => {
       await shouldFail(
         contracts.dat.sell(investor, sellAmount, "1", {
-          from: investor
+          from: investor,
         })
       );
     });

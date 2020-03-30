@@ -1,6 +1,6 @@
 const { deployDat } = require("../helpers");
 
-contract("dat / whitelist / message", accounts => {
+contract("dat / whitelist / message", (accounts) => {
   let contracts;
 
   before(async () => {

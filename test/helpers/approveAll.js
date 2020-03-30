@@ -15,6 +15,6 @@ module.exports = async function approveAll(contracts, accounts) {
     }
   }
   await contracts.whitelist.approveNewUsers(accountsToAdd, jurisdictions, {
-    from: control
+    from: control,
   });
 };

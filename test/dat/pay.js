@@ -6,10 +6,10 @@ const {
   constants,
   deployDat,
   getGasCost,
-  shouldFail
+  shouldFail,
 } = require("../helpers");
 
-contract("dat / pay", accounts => {
+contract("dat / pay", (accounts) => {
   let contracts;
   const investor = accounts[3];
   const payAmount = "42000000000000000000";
@@ -18,7 +18,7 @@ contract("dat / pay", accounts => {
     contracts = await deployDat(
       accounts,
       {
-        initGoal: "0" // Start in the run state
+        initGoal: "0", // Start in the run state
       },
       false
     );
@@ -28,7 +28,7 @@ contract("dat / pay", accounts => {
     for (let i = 0; i < 9; i++) {
       await contracts.dat.buy(accounts[i], "100000000000000000000", 1, {
         value: "100000000000000000000",
-        from: accounts[i]
+        from: accounts[i],
       });
     }
   });
@@ -49,7 +49,7 @@ contract("dat / pay", accounts => {
       payValue = new BigNumber(await contracts.dat.estimatePayValue(payAmount));
       await contracts.dat.pay(investor, payAmount, {
         from: investor,
-        value: payAmount
+        value: payAmount,
       });
     });
 
@@ -65,7 +65,7 @@ contract("dat / pay", accounts => {
   it("can make a tiny payment", async () => {
     await contracts.dat.pay(investor, "1", {
       from: investor,
-      value: "1"
+      value: "1",
     });
   });
 
@@ -77,17 +77,17 @@ contract("dat / pay", accounts => {
       accounts,
       {
         initGoal: "0", // Start in the run state
-        currency: token.address
+        currency: token.address,
       },
       false
     );
     await token.approve(contracts.dat.address, constants.MAX_UINT, {
-      from: accounts[0]
+      from: accounts[0],
     });
     await approveAll(contracts, accounts);
     await shouldFail(
       contracts.dat.pay(accounts[0], "0", {
-        from: accounts[0]
+        from: accounts[0],
       }),
       "MISSING_CURRENCY"
     );
@@ -99,14 +99,14 @@ contract("dat / pay", accounts => {
         [await contracts.dat.beneficiary()],
         [4],
         {
-          from: await contracts.dat.control()
+          from: await contracts.dat.control(),
         }
       );
       await contracts.whitelist.updateJurisdictionsForUserIds(
         [investor],
         [-1],
         {
-          from: await contracts.dat.control()
+          from: await contracts.dat.control(),
         }
       );
     });
@@ -114,7 +114,7 @@ contract("dat / pay", accounts => {
     it("Can pay even if account is restricted", async () => {
       await contracts.dat.pay(investor, payAmount, {
         from: investor,
-        value: payAmount
+        value: payAmount,
       });
     });
 
@@ -141,7 +141,7 @@ contract("dat / pay", accounts => {
 
         const tx = await contracts.dat.pay(investor, payAmount, {
           from: investor,
-          value: payAmount
+          value: payAmount,
         });
         gasCost = await getGasCost(tx);
       });

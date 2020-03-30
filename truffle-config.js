@@ -23,10 +23,7 @@ const HDWalletProvider = require("truffle-hdwallet-provider");
 //
 const fs = require("fs");
 const privateKeyOrMnemonic = fs.existsSync(".privateKey")
-  ? fs
-      .readFileSync(".privateKey")
-      .toString()
-      .split(",")
+  ? fs.readFileSync(".privateKey").toString().split(",")
   : undefined;
 
 module.exports = {
@@ -52,7 +49,7 @@ module.exports = {
       gas: 6721974,
       host: "127.0.0.1",
       port: 8545,
-      network_id: "*" // Match any network id
+      network_id: "*", // Match any network id
     },
 
     // Another network with more advanced options...
@@ -78,7 +75,7 @@ module.exports = {
       confirmations: 1,
       gas: 6400000,
       gasPrice: 1000100000, // 1.0001GWEI
-      skipDryRun: true
+      skipDryRun: true,
     },
     rinkeby: {
       provider: () =>
@@ -92,7 +89,7 @@ module.exports = {
       confirmations: 1,
       gas: 6400000,
       gasPrice: 5000000000, // 5GWEI
-      skipDryRun: true
+      skipDryRun: true,
     },
     ropsten: {
       provider: () =>
@@ -106,8 +103,8 @@ module.exports = {
       confirmations: 1,
       gas: 6400000,
       gasPrice: 5000000000, // 5GWEI
-      skipDryRun: true
-    }
+      skipDryRun: true,
+    },
 
     // Useful for private networks
     // private: {
@@ -131,10 +128,10 @@ module.exports = {
         "Migrations",
         "MintableERC20",
         "NoFallbackProxy",
-        "TestUsdc"
+        "TestUsdc",
       ],
-      gasPrice: 5
-    }
+      gasPrice: 5,
+    },
   },
   plugins: ["solidity-coverage"],
 
@@ -147,10 +144,10 @@ module.exports = {
         // See the solidity docs for advice about optimization and evmVersion
         optimizer: {
           enabled: true,
-          runs: 200
+          runs: 200,
         },
-        evmVersion: "istanbul"
-      }
-    }
-  }
+        evmVersion: "istanbul",
+      },
+    },
+  },
 };

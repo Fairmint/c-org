@@ -2,7 +2,7 @@ const { approveAll, deployDat } = require("../helpers");
 const { tokens } = require("hardlydifficult-ethereum-contracts");
 const { constants } = require("../helpers");
 
-contract("dat / buybackReserve", accounts => {
+contract("dat / buybackReserve", (accounts) => {
   let contracts;
   let token;
 
@@ -20,7 +20,7 @@ contract("dat / buybackReserve", accounts => {
   describe("once excessive reserve", () => {
     before(async () => {
       await token.mint(contracts.dat.address, constants.MAX_UINT, {
-        from: accounts[0]
+        from: accounts[0],
       });
     });
 

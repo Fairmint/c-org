@@ -1,7 +1,7 @@
 const { deployDat } = require("../helpers");
 const { reverts } = require("truffle-assertions");
 
-contract("dat / whitelist / startDate", accounts => {
+contract("dat / whitelist / startDate", (accounts) => {
   let contracts;
   let ownerAccount;
   let operatorAccount = accounts[5];
@@ -12,14 +12,14 @@ contract("dat / whitelist / startDate", accounts => {
     contracts = await deployDat(accounts);
     ownerAccount = await contracts.whitelist.owner();
     await contracts.whitelist.addOperator(operatorAccount, {
-      from: ownerAccount
+      from: ownerAccount,
     });
     await contracts.whitelist.approveNewUsers([trader], [4], {
-      from: operatorAccount
+      from: operatorAccount,
     });
     startDate = Math.round(Date.now() / 1000) + 30;
     await contracts.whitelist.configWhitelist(startDate, 84, {
-      from: ownerAccount
+      from: ownerAccount,
     });
   });
 
@@ -32,7 +32,7 @@ contract("dat / whitelist / startDate", accounts => {
     await reverts(
       contracts.dat.buy(trader, price, 1, {
         from: trader,
-        value: price
+        value: price,
       }),
       "WAIT_FOR_START_DATE"
     );
@@ -42,7 +42,7 @@ contract("dat / whitelist / startDate", accounts => {
     beforeEach(async () => {
       startDate = Math.round(Date.now() / 1000) - 1;
       await contracts.whitelist.configWhitelist(startDate, 0, {
-        from: ownerAccount
+        from: ownerAccount,
       });
     });
 
@@ -54,7 +54,7 @@ contract("dat / whitelist / startDate", accounts => {
       const price = web3.utils.toWei("100", "ether");
       await contracts.dat.buy(trader, price, 1, {
         from: trader,
-        value: price
+        value: price,
       });
     });
   });

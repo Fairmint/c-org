@@ -1,6 +1,6 @@
 const { deployDat, shouldFail, constants } = require("../helpers");
 
-contract("dat / updateConfig", accounts => {
+contract("dat / updateConfig", (accounts) => {
   let contracts;
 
   it("shouldFail with CONTROL_ONLY", async () => {
@@ -78,7 +78,7 @@ contract("dat / updateConfig", accounts => {
 
   it("shouldFail with INVALID_COMMITMENT", async () => {
     contracts = await deployDat(accounts, {
-      revenueCommitmentBasisPoints: 0
+      revenueCommitmentBasisPoints: 0,
     });
     contracts.dat.updateConfig(
       await contracts.dat.whitelist(),

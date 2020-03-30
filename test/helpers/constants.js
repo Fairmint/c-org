@@ -6,7 +6,7 @@ module.exports = {
     INIT: 0,
     RUN: 1,
     CLOSE: 2,
-    CANCEL: 3
+    CANCEL: 3,
   },
-  BASIS_POINTS_DEN: 10000
+  BASIS_POINTS_DEN: 10000,
 };

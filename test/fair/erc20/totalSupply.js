@@ -1,6 +1,6 @@
 const { deployDat } = require("../../helpers");
 
-contract("fair / erc20 / totalSupply", accounts => {
+contract("fair / erc20 / totalSupply", (accounts) => {
   let contracts;
 
   before(async () => {

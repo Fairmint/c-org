@@ -1,6 +1,6 @@
 const { deployDat, shouldFail, constants } = require("../helpers");
 
-contract("dat / initialize", accounts => {
+contract("dat / initialize", (accounts) => {
   let contracts;
 
   it("shouldFail to init twice", async () => {

@@ -6,7 +6,7 @@ const sheets = require("./test-data/script.json");
 
 const { tokens } = require("hardlydifficult-ethereum-contracts");
 
-contract("dat / csvTests", accounts => {
+contract("dat / csvTests", (accounts) => {
   const beneficiary = accounts[0];
   const control = accounts[1];
   const feeCollector = accounts[2];
@@ -17,8 +17,8 @@ contract("dat / csvTests", accounts => {
   const tokenType = [undefined, "dai", "usdc"];
 
   let initComplete;
-  sheets.forEach(sheet => {
-    tokenType.forEach(tokenArtifact => {
+  sheets.forEach((sheet) => {
+    tokenType.forEach((tokenArtifact) => {
       let contracts;
       let currency;
       let currencyString;
@@ -66,7 +66,7 @@ contract("dat / csvTests", accounts => {
             await deployAndConfigDat(sheet);
             await approveAll(contracts, accounts);
             await contracts.whitelist.approveNewUsers([ethBank], [4], {
-              from: await contracts.dat.control()
+              from: await contracts.dat.control(),
             });
             await runTestScript(sheet);
           });
@@ -101,9 +101,7 @@ contract("dat / csvTests", accounts => {
           revenueCommitmentBasisPoints: new BigNumber(
             revenueCommitment
           ).toFixed(),
-          initGoal: parseNumber(configJson.init_goal)
-            .shiftedBy(18)
-            .toFixed(),
+          initGoal: parseNumber(configJson.init_goal).shiftedBy(18).toFixed(),
           initReserve: parseNumber(configJson.init_reserve)
             .shiftedBy(18)
             .toFixed(),
@@ -111,7 +109,7 @@ contract("dat / csvTests", accounts => {
           feeBasisPoints: new BigNumber(fee).toFixed(),
           minInvestment: new BigNumber(100)
             .shiftedBy(currencyDecimals)
-            .toFixed()
+            .toFixed(),
         });
       }
 
@@ -174,7 +172,7 @@ contract("dat / csvTests", accounts => {
           fair: new BigNumber(await contracts.dat.balanceOf(address)),
           currency: new BigNumber(
             currency ? await currency.balanceOf(address) : 0
-          )
+          ),
         };
 
         if (currency) {
@@ -187,7 +185,7 @@ contract("dat / csvTests", accounts => {
           ) {
             console.log(`  Set #${row.account.id} to approve dat`);
             await currency.approve(contracts.dat.address, -1, {
-              from: row.account.address
+              from: row.account.address,
             });
           }
         }
@@ -277,7 +275,7 @@ contract("dat / csvTests", accounts => {
               1,
               {
                 from: row.account.address,
-                value: currency ? 0 : quantity.toFixed()
+                value: currency ? 0 : quantity.toFixed(),
               }
             );
             break;
@@ -287,7 +285,7 @@ contract("dat / csvTests", accounts => {
               quantity.toFixed(),
               1,
               {
-                from: row.account.address
+                from: row.account.address,
               }
             );
             break;
@@ -298,7 +296,7 @@ contract("dat / csvTests", accounts => {
                 ? 0
                 : new BigNumber(await web3.eth.getBalance(row.account.address))
                     .minus(GAS_COST_BUFFER)
-                    .toFixed()
+                    .toFixed(),
             });
             break;
           case "pay":
@@ -307,7 +305,7 @@ contract("dat / csvTests", accounts => {
               quantity.toFixed(),
               {
                 from: row.account.address,
-                value: currency ? 0 : quantity.toFixed()
+                value: currency ? 0 : quantity.toFixed(),
               }
             );
             break;
@@ -318,14 +316,14 @@ contract("dat / csvTests", accounts => {
                   targetAddress,
                   quantity.toFixed(),
                   {
-                    from: row.account.address
+                    from: row.account.address,
                   }
                 );
               } else {
                 tx = await web3.eth.sendTransaction({
                   from: row.account.address,
                   to: targetAddress,
-                  value: quantity.toFixed()
+                  value: quantity.toFixed(),
                 });
               }
             } else {
@@ -333,14 +331,14 @@ contract("dat / csvTests", accounts => {
                 targetAddress,
                 quantity.toFixed(),
                 {
-                  from: row.account.address
+                  from: row.account.address,
                 }
               );
             }
             break;
           case "burn":
             tx = await contracts.dat.burn(quantity.toFixed(), {
-              from: row.account.address
+              from: row.account.address,
             });
             break;
           default:
@@ -496,11 +494,7 @@ contract("dat / csvTests", accounts => {
           return true;
 
         if (
-          new BigNumber(a)
-            .div(b)
-            .minus(1)
-            .abs()
-            .lt(0.00001) // Allow up to .001% error from expected value
+          new BigNumber(a).div(b).minus(1).abs().lt(0.00001) // Allow up to .001% error from expected value
         )
           return true;
 
@@ -531,7 +525,7 @@ contract("dat / csvTests", accounts => {
         await web3.eth.sendTransaction({
           from: ethBank,
           to: row.account.address,
-          value: GAS_COST_BUFFER.toFixed()
+          value: GAS_COST_BUFFER.toFixed(),
         });
       }
 
@@ -543,7 +537,7 @@ contract("dat / csvTests", accounts => {
         await web3.eth.sendTransaction({
           from: row.account.address,
           to: ethBank,
-          value: amount.toFixed()
+          value: amount.toFixed(),
         });
       }
 
@@ -572,7 +566,7 @@ contract("dat / csvTests", accounts => {
             account,
             targetBalance.shiftedBy(currencyDecimals).toFixed(),
             {
-              from: control
+              from: control,
             }
           );
         } else {
@@ -609,7 +603,7 @@ contract("dat / csvTests", accounts => {
           await web3.eth.sendTransaction({
             from,
             to,
-            value: amount.shiftedBy(18).toFixed()
+            value: amount.shiftedBy(18).toFixed(),
           });
 
           const afterBalance = new BigNumber(

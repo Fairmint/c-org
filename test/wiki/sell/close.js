@@ -4,10 +4,10 @@ const {
   constants,
   deployDat,
   getGasCost,
-  shouldFail
+  shouldFail,
 } = require("../../helpers");
 
-contract("wiki / sell / close", accounts => {
+contract("wiki / sell / close", (accounts) => {
   const initReserve = "1000000000000000000000";
   const buyAmount = "100000000000000000000";
   const sellAmount = "1000000000000000000";
@@ -19,7 +19,7 @@ contract("wiki / sell / close", accounts => {
     contracts = await deployDat(accounts, {
       initGoal: 0,
       initReserve,
-      feeBasisPoints: "10"
+      feeBasisPoints: "10",
     });
 
     await approveAll(contracts, accounts);
@@ -30,14 +30,14 @@ contract("wiki / sell / close", accounts => {
     for (let i = 0; i < 5; i++) {
       await contracts.dat.buy(accounts[i], buyAmount, 1, {
         from: accounts[i],
-        value: buyAmount
+        value: buyAmount,
       });
     }
 
     // Close the DAT
     await contracts.dat.close({
       from: beneficiary,
-      value: "100000000000000000000000"
+      value: "100000000000000000000000",
     });
   });
 
@@ -69,7 +69,7 @@ contract("wiki / sell / close", accounts => {
       x = new BigNumber(await contracts.dat.estimateSellValue(sellAmount));
 
       const tx = await contracts.dat.sell(investor, sellAmount, 1, {
-        from: investor
+        from: investor,
       });
       gasCost = await getGasCost(tx);
     });
@@ -86,10 +86,7 @@ contract("wiki / sell / close", accounts => {
       const balance = new BigNumber(await web3.eth.getBalance(investor));
       assert.equal(
         balance.toFixed(),
-        investorCurrencyBalanceBefore
-          .plus(x)
-          .minus(gasCost)
-          .toFixed()
+        investorCurrencyBalanceBefore.plus(x).minus(gasCost).toFixed()
       );
       assert.notEqual(x.toFixed(), 0);
     });
@@ -115,7 +112,7 @@ contract("wiki / sell / close", accounts => {
 
     await shouldFail(
       contracts.dat.sell(investor, sellAmount, x.plus(1).toFixed(), {
-        from: investor
+        from: investor,
       })
     );
   });
@@ -124,7 +121,7 @@ contract("wiki / sell / close", accounts => {
     const x = new BigNumber(await contracts.dat.estimateSellValue(sellAmount));
 
     await contracts.dat.sell(investor, sellAmount, x.toFixed(), {
-      from: investor
+      from: investor,
     });
   });
 });

@@ -1,6 +1,6 @@
 const { approveAll, deployDat } = require("../helpers");
 
-contract("dat / whitelist / restrictionCode", accounts => {
+contract("dat / whitelist / restrictionCode", (accounts) => {
   let contracts;
 
   beforeEach(async () => {
@@ -23,7 +23,7 @@ contract("dat / whitelist / restrictionCode", accounts => {
         [accounts[1]],
         [-1],
         {
-          from: await contracts.dat.control()
+          from: await contracts.dat.control(),
         }
       );
     });

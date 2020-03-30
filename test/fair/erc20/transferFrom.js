@@ -1,13 +1,13 @@
 const { approveAll, deployDat } = require("../../helpers");
 
-contract("fair / erc20 / transferFrom", accounts => {
+contract("fair / erc20 / transferFrom", (accounts) => {
   let contracts;
   const initReserve = 1000;
 
   before(async () => {
     contracts = await deployDat(accounts, {
       initReserve,
-      initGoal: 0
+      initGoal: 0,
     });
 
     await approveAll(contracts, accounts);
@@ -31,7 +31,7 @@ contract("fair / erc20 / transferFrom", accounts => {
         accounts[1],
         transferAmount,
         {
-          from: accounts[2]
+          from: accounts[2],
         }
       );
     });

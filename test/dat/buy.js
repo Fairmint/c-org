@@ -4,7 +4,7 @@
 
 const { approveAll, deployDat, shouldFail } = require("../helpers");
 
-contract("dat / buy", accounts => {
+contract("dat / buy", (accounts) => {
   let contracts;
 
   before(async () => {
@@ -22,7 +22,7 @@ contract("dat / buy", accounts => {
     await shouldFail(
       contracts.dat.buy(accounts[1], "100000000000000000001", 1, {
         value: "100000000000000000000",
-        from: accounts[1]
+        from: accounts[1],
       }),
       "INCORRECT_MSG_VALUE"
     );
@@ -32,7 +32,7 @@ contract("dat / buy", accounts => {
     before(async () => {
       await contracts.dat.buy(accounts[1], "100000000000000000000", 1, {
         value: "100000000000000000000",
-        from: accounts[1]
+        from: accounts[1],
       });
     });
 

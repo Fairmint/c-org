@@ -1,7 +1,7 @@
 const BigNumber = require("bignumber.js");
 
 async function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 async function getRequest(tx) {

@@ -2,7 +2,7 @@ module.exports = {
   env: {
     commonjs: true,
     es6: true,
-    node: true
+    node: true,
   },
   extends: ["plugin:prettier/recommended", "eslint:recommended"],
   globals: {
@@ -18,15 +18,15 @@ module.exports = {
     afterEach: "readonly",
     describe: "readonly",
     web3: "readonly",
-    context: "readonly"
+    context: "readonly",
   },
   parserOptions: {
-    ecmaVersion: 2018
+    ecmaVersion: 2018,
   },
   rules: {
     "no-underscore-dangle": 0,
     "no-console": 0,
     "require-atomic-updates": 0,
-    "no-unused-vars": 0
-  }
+    "no-unused-vars": 0,
+  },
 };

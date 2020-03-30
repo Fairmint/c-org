@@ -1,7 +1,7 @@
 const BigNumber = require("bignumber.js");
 const { approveAll, constants, deployDat } = require("../../helpers");
 
-contract("wiki / pay / run", accounts => {
+contract("wiki / pay / run", (accounts) => {
   let contracts;
   const investor = accounts[3];
   const payAmount = "42000000000000000000";
@@ -9,7 +9,7 @@ contract("wiki / pay / run", accounts => {
   beforeEach(async () => {
     contracts = await deployDat(accounts, {
       initGoal: "0", // Start in the run state
-      autoBurn: true
+      autoBurn: true,
     });
 
     await approveAll(contracts, accounts);
@@ -18,7 +18,7 @@ contract("wiki / pay / run", accounts => {
     for (let i = 9; i >= 0; i--) {
       await contracts.dat.buy(accounts[i], "100000000000000000000", 1, {
         value: "100000000000000000000",
-        from: accounts[i]
+        from: accounts[i],
       });
     }
   });
@@ -54,7 +54,7 @@ contract("wiki / pay / run", accounts => {
 
       await contracts.dat.pay(investor, payAmount, {
         from: investor,
-        value: payAmount
+        value: payAmount,
       });
     });
 
@@ -114,14 +114,14 @@ contract("wiki / pay / run", accounts => {
         [investor],
         [-1],
         {
-          from: await contracts.dat.control()
+          from: await contracts.dat.control(),
         }
       );
       burnedSupplyBefore = new BigNumber(await contracts.dat.burnedSupply());
 
       await contracts.dat.pay(investor, payAmount, {
         from: investor,
-        value: payAmount
+        value: payAmount,
       });
     });
 
@@ -147,7 +147,7 @@ contract("wiki / pay / run", accounts => {
           1,
           {
             value: "10000000000000000000000",
-            from: accounts[i]
+            from: accounts[i],
           }
         );
       }
@@ -164,13 +164,13 @@ contract("wiki / pay / run", accounts => {
         [investor],
         [-1],
         {
-          from: await contracts.dat.control()
+          from: await contracts.dat.control(),
         }
       );
 
       await contracts.dat.pay(investor, payAmount, {
         from: investor,
-        value: payAmount
+        value: payAmount,
       });
     });
 
@@ -193,10 +193,7 @@ contract("wiki / pay / run", accounts => {
       );
       assert.equal(
         balance.toFixed(),
-        beneficiaryFairBalanceBefore
-          .plus(x)
-          .minus(expectedBurn)
-          .toFixed()
+        beneficiaryFairBalanceBefore.plus(x).minus(expectedBurn).toFixed()
       );
     });
   });
@@ -214,7 +211,7 @@ contract("wiki / pay / run", accounts => {
           1,
           {
             value: "10000000000000000000000",
-            from: accounts[i]
+            from: accounts[i],
           }
         );
       }
@@ -223,7 +220,7 @@ contract("wiki / pay / run", accounts => {
 
       await contracts.dat.pay(investor, payAmount, {
         from: investor,
-        value: payAmount
+        value: payAmount,
       });
     });
 

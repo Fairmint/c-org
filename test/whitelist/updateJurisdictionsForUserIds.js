@@ -1,7 +1,7 @@
 const { deployDat } = require("../helpers");
 const { reverts } = require("truffle-assertions");
 
-contract("dat / whitelist / updateJurisdictionsForUserIds", accounts => {
+contract("dat / whitelist / updateJurisdictionsForUserIds", (accounts) => {
   let contracts;
   let ownerAccount;
   let operatorAccount = accounts[2];
@@ -10,17 +10,17 @@ contract("dat / whitelist / updateJurisdictionsForUserIds", accounts => {
     contracts = await deployDat(accounts);
     ownerAccount = await contracts.whitelist.owner();
     await contracts.whitelist.addOperator(operatorAccount, {
-      from: ownerAccount
+      from: ownerAccount,
     });
     await contracts.whitelist.approveNewUsers([accounts[5]], [4], {
-      from: operatorAccount
+      from: operatorAccount,
     });
   });
 
   it("non-operators cannot updateJurisdictionsForUserIds", async () => {
     await reverts(
       contracts.whitelist.updateJurisdictionsForUserIds([accounts[5]], [1], {
-        from: accounts[9]
+        from: accounts[9],
       }),
       "OperatorRole: caller does not have the Operator role"
     );
@@ -31,7 +31,7 @@ contract("dat / whitelist / updateJurisdictionsForUserIds", accounts => {
       [accounts[5]],
       [5],
       {
-        from: operatorAccount
+        from: operatorAccount,
       }
     );
   });
@@ -39,7 +39,7 @@ contract("dat / whitelist / updateJurisdictionsForUserIds", accounts => {
   it("shouldFail to update an unknown entry", async () => {
     await reverts(
       contracts.whitelist.updateJurisdictionsForUserIds([accounts[6]], [1], {
-        from: operatorAccount
+        from: operatorAccount,
       }),
       "USER_ID_UNKNOWN"
     );
@@ -48,7 +48,7 @@ contract("dat / whitelist / updateJurisdictionsForUserIds", accounts => {
   it("shouldFail to update to an invalid jurisdiction", async () => {
     await reverts(
       contracts.whitelist.updateJurisdictionsForUserIds([accounts[5]], [0], {
-        from: operatorAccount
+        from: operatorAccount,
       }),
       "INVALID_JURISDICTION_ID"
     );
@@ -60,7 +60,7 @@ contract("dat / whitelist / updateJurisdictionsForUserIds", accounts => {
         [accounts[5]],
         [42],
         {
-          from: operatorAccount
+          from: operatorAccount,
         }
       );
       await contracts.whitelist.updateJurisdictionFlows(
@@ -68,7 +68,7 @@ contract("dat / whitelist / updateJurisdictionsForUserIds", accounts => {
         [1, 42],
         [1, 1],
         {
-          from: ownerAccount
+          from: ownerAccount,
         }
       );
     });
@@ -78,7 +78,7 @@ contract("dat / whitelist / updateJurisdictionsForUserIds", accounts => {
         jurisdictionId,
         totalTokensLocked,
         startIndex,
-        endIndex
+        endIndex,
       } = await contracts.whitelist.getAuthorizedUserIdInfo(accounts[5]);
       assert.equal(jurisdictionId, 42);
       assert.equal(totalTokensLocked, 0);
@@ -92,14 +92,14 @@ contract("dat / whitelist / updateJurisdictionsForUserIds", accounts => {
         [4, 5, 42],
         [100000000, 100000000, 100000000],
         {
-          from: await contracts.dat.control()
+          from: await contracts.dat.control(),
         }
       );
       const price = web3.utils.toWei("100", "ether");
       console.log(`${accounts[5]} buy`);
       await contracts.dat.buy(accounts[5], price, 1, {
         from: accounts[5],
-        value: price
+        value: price,
       });
     });
 
@@ -112,14 +112,14 @@ contract("dat / whitelist / updateJurisdictionsForUserIds", accounts => {
           [4, 5, 42],
           [100000000, 100000000, 100000000],
           {
-            from: await contracts.dat.control()
+            from: await contracts.dat.control(),
           }
         );
         const price = web3.utils.toWei("100", "ether");
         expectedTokens = await contracts.dat.estimateBuyValue(price);
         await contracts.dat.buy(accounts[5], price, 1, {
           from: accounts[5],
-          value: price
+          value: price,
         });
       });
 
@@ -128,7 +128,7 @@ contract("dat / whitelist / updateJurisdictionsForUserIds", accounts => {
           jurisdictionId,
           totalTokensLocked,
           startIndex,
-          endIndex
+          endIndex,
         } = await contracts.whitelist.getAuthorizedUserIdInfo(accounts[5]);
         assert.equal(jurisdictionId, 42);
         assert.equal(totalTokensLocked.toString(), expectedTokens.toString());
@@ -139,7 +139,7 @@ contract("dat / whitelist / updateJurisdictionsForUserIds", accounts => {
       it("getUserIdLockup updated", async () => {
         const {
           lockupExpirationDate,
-          numberOfTokensLocked
+          numberOfTokensLocked,
         } = await contracts.whitelist.getUserIdLockup(accounts[5], 0);
         assert.notEqual(lockupExpirationDate, 0);
         assert.equal(
@@ -154,7 +154,7 @@ contract("dat / whitelist / updateJurisdictionsForUserIds", accounts => {
             [accounts[5]],
             [69],
             {
-              from: operatorAccount
+              from: operatorAccount,
             }
           );
         });
@@ -164,7 +164,7 @@ contract("dat / whitelist / updateJurisdictionsForUserIds", accounts => {
             jurisdictionId,
             totalTokensLocked,
             startIndex,
-            endIndex
+            endIndex,
           } = await contracts.whitelist.getAuthorizedUserIdInfo(accounts[5]);
           assert.equal(jurisdictionId.toString(), 69);
           assert.equal(totalTokensLocked.toString(), expectedTokens.toString());

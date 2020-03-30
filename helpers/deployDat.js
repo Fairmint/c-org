@@ -21,7 +21,7 @@ module.exports = async function deployDat(accounts, options, useProxy = true) {
       beneficiary: accounts[0],
       feeCollector: accounts.length > 2 ? accounts[2] : accounts[0],
       name: "Test org",
-      symbol: "TFO"
+      symbol: "TFO",
     },
     options
   );
@@ -30,14 +30,14 @@ module.exports = async function deployDat(accounts, options, useProxy = true) {
   if (useProxy) {
     // ProxyAdmin
     contracts.proxyAdmin = await proxyAdminArtifact.new({
-      from: callOptions.control
+      from: callOptions.control,
     });
     console.log(`ProxyAdmin deployed ${contracts.proxyAdmin.address}`);
   }
 
   // DAT
   const datContract = await datArtifact.new({
-    from: callOptions.control
+    from: callOptions.control,
   });
   console.log(`DAT template deployed ${datContract.address}`);
 
@@ -47,7 +47,7 @@ module.exports = async function deployDat(accounts, options, useProxy = true) {
       contracts.proxyAdmin.address, // admin
       [], // data
       {
-        from: callOptions.control
+        from: callOptions.control,
       }
     );
     console.log(`DAT proxy deployed ${datProxy.address}`);
@@ -72,7 +72,7 @@ module.exports = async function deployDat(accounts, options, useProxy = true) {
   // Whitelist
   if (callOptions.whitelistAddress === undefined) {
     const whitelistContract = await whitelistArtifact.new({
-      from: callOptions.control
+      from: callOptions.control,
     });
     console.log(`Whitelist template deployed ${whitelistContract.address}`);
 
@@ -82,7 +82,7 @@ module.exports = async function deployDat(accounts, options, useProxy = true) {
         contracts.proxyAdmin.address, // admin
         [], // data
         {
-          from: callOptions.control
+          from: callOptions.control,
         }
       );
       console.log(`Whitelist proxy deployed ${whitelistProxy.address}`);
@@ -92,14 +92,14 @@ module.exports = async function deployDat(accounts, options, useProxy = true) {
       contracts.whitelist = whitelistContract;
     }
     await contracts.whitelist.initialize(contracts.dat.address, {
-      from: callOptions.control
+      from: callOptions.control,
     });
     await contracts.whitelist.updateJurisdictionFlows(
       [1, 4, 4],
       [4, 1, 4],
       [1, 1, 1],
       {
-        from: callOptions.control
+        from: callOptions.control,
       }
     );
     callOptions.whitelistAddress = contracts.whitelist.address;
@@ -107,13 +107,13 @@ module.exports = async function deployDat(accounts, options, useProxy = true) {
 
     promises.push(
       contracts.whitelist.approveNewUsers([callOptions.control], [4], {
-        from: callOptions.control
+        from: callOptions.control,
       })
     );
     if (callOptions.control != callOptions.beneficiary) {
       promises.push(
         contracts.whitelist.approveNewUsers([callOptions.beneficiary], [4], {
-          from: callOptions.control
+          from: callOptions.control,
         })
       );
     }
@@ -123,13 +123,13 @@ module.exports = async function deployDat(accounts, options, useProxy = true) {
     ) {
       promises.push(
         contracts.whitelist.approveNewUsers([callOptions.feeCollector], [4], {
-          from: callOptions.control
+          from: callOptions.control,
         })
       );
     }
     promises.push(
       contracts.whitelist.approveNewUsers([web3.utils.padLeft(0, 40)], [1], {
-        from: callOptions.control
+        from: callOptions.control,
       })
     );
   }
@@ -150,7 +150,7 @@ module.exports = async function deployDat(accounts, options, useProxy = true) {
         200, // duration in seconds
         false, // non-revocable
         {
-          from: callOptions.control
+          from: callOptions.control,
         }
       );
       console.log(`Vesting contract deployed ${contract.address}`);
@@ -162,7 +162,7 @@ module.exports = async function deployDat(accounts, options, useProxy = true) {
           [contracts.vesting[i].address],
           [4],
           {
-            from: callOptions.control
+            from: callOptions.control,
           }
         );
         await contracts.whitelist.addApprovedUserWallets(
@@ -174,7 +174,7 @@ module.exports = async function deployDat(accounts, options, useProxy = true) {
         contract.address,
         callOptions.vesting[i].value,
         {
-          from: callOptions.beneficiary
+          from: callOptions.beneficiary,
         }
       );
     }

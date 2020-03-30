@@ -1,7 +1,7 @@
 const { deployDat } = require("../helpers");
 const truffleAssert = require("truffle-assertions");
 
-contract("dat / whitelist / operators", accounts => {
+contract("dat / whitelist / operators", (accounts) => {
   let contracts;
   let operatorAccount = accounts[5];
 
@@ -37,7 +37,7 @@ contract("dat / whitelist / operators", accounts => {
   it("other accounts cannot remove operators", async () => {
     await truffleAssert.reverts(
       contracts.whitelist.removeOperator(operatorAccount, {
-        from: accounts[4]
+        from: accounts[4],
       }),
       "Ownable: caller is not the owner"
     );
@@ -46,7 +46,7 @@ contract("dat / whitelist / operators", accounts => {
   describe("after adding operators", () => {
     beforeEach(async () => {
       contracts.whitelist.addOperator(operatorAccount, {
-        from: await contracts.whitelist.owner()
+        from: await contracts.whitelist.owner(),
       });
     });
 
@@ -58,7 +58,7 @@ contract("dat / whitelist / operators", accounts => {
     describe("after removing operators", () => {
       beforeEach(async () => {
         contracts.whitelist.removeOperator(operatorAccount, {
-          from: await contracts.whitelist.owner()
+          from: await contracts.whitelist.owner(),
         });
       });
 

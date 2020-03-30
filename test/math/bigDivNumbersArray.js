@@ -93,16 +93,12 @@ const numbers = [
   // MAX_UINT192.times('1009'),
   // MAX_UINT256.div("1009").dp(0),
   // MAX_UINT256.div("10").dp(0),
-  MAX_UINT256.div("2")
-    .dp(0)
-    .minus("1"),
+  MAX_UINT256.div("2").dp(0).minus("1"),
   MAX_UINT256.div("2").dp(0),
-  MAX_UINT256.div("2")
-    .dp(0)
-    .plus("1"),
+  MAX_UINT256.div("2").dp(0).plus("1"),
   MAX_UINT256.minus("2"),
   MAX_UINT256.minus("1"),
-  MAX_UINT256
+  MAX_UINT256,
 ];
 
 const getValue = (expectedBN, roundUp, allowIncreasedDiff) => {
@@ -233,12 +229,7 @@ contract("math / bigDivNumbersArray", () => {
                 .times(numB)
                 .div(new BigNumber(den).times(denB));
               if (res2x2.lte(MAX_UINT256)) {
-                if (
-                  new BigNumber(den)
-                    .times(denB)
-                    .plus(100)
-                    .gte(MAX_UINT256)
-                ) {
+                if (new BigNumber(den).times(denB).plus(100).gte(MAX_UINT256)) {
                   console.log(
                     `${denB.toFixed()} ~= ${res2x2.toExponential(2)}`
                   );
@@ -250,12 +241,7 @@ contract("math / bigDivNumbersArray", () => {
 
           const bnRes = new BigNumber(numA).times(numB).div(den);
           if (bnRes.lte(MAX_UINT256)) {
-            if (
-              new BigNumber(numA)
-                .times(numB)
-                .plus(100)
-                .gte(MAX_UINT256)
-            ) {
+            if (new BigNumber(numA).times(numB).plus(100).gte(MAX_UINT256)) {
               it(`bigDiv2x1         ${numA.toFixed()} * ${numB.toFixed()} / ${den.toFixed()} ~= ${bnRes.toExponential(
                 2
               )}`, async () => {

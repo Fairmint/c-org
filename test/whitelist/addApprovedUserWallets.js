@@ -1,7 +1,7 @@
 const { deployDat } = require("../helpers");
 const { reverts } = require("truffle-assertions");
 
-contract("dat / whitelist / addApprovedUserWallets", accounts => {
+contract("dat / whitelist / addApprovedUserWallets", (accounts) => {
   let contracts;
   let ownerAccount;
   let operatorAccount = accounts[5];
@@ -10,17 +10,17 @@ contract("dat / whitelist / addApprovedUserWallets", accounts => {
     contracts = await deployDat(accounts);
     ownerAccount = await contracts.whitelist.owner();
     await contracts.whitelist.addOperator(operatorAccount, {
-      from: ownerAccount
+      from: ownerAccount,
     });
     await contracts.whitelist.approveNewUsers([accounts[5]], [4], {
-      from: operatorAccount
+      from: operatorAccount,
     });
   });
 
   it("non-operators cannot addApprovedUserWallets", async () => {
     await reverts(
       contracts.whitelist.addApprovedUserWallets([accounts[5]], [accounts[4]], {
-        from: accounts[9]
+        from: accounts[9],
       }),
       "OperatorRole: caller does not have the Operator role"
     );
@@ -31,7 +31,7 @@ contract("dat / whitelist / addApprovedUserWallets", accounts => {
       [accounts[5]],
       [accounts[4]],
       {
-        from: operatorAccount
+        from: operatorAccount,
       }
     );
   });
@@ -39,7 +39,7 @@ contract("dat / whitelist / addApprovedUserWallets", accounts => {
   it("shouldFail to add known wallets 1", async () => {
     await reverts(
       contracts.whitelist.addApprovedUserWallets([accounts[5]], [accounts[5]], {
-        from: operatorAccount
+        from: operatorAccount,
       }),
       "WALLET_ALREADY_ADDED"
     );
@@ -51,7 +51,7 @@ contract("dat / whitelist / addApprovedUserWallets", accounts => {
         [accounts[5]],
         [accounts[4]],
         {
-          from: operatorAccount
+          from: operatorAccount,
         }
       );
     });
@@ -62,7 +62,7 @@ contract("dat / whitelist / addApprovedUserWallets", accounts => {
           [accounts[5]],
           [accounts[4]],
           {
-            from: operatorAccount
+            from: operatorAccount,
           }
         ),
         "WALLET_ALREADY_ADDED"
@@ -75,7 +75,7 @@ contract("dat / whitelist / addApprovedUserWallets", accounts => {
           [accounts[8]],
           [accounts[7]],
           {
-            from: operatorAccount
+            from: operatorAccount,
           }
         ),
         "USER_ID_UNKNOWN"
