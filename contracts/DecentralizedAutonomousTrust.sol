@@ -411,6 +411,17 @@ contract DecentralizedAutonomousTrust
       initReserve = _initReserve;
       _mint(beneficiary, initReserve);
     }
+
+    // Initialize permit
+    DOMAIN_SEPARATOR = keccak256(
+      abi.encode(
+        keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
+        keccak256(bytes(name())),
+        keccak256(bytes(version)),
+        getChainId(),
+        address(this)
+      )
+    );
   }
   function getChainId(
   ) private pure
@@ -421,20 +432,6 @@ contract DecentralizedAutonomousTrust
     {
       id := chainid()
     }
-  }
-
-  function initializePermit(
-  ) public
-  {
-    DOMAIN_SEPARATOR = keccak256(
-      abi.encode(
-        keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
-        keccak256(bytes(name())),
-        keccak256(bytes(version)),
-        getChainId(),
-        address(this)
-      )
-    );
   }
 
   function updateConfig(
