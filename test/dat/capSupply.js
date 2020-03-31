@@ -2,7 +2,7 @@ const { approveAll, deployDat } = require("../helpers");
 const { tokens } = require("hardlydifficult-ethereum-contracts");
 const { constants, shouldFail } = require("../helpers");
 
-contract("dat / capSupply", accounts => {
+contract("dat / capSupply", (accounts) => {
   let contracts;
   let token;
 
@@ -11,17 +11,17 @@ contract("dat / capSupply", accounts => {
     contracts = await deployDat(accounts, { currency: token.address });
     await approveAll(contracts, accounts);
     await token.mint(accounts[1], constants.MAX_UINT, {
-      from: accounts[0]
+      from: accounts[0],
     });
     await token.approve(contracts.dat.address, constants.MAX_UINT, {
-      from: accounts[1]
+      from: accounts[1],
     });
     await contracts.dat.buy(
       accounts[1],
       "30000000000000000000000000000000000000000000000000000000",
       1,
       {
-        from: accounts[1]
+        from: accounts[1],
       }
     );
   });
@@ -38,7 +38,7 @@ contract("dat / capSupply", accounts => {
         "30000000000000000000000000000000000000000000000000000000",
         1,
         {
-          from: accounts[1]
+          from: accounts[1],
         }
       ),
       "EXCESSIVE_SUPPLY"

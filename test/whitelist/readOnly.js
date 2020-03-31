@@ -1,6 +1,6 @@
 const { approveAll, deployDat } = require("../helpers");
 
-contract("dat / whitelist / readOnly", accounts => {
+contract("dat / whitelist / readOnly", (accounts) => {
   let contracts;
   let control;
 
@@ -28,7 +28,7 @@ contract("dat / whitelist / readOnly", accounts => {
   describe("after config", () => {
     beforeEach(async () => {
       await contracts.whitelist.configWhitelist(42, 84, {
-        from: control
+        from: control,
       });
     });
 
@@ -55,7 +55,7 @@ contract("dat / whitelist / readOnly", accounts => {
         [1, 2],
         [1, 1],
         {
-          from: control
+          from: control,
         }
       );
     });
@@ -83,7 +83,7 @@ contract("dat / whitelist / readOnly", accounts => {
     describe("after updateJurisdictionFlows to clear entries", () => {
       beforeEach(async () => {
         await contracts.whitelist.updateJurisdictionFlows([42], [1], [0], {
-          from: control
+          from: control,
         });
       });
 
@@ -107,7 +107,7 @@ contract("dat / whitelist / readOnly", accounts => {
         [accounts[4], accounts[5]],
         [4, 5],
         {
-          from: control
+          from: control,
         }
       );
     });
@@ -132,7 +132,7 @@ contract("dat / whitelist / readOnly", accounts => {
           [accounts[4], accounts[4]],
           [accounts[6], accounts[7]],
           {
-            from: control
+            from: control,
           }
         );
       });
@@ -157,7 +157,7 @@ contract("dat / whitelist / readOnly", accounts => {
         jurisdictionId,
         totalTokensLocked,
         startIndex,
-        endIndex
+        endIndex,
       } = await contracts.whitelist.getAuthorizedUserIdInfo(accounts[9]);
       assert.equal(jurisdictionId, 0);
       assert.equal(totalTokensLocked, 0);
@@ -170,7 +170,7 @@ contract("dat / whitelist / readOnly", accounts => {
         jurisdictionId,
         totalTokensLocked,
         startIndex,
-        endIndex
+        endIndex,
       } = await contracts.whitelist.getAuthorizedUserIdInfo(accounts[4]);
       assert.equal(jurisdictionId, 4);
       assert.equal(totalTokensLocked, 0);
@@ -181,7 +181,7 @@ contract("dat / whitelist / readOnly", accounts => {
     it("default getUserIdLockup", async () => {
       const {
         lockupExpirationDate,
-        numberOfTokensLocked
+        numberOfTokensLocked,
       } = await contracts.whitelist.getUserIdLockup(accounts[4], 0);
       assert.equal(lockupExpirationDate, 0);
       assert.equal(numberOfTokensLocked, 0);
@@ -196,14 +196,14 @@ contract("dat / whitelist / readOnly", accounts => {
           [4, 5],
           [100000000, 100000000],
           {
-            from: control
+            from: control,
           }
         );
         const price = web3.utils.toWei("100", "ether");
         expectedTokens = await contracts.dat.estimateBuyValue(price);
         await contracts.dat.buy(accounts[4], price, 1, {
           from: accounts[4],
-          value: price
+          value: price,
         });
       });
 
@@ -212,7 +212,7 @@ contract("dat / whitelist / readOnly", accounts => {
           jurisdictionId,
           totalTokensLocked,
           startIndex,
-          endIndex
+          endIndex,
         } = await contracts.whitelist.getAuthorizedUserIdInfo(accounts[4]);
         assert.equal(jurisdictionId, 4);
         assert.equal(totalTokensLocked.toString(), expectedTokens.toString());
@@ -223,7 +223,7 @@ contract("dat / whitelist / readOnly", accounts => {
       it("getUserIdLockup updated", async () => {
         const {
           lockupExpirationDate,
-          numberOfTokensLocked
+          numberOfTokensLocked,
         } = await contracts.whitelist.getUserIdLockup(accounts[4], 0);
         assert.notEqual(lockupExpirationDate, 0);
         assert.equal(

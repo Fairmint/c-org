@@ -1,7 +1,7 @@
 const { deployDat } = require("../helpers");
 const { reverts } = require("truffle-assertions");
 
-contract("dat / whitelist / configWhitelist", accounts => {
+contract("dat / whitelist / configWhitelist", (accounts) => {
   let contracts;
   let ownerAccount;
   let operatorAccount = accounts[5];
@@ -10,7 +10,7 @@ contract("dat / whitelist / configWhitelist", accounts => {
     contracts = await deployDat(accounts);
     ownerAccount = await contracts.whitelist.owner();
     await contracts.whitelist.addOperator(operatorAccount, {
-      from: ownerAccount
+      from: ownerAccount,
     });
   });
 
@@ -24,7 +24,7 @@ contract("dat / whitelist / configWhitelist", accounts => {
   describe("on config", () => {
     beforeEach(async () => {
       await contracts.whitelist.configWhitelist(42, 84, {
-        from: ownerAccount
+        from: ownerAccount,
       });
     });
 
@@ -41,7 +41,7 @@ contract("dat / whitelist / configWhitelist", accounts => {
     describe("on config again", () => {
       beforeEach(async () => {
         await contracts.whitelist.configWhitelist(1, 2, {
-          from: ownerAccount
+          from: ownerAccount,
         });
       });
 

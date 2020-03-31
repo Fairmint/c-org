@@ -3,12 +3,12 @@ const { deployDat } = require("../helpers");
 const { reverts } = require("truffle-assertions");
 
 async function sleep(ms) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     setTimeout(resolve, ms);
   });
 }
 
-contract("dat / whitelist / processLockups", accounts => {
+contract("dat / whitelist / processLockups", (accounts) => {
   let contracts;
   let ownerAccount;
   let operatorAccount = accounts[3];
@@ -18,17 +18,17 @@ contract("dat / whitelist / processLockups", accounts => {
     contracts = await deployDat(accounts);
     ownerAccount = await contracts.whitelist.owner();
     await contracts.whitelist.addOperator(operatorAccount, {
-      from: ownerAccount
+      from: ownerAccount,
     });
     await contracts.whitelist.approveNewUsers([trader], [4], {
-      from: operatorAccount
+      from: operatorAccount,
     });
     await contracts.whitelist.addLockups(
       [trader],
       [Math.round(Date.now() / 1000) + 5],
       [42],
       {
-        from: operatorAccount
+        from: operatorAccount,
       }
     );
   });
@@ -36,14 +36,14 @@ contract("dat / whitelist / processLockups", accounts => {
   it("anyone can processLockups", async () => {
     await sleep(6000);
     await contracts.whitelist.processLockups(trader, -1, {
-      from: accounts[8]
+      from: accounts[8],
     });
   });
 
   it("should fail to for a userId that does not exist", async () => {
     await reverts(
       contracts.whitelist.processLockups(accounts[8], -1, {
-        from: accounts[8]
+        from: accounts[8],
       }),
       "USER_ID_UNKNOWN"
     );
@@ -54,7 +54,7 @@ contract("dat / whitelist / processLockups", accounts => {
       jurisdictionId,
       totalTokensLocked,
       startIndex,
-      endIndex
+      endIndex,
     } = await contracts.whitelist.getAuthorizedUserIdInfo(trader);
     assert.equal(jurisdictionId, 4);
     assert.equal(totalTokensLocked.toString(), 42);
@@ -66,7 +66,7 @@ contract("dat / whitelist / processLockups", accounts => {
     beforeEach(async () => {
       await sleep(6000);
       await contracts.whitelist.processLockups(trader, -1, {
-        from: accounts[8]
+        from: accounts[8],
       });
     });
 
@@ -75,7 +75,7 @@ contract("dat / whitelist / processLockups", accounts => {
         jurisdictionId,
         totalTokensLocked,
         startIndex,
-        endIndex
+        endIndex,
       } = await contracts.whitelist.getAuthorizedUserIdInfo(trader);
       assert.equal(jurisdictionId, 4);
       assert.equal(totalTokensLocked.toString(), 0);
@@ -97,7 +97,7 @@ contract("dat / whitelist / processLockups", accounts => {
             lockupTime += 10000;
           }
           await contracts.whitelist.addLockups([trader], [lockupTime++], [42], {
-            from: operatorAccount
+            from: operatorAccount,
           });
         }
       });
@@ -107,7 +107,7 @@ contract("dat / whitelist / processLockups", accounts => {
           jurisdictionId,
           totalTokensLocked,
           startIndex,
-          endIndex
+          endIndex,
         } = await contracts.whitelist.getAuthorizedUserIdInfo(trader);
         assert.equal(jurisdictionId, 4);
         assert.equal(
@@ -124,7 +124,7 @@ contract("dat / whitelist / processLockups", accounts => {
         await web3.eth.sendTransaction({
           from: accounts[0],
           to: accounts[1],
-          value: 1
+          value: 1,
         });
 
         let lockedTokens = await contracts.whitelist.getLockedTokenCount(
@@ -134,7 +134,7 @@ contract("dat / whitelist / processLockups", accounts => {
         const price = web3.utils.toWei("1000000", "ether");
         await contracts.dat.buy(trader, price, 1, {
           from: trader,
-          value: price
+          value: price,
         });
         lockedTokens = await contracts.whitelist.getLockedTokenCount(trader);
         assert.equal(lockedTokens.toString(), 42 * notReadToFreeCount);
@@ -146,7 +146,7 @@ contract("dat / whitelist / processLockups", accounts => {
           await sleep((5 + readyToFreeCount) * 1000);
           for (let i = 0; i < 5; i++) {
             await contracts.whitelist.processLockups(trader, maxToFreePerLoop, {
-              from: accounts[8]
+              from: accounts[8],
             });
           }
         });
@@ -156,7 +156,7 @@ contract("dat / whitelist / processLockups", accounts => {
             jurisdictionId,
             totalTokensLocked,
             startIndex,
-            endIndex
+            endIndex,
           } = await contracts.whitelist.getAuthorizedUserIdInfo(trader);
           assert.equal(jurisdictionId, 4);
           assert.equal(totalTokensLocked.toString(), 42 * notReadToFreeCount);

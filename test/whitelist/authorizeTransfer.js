@@ -3,10 +3,10 @@ const { deployDat } = require("../helpers");
 const { reverts } = require("truffle-assertions");
 
 async function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-contract("dat / whitelist / authorizeTransfer", accounts => {
+contract("dat / whitelist / authorizeTransfer", (accounts) => {
   let contracts;
   let ownerAccount;
   let operatorAccount = accounts[3];
@@ -16,15 +16,15 @@ contract("dat / whitelist / authorizeTransfer", accounts => {
     contracts = await deployDat(accounts);
     ownerAccount = await contracts.whitelist.owner();
     await contracts.whitelist.addOperator(operatorAccount, {
-      from: ownerAccount
+      from: ownerAccount,
     });
     await contracts.whitelist.approveNewUsers([trader], [4], {
-      from: operatorAccount
+      from: operatorAccount,
     });
     const price = web3.utils.toWei("100", "ether");
     await contracts.dat.buy(trader, price, 1, {
       from: trader,
-      value: price
+      value: price,
     });
   });
 
@@ -57,7 +57,7 @@ contract("dat / whitelist / authorizeTransfer", accounts => {
   describe("when blocked by jurisdiction flow", () => {
     beforeEach(async () => {
       await contracts.whitelist.updateJurisdictionsForUserIds([trader], [5], {
-        from: operatorAccount
+        from: operatorAccount,
       });
     });
 
@@ -70,7 +70,7 @@ contract("dat / whitelist / authorizeTransfer", accounts => {
       await reverts(
         contracts.dat.buy(trader, price, 1, {
           from: trader,
-          value: price
+          value: price,
         }),
         "DENIED: JURISDICTION_FLOW"
       );
@@ -81,7 +81,7 @@ contract("dat / whitelist / authorizeTransfer", accounts => {
       const balanceBefore = await contracts.dat.balanceOf(trader);
       await contracts.dat.pay(trader, payAmount, {
         from: trader,
-        value: payAmount
+        value: payAmount,
       });
       const balanceAfter = await contracts.dat.balanceOf(trader);
       assert.equal(balanceBefore.toString(), balanceAfter.toString());
@@ -91,7 +91,7 @@ contract("dat / whitelist / authorizeTransfer", accounts => {
     it("cannot transfer: flow", async () => {
       await reverts(
         contracts.dat.transfer(accounts[1], 1, {
-          from: trader
+          from: trader,
         }),
         "DENIED: JURISDICTION_FLOW"
       );
@@ -100,7 +100,7 @@ contract("dat / whitelist / authorizeTransfer", accounts => {
     it("cannot sell", async () => {
       await reverts(
         contracts.dat.sell(trader, 1, 1, {
-          from: trader
+          from: trader,
         }),
         "DENIED: JURISDICTION_FLOW"
       );
@@ -112,7 +112,7 @@ contract("dat / whitelist / authorizeTransfer", accounts => {
       const price = web3.utils.toWei("100", "ether");
       contracts.dat.buy(trader, price, 1, {
         from: trader,
-        value: price
+        value: price,
       });
     });
 
@@ -121,7 +121,7 @@ contract("dat / whitelist / authorizeTransfer", accounts => {
         jurisdictionId,
         totalTokensLocked,
         startIndex,
-        endIndex
+        endIndex,
       } = await contracts.whitelist.getAuthorizedUserIdInfo(trader);
       assert.equal(jurisdictionId, 4);
       assert.equal(totalTokensLocked.toString(), 0);
@@ -135,16 +135,16 @@ contract("dat / whitelist / authorizeTransfer", accounts => {
 
     beforeEach(async () => {
       await contracts.dat.burn(await contracts.dat.balanceOf(trader), {
-        from: trader
+        from: trader,
       });
       await contracts.whitelist.updateJurisdictionFlows([1], [4], [30], {
-        from: ownerAccount
+        from: ownerAccount,
       });
       const price = web3.utils.toWei("100", "ether");
       tokenCount = await contracts.dat.estimateBuyValue(price);
       contracts.dat.buy(trader, price, 1, {
         from: trader,
-        value: price
+        value: price,
       });
     });
 
@@ -153,7 +153,7 @@ contract("dat / whitelist / authorizeTransfer", accounts => {
         jurisdictionId,
         totalTokensLocked,
         startIndex,
-        endIndex
+        endIndex,
       } = await contracts.whitelist.getAuthorizedUserIdInfo(trader);
       assert.equal(jurisdictionId, 4);
       assert.equal(totalTokensLocked.toString(), tokenCount);
@@ -164,7 +164,7 @@ contract("dat / whitelist / authorizeTransfer", accounts => {
     it("cannot transfer: lockup", async () => {
       await reverts(
         contracts.dat.transfer(accounts[1], 1, {
-          from: trader
+          from: trader,
         }),
         "INSUFFICIENT_TRANSFERABLE_BALANCE"
       );
@@ -177,14 +177,14 @@ contract("dat / whitelist / authorizeTransfer", accounts => {
 
       it("can transfer", async () => {
         await contracts.dat.transfer(accounts[1], 1, {
-          from: trader
+          from: trader,
         });
       });
 
       it("cannot transfer more than balance", async () => {
         await reverts(
           contracts.dat.transfer(accounts[1], "1000000000000000000000000", {
-            from: trader
+            from: trader,
           }),
           "INSUFFICIENT_BALANCE"
         );
@@ -195,13 +195,13 @@ contract("dat / whitelist / authorizeTransfer", accounts => {
           const price = web3.utils.toWei("100", "ether");
           await contracts.dat.buy(trader, price, 1, {
             from: trader,
-            value: price
+            value: price,
           });
         });
 
         it("can transfer", async () => {
           await contracts.dat.transfer(accounts[1], 1, {
-            from: trader
+            from: trader,
           });
         });
 
@@ -211,7 +211,7 @@ contract("dat / whitelist / authorizeTransfer", accounts => {
           ).minus(100);
           await reverts(
             contracts.dat.transfer(accounts[1], balance.toFixed(), {
-              from: trader
+              from: trader,
             }),
             "INSUFFICIENT_TRANSFERABLE_BALANCE"
           );

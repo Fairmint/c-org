@@ -1,17 +1,17 @@
 const { approveAll, deployDat } = require("../helpers");
 
-contract("fair / burn", accounts => {
+contract("fair / burn", (accounts) => {
   let contracts;
 
   before(async () => {
     contracts = await deployDat(accounts, {
-      initGoal: 0
+      initGoal: 0,
     });
     await approveAll(contracts, accounts);
 
     await contracts.dat.buy(accounts[1], "420000000000000000000", 1, {
       value: "420000000000000000000",
-      from: accounts[1]
+      from: accounts[1],
     });
   });
 

@@ -2,15 +2,15 @@ const {
   approveAll,
   constants,
   deployDat,
-  shouldFail
+  shouldFail,
 } = require("../../helpers");
 
-contract("wiki / buy / cancel", accounts => {
+contract("wiki / buy / cancel", (accounts) => {
   let contracts;
 
   before(async () => {
     contracts = await deployDat(accounts, {
-      initGoal: "1000000000000000000000" // 10x the buy size below
+      initGoal: "1000000000000000000000", // 10x the buy size below
     });
 
     await approveAll(contracts, accounts);
@@ -24,7 +24,7 @@ contract("wiki / buy / cancel", accounts => {
   it("Sanity check: buy() works durning init", async () => {
     await contracts.dat.buy(accounts[9], "100000000000000000000", 1, {
       value: "100000000000000000000",
-      from: accounts[9]
+      from: accounts[9],
     });
   });
 
@@ -47,7 +47,7 @@ contract("wiki / buy / cancel", accounts => {
       await shouldFail(
         contracts.dat.buy(accounts[9], "100000000000000000000", 1, {
           value: "100000000000000000000",
-          from: accounts[9]
+          from: accounts[9],
         })
       );
     });

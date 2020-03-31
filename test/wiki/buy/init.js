@@ -4,10 +4,10 @@ const {
   approveAll,
   constants,
   deployDat,
-  shouldFail
+  shouldFail,
 } = require("../../helpers");
 
-contract("wiki / buy / init", accounts => {
+contract("wiki / buy / init", (accounts) => {
   const initGoal = "10000000000000000000000";
   const initReserve = "1000000000000000000000";
   let contracts;
@@ -16,7 +16,7 @@ contract("wiki / buy / init", accounts => {
     contracts = await deployDat(accounts, {
       initGoal,
       initReserve,
-      feeBasisPoints: "10"
+      feeBasisPoints: "10",
     });
 
     await approveAll(contracts, accounts);
@@ -33,7 +33,7 @@ contract("wiki / buy / init", accounts => {
       for (let i = 3; i < 6; i++) {
         await contracts.dat.buy(accounts[i], "100000000000000000000", 1, {
           from: accounts[i],
-          value: "100000000000000000000"
+          value: "100000000000000000000",
         });
       }
     });
@@ -100,11 +100,11 @@ contract("wiki / buy / init", accounts => {
         200, // duration in seconds
         false, // non-revocable
         {
-          from: accounts[1] // control
+          from: accounts[1], // control
         }
       );
       await contracts.whitelist.approveNewUsers([vesting.address], [4], {
-        from: await contracts.dat.control()
+        from: await contracts.dat.control(),
       });
 
       await contracts.dat.transfer(vesting.address, "42");
@@ -117,7 +117,7 @@ contract("wiki / buy / init", accounts => {
       beforeEach(async () => {
         await contracts.dat.buy(fromAccount, "100000000000000000000", 1, {
           from: fromAccount,
-          value: "100000000000000000000"
+          value: "100000000000000000000",
         });
       });
 
@@ -148,24 +148,20 @@ contract("wiki / buy / init", accounts => {
       const buySlope = new BigNumber(await contracts.dat.buySlopeNum()).div(
         await contracts.dat.buySlopeDen()
       );
-      max = buySlope
-        .times(initGoal)
-        .times(initGoal)
-        .div(2)
-        .dp(0);
+      max = buySlope.times(initGoal).times(initGoal).div(2).dp(0);
     });
 
     it("Sanity check: buy works if amount is less than max", async () => {
       await contracts.dat.buy(fromAccount, "100000000000000000000", 1, {
         from: fromAccount,
-        value: "100000000000000000000"
+        value: "100000000000000000000",
       });
     });
 
     it("buy works if amount is exactly max", async () => {
       await contracts.dat.buy(fromAccount, max.toFixed(), 1, {
         from: fromAccount,
-        value: max.toFixed()
+        value: max.toFixed(),
       });
     });
 
@@ -173,14 +169,14 @@ contract("wiki / buy / init", accounts => {
       beforeEach(async () => {
         await contracts.dat.buy(fromAccount, "100000000000000000000", 1, {
           from: fromAccount,
-          value: "100000000000000000000"
+          value: "100000000000000000000",
         });
       });
 
       it("buy for max still works", async () => {
         await contracts.dat.buy(fromAccount, max.toFixed(), 1, {
           from: fromAccount,
-          value: max.toFixed()
+          value: max.toFixed(),
         });
       });
     });
@@ -192,7 +188,7 @@ contract("wiki / buy / init", accounts => {
         1,
         {
           from: fromAccount,
-          value: max.plus(100000000000).toFixed()
+          value: max.plus(100000000000).toFixed(),
         }
       );
     });
@@ -204,7 +200,7 @@ contract("wiki / buy / init", accounts => {
         [accounts[5]],
         [-1],
         {
-          from: await contracts.dat.control()
+          from: await contracts.dat.control(),
         }
       );
     });
@@ -213,7 +209,7 @@ contract("wiki / buy / init", accounts => {
       await shouldFail(
         contracts.dat.buy(accounts[5], "100000000000000000000", 1, {
           from: accounts[5],
-          value: "100000000000000000000"
+          value: "100000000000000000000",
         })
       );
     });
@@ -224,7 +220,7 @@ contract("wiki / buy / init", accounts => {
     await shouldFail(
       contracts.dat.buy(accounts[5], amount.toFixed(), 1, {
         from: accounts[5],
-        value: amount.toFixed()
+        value: amount.toFixed(),
       })
     );
   });
@@ -237,7 +233,7 @@ contract("wiki / buy / init", accounts => {
     beforeEach(async () => {
       await contracts.dat.buy(fromAccount, amount, 1, {
         from: fromAccount,
-        value: amount
+        value: amount,
       });
       const buySlope = new BigNumber(await contracts.dat.buySlopeNum()).div(
         await contracts.dat.buySlopeDen()
@@ -269,7 +265,7 @@ contract("wiki / buy / init", accounts => {
       beforeEach(async () => {
         await contracts.dat.buy(fromAccount, amount, 1, {
           from: fromAccount,
-          value: amount
+          value: amount,
         });
       });
 
@@ -282,10 +278,7 @@ contract("wiki / buy / init", accounts => {
         const totalSupply = await contracts.dat.totalSupply();
         assert.equal(
           totalSupply.toString(),
-          x
-            .times(2)
-            .plus(initReserve)
-            .toFixed()
+          x.times(2).plus(initReserve).toFixed()
         );
       });
 
@@ -326,15 +319,11 @@ contract("wiki / buy / init", accounts => {
         constants.BASIS_POINTS_DEN
       );
 
-      const max = buySlope
-        .times(initGoal)
-        .times(initGoal)
-        .div(2)
-        .dp(0);
+      const max = buySlope.times(initGoal).times(initGoal).div(2).dp(0);
       for (let i = 0; i < 2; i++) {
         await contracts.dat.buy(accounts[5], max.toFixed(), 1, {
           from: accounts[5],
-          value: max.toFixed()
+          value: max.toFixed(),
         });
       }
       // y=init_investors[beneficiary]*buy_slope*init_goal/2
@@ -415,21 +404,17 @@ contract("wiki / buy / init", accounts => {
         constants.BASIS_POINTS_DEN
       );
 
-      const max = buySlope
-        .times(initGoal)
-        .times(initGoal)
-        .div(2)
-        .dp(0);
+      const max = buySlope.times(initGoal).times(initGoal).div(2).dp(0);
       await contracts.dat.buy(accounts[0], max.toFixed(), 1, {
         from: accounts[0],
-        value: max.toFixed()
+        value: max.toFixed(),
       });
       beneficiaryBalanceBefore = new BigNumber(
         await web3.eth.getBalance(await contracts.dat.beneficiary())
       );
       await contracts.dat.buy(accounts[5], max.toFixed(), 1, {
         from: accounts[5],
-        value: max.toFixed()
+        value: max.toFixed(),
       });
       // y=init_investors[beneficiary]*buy_slope*init_goal/2
       y = new BigNumber(
@@ -494,7 +479,7 @@ contract("wiki / buy / init", accounts => {
     await shouldFail(
       contracts.dat.buy(accounts[2], "100000000000000000000", 0, {
         from: accounts[2],
-        value: "100000000000000000000"
+        value: "100000000000000000000",
       }),
       "MUST_BUY_AT_LEAST_1"
     );

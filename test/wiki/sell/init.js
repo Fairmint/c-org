@@ -4,10 +4,10 @@ const {
   constants,
   deployDat,
   getGasCost,
-  shouldFail
+  shouldFail,
 } = require("../../helpers");
 
-contract("wiki / sell / init", accounts => {
+contract("wiki / sell / init", (accounts) => {
   const initGoal = "10000000000000000000000";
   const initReserve = "1000000000000000000000";
   const buyAmount = "100000000000000000000";
@@ -20,7 +20,7 @@ contract("wiki / sell / init", accounts => {
     contracts = await deployDat(accounts, {
       initGoal,
       initReserve,
-      feeBasisPoints: "10"
+      feeBasisPoints: "10",
     });
 
     await approveAll(contracts, accounts);
@@ -31,7 +31,7 @@ contract("wiki / sell / init", accounts => {
     for (let i = 0; i < 5; i++) {
       await contracts.dat.buy(accounts[i], buyAmount, 1, {
         from: accounts[i],
-        value: buyAmount
+        value: buyAmount,
       });
     }
   });
@@ -50,7 +50,7 @@ contract("wiki / sell / init", accounts => {
   describe("if the investor was awarded tokens from the initReserve", () => {
     beforeEach(async () => {
       await contracts.dat.transfer(investor, initReserve, {
-        from: beneficiary
+        from: beneficiary,
       });
     });
 
@@ -92,7 +92,7 @@ contract("wiki / sell / init", accounts => {
       x = new BigNumber(await contracts.dat.estimateSellValue(sellAmount));
 
       const tx = await contracts.dat.sell(investor, sellAmount, 1, {
-        from: investor
+        from: investor,
       });
       gasCost = await getGasCost(tx);
     });
@@ -109,10 +109,7 @@ contract("wiki / sell / init", accounts => {
       const balance = new BigNumber(await web3.eth.getBalance(investor));
       assert.equal(
         balance.toFixed(),
-        investorCurrencyBalanceBefore
-          .plus(x)
-          .minus(gasCost)
-          .toFixed()
+        investorCurrencyBalanceBefore.plus(x).minus(gasCost).toFixed()
       );
       assert.notEqual(x.toFixed(), 0);
     });
@@ -142,7 +139,7 @@ contract("wiki / sell / init", accounts => {
 
     await shouldFail(
       contracts.dat.sell(investor, sellAmount, x.plus(1).toFixed(), {
-        from: investor
+        from: investor,
       })
     );
   });
@@ -152,7 +149,7 @@ contract("wiki / sell / init", accounts => {
     const x = new BigNumber(await contracts.dat.estimateSellValue(sellAmount));
 
     await contracts.dat.sell(investor, sellAmount, x.toFixed(), {
-      from: investor
+      from: investor,
     });
   });
 

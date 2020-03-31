@@ -9,7 +9,7 @@ const vestingArtifact = artifacts.require("TokenVesting");
 const datArtifact = artifacts.require("DecentralizedAutonomousTrust");
 const proxyAdminArtifact = artifacts.require("ProxyAdmin");
 
-contract("deploy script", accounts => {
+contract("deploy script", (accounts) => {
   it("deploy", async () => {
     const abiJson = {};
     const bytecodeJson = {};
@@ -86,7 +86,7 @@ contract("deploy script", accounts => {
             currency: currencyToken.address,
             minInvestment: new BigNumber("100")
               .shiftedBy(currencyDecimals)
-              .toFixed()
+              .toFixed(),
           },
           callOptions
         )

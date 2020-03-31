@@ -25,43 +25,13 @@ contract("math / bigDiv", () => {
   });
 
   it("2x1 does not overflow with half max value", async () => {
+    await contract.bigDiv2x1RoundUp(maxValue.div(2).dp(0).toFixed(), 1, 1);
+    await contract.bigDiv2x1RoundUp(1, maxValue.div(2).dp(0).toFixed(), 1);
+    await contract.bigDiv2x1RoundUp(1, 1, maxValue.div(2).dp(0).toFixed());
     await contract.bigDiv2x1RoundUp(
-      maxValue
-        .div(2)
-        .dp(0)
-        .toFixed(),
-      1,
-      1
-    );
-    await contract.bigDiv2x1RoundUp(
-      1,
-      maxValue
-        .div(2)
-        .dp(0)
-        .toFixed(),
-      1
-    );
-    await contract.bigDiv2x1RoundUp(
-      1,
-      1,
-      maxValue
-        .div(2)
-        .dp(0)
-        .toFixed()
-    );
-    await contract.bigDiv2x1RoundUp(
-      maxValue
-        .div(2)
-        .dp(0)
-        .toFixed(),
-      maxValue
-        .div(2)
-        .dp(0)
-        .toFixed(),
-      maxValue
-        .div(2)
-        .dp(0)
-        .toFixed()
+      maxValue.div(2).dp(0).toFixed(),
+      maxValue.div(2).dp(0).toFixed(),
+      maxValue.div(2).dp(0).toFixed()
     );
   });
 
@@ -93,59 +63,15 @@ contract("math / bigDiv", () => {
   });
 
   it("2x2 does not overflow with half max value", async () => {
+    await contract.bigDiv2x2(maxValue.div(2).dp(0).toFixed(), 1, 1, 1);
+    await contract.bigDiv2x2(1, maxValue.div(2).dp(0).toFixed(), 1, 1);
+    await contract.bigDiv2x2(1, 1, maxValue.div(2).dp(0).toFixed(), 1);
+    await contract.bigDiv2x2(1, 1, 1, maxValue.div(2).dp(0).toFixed());
     await contract.bigDiv2x2(
-      maxValue
-        .div(2)
-        .dp(0)
-        .toFixed(),
-      1,
-      1,
-      1
-    );
-    await contract.bigDiv2x2(
-      1,
-      maxValue
-        .div(2)
-        .dp(0)
-        .toFixed(),
-      1,
-      1
-    );
-    await contract.bigDiv2x2(
-      1,
-      1,
-      maxValue
-        .div(2)
-        .dp(0)
-        .toFixed(),
-      1
-    );
-    await contract.bigDiv2x2(
-      1,
-      1,
-      1,
-      maxValue
-        .div(2)
-        .dp(0)
-        .toFixed()
-    );
-    await contract.bigDiv2x2(
-      maxValue
-        .div(2)
-        .dp(0)
-        .toFixed(),
-      maxValue
-        .div(2)
-        .dp(0)
-        .toFixed(),
-      maxValue
-        .div(2)
-        .dp(0)
-        .toFixed(),
-      maxValue
-        .div(2)
-        .dp(0)
-        .toFixed()
+      maxValue.div(2).dp(0).toFixed(),
+      maxValue.div(2).dp(0).toFixed(),
+      maxValue.div(2).dp(0).toFixed(),
+      maxValue.div(2).dp(0).toFixed()
     );
   });
 

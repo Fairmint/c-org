@@ -3,17 +3,17 @@ const {
   approveAll,
   constants,
   deployDat,
-  shouldFail
+  shouldFail,
 } = require("../../helpers");
 
-contract("wiki / buy / run", accounts => {
+contract("wiki / buy / run", (accounts) => {
   let contracts;
 
   beforeEach(async () => {
     contracts = await deployDat(accounts, {
       initGoal: 0,
       feeBasisPoints: 10,
-      autoBurn: true
+      autoBurn: true,
     });
 
     await approveAll(contracts, accounts);
@@ -30,7 +30,7 @@ contract("wiki / buy / run", accounts => {
         [accounts[5]],
         [-1],
         {
-          from: await contracts.dat.control()
+          from: await contracts.dat.control(),
         }
       );
     });
@@ -39,7 +39,7 @@ contract("wiki / buy / run", accounts => {
       await shouldFail(
         contracts.dat.buy(accounts[5], "100000000000000000000", 1, {
           from: accounts[5],
-          value: "100000000000000000000"
+          value: "100000000000000000000",
         })
       );
     });
@@ -50,7 +50,7 @@ contract("wiki / buy / run", accounts => {
     await shouldFail(
       contracts.dat.buy(accounts[5], amount.toFixed(), 1, {
         from: accounts[5],
-        value: amount.toFixed()
+        value: amount.toFixed(),
       })
     );
   });
@@ -69,7 +69,7 @@ contract("wiki / buy / run", accounts => {
       await shouldFail(
         contracts.dat.buy(accounts[5], amount, x.plus(1).toFixed(), {
           from: accounts[5],
-          value: amount
+          value: amount,
         })
       );
     });
@@ -77,7 +77,7 @@ contract("wiki / buy / run", accounts => {
     it("Sanity check buying x works", async () => {
       await contracts.dat.buy(accounts[5], amount, x.toFixed(), {
         from: accounts[5],
-        value: amount
+        value: amount,
       });
     });
   });
@@ -94,7 +94,7 @@ contract("wiki / buy / run", accounts => {
       x = new BigNumber(await contracts.dat.estimateBuyValue(amount));
       await contracts.dat.buy(accounts[5], amount, 1, {
         from: accounts[5],
-        value: amount
+        value: amount,
       });
     });
 
@@ -117,7 +117,7 @@ contract("wiki / buy / run", accounts => {
         x = new BigNumber(await contracts.dat.estimateBuyValue(amount));
         await contracts.dat.buy(accounts[5], amount, 1, {
           from: accounts[5],
-          value: amount
+          value: amount,
         });
       });
 
@@ -165,7 +165,7 @@ contract("wiki / buy / run", accounts => {
 
         await contracts.dat.buy(from, amount, 1, {
           from,
-          value: amount
+          value: amount,
         });
       });
 
@@ -221,7 +221,7 @@ contract("wiki / buy / run", accounts => {
 
       await contracts.dat.buy(from, amount, 1, {
         from: from,
-        value: amount
+        value: amount,
       });
     });
 

@@ -2,16 +2,16 @@ const {
   approveAll,
   constants,
   deployDat,
-  shouldFail
+  shouldFail,
 } = require("../../helpers");
 
-contract("wiki / close / close", accounts => {
+contract("wiki / close / close", (accounts) => {
   let contracts;
   const investor = accounts[3];
 
   before(async () => {
     contracts = await deployDat(accounts, {
-      initGoal: "0"
+      initGoal: "0",
     });
 
     await approveAll(contracts, accounts);
@@ -20,13 +20,13 @@ contract("wiki / close / close", accounts => {
     for (let i = 0; i < 9; i++) {
       await contracts.dat.buy(accounts[i], "100000000000000000000", 1, {
         value: "100000000000000000000",
-        from: accounts[i]
+        from: accounts[i],
       });
     }
 
     await contracts.dat.close({
       from: accounts[0],
-      value: "10000000000000000000000"
+      value: "10000000000000000000000",
     });
   });
 
@@ -39,7 +39,7 @@ contract("wiki / close / close", accounts => {
     await shouldFail(
       contracts.dat.close({
         from: await contracts.dat.beneficiary(),
-        value: "10000000000000000000000"
+        value: "10000000000000000000000",
       }),
       "INVALID_STATE"
     );

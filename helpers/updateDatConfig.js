@@ -9,7 +9,7 @@ module.exports = async function updateDatConfig(contracts, options) {
       autoBurn: await contracts.dat.autoBurn(),
       revenueCommitmentBasisPoints: await contracts.dat.revenueCommitmentBasisPoints(),
       minInvestment: await contracts.dat.minInvestment(),
-      openUntilAtLeast: await contracts.dat.openUntilAtLeast()
+      openUntilAtLeast: await contracts.dat.openUntilAtLeast(),
     },
     options
   );

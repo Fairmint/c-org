@@ -8,16 +8,16 @@ const {
   deployDat,
   getGasCost,
   shouldFail,
-  updateDatConfig
+  updateDatConfig,
 } = require("../../helpers");
 
-contract("wiki / close / run", accounts => {
+contract("wiki / close / run", (accounts) => {
   let contracts;
 
   beforeEach(async () => {
     contracts = await deployDat(accounts, {
       initGoal: "0", // Start in the run state
-      autoBurn: true
+      autoBurn: true,
     });
 
     await approveAll(contracts, accounts);
@@ -26,7 +26,7 @@ contract("wiki / close / run", accounts => {
     for (let i = 9; i >= 0; i--) {
       await contracts.dat.buy(accounts[i], "100000000000000000000", 1, {
         value: "100000000000000000000",
-        from: accounts[i]
+        from: accounts[i],
       });
     }
   });
@@ -40,7 +40,7 @@ contract("wiki / close / run", accounts => {
     await shouldFail(
       contracts.dat.close({
         from: accounts[9],
-        value: "10000000000000000000000"
+        value: "10000000000000000000000",
       })
     );
   });
@@ -48,7 +48,7 @@ contract("wiki / close / run", accounts => {
   describe("when locked", async () => {
     beforeEach(async () => {
       await updateDatConfig(contracts, {
-        openUntilAtLeast: Math.round(Date.now() / 1000) + 10
+        openUntilAtLeast: Math.round(Date.now() / 1000) + 10,
       });
     });
 
@@ -56,7 +56,7 @@ contract("wiki / close / run", accounts => {
       await shouldFail(
         contracts.dat.close({
           from: await contracts.dat.beneficiary(),
-          value: "10000000000000000000000"
+          value: "10000000000000000000000",
         })
       );
     });
@@ -69,7 +69,7 @@ contract("wiki / close / run", accounts => {
       it("then close works again", async () => {
         await contracts.dat.close({
           from: await contracts.dat.beneficiary(),
-          value: "10000000000000000000000"
+          value: "10000000000000000000000",
         });
       });
     });
@@ -91,7 +91,7 @@ contract("wiki / close / run", accounts => {
       exitFee = new BigNumber(await contracts.dat.estimateExitFee(0));
       const tx = await contracts.dat.close({
         from: await contracts.dat.beneficiary(),
-        value: exitFee.toFixed()
+        value: exitFee.toFixed(),
       });
       gasCost = await getGasCost(tx);
     });
@@ -107,10 +107,7 @@ contract("wiki / close / run", accounts => {
       );
       assert.equal(
         balance.toFixed(),
-        beneficiaryBalanceBefore
-          .minus(exitFee)
-          .minus(gasCost)
-          .toFixed()
+        beneficiaryBalanceBefore.minus(exitFee).minus(gasCost).toFixed()
       );
     });
 
@@ -130,7 +127,7 @@ contract("wiki / close / run", accounts => {
     await shouldFail(
       contracts.dat.close({
         from: await contracts.dat.beneficiary(),
-        value: exitFee.minus(1).toFixed()
+        value: exitFee.minus(1).toFixed(),
       })
     );
   });
@@ -147,7 +144,7 @@ contract("wiki / close / run", accounts => {
       exitFee = new BigNumber(await contracts.dat.estimateExitFee(0));
       const tx = await contracts.dat.close({
         from: await contracts.dat.beneficiary(),
-        value: exitFee.plus(web3.utils.toWei("1", "ether")).toFixed()
+        value: exitFee.plus(web3.utils.toWei("1", "ether")).toFixed(),
       });
       gasCost = await getGasCost(tx);
     });
@@ -158,10 +155,7 @@ contract("wiki / close / run", accounts => {
       );
       assert.equal(
         balance.toFixed(),
-        beneficiaryBalanceBefore
-          .minus(exitFee)
-          .minus(gasCost)
-          .toFixed()
+        beneficiaryBalanceBefore.minus(exitFee).minus(gasCost).toFixed()
       );
     });
   });
@@ -173,7 +167,7 @@ contract("wiki / close / run", accounts => {
       contracts = await deployDat(accounts, { currency: token.address });
       await approveAll(contracts, accounts);
       await token.mint(contracts.dat.address, constants.MAX_UINT, {
-        from: accounts[0]
+        from: accounts[0],
       });
     });
 

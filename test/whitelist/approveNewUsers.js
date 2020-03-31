@@ -1,7 +1,7 @@
 const { deployDat } = require("../helpers");
 const { reverts } = require("truffle-assertions");
 
-contract("dat / whitelist / approveNewUsers", accounts => {
+contract("dat / whitelist / approveNewUsers", (accounts) => {
   let contracts;
   let ownerAccount;
   let operatorAccount = accounts[5];
@@ -10,14 +10,14 @@ contract("dat / whitelist / approveNewUsers", accounts => {
     contracts = await deployDat(accounts);
     ownerAccount = await contracts.whitelist.owner();
     await contracts.whitelist.addOperator(operatorAccount, {
-      from: ownerAccount
+      from: ownerAccount,
     });
   });
 
   it("non-operators cannot approveNewUsers", async () => {
     await reverts(
       contracts.whitelist.approveNewUsers([accounts[5]], [4], {
-        from: accounts[9]
+        from: accounts[9],
       }),
       "OperatorRole: caller does not have the Operator role"
     );
@@ -25,14 +25,14 @@ contract("dat / whitelist / approveNewUsers", accounts => {
 
   it("operators can approveNewUsers", async () => {
     await contracts.whitelist.approveNewUsers([accounts[5]], [4], {
-      from: operatorAccount
+      from: operatorAccount,
     });
   });
 
   it("should fail to approve a 0 jurisdiction", async () => {
     await reverts(
       contracts.whitelist.approveNewUsers([accounts[5]], [0], {
-        from: operatorAccount
+        from: operatorAccount,
       }),
       "INVALID_JURISDICTION_ID"
     );
@@ -41,7 +41,7 @@ contract("dat / whitelist / approveNewUsers", accounts => {
   describe("after approval", () => {
     beforeEach(async () => {
       await contracts.whitelist.approveNewUsers([accounts[5]], [4], {
-        from: operatorAccount
+        from: operatorAccount,
       });
     });
 
@@ -50,7 +50,7 @@ contract("dat / whitelist / approveNewUsers", accounts => {
         jurisdictionId,
         totalTokensLocked,
         startIndex,
-        endIndex
+        endIndex,
       } = await contracts.whitelist.getAuthorizedUserIdInfo(accounts[5]);
       assert.equal(jurisdictionId, 4);
       assert.equal(totalTokensLocked, 0);
@@ -63,7 +63,7 @@ contract("dat / whitelist / approveNewUsers", accounts => {
         jurisdictionId,
         totalTokensLocked,
         startIndex,
-        endIndex
+        endIndex,
       } = await contracts.whitelist.getAuthorizedUserIdInfo(accounts[5]);
       assert.equal(jurisdictionId, 4);
       assert.equal(totalTokensLocked, 0);
@@ -74,7 +74,7 @@ contract("dat / whitelist / approveNewUsers", accounts => {
     it("should fail to approve a known user", async () => {
       await reverts(
         contracts.whitelist.approveNewUsers([accounts[5]], [4], {
-          from: operatorAccount
+          from: operatorAccount,
         }),
         "USER_WALLET_ALREADY_ADDED"
       );

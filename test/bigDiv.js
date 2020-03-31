@@ -1,7 +1,7 @@
 const BigNumber = require("bignumber.js");
 const bigDivArtifact = artifacts.require("BigDivMock");
 
-contract("bigDiv", accounts => {
+contract("bigDiv", (accounts) => {
   let contract;
   const maxValue = new BigNumber(2).pow(256).minus(1);
 
@@ -23,43 +23,13 @@ contract("bigDiv", accounts => {
   });
 
   it("2x1 does not overflow with half max value", async () => {
+    await contract.bigDiv2x1RoundUp(maxValue.div(2).dp(0).toFixed(), 1, 1);
+    await contract.bigDiv2x1RoundUp(1, maxValue.div(2).dp(0).toFixed(), 1);
+    await contract.bigDiv2x1RoundUp(1, 1, maxValue.div(2).dp(0).toFixed());
     await contract.bigDiv2x1RoundUp(
-      maxValue
-        .div(2)
-        .dp(0)
-        .toFixed(),
-      1,
-      1
-    );
-    await contract.bigDiv2x1RoundUp(
-      1,
-      maxValue
-        .div(2)
-        .dp(0)
-        .toFixed(),
-      1
-    );
-    await contract.bigDiv2x1RoundUp(
-      1,
-      1,
-      maxValue
-        .div(2)
-        .dp(0)
-        .toFixed()
-    );
-    await contract.bigDiv2x1RoundUp(
-      maxValue
-        .div(2)
-        .dp(0)
-        .toFixed(),
-      maxValue
-        .div(2)
-        .dp(0)
-        .toFixed(),
-      maxValue
-        .div(2)
-        .dp(0)
-        .toFixed()
+      maxValue.div(2).dp(0).toFixed(),
+      maxValue.div(2).dp(0).toFixed(),
+      maxValue.div(2).dp(0).toFixed()
     );
   });
 
@@ -91,59 +61,15 @@ contract("bigDiv", accounts => {
   });
 
   it("2x2 does not overflow with half max value", async () => {
+    await contract.bigDiv2x2(maxValue.div(2).dp(0).toFixed(), 1, 1, 1);
+    await contract.bigDiv2x2(1, maxValue.div(2).dp(0).toFixed(), 1, 1);
+    await contract.bigDiv2x2(1, 1, maxValue.div(2).dp(0).toFixed(), 1);
+    await contract.bigDiv2x2(1, 1, 1, maxValue.div(2).dp(0).toFixed());
     await contract.bigDiv2x2(
-      maxValue
-        .div(2)
-        .dp(0)
-        .toFixed(),
-      1,
-      1,
-      1
-    );
-    await contract.bigDiv2x2(
-      1,
-      maxValue
-        .div(2)
-        .dp(0)
-        .toFixed(),
-      1,
-      1
-    );
-    await contract.bigDiv2x2(
-      1,
-      1,
-      maxValue
-        .div(2)
-        .dp(0)
-        .toFixed(),
-      1
-    );
-    await contract.bigDiv2x2(
-      1,
-      1,
-      1,
-      maxValue
-        .div(2)
-        .dp(0)
-        .toFixed()
-    );
-    await contract.bigDiv2x2(
-      maxValue
-        .div(2)
-        .dp(0)
-        .toFixed(),
-      maxValue
-        .div(2)
-        .dp(0)
-        .toFixed(),
-      maxValue
-        .div(2)
-        .dp(0)
-        .toFixed(),
-      maxValue
-        .div(2)
-        .dp(0)
-        .toFixed()
+      maxValue.div(2).dp(0).toFixed(),
+      maxValue.div(2).dp(0).toFixed(),
+      maxValue.div(2).dp(0).toFixed(),
+      maxValue.div(2).dp(0).toFixed()
     );
   });
 

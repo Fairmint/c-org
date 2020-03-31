@@ -1,7 +1,7 @@
 const BigNumber = require("bignumber.js");
 const { approveAll, deployDat, getGasCost } = require("../helpers");
 
-contract("dat / to", accounts => {
+contract("dat / to", (accounts) => {
   let contracts;
   const currencyHolder = accounts[3];
   const fairHolder = accounts[4];
@@ -10,7 +10,7 @@ contract("dat / to", accounts => {
     contracts = await deployDat(
       accounts,
       {
-        initGoal: "0" // Start in the run state
+        initGoal: "0", // Start in the run state
       },
       false
     );
@@ -37,7 +37,7 @@ contract("dat / to", accounts => {
       );
       const tx = await contracts.dat.buy(fairHolder, amount, 1, {
         from: currencyHolder,
-        value: amount
+        value: amount,
       });
       gasPaid = await getGasCost(tx);
     });
@@ -50,10 +50,7 @@ contract("dat / to", accounts => {
       const balance = new BigNumber(await web3.eth.getBalance(currencyHolder));
       assert.equal(
         balance.toFixed(),
-        currencyHolderBalanceBefore
-          .minus(amount)
-          .minus(gasPaid)
-          .toFixed()
+        currencyHolderBalanceBefore.minus(amount).minus(gasPaid).toFixed()
       );
     });
 
@@ -82,7 +79,7 @@ contract("dat / to", accounts => {
           await contracts.dat.estimateSellValue(amount)
         );
         await contracts.dat.sell(currencyHolder, amount, 1, {
-          from: fairHolder
+          from: fairHolder,
         });
       });
 
@@ -131,7 +128,7 @@ contract("dat / to", accounts => {
       );
       const tx = await contracts.dat.pay(fairHolder, amount, {
         from: currencyHolder,
-        value: amount
+        value: amount,
       });
       gasPaid = await getGasCost(tx);
     });
@@ -144,10 +141,7 @@ contract("dat / to", accounts => {
       const balance = new BigNumber(await web3.eth.getBalance(currencyHolder));
       assert.equal(
         balance.toFixed(),
-        currencyHolderBalanceBefore
-          .minus(amount)
-          .minus(gasPaid)
-          .toFixed()
+        currencyHolderBalanceBefore.minus(amount).minus(gasPaid).toFixed()
       );
     });
 

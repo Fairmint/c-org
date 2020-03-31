@@ -2,17 +2,17 @@ const {
   approveAll,
   constants,
   deployDat,
-  shouldFail
+  shouldFail,
 } = require("../../helpers");
 
-contract("wiki / burn / close", accounts => {
+contract("wiki / burn / close", (accounts) => {
   let contracts;
   const investor = accounts[3];
   const burnAmount = "42";
 
   before(async () => {
     contracts = await deployDat(accounts, {
-      initGoal: "0"
+      initGoal: "0",
     });
     await approveAll(contracts, accounts);
 
@@ -20,13 +20,13 @@ contract("wiki / burn / close", accounts => {
     for (let i = 0; i < 9; i++) {
       await contracts.dat.buy(accounts[i], "100000000000000000000", 1, {
         value: "100000000000000000000",
-        from: accounts[i]
+        from: accounts[i],
       });
     }
 
     await contracts.dat.close({
       from: accounts[0],
-      value: "10000000000000000000000"
+      value: "10000000000000000000000",
     });
   });
 
@@ -38,7 +38,7 @@ contract("wiki / burn / close", accounts => {
   it("Burn fails", async () => {
     await shouldFail(
       contracts.dat.burn(burnAmount, {
-        from: investor
+        from: investor,
       })
     );
   });
