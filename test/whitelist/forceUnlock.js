@@ -148,7 +148,7 @@ contract("dat / whitelist / forceUnlock", accounts => {
           await sleep((5 + readyToFreeCount) * 1000);
           for (let i = 0; i < 5; i++) {
             await contracts.whitelist.forceUnlock(trader, maxToFreePerLoop, {
-              from: accounts[8]
+              from: operatorAccount
             });
           }
         });
