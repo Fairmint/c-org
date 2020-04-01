@@ -145,15 +145,18 @@ contract("dat / whitelist / forceUnlock", accounts => {
 
       describe("after process", () => {
         beforeEach(async () => {
-          await sleep((5 + readyToFreeCount) * 1000);
           for (let i = 0; i < 5; i++) {
-            await contracts.whitelist.forceUnlock(trader, maxToFreePerLoop, {
-              from: operatorAccount
-            });
+            await contracts.whitelist.forceUnlock(
+              trader,
+              maxToFreePerLoop * (i + 1),
+              {
+                from: operatorAccount
+              }
+            );
           }
         });
 
-        it("most lockups were freed", async () => {
+        it("lockups were freed", async () => {
           const {
             jurisdictionId,
             totalTokensLocked,
@@ -161,9 +164,10 @@ contract("dat / whitelist / forceUnlock", accounts => {
             endIndex
           } = await contracts.whitelist.getAuthorizedUserIdInfo(trader);
           assert.equal(jurisdictionId, 4);
-          assert.equal(totalTokensLocked.toString(), 42 * notReadToFreeCount);
-          assert.equal(startIndex, 1 + readyToFreeCount);
-          assert.equal(endIndex, 1 + readyToFreeCount + notReadToFreeCount);
+
+          // All entries were unlocked
+          assert.equal(totalTokensLocked.toString(), 0);
+          assert.equal(startIndex, endIndex);
         });
       });
     });
