@@ -1,4 +1,3 @@
-const BigNumber = require("bignumber.js");
 const { deployDat } = require("../helpers");
 const { reverts } = require("truffle-assertions");
 
