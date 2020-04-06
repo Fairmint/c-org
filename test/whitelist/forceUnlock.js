@@ -2,12 +2,12 @@ const { deployDat } = require("../helpers");
 const { reverts } = require("truffle-assertions");
 
 async function sleep(ms) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     setTimeout(resolve, ms);
   });
 }
 
-contract("dat / whitelist / forceUnlock", accounts => {
+contract("dat / whitelist / forceUnlock", (accounts) => {
   let contracts;
   let ownerAccount;
   let operatorAccount = accounts[3];
@@ -17,17 +17,17 @@ contract("dat / whitelist / forceUnlock", accounts => {
     contracts = await deployDat(accounts);
     ownerAccount = await contracts.whitelist.owner();
     await contracts.whitelist.addOperator(operatorAccount, {
-      from: ownerAccount
+      from: ownerAccount,
     });
     await contracts.whitelist.approveNewUsers([trader], [4], {
-      from: operatorAccount
+      from: operatorAccount,
     });
     await contracts.whitelist.addLockups(
       [trader],
       [Math.round(Date.now() / 1000) + 5],
       [42],
       {
-        from: operatorAccount
+        from: operatorAccount,
       }
     );
   });
@@ -35,7 +35,7 @@ contract("dat / whitelist / forceUnlock", accounts => {
   it("non-operator should fail to forceUnlock", async () => {
     await reverts(
       contracts.whitelist.forceUnlock(trader, -1, {
-        from: accounts[8]
+        from: accounts[8],
       }),
       "OperatorRole: caller does not have the Operator role"
     );
@@ -44,7 +44,7 @@ contract("dat / whitelist / forceUnlock", accounts => {
   it("should fail to for a userId that does not exist", async () => {
     await reverts(
       contracts.whitelist.forceUnlock(accounts[8], -1, {
-        from: operatorAccount
+        from: operatorAccount,
       }),
       "USER_ID_UNKNOWN"
     );
@@ -55,7 +55,7 @@ contract("dat / whitelist / forceUnlock", accounts => {
       jurisdictionId,
       totalTokensLocked,
       startIndex,
-      endIndex
+      endIndex,
     } = await contracts.whitelist.getAuthorizedUserIdInfo(trader);
     assert.equal(jurisdictionId, 4);
     assert.equal(totalTokensLocked.toString(), 42);
@@ -67,7 +67,7 @@ contract("dat / whitelist / forceUnlock", accounts => {
     beforeEach(async () => {
       await sleep(6000);
       await contracts.whitelist.forceUnlock(trader, -1, {
-        from: operatorAccount
+        from: operatorAccount,
       });
     });
 
@@ -76,7 +76,7 @@ contract("dat / whitelist / forceUnlock", accounts => {
         jurisdictionId,
         totalTokensLocked,
         startIndex,
-        endIndex
+        endIndex,
       } = await contracts.whitelist.getAuthorizedUserIdInfo(trader);
       assert.equal(jurisdictionId, 4);
       assert.equal(totalTokensLocked.toString(), 0);
@@ -98,7 +98,7 @@ contract("dat / whitelist / forceUnlock", accounts => {
             lockupTime += 10000;
           }
           await contracts.whitelist.addLockups([trader], [lockupTime++], [42], {
-            from: operatorAccount
+            from: operatorAccount,
           });
         }
       });
@@ -108,7 +108,7 @@ contract("dat / whitelist / forceUnlock", accounts => {
           jurisdictionId,
           totalTokensLocked,
           startIndex,
-          endIndex
+          endIndex,
         } = await contracts.whitelist.getAuthorizedUserIdInfo(trader);
         assert.equal(jurisdictionId, 4);
         assert.equal(
@@ -125,7 +125,7 @@ contract("dat / whitelist / forceUnlock", accounts => {
         await web3.eth.sendTransaction({
           from: accounts[0],
           to: accounts[1],
-          value: 1
+          value: 1,
         });
 
         let lockedTokens = await contracts.whitelist.getLockedTokenCount(
@@ -135,7 +135,7 @@ contract("dat / whitelist / forceUnlock", accounts => {
         const price = web3.utils.toWei("1000000", "ether");
         await contracts.dat.buy(trader, price, 1, {
           from: trader,
-          value: price
+          value: price,
         });
         lockedTokens = await contracts.whitelist.getLockedTokenCount(trader);
         assert.equal(lockedTokens.toString(), 42 * notReadToFreeCount);
@@ -149,7 +149,7 @@ contract("dat / whitelist / forceUnlock", accounts => {
               trader,
               maxToFreePerLoop * (i + 1),
               {
-                from: operatorAccount
+                from: operatorAccount,
               }
             );
           }
@@ -160,13 +160,13 @@ contract("dat / whitelist / forceUnlock", accounts => {
             jurisdictionId,
             totalTokensLocked,
             startIndex,
-            endIndex
+            endIndex,
           } = await contracts.whitelist.getAuthorizedUserIdInfo(trader);
           assert.equal(jurisdictionId, 4);
 
           // All entries were unlocked
           assert.equal(totalTokensLocked.toString(), 0);
-          assert.equal(startIndex, endIndex);
+          assert.equal(startIndex.toString(), endIndex.toString());
         });
       });
     });
