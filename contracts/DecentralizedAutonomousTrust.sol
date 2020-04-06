@@ -66,6 +66,7 @@ contract DecentralizedAutonomousTrust
     address indexed _beneficiary,
     address indexed _control,
     address indexed _feeCollector,
+    address _overridePayTo,
     bool _autoBurn,
     uint _revenueCommitmentBasisPoints,
     uint _feeBasisPoints,
@@ -121,6 +122,9 @@ contract DecentralizedAutonomousTrust
   /// @notice The address of the beneficiary organization which receives the investments.
   /// Points to the wallet of the organization.
   address payable public beneficiary;
+
+  /// @notice The address to send tokens on pay. If zero, the caller may choose.
+  address public overridePayTo;
 
   /// @notice The buy slope of the bonding curve.
   /// Does not affect the financial model, only the granularity of FAIR.
@@ -439,6 +443,7 @@ contract DecentralizedAutonomousTrust
     address payable _beneficiary,
     address _control,
     address payable _feeCollector,
+    address _overridePayTo,
     uint _feeBasisPoints,
     bool _autoBurn,
     uint _revenueCommitmentBasisPoints,
@@ -457,6 +462,8 @@ contract DecentralizedAutonomousTrust
 
     require(_feeCollector != address(0), "INVALID_ADDRESS");
     feeCollector = _feeCollector;
+
+    overridePayTo = _overridePayTo;
 
     autoBurn = _autoBurn;
 
@@ -491,6 +498,7 @@ contract DecentralizedAutonomousTrust
       _beneficiary,
       _control,
       _feeCollector,
+      _overridePayTo,
       _autoBurn,
       _revenueCommitmentBasisPoints,
       _feeBasisPoints,
@@ -853,13 +861,15 @@ contract DecentralizedAutonomousTrust
   }
 
   /// @dev Pay the organization on-chain.
-  /// @param _to The account which receives tokens for the contribution.
+  /// @param _to The account which receives tokens for the contribution. If this address
+  /// is not authorized to receive tokens then they will be sent to the beneficiary account instead.
   /// @param _currencyValue How much currency which was paid.
-  function _pay(
+  function pay(
     address _to,
     uint _currencyValue
-  ) private
+  ) public payable
   {
+    _collectInvestment(_currencyValue, msg.value, false);
     require(_currencyValue > 0, "MISSING_CURRENCY");
     require(state == STATE_RUN, "INVALID_STATE");
 
@@ -870,13 +880,18 @@ contract DecentralizedAutonomousTrust
 
     uint tokenValue = estimatePayValue(_currencyValue);
 
-    // Update the to address to the beneficiary if the currency value would fail
+    // Update the to address to the overridePayTo value if set,
+    // and the beneficiary if the address is not whitelisted
     address to = _to;
-    if(to == address(0))
+    if(overridePayTo != address(0))
+    {
+      to = overridePayTo;
+    }
+    else if(to == address(0))
     {
       to = beneficiary;
     }
-    else if(_detectTransferRestriction(address(0), _to, tokenValue) != 0)
+    else if(_detectTransferRestriction(address(0), to, tokenValue) != 0)
     {
       to = beneficiary;
     }
@@ -896,19 +911,6 @@ contract DecentralizedAutonomousTrust
     }
 
     emit Pay(msg.sender, _to, _currencyValue, tokenValue);
-  }
-
-  /// @dev Pay the organization on-chain.
-  /// @param _to The account which receives tokens for the contribution. If this address
-  /// is not authorized to receive tokens then they will be sent to the beneficiary account instead.
-  /// @param _currencyValue How much currency which was paid.
-  function pay(
-    address _to,
-    uint _currencyValue
-  ) public payable
-  {
-    _collectInvestment(_currencyValue, msg.value, false);
-    _pay(_to, _currencyValue);
   }
 
   /// Close
