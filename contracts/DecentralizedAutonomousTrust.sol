@@ -891,7 +891,8 @@ contract DecentralizedAutonomousTrust
     {
       to = beneficiary;
     }
-    else if(_detectTransferRestriction(address(0), to, tokenValue) != 0)
+
+    if(to != beneficiary && _detectTransferRestriction(address(0), to, tokenValue) != 0)
     {
       to = beneficiary;
     }
