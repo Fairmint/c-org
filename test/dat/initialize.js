@@ -1,4 +1,6 @@
 const { deployDat, shouldFail, constants } = require("../helpers");
+const { reverts } = require("truffle-assertions");
+const BigNumber = require("bignumber.js");
 
 contract("dat / initialize", (accounts) => {
   let contracts;
@@ -13,6 +15,8 @@ contract("dat / initialize", (accounts) => {
         await contracts.dat.buySlopeNum(),
         await contracts.dat.buySlopeDen(),
         await contracts.dat.investmentReserveBasisPoints(),
+        await contracts.dat.setupFee(),
+        await contracts.dat.setupFeeRecipient(),
         await contracts.dat.name(),
         await contracts.dat.symbol(),
         { from: await contracts.dat.control() }
@@ -61,5 +65,59 @@ contract("dat / initialize", (accounts) => {
       deployDat(accounts, { investmentReserveBasisPoints: "100000" }),
       "INVALID_RESERVE"
     );
+  });
+
+  it("shouldFail if recipient is missing", async () => {
+    await reverts(
+      deployDat(accounts, { setupFee: "1" }),
+      "MISSING_SETUP_FEE_RECIPIENT"
+    );
+  });
+
+  it("shouldFail if fee is missing", async () => {
+    await reverts(
+      deployDat(accounts, { setupFeeRecipient: accounts[3] }),
+      "MISSING_SETUP_FEE"
+    );
+  });
+
+  describe("fee vs goal", () => {
+    const buySlopeNum = "42";
+    const buySlopeDen = "100000000000000000000";
+    const initGoal = "420000000000000000000000";
+    let goal;
+
+    beforeEach(async () => {
+      // buy_slope*(init_goal^2)/2
+      goal = new BigNumber(buySlopeNum)
+        .div(buySlopeDen)
+        .times(new BigNumber(initGoal).pow(2))
+        .div(2);
+      console.log(goal.toFixed());
+      goal = goal.dp(0, BigNumber.ROUND_DOWN);
+    });
+
+    it("should work if fee is equal to the goal", async () => {
+      await deployDat(accounts, {
+        buySlopeNum,
+        buySlopeDen,
+        initGoal,
+        setupFee: goal.minus(10000000), // TODO testing off by 1?
+        setupFeeRecipient: accounts[3],
+      });
+    });
+
+    it("shouldFail if fee is greater than goal", async () => {
+      await reverts(
+        deployDat(accounts, {
+          buySlopeNum,
+          buySlopeDen,
+          initGoal,
+          setupFee: goal.plus(1),
+          setupFeeRecipient: accounts[3],
+        }),
+        "EXCESSIVE_SETUP_FEE"
+      );
+    });
   });
 });

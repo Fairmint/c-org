@@ -1,3 +1,5 @@
+const { constants } = require("hardlydifficult-ethereum-contracts");
+
 const datArtifact = artifacts.require("DecentralizedAutonomousTrust");
 const whitelistArtifact = artifacts.require("Whitelist");
 const proxyArtifact = artifacts.require("AdminUpgradeabilityProxy");
@@ -11,7 +13,7 @@ module.exports = async function deployDat(accounts, options, useProxy = true) {
   const callOptions = Object.assign(
     {
       initReserve: "42000000000000000000",
-      currency: web3.utils.padLeft(0, 40),
+      currency: constants.ZERO_ADDRESS,
       initGoal: "0",
       buySlopeNum: "1",
       buySlopeDen: "100000000000000000000",
@@ -20,6 +22,8 @@ module.exports = async function deployDat(accounts, options, useProxy = true) {
       control: accounts.length > 2 ? accounts[1] : accounts[0],
       beneficiary: accounts[0],
       feeCollector: accounts.length > 2 ? accounts[2] : accounts[0],
+      setupFee: 0,
+      setupFeeRecipient: constants.ZERO_ADDRESS,
       name: "Test org",
       symbol: "TFO",
     },
@@ -64,6 +68,8 @@ module.exports = async function deployDat(accounts, options, useProxy = true) {
     callOptions.buySlopeNum,
     callOptions.buySlopeDen,
     callOptions.investmentReserveBasisPoints,
+    callOptions.setupFee,
+    callOptions.setupFeeRecipient,
     callOptions.name,
     callOptions.symbol,
     { from: callOptions.control }
