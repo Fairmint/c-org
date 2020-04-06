@@ -123,9 +123,6 @@ contract DecentralizedAutonomousTrust
   /// Points to the wallet of the organization.
   address payable public beneficiary;
 
-  /// @notice The address to send tokens on pay. If zero, the caller may choose.
-  address public overridePayTo;
-
   /// @notice The buy slope of the bonding curve.
   /// Does not affect the financial model, only the granularity of FAIR.
   /// @dev This is the numerator component of the fractional value.
@@ -192,6 +189,9 @@ contract DecentralizedAutonomousTrust
   bytes32 public DOMAIN_SEPARATOR;
   // bytes32 public constant PERMIT_TYPEHASH = keccak256("Permit(address holder,address spender,uint256 nonce,uint256 expiry,bool allowed)");
   bytes32 public constant PERMIT_TYPEHASH = 0xea2aa0a1be11a07ed86d755c93467f4f82362b452371d1ba94d1715123511acb;
+
+  /// @notice The address to send tokens on pay. If zero, the caller may choose.
+  address public overridePayTo;
 
   modifier authorizeTransfer(
     address _from,
