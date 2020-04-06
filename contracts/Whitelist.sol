@@ -549,7 +549,7 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
    * @dev This should generally remain unused. It could be used in combination with
    * `addLockups` to fix an incorrect lockup expiration date or quantity.
    */
-  function forceUnlock(
+  function forceUnlockUpTo(
     address _userId,
     uint _maxLockupIndex
   ) external

@@ -7,7 +7,7 @@ async function sleep(ms) {
   });
 }
 
-contract("dat / whitelist / forceUnlock", (accounts) => {
+contract("dat / whitelist / forceUnlockUpTo", (accounts) => {
   let contracts;
   let ownerAccount;
   let operatorAccount = accounts[3];
@@ -32,9 +32,9 @@ contract("dat / whitelist / forceUnlock", (accounts) => {
     );
   });
 
-  it("non-operator should fail to forceUnlock", async () => {
+  it("non-operator should fail to forceUnlockUpTo", async () => {
     await reverts(
-      contracts.whitelist.forceUnlock(trader, -1, {
+      contracts.whitelist.forceUnlockUpTo(trader, -1, {
         from: accounts[8],
       }),
       "OperatorRole: caller does not have the Operator role"
@@ -43,7 +43,7 @@ contract("dat / whitelist / forceUnlock", (accounts) => {
 
   it("should fail to for a userId that does not exist", async () => {
     await reverts(
-      contracts.whitelist.forceUnlock(accounts[8], -1, {
+      contracts.whitelist.forceUnlockUpTo(accounts[8], -1, {
         from: operatorAccount,
       }),
       "USER_ID_UNKNOWN"
@@ -63,10 +63,10 @@ contract("dat / whitelist / forceUnlock", (accounts) => {
     assert.equal(endIndex, 1);
   });
 
-  describe("on forceUnlock", () => {
+  describe("on forceUnlockUpTo", () => {
     beforeEach(async () => {
       await sleep(6000);
-      await contracts.whitelist.forceUnlock(trader, -1, {
+      await contracts.whitelist.forceUnlockUpTo(trader, -1, {
         from: operatorAccount,
       });
     });
@@ -145,7 +145,7 @@ contract("dat / whitelist / forceUnlock", (accounts) => {
       describe("after process", () => {
         beforeEach(async () => {
           for (let i = 0; i < 5; i++) {
-            await contracts.whitelist.forceUnlock(
+            await contracts.whitelist.forceUnlockUpTo(
               trader,
               maxToFreePerLoop * (i + 1),
               {
