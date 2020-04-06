@@ -33,6 +33,7 @@ contract("dat / closeRefund", (accounts) => {
       proxy.address,
       await contracts.dat.control(),
       await contracts.dat.feeCollector(),
+      await contracts.dat.overridePayTo(),
       await contracts.dat.feeBasisPoints(),
       await contracts.dat.autoBurn(),
       await contracts.dat.revenueCommitmentBasisPoints(),
