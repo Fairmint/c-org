@@ -549,15 +549,17 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
    * @dev This should generally remain unused. It could be used in combination with
    * `addLockups` to fix an incorrect lockup expiration date or quantity.
    */
-  function forceUnlock(
+  function forceUnlockUpTo(
     address _userId,
-    uint _maxCount
+    uint _maxLockupIndex
   ) external
     onlyOperator()
   {
     UserInfo storage info = authorizedUserIdInfo[_userId];
     require(info.jurisdictionId > 0, "USER_ID_UNKNOWN");
-    for(uint i = 0; i < _maxCount; i++)
+    require(_maxLockupIndex > info.startIndex, "ALREADY_UNLOCKED");
+    uint maxCount = _maxLockupIndex - info.startIndex;
+    for(uint i = 0; i < maxCount; i++)
     {
       if(_processLockup(info, _userId, true))
       {
