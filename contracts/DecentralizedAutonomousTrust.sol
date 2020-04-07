@@ -190,6 +190,13 @@ contract DecentralizedAutonomousTrust
   // bytes32 public constant PERMIT_TYPEHASH = keccak256("Permit(address holder,address spender,uint256 nonce,uint256 expiry,bool allowed)");
   bytes32 public constant PERMIT_TYPEHASH = 0xea2aa0a1be11a07ed86d755c93467f4f82362b452371d1ba94d1715123511acb;
 
+  // The success fee (expressed in currency) that will be earned by setupFeeRecipient as soon as initGoal
+  // is reached. We must have setup_fee <= buy_slope*init_goal^(2)/2
+  uint public setupFee;
+
+  // The recipient of the setup_fee once init_goal is reached
+  address payable public setupFeeRecipient;
+
   /// @notice The address to send tokens on pay. If zero, the caller may choose.
   address public overridePayTo;
 
@@ -369,6 +376,8 @@ contract DecentralizedAutonomousTrust
     uint _buySlopeNum,
     uint _buySlopeDen,
     uint _investmentReserveBasisPoints,
+    uint _setupFee,
+    address payable _setupFeeRecipient,
     string memory _name,
     string memory _symbol
   ) public
@@ -399,6 +408,17 @@ contract DecentralizedAutonomousTrust
     // 100% or less
     require(_investmentReserveBasisPoints <= BASIS_POINTS_DEN, "INVALID_RESERVE");
     investmentReserveBasisPoints = _investmentReserveBasisPoints;
+
+    // Setup Fee
+    require(_setupFee == 0 || _setupFeeRecipient != address(0), "MISSING_SETUP_FEE_RECIPIENT");
+    require(_setupFeeRecipient == address(0) || _setupFee != 0, "MISSING_SETUP_FEE");
+    // setup_fee <= (n/d)*(g^2)/2
+    uint initGoalInCurrency = _initGoal * _initGoal;
+    initGoalInCurrency = initGoalInCurrency.mul(_buySlopeNum);
+    initGoalInCurrency /= 2 * _buySlopeDen;
+    require(_setupFee <= initGoalInCurrency, "EXCESSIVE_SETUP_FEE");
+    setupFee = _setupFee;
+    setupFeeRecipient = _setupFeeRecipient;
 
     // Set default values (which may be updated using `updateConfig`)
     minInvestment = 100 ether;
@@ -693,6 +713,20 @@ contract DecentralizedAutonomousTrust
           buySlopeNum * initGoal,
           buySlopeDen * 2
         );
+
+        if(setupFee > 0)
+        {
+          _transferCurrency(setupFeeRecipient, setupFee);
+          if(beneficiaryContribution > setupFee)
+          {
+            beneficiaryContribution -= setupFee;
+          }
+          else
+          {
+            beneficiaryContribution = 0;
+          }
+        }
+
         _distributeInvestment(buybackReserve().sub(beneficiaryContribution));
       }
     }
