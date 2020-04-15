@@ -102,7 +102,7 @@ contract("dat / initialize", (accounts) => {
         buySlopeNum,
         buySlopeDen,
         initGoal,
-        setupFee: goal.minus(10000000), // TODO testing off by 1?
+        setupFee: goal,
         setupFeeRecipient: accounts[3],
       });
     });
