@@ -1,11 +1,5 @@
 const BigNumber = require("bignumber.js");
-const vestingArtifact = artifacts.require("TokenVesting");
-const {
-  approveAll,
-  constants,
-  deployDat,
-  shouldFail,
-} = require("../../helpers");
+const { approveAll, constants, deployDat } = require("../../helpers");
 
 contract("wiki / buy / initWithSetupFee", (accounts) => {
   const initGoal = "10000000000000000000000";
@@ -15,13 +9,17 @@ contract("wiki / buy / initWithSetupFee", (accounts) => {
   let contracts;
 
   beforeEach(async () => {
-    contracts = await deployDat(accounts, {
-      initGoal,
-      initReserve,
-      feeBasisPoints: "10",
-      setupFee,
-      setupFeeRecipient,
-    });
+    contracts = await deployDat(
+      accounts,
+      {
+        initGoal,
+        initReserve,
+        feeBasisPoints: "10",
+        setupFee,
+        setupFeeRecipient,
+      },
+      false
+    );
 
     await approveAll(contracts, accounts);
   });
