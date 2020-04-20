@@ -948,6 +948,13 @@ contract DecentralizedAutonomousTrust
     emit Pay(msg.sender, _to, _currencyValue, tokenValue);
   }
 
+  /// @notice Pay the organization on-chain without minting any tokens.
+  /// @dev This allows you to add funds directly to the buybackReserve.
+  function () external payable
+  {
+    require(address(currency) == address(0), "ONLY_FOR_CURRENCY_ETH");
+  }
+
   /// Close
 
   function estimateExitFee(
