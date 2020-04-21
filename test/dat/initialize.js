@@ -69,14 +69,14 @@ contract("dat / initialize", (accounts) => {
 
   it("shouldFail if recipient is missing", async () => {
     await reverts(
-      deployDat(accounts, { setupFee: "1" }),
+      deployDat(accounts, { setupFee: "1" }, false),
       "MISSING_SETUP_FEE_RECIPIENT"
     );
   });
 
   it("shouldFail if fee is missing", async () => {
     await reverts(
-      deployDat(accounts, { setupFeeRecipient: accounts[3] }),
+      deployDat(accounts, { setupFeeRecipient: accounts[3] }, false),
       "MISSING_SETUP_FEE"
     );
   });
@@ -109,13 +109,17 @@ contract("dat / initialize", (accounts) => {
 
     it("shouldFail if fee is greater than goal", async () => {
       await reverts(
-        deployDat(accounts, {
-          buySlopeNum,
-          buySlopeDen,
-          initGoal,
-          setupFee: goal.plus(1),
-          setupFeeRecipient: accounts[3],
-        }),
+        deployDat(
+          accounts,
+          {
+            buySlopeNum,
+            buySlopeDen,
+            initGoal,
+            setupFee: goal.plus(1),
+            setupFeeRecipient: accounts[3],
+          },
+          false
+        ),
         "EXCESSIVE_SETUP_FEE"
       );
     });

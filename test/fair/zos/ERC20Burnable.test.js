@@ -16,7 +16,7 @@ contract("ERC20Burnable", function (accounts) {
     const contracts = await deployDat(accounts, {
       initGoal: 0,
       beneficiary: owner,
-      initReserve: initialBalance,
+      initReserve: initialBalance.toString(),
     });
     await approveAll(contracts, accounts);
     this.token = contracts.dat;
