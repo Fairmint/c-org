@@ -24,7 +24,7 @@ contract("ERC20", function (accounts) {
   beforeEach(async function () {
     const contracts = await deployDat(accounts, {
       initGoal: 0,
-      initReserve: initialSupply,
+      initReserve: initialSupply.toString(),
       beneficiary: initialHolder,
     });
     await approveAll(contracts, accounts);
