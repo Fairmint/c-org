@@ -1,6 +1,7 @@
 const { approveAll, deployDat } = require("../helpers");
 const { tokens } = require("hardlydifficult-ethereum-contracts");
-const { constants, shouldFail } = require("../helpers");
+const { constants } = require("../helpers");
+const { reverts } = require("truffle-assertions");
 
 contract("dat / collectInvestment", (accounts) => {
   it("shouldFail with DO_NOT_SEND_ETH", async () => {
@@ -13,7 +14,7 @@ contract("dat / collectInvestment", (accounts) => {
     await token.approve(contracts.dat.address, constants.MAX_UINT, {
       from: accounts[1],
     });
-    await shouldFail(
+    await reverts(
       contracts.dat.buy(accounts[1], "100000000000000000000", 1, {
         from: accounts[1],
         value: 1,

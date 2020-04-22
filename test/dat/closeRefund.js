@@ -1,4 +1,5 @@
-const { approveAll, deployDat, shouldFail } = require("../helpers");
+const { approveAll, deployDat } = require("../helpers");
+const { reverts } = require("truffle-assertions");
 const noFallbackProxyArtifact = artifacts.require("NoFallbackProxy");
 
 contract("dat / closeRefund", (accounts) => {
@@ -46,7 +47,7 @@ contract("dat / closeRefund", (accounts) => {
       contracts.dat.abi.find((e) => e.name === "close"),
       []
     );
-    await shouldFail(
+    await reverts(
       proxy.proxyCall(contracts.dat.address, callData, {
         value: "1000000000000000000000000000",
         from: await contracts.dat.control(),

@@ -1,13 +1,8 @@
 const { tokens } = require("hardlydifficult-ethereum-contracts");
 
 const BigNumber = require("bignumber.js");
-const {
-  approveAll,
-  constants,
-  deployDat,
-  getGasCost,
-  shouldFail,
-} = require("../helpers");
+const { approveAll, constants, deployDat, getGasCost } = require("../helpers");
+const { reverts } = require("truffle-assertions");
 
 contract("dat / overridePayTo", (accounts) => {
   let contracts;
@@ -108,7 +103,7 @@ contract("dat / overridePayTo", (accounts) => {
           from: accounts[0],
         });
         await approveAll(contracts, accounts);
-        await shouldFail(
+        await reverts(
           contracts.dat.pay(accounts[0], "0", {
             from: accounts[0],
           }),
@@ -165,7 +160,7 @@ contract("dat / overridePayTo", (accounts) => {
           from: accounts[0],
         });
         await approveAll(contracts, accounts);
-        await shouldFail(
+        await reverts(
           contracts.dat.pay(accounts[0], "0", {
             from: accounts[0],
           }),

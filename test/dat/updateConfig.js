@@ -1,11 +1,12 @@
-const { deployDat, shouldFail, constants } = require("../helpers");
+const { deployDat, constants } = require("../helpers");
+const { reverts } = require("truffle-assertions");
 
 contract("dat / updateConfig", (accounts) => {
   let contracts;
 
   it("shouldFail with CONTROL_ONLY", async () => {
     contracts = await deployDat(accounts);
-    await shouldFail(
+    await reverts(
       contracts.dat.updateConfig(
         await contracts.dat.whitelist(),
         await contracts.dat.beneficiary(),
@@ -42,7 +43,7 @@ contract("dat / updateConfig", (accounts) => {
 
   it("shouldFail with INVALID_ADDRESS if control is missing", async () => {
     contracts = await deployDat(accounts);
-    await shouldFail(
+    await reverts(
       contracts.dat.updateConfig(
         await contracts.dat.whitelist(),
         await contracts.dat.beneficiary(),
@@ -62,7 +63,7 @@ contract("dat / updateConfig", (accounts) => {
 
   it("shouldFail with INVALID_ADDRESS if feeCollector is missing", async () => {
     contracts = await deployDat(accounts);
-    await shouldFail(
+    await reverts(
       contracts.dat.updateConfig(
         await contracts.dat.whitelist(),
         await contracts.dat.beneficiary(),
@@ -97,7 +98,7 @@ contract("dat / updateConfig", (accounts) => {
       await contracts.dat.openUntilAtLeast(),
       { from: await contracts.dat.control() }
     );
-    await shouldFail(
+    await reverts(
       contracts.dat.updateConfig(
         await contracts.dat.whitelist(),
         await contracts.dat.beneficiary(),
@@ -117,7 +118,7 @@ contract("dat / updateConfig", (accounts) => {
 
   it("shouldFail with INVALID_COMMITMENT", async () => {
     contracts = await deployDat(accounts);
-    await shouldFail(
+    await reverts(
       contracts.dat.updateConfig(
         await contracts.dat.whitelist(),
         await contracts.dat.beneficiary(),
@@ -137,7 +138,7 @@ contract("dat / updateConfig", (accounts) => {
 
   it("shouldFail with INVALID_FEE", async () => {
     contracts = await deployDat(accounts);
-    await shouldFail(
+    await reverts(
       contracts.dat.updateConfig(
         await contracts.dat.whitelist(),
         await contracts.dat.beneficiary(),
@@ -157,7 +158,7 @@ contract("dat / updateConfig", (accounts) => {
 
   it("shouldFail with INVALID_MIN_INVESTMENT", async () => {
     contracts = await deployDat(accounts);
-    await shouldFail(
+    await reverts(
       contracts.dat.updateConfig(
         await contracts.dat.whitelist(),
         await contracts.dat.beneficiary(),
@@ -177,7 +178,7 @@ contract("dat / updateConfig", (accounts) => {
 
   it("shouldFail with INVALID_ADDRESS when missing the beneficiary", async () => {
     contracts = await deployDat(accounts);
-    await shouldFail(
+    await reverts(
       contracts.dat.updateConfig(
         await contracts.dat.whitelist(),
         constants.ZERO_ADDRESS,
@@ -210,7 +211,7 @@ contract("dat / updateConfig", (accounts) => {
       "100",
       { from: await contracts.dat.control() }
     );
-    await shouldFail(
+    await reverts(
       contracts.dat.updateConfig(
         await contracts.dat.whitelist(),
         await contracts.dat.beneficiary(),

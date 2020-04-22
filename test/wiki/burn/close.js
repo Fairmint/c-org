@@ -1,9 +1,5 @@
-const {
-  approveAll,
-  constants,
-  deployDat,
-  shouldFail,
-} = require("../../helpers");
+const { approveAll, constants, deployDat } = require("../../helpers");
+const { reverts } = require("truffle-assertions");
 
 contract("wiki / burn / close", (accounts) => {
   let contracts;
@@ -36,10 +32,11 @@ contract("wiki / burn / close", (accounts) => {
   });
 
   it("Burn fails", async () => {
-    await shouldFail(
+    await reverts(
       contracts.dat.burn(burnAmount, {
         from: investor,
-      })
+      }),
+      "ONLY_DURING_RUN"
     );
   });
 });

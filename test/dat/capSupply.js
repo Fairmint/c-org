@@ -1,6 +1,7 @@
 const { approveAll, deployDat } = require("../helpers");
 const { tokens } = require("hardlydifficult-ethereum-contracts");
-const { constants, shouldFail } = require("../helpers");
+const { constants } = require("../helpers");
+const { reverts } = require("truffle-assertions");
 
 contract("dat / capSupply", (accounts) => {
   let contracts;
@@ -32,7 +33,7 @@ contract("dat / capSupply", (accounts) => {
   });
 
   it("buying over cap shouldFail", async () => {
-    await shouldFail(
+    await reverts(
       contracts.dat.buy(
         accounts[1],
         "30000000000000000000000000000000000000000000000000000000",

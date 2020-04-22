@@ -1,11 +1,7 @@
 const BigNumber = require("bignumber.js");
 const vestingArtifact = artifacts.require("TokenVesting");
-const {
-  approveAll,
-  constants,
-  deployDat,
-  shouldFail,
-} = require("../../helpers");
+const { approveAll, constants, deployDat } = require("../../helpers");
+const { reverts } = require("truffle-assertions");
 
 contract("wiki / buy / init", (accounts) => {
   const initGoal = "10000000000000000000000";
@@ -133,8 +129,9 @@ contract("wiki / buy / init", (accounts) => {
       });
 
       it("transfer shouldFail", async () => {
-        await shouldFail(
-          contracts.dat.transfer(toAccount, 42, { from: fromAccount })
+        await reverts(
+          contracts.dat.transfer(toAccount, 42, { from: fromAccount }),
+          "ONLY_BENEFICIARY_DURING_INIT"
         );
       });
     });
@@ -206,22 +203,24 @@ contract("wiki / buy / init", (accounts) => {
     });
 
     it("Buy fails", async () => {
-      await shouldFail(
+      await reverts(
         contracts.dat.buy(accounts[5], "100000000000000000000", 1, {
           from: accounts[5],
           value: "100000000000000000000",
-        })
+        }),
+        "DENIED: JURISDICTION_FLOW"
       );
     });
   });
 
   it("If amount < min_investment, then the function exits.", async () => {
     const amount = new BigNumber(await contracts.dat.minInvestment()).minus(1);
-    await shouldFail(
+    await reverts(
       contracts.dat.buy(accounts[5], amount.toFixed(), 1, {
         from: accounts[5],
         value: amount.toFixed(),
-      })
+      }),
+      "PRICE_SLIPPAGE"
     );
   });
 
@@ -476,7 +475,7 @@ contract("wiki / buy / init", (accounts) => {
   });
 
   it("shouldFail if minTokens == 0", async () => {
-    await shouldFail(
+    await reverts(
       contracts.dat.buy(accounts[2], "100000000000000000000", 0, {
         from: accounts[2],
         value: "100000000000000000000",

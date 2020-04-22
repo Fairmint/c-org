@@ -2,7 +2,8 @@
  * Tests the ability to buy dat tokens
  */
 
-const { approveAll, deployDat, shouldFail } = require("../helpers");
+const { approveAll, deployDat } = require("../helpers");
+const { reverts } = require("truffle-assertions");
 
 contract("dat / buy", (accounts) => {
   let contracts;
@@ -19,7 +20,7 @@ contract("dat / buy", (accounts) => {
   });
 
   it("shouldFail with INCORRECT_MSG_VALUE", async () => {
-    await shouldFail(
+    await reverts(
       contracts.dat.buy(accounts[1], "100000000000000000001", 1, {
         value: "100000000000000000000",
         from: accounts[1],

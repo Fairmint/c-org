@@ -4,8 +4,8 @@ const {
   constants,
   deployDat,
   getGasCost,
-  shouldFail,
 } = require("../../helpers");
+const { reverts } = require("truffle-assertions");
 
 contract("wiki / sell / run", (accounts) => {
   const initReserve = "1000000000000000000000";
@@ -41,8 +41,9 @@ contract("wiki / sell / run", (accounts) => {
   });
 
   it("If address == beneficiary, then the function exits.", async () => {
-    await shouldFail(
-      contracts.dat.sell(beneficiary, sellAmount, 1, { from: beneficiary })
+    await reverts(
+      contracts.dat.sell(beneficiary, sellAmount, 1, { from: beneficiary }),
+      "BENEFICIARY_ONLY_SELL_IN_CLOSE_OR_CANCEL"
     );
   });
 
@@ -59,8 +60,9 @@ contract("wiki / sell / run", (accounts) => {
     });
 
     await contracts.dat.transfer(investor, sellAmount, { from: beneficiary });
-    await shouldFail(
-      contracts.dat.sell(investor, sellAmount, 1, { from: investor })
+    await reverts(
+      contracts.dat.sell(investor, sellAmount, 1, { from: investor }),
+      "Address: insufficient balance" // from the currency (buyback reserve)
     );
   });
 
@@ -92,10 +94,11 @@ contract("wiki / sell / run", (accounts) => {
   it("If x < minimum then the call fails.", async () => {
     const x = new BigNumber(await contracts.dat.estimateSellValue(sellAmount));
 
-    await shouldFail(
+    await reverts(
       contracts.dat.sell(investor, sellAmount, x.plus(1).toFixed(), {
         from: investor,
-      })
+      }),
+      "PRICE_SLIPPAGE"
     );
   });
 
@@ -124,7 +127,7 @@ contract("wiki / sell / run", (accounts) => {
       gasCost = await getGasCost(tx);
     });
 
-    it("amount is being substracted from the investor's balance.", async () => {
+    it("amount is being subtracted from the investor's balance.", async () => {
       const balance = new BigNumber(await contracts.dat.balanceOf(investor));
       assert.equal(
         balance.toFixed(),
@@ -161,10 +164,11 @@ contract("wiki / sell / run", (accounts) => {
     // x=amount*buyback_reserve/(total_supply-init_reserve)
     const x = new BigNumber(await contracts.dat.estimateSellValue(sellAmount));
 
-    await shouldFail(
+    await reverts(
       contracts.dat.sell(investor, sellAmount, x.plus(1).toFixed(), {
         from: investor,
-      })
+      }),
+      "PRICE_SLIPPAGE"
     );
   });
 
@@ -189,10 +193,11 @@ contract("wiki / sell / run", (accounts) => {
     });
 
     it("Sell fails", async () => {
-      await shouldFail(
+      await reverts(
         contracts.dat.sell(investor, sellAmount, "1", {
           from: investor,
-        })
+        }),
+        "DENIED: JURISDICTION_FLOW"
       );
     });
   });

@@ -4,8 +4,8 @@ const {
   constants,
   deployDat,
   getGasCost,
-  shouldFail,
 } = require("../../helpers");
+const { reverts } = require("truffle-assertions");
 
 contract("wiki / sell / init", (accounts) => {
   const initGoal = "10000000000000000000000";
@@ -42,8 +42,9 @@ contract("wiki / sell / init", (accounts) => {
   });
 
   it("If address == beneficiary, then the function exits.", async () => {
-    await shouldFail(
-      contracts.dat.sell(beneficiary, sellAmount, 1, { from: beneficiary })
+    await reverts(
+      contracts.dat.sell(beneficiary, sellAmount, 1, { from: beneficiary }),
+      "BENEFICIARY_ONLY_SELL_IN_CLOSE_OR_CANCEL"
     );
   });
 
@@ -55,8 +56,9 @@ contract("wiki / sell / init", (accounts) => {
     });
 
     it("If init_investors[address]<amount then the call fails.", async () => {
-      await shouldFail(
-        contracts.dat.sell(investor, initReserve, 1, { from: investor })
+      await reverts(
+        contracts.dat.sell(investor, initReserve, 1, { from: investor }),
+        "SafeMath: subtraction overflow"
       );
     });
 
@@ -137,10 +139,11 @@ contract("wiki / sell / init", (accounts) => {
     // x=amount*buyback_reserve/(total_supply-init_reserve)
     const x = new BigNumber(await contracts.dat.estimateSellValue(sellAmount));
 
-    await shouldFail(
+    await reverts(
       contracts.dat.sell(investor, sellAmount, x.plus(1).toFixed(), {
         from: investor,
-      })
+      }),
+      "PRICE_SLIPPAGE"
     );
   });
 
@@ -154,7 +157,7 @@ contract("wiki / sell / init", (accounts) => {
   });
 
   it("shouldFail if minCurrency == 0", async () => {
-    await shouldFail(
+    await reverts(
       contracts.dat.sell(investor, sellAmount, 0, { from: investor }),
       "MUST_SELL_AT_LEAST_1"
     );

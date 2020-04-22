@@ -1,9 +1,5 @@
-const {
-  approveAll,
-  constants,
-  deployDat,
-  shouldFail,
-} = require("../../helpers");
+const { approveAll, constants, deployDat } = require("../../helpers");
+const { reverts } = require("truffle-assertions");
 
 contract("wiki / pay / close", (accounts) => {
   let contracts;
@@ -36,11 +32,12 @@ contract("wiki / pay / close", (accounts) => {
   });
 
   it("pay should fail", async () => {
-    await shouldFail(
+    await reverts(
       contracts.dat.pay(investor, "1", {
         from: investor,
         value: "1",
-      })
+      }),
+      "INVALID_STATE"
     );
   });
 });

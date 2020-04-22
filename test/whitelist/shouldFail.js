@@ -1,4 +1,5 @@
-const { constants, deployDat, shouldFail } = require("../helpers");
+const { constants, deployDat } = require("../helpers");
+const { reverts } = require("truffle-assertions");
 
 contract("dat / whitelist / shouldFail", (accounts) => {
   let contracts;
@@ -8,7 +9,7 @@ contract("dat / whitelist / shouldFail", (accounts) => {
   });
 
   it("shouldFail to init again", async () => {
-    await shouldFail(
+    await reverts(
       contracts.whitelist.initialize(constants.ZERO_ADDRESS, {
         from: accounts[0],
       }),
@@ -17,7 +18,7 @@ contract("dat / whitelist / shouldFail", (accounts) => {
   });
 
   it("shouldFail to approve by a non-operator", async () => {
-    await shouldFail(
+    await reverts(
       contracts.whitelist.approveNewUsers([accounts[1]], [1], {
         from: accounts[5],
       }),
@@ -26,7 +27,7 @@ contract("dat / whitelist / shouldFail", (accounts) => {
   });
 
   it("shouldFail if called directly", async () => {
-    await shouldFail(
+    await reverts(
       contracts.whitelist.authorizeTransfer(accounts[1], accounts[1], 1, true),
       "CALL_VIA_CONTRACT_ONLY"
     );

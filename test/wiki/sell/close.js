@@ -4,8 +4,8 @@ const {
   constants,
   deployDat,
   getGasCost,
-  shouldFail,
 } = require("../../helpers");
+const { reverts } = require("truffle-assertions");
 
 contract("wiki / sell / close", (accounts) => {
   const initReserve = "1000000000000000000000";
@@ -110,10 +110,11 @@ contract("wiki / sell / close", (accounts) => {
   it("if the value is less than the min specified then sell fails", async () => {
     const x = new BigNumber(await contracts.dat.estimateSellValue(sellAmount));
 
-    await shouldFail(
+    await reverts(
       contracts.dat.sell(investor, sellAmount, x.plus(1).toFixed(), {
         from: investor,
-      })
+      }),
+      "PRICE_SLIPPAGE"
     );
   });
 
