@@ -46,7 +46,9 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/repo
-      - run: npm run coverage
+      - run:
+          command: npm run coverage
+          no_output_timeout: 120m
 
   publish:
     context: docker-hub-credentials
