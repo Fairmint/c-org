@@ -75,9 +75,9 @@ workflows:
       - test:
           requires:
             - build
-      #- coverage:
-      #    requires:
-      #      - build
+      - coverage:
+         requires:
+           - build
       - publish:
           requires:
             - build
