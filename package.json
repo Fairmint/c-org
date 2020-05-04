@@ -23,6 +23,7 @@
     "@openzeppelin/test-helpers": "0.5.5",
     "@openzeppelin/upgrades": "2.8.0",
     "bignumber.js": "9.0.0",
+    "hardlydifficult-eth": "1.0.0",
     "hardlydifficult-ethereum-contracts": "0.11.1",
     "papaparse": "5.2.0",
     "sleep": "6.1.0",

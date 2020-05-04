@@ -1,11 +1,26 @@
+const { constants } = require("hardlydifficult-eth");
+
 module.exports = async function updateDatConfig(contracts, options) {
+  /* Original version:
+    address _whitelistAddress,
+    address payable _beneficiary,
+    address _control,
+    address payable _feeCollector,
+    uint _feeBasisPoints,
+    bool _autoBurn,
+    uint _revenueCommitmentBasisPoints,
+    uint _minInvestment,
+    uint _openUntilAtLeast
+  */
   const callOptions = Object.assign(
     {
       whitelistAddress: await contracts.dat.whitelist(),
       beneficiary: await contracts.dat.beneficiary(),
       control: await contracts.dat.control(),
       feeCollector: await contracts.dat.feeCollector(),
-      overridePayTo: await contracts.dat.overridePayTo(),
+      overridePayTo: contracts.dat.overridePayTo
+        ? await contracts.dat.overridePayTo()
+        : constants.ZERO_ADDRESS,
       feeBasisPoints: await contracts.dat.feeBasisPoints(),
       autoBurn: await contracts.dat.autoBurn(),
       revenueCommitmentBasisPoints: await contracts.dat.revenueCommitmentBasisPoints(),
@@ -15,19 +30,38 @@ module.exports = async function updateDatConfig(contracts, options) {
     options
   );
 
+  let result;
   //console.log(`Update DAT: ${JSON.stringify(callOptions, null, 2)}`);
-  const result = await contracts.dat.updateConfig(
-    callOptions.whitelistAddress,
-    callOptions.beneficiary,
-    callOptions.control,
-    callOptions.feeCollector,
-    callOptions.overridePayTo,
-    callOptions.feeBasisPoints,
-    callOptions.autoBurn,
-    callOptions.revenueCommitmentBasisPoints,
-    callOptions.minInvestment,
-    callOptions.openUntilAtLeast,
-    { from: await contracts.dat.control() }
-  );
+  if (contracts.dat.overridePayTo) {
+    // latest version
+    result = await contracts.dat.updateConfig(
+      callOptions.whitelistAddress,
+      callOptions.beneficiary,
+      callOptions.control,
+      callOptions.feeCollector,
+      callOptions.overridePayTo,
+      callOptions.feeBasisPoints,
+      callOptions.autoBurn,
+      callOptions.revenueCommitmentBasisPoints,
+      callOptions.minInvestment,
+      callOptions.openUntilAtLeast,
+      { from: await contracts.dat.control() }
+    );
+  } else {
+    // original version
+    result = await contracts.dat.updateConfig(
+      callOptions.whitelistAddress,
+      callOptions.beneficiary,
+      callOptions.control,
+      callOptions.feeCollector,
+      callOptions.feeBasisPoints,
+      callOptions.autoBurn,
+      callOptions.revenueCommitmentBasisPoints,
+      callOptions.minInvestment,
+      callOptions.openUntilAtLeast,
+      { from: await contracts.dat.control() }
+    );
+  }
+
   return result;
 };
