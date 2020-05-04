@@ -20,7 +20,7 @@ contract("dat / whitelist / addApprovedUserWallets", (accounts) => {
   it("non-operators cannot addApprovedUserWallets", async () => {
     await reverts(
       contracts.whitelist.addApprovedUserWallets([accounts[5]], [accounts[4]], {
-        from: accounts[9],
+        from: accounts[8],
       }),
       "OperatorRole: caller does not have the Operator role"
     );
