@@ -16,10 +16,28 @@ contract("dat / whitelist / updateJurisdictionFlows", (accounts) => {
 
   it("Operator cannot updateJurisdictionFlows", async () => {
     await reverts(
-      contracts.whitelist.updateJurisdictionFlows([0], [0], [1], {
+      contracts.whitelist.updateJurisdictionFlows([1], [1], [1], {
         from: operatorAccount,
       }),
       "Ownable: caller is not the owner"
+    );
+  });
+
+  it("updateJurisdictionFlows does not accept 0", async () => {
+    await reverts(
+      contracts.whitelist.updateJurisdictionFlows([0], [1], [1], {
+        from: ownerAccount,
+      }),
+      "INVALID_JURISDICTION_ID"
+    );
+  });
+
+  it("updateJurisdictionFlows does not accept 0", async () => {
+    await reverts(
+      contracts.whitelist.updateJurisdictionFlows([1], [0], [1], {
+        from: ownerAccount,
+      }),
+      "INVALID_JURISDICTION_ID"
     );
   });
 

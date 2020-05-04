@@ -22,6 +22,11 @@ contract("dat / whitelist / message", (accounts) => {
     assert.equal(reason, "DENIED: LOCKUP");
   });
 
+  it("Can read message for 3", async () => {
+    const reason = await contracts.whitelist.messageForTransferRestriction(3);
+    assert.equal(reason, "DENIED: USER_UNKNOWN");
+  });
+
   it("Can read message for huge numbers", async () => {
     const reason = await contracts.whitelist.messageForTransferRestriction(-1);
     assert.equal(reason, "DENIED: UNKNOWN_ERROR");

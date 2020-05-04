@@ -69,5 +69,20 @@ contract("dat / whitelist / operators", (accounts) => {
         assert.equal(isOperator, false);
       });
     });
+
+    describe("after renouncing operators", () => {
+      beforeEach(async () => {
+        contracts.whitelist.renounceOperator({
+          from: operatorAccount,
+        });
+      });
+
+      it("is no longer an operator", async () => {
+        const isOperator = await contracts.whitelist.isOperator(
+          operatorAccount
+        );
+        assert.equal(isOperator, false);
+      });
+    });
   });
 });
