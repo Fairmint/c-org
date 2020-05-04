@@ -1,10 +1,6 @@
 const BigNumber = require("bignumber.js");
-const {
-  approveAll,
-  constants,
-  deployDat,
-  shouldFail,
-} = require("../../helpers");
+const { approveAll, constants, deployDat } = require("../../helpers");
+const { reverts } = require("truffle-assertions");
 
 contract("wiki / buy / run", (accounts) => {
   let contracts;
@@ -36,22 +32,24 @@ contract("wiki / buy / run", (accounts) => {
     });
 
     it("Buy fails", async () => {
-      await shouldFail(
+      await reverts(
         contracts.dat.buy(accounts[5], "100000000000000000000", 1, {
           from: accounts[5],
           value: "100000000000000000000",
-        })
+        }),
+        "DENIED: JURISDICTION_FLOW"
       );
     });
   });
 
   it("If amount < min_investment, then the function exits.", async () => {
     const amount = new BigNumber(await contracts.dat.minInvestment()).minus(1);
-    await shouldFail(
+    await reverts(
       contracts.dat.buy(accounts[5], amount.toFixed(), 1, {
         from: accounts[5],
         value: amount.toFixed(),
-      })
+      }),
+      "PRICE_SLIPPAGE"
     );
   });
 
@@ -66,11 +64,12 @@ contract("wiki / buy / run", (accounts) => {
     });
 
     it("buying with min+1 should fail", async () => {
-      await shouldFail(
+      await reverts(
         contracts.dat.buy(accounts[5], amount, x.plus(1).toFixed(), {
           from: accounts[5],
           value: amount,
-        })
+        }),
+        "PRICE_SLIPPAGE"
       );
     });
 

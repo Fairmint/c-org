@@ -1,9 +1,5 @@
-const {
-  approveAll,
-  constants,
-  deployDat,
-  shouldFail,
-} = require("../../helpers");
+const { approveAll, constants, deployDat } = require("../../helpers");
+const { reverts } = require("truffle-assertions");
 
 contract("wiki / buy / close", (accounts) => {
   let contracts;
@@ -42,11 +38,12 @@ contract("wiki / buy / close", (accounts) => {
     });
 
     it("The buy() functions fails in close state", async () => {
-      await shouldFail(
+      await reverts(
         contracts.dat.buy(accounts[9], "100000000000000000000", 1, {
           value: "100000000000000000000",
           from: accounts[9],
-        })
+        }),
+        "PRICE_SLIPPAGE"
       );
     });
   });

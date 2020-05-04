@@ -1,4 +1,4 @@
-const { deployDat, shouldFail, constants } = require("../helpers");
+const { deployDat, constants } = require("../helpers");
 const { reverts } = require("truffle-assertions");
 const BigNumber = require("bignumber.js");
 
@@ -7,7 +7,7 @@ contract("dat / initialize", (accounts) => {
 
   it("shouldFail to init twice", async () => {
     contracts = await deployDat(accounts);
-    await shouldFail(
+    await reverts(
       contracts.dat.initialize(
         await contracts.dat.initReserve(),
         await contracts.dat.currency(),
@@ -21,47 +21,47 @@ contract("dat / initialize", (accounts) => {
         await contracts.dat.symbol(),
         { from: await contracts.dat.control() }
       ),
-      "ALREADY_INITIALIZED"
+      "Contract instance has already been initialized"
     );
   });
 
   it("shouldFail with EXCESSIVE_GOAL", async () => {
-    await shouldFail(
+    await reverts(
       deployDat(accounts, { initGoal: constants.MAX_UINT }),
       "EXCESSIVE_GOAL"
     );
   });
 
   it("shouldFail with INVALID_SLOPE_NUM", async () => {
-    await shouldFail(
+    await reverts(
       deployDat(accounts, { buySlopeNum: "0" }),
       "INVALID_SLOPE_NUM"
     );
   });
 
   it("shouldFail with INVALID_SLOPE_DEN", async () => {
-    await shouldFail(
+    await reverts(
       deployDat(accounts, { buySlopeDen: "0" }),
       "INVALID_SLOPE_DEN"
     );
   });
 
   it("shouldFail with EXCESSIVE_SLOPE_NUM", async () => {
-    await shouldFail(
+    await reverts(
       deployDat(accounts, { buySlopeNum: constants.MAX_UINT }),
       "EXCESSIVE_SLOPE_NUM"
     );
   });
 
   it("shouldFail with EXCESSIVE_SLOPE_DEN", async () => {
-    await shouldFail(
+    await reverts(
       deployDat(accounts, { buySlopeDen: constants.MAX_UINT }),
       "EXCESSIVE_SLOPE_DEN"
     );
   });
 
   it("shouldFail with INVALID_RESERVE", async () => {
-    await shouldFail(
+    await reverts(
       deployDat(accounts, { investmentReserveBasisPoints: "100000" }),
       "INVALID_RESERVE"
     );

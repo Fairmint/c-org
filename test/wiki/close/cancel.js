@@ -1,13 +1,8 @@
-const {
-  approveAll,
-  constants,
-  deployDat,
-  shouldFail,
-} = require("../../helpers");
+const { approveAll, constants, deployDat } = require("../../helpers");
+const { reverts } = require("truffle-assertions");
 
 contract("wiki / close / cancel", (accounts) => {
   let contracts;
-  const investor = accounts[3];
 
   before(async () => {
     contracts = await deployDat(accounts, {
@@ -33,11 +28,12 @@ contract("wiki / close / cancel", (accounts) => {
   });
 
   it("close should fail", async () => {
-    await shouldFail(
+    await reverts(
       contracts.dat.close({
         from: await contracts.dat.beneficiary(),
         value: "10000000000000000000000",
-      })
+      }),
+      "INVALID_STATE"
     );
   });
 });

@@ -382,8 +382,7 @@ contract DecentralizedAutonomousTrust
     string memory _symbol
   ) public
   {
-    require(control == address(0), "ALREADY_INITIALIZED");
-
+    // The ERC-20 implementation will confirm initialize is only run once
     ERC20Detailed.initialize(_name, _symbol, 18);
 
     // Set initGoal, which in turn defines the initial state

@@ -7,9 +7,9 @@ const {
   constants,
   deployDat,
   getGasCost,
-  shouldFail,
   updateDatConfig,
 } = require("../../helpers");
+const { reverts } = require("truffle-assertions");
 
 contract("wiki / close / run", (accounts) => {
   let contracts;
@@ -37,11 +37,12 @@ contract("wiki / close / run", (accounts) => {
   });
 
   it("If address != beneficiary then the function exits.", async () => {
-    await shouldFail(
+    await reverts(
       contracts.dat.close({
         from: accounts[9],
         value: "10000000000000000000000",
-      })
+      }),
+      "BENEFICIARY_ONLY"
     );
   });
 
@@ -53,11 +54,12 @@ contract("wiki / close / run", (accounts) => {
     });
 
     it("If now < locked_until then close fails", async () => {
-      await shouldFail(
+      await reverts(
         contracts.dat.close({
           from: await contracts.dat.beneficiary(),
           value: "10000000000000000000000",
-        })
+        }),
+        "TOO_EARLY"
       );
     });
 
@@ -124,11 +126,12 @@ contract("wiki / close / run", (accounts) => {
 
   it("should fail if send less than exitFee.", async () => {
     const exitFee = new BigNumber(await contracts.dat.estimateExitFee(0));
-    await shouldFail(
+    await reverts(
       contracts.dat.close({
         from: await contracts.dat.beneficiary(),
         value: exitFee.minus(1).toFixed(),
-      })
+      }),
+      "SafeMath: subtraction overflow"
     );
   });
 

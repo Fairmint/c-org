@@ -1,4 +1,4 @@
-const { shouldFail, deployDat, updateDatConfig } = require("../../helpers");
+const { deployDat } = require("../../helpers");
 
 contract("fair / erc20 / decimals", (accounts) => {
   let contracts;
