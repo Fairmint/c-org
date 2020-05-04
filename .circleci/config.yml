@@ -46,7 +46,9 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/repo
-      - run: npm run coverage
+      - run:
+          command: npm run coverage
+          no_output_timeout: 120m
 
   publish:
     context: docker-hub-credentials
@@ -75,9 +77,9 @@ workflows:
       - test:
           requires:
             - build
-      #- coverage:
-      #    requires:
-      #      - build
+      - coverage:
+         requires:
+           - build
       - publish:
           requires:
             - build
