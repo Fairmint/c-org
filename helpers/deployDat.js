@@ -1,4 +1,4 @@
-const { constants } = require("hardlydifficult-ethereum-contracts");
+const { constants, helpers } = require("hardlydifficult-eth");
 
 // Original deployment used 2.0.8 for the DAT and 2.2.0 for the whitelist
 const cOrgAbi208 = require("../versions/2.0.8/abi.json");
@@ -13,7 +13,12 @@ const vestingArtifact = artifacts.require("TokenVesting");
 
 const updateDatConfig = require("./updateDatConfig");
 
-module.exports = async function deployDat(accounts, options, useProxy = true) {
+module.exports = async function deployDat(
+  accounts,
+  options,
+  useProxy = true,
+  upgrade = true
+) {
   const contracts = {};
   const callOptions = Object.assign(
     {
@@ -86,6 +91,9 @@ module.exports = async function deployDat(accounts, options, useProxy = true) {
         callOptions.symbol
       )
       .send({ from: callOptions.control, gas: constants.MAX_GAS });
+    await contracts.dat.methods
+      .initializePermit()
+      .send({ from: callOptions.control, gas: constants.MAX_GAS });
   } else {
     contracts.dat = datContract;
 
@@ -105,10 +113,22 @@ module.exports = async function deployDat(accounts, options, useProxy = true) {
   }
 
   if (useProxy) {
-    await contracts.proxyAdmin.upgrade(datProxy.address, datContract.address, {
-      from: callOptions.control,
-    });
-    contracts.dat = await datArtifact.at(datProxy.address);
+    if (upgrade) {
+      await contracts.proxyAdmin.upgrade(
+        datProxy.address,
+        datContract.address,
+        {
+          from: callOptions.control,
+        }
+      );
+      contracts.dat = await datArtifact.at(datProxy.address);
+    } else {
+      contracts.dat = await helpers.truffleContract.at(
+        web3,
+        cOrgAbi208.dat,
+        datProxy.address
+      );
+    }
   }
 
   let promises = [];
@@ -159,14 +179,24 @@ module.exports = async function deployDat(accounts, options, useProxy = true) {
     }
 
     if (useProxy) {
-      await contracts.proxyAdmin.upgrade(
-        whitelistProxy.address,
-        whitelistContract.address,
-        {
-          from: callOptions.control,
-        }
-      );
-      contracts.whitelist = await whitelistArtifact.at(whitelistProxy.address);
+      if (upgrade) {
+        await contracts.proxyAdmin.upgrade(
+          whitelistProxy.address,
+          whitelistContract.address,
+          {
+            from: callOptions.control,
+          }
+        );
+        contracts.whitelist = await whitelistArtifact.at(
+          whitelistProxy.address
+        );
+      } else {
+        contracts.whitelist = await helpers.truffleContract.at(
+          web3,
+          cOrgAbi220.whitelist,
+          whitelistProxy.address
+        );
+      }
     }
     callOptions.whitelistAddress = contracts.whitelist.address;
     await contracts.whitelist.updateJurisdictionFlows(
