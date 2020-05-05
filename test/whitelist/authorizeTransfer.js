@@ -28,6 +28,18 @@ contract("dat / whitelist / authorizeTransfer", (accounts) => {
     });
   });
 
+  it("should fail if the from account is no longer whitelisted", async () => {
+    await contracts.whitelist.revokeUserWallets([trader], {
+      from: operatorAccount,
+    });
+    await reverts(
+      contracts.dat.transfer(accounts[1], 1, {
+        from: trader,
+      }),
+      "FROM_USER_UNKNOWN"
+    );
+  });
+
   it("owner cannot call authorizeTransfer directly", async () => {
     await reverts(
       contracts.whitelist.authorizeTransfer(

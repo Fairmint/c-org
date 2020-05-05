@@ -353,7 +353,6 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
     {
       address trader = _traders[i];
       require(authorizedWalletToUserId[trader] == address(0), "USER_WALLET_ALREADY_ADDED");
-      require(authorizedUserIdInfo[trader].jurisdictionId == 0, "USER_ID_ALREADY_ADDED");
       uint jurisdictionId = _jurisdictionIds[i];
       require(jurisdictionId != 0, "INVALID_JURISDICTION_ID");
 

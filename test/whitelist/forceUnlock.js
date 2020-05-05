@@ -71,6 +71,15 @@ contract("dat / whitelist / forceUnlockUpTo", (accounts) => {
       });
     });
 
+    it("should fail if the entries were already processed", async () => {
+      await reverts(
+        contracts.whitelist.forceUnlockUpTo(trader, 1, {
+          from: operatorAccount,
+        }),
+        "ALREADY_UNLOCKED"
+      );
+    });
+
     it("has no more lockup", async () => {
       const {
         jurisdictionId,

@@ -4,7 +4,7 @@ const { reverts } = require("truffle-assertions");
 contract("dat / whitelist / addApprovedUserWallets", (accounts) => {
   let contracts;
   let ownerAccount;
-  let operatorAccount = accounts[5];
+  let operatorAccount = accounts[9];
 
   beforeEach(async () => {
     contracts = await deployDat(accounts);
@@ -20,7 +20,7 @@ contract("dat / whitelist / addApprovedUserWallets", (accounts) => {
   it("non-operators cannot addApprovedUserWallets", async () => {
     await reverts(
       contracts.whitelist.addApprovedUserWallets([accounts[5]], [accounts[4]], {
-        from: accounts[9],
+        from: accounts[8],
       }),
       "OperatorRole: caller does not have the Operator role"
     );
@@ -80,6 +80,25 @@ contract("dat / whitelist / addApprovedUserWallets", (accounts) => {
         ),
         "USER_ID_UNKNOWN"
       );
+    });
+
+    describe("change to an invalid jurisdiction id", () => {
+      beforeEach(async () => {
+        await contracts.dat.buy(accounts[5], "100000000000000000000", 1, {
+          value: "100000000000000000000",
+          from: accounts[5],
+        });
+        // This jurisdiction id is not approved to do anything
+        await contracts.whitelist.updateJurisdictionsForUserIds(
+          [accounts[5]],
+          [99],
+          { from: operatorAccount }
+        );
+      });
+
+      it("User can transfer between wallets", async () => {
+        await contracts.dat.transfer(accounts[4], 1, { from: accounts[5] });
+      });
     });
   });
 });
