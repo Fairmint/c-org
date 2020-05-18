@@ -99,6 +99,18 @@ contract("dat / whitelist / addApprovedUserWallets", (accounts) => {
       it("User can transfer between wallets", async () => {
         await contracts.dat.transfer(accounts[4], 1, { from: accounts[5] });
       });
+
+      it("no transfer restriction when transferring between wallets", async () => {
+        assert.equal(
+          await contracts.whitelist.detectTransferRestriction(
+            accounts[5],
+            accounts[4],
+            1,
+            { from: accounts[5] }
+          ),
+          0
+        );
+      });
     });
   });
 });
