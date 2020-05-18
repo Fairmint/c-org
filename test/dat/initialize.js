@@ -25,6 +25,10 @@ contract("dat / initialize", (accounts) => {
     );
   });
 
+  it("can deploy without any initReserve", async () => {
+    await deployDat(accounts, { initReserve: 0 }),
+  })
+
   it("shouldFail with EXCESSIVE_GOAL", async () => {
     await reverts(
       deployDat(accounts, { initGoal: constants.MAX_UINT }),
