@@ -79,7 +79,7 @@ workflows:
             - build
       - coverage:
          requires:
-           - build
+           - test
       - publish:
           requires:
             - build
