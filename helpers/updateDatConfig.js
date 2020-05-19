@@ -10,7 +10,7 @@ module.exports = async function updateDatConfig(contracts, options) {
     bool _autoBurn,
     uint _revenueCommitmentBasisPoints,
     uint _minInvestment,
-    uint _openUntilAtLeast
+    uint _minDuration
   */
   const callOptions = Object.assign(
     {
@@ -25,7 +25,7 @@ module.exports = async function updateDatConfig(contracts, options) {
       autoBurn: await contracts.dat.autoBurn(),
       revenueCommitmentBasisPoints: await contracts.dat.revenueCommitmentBasisPoints(),
       minInvestment: await contracts.dat.minInvestment(),
-      openUntilAtLeast: await contracts.dat.openUntilAtLeast(),
+      minDuration: await contracts.dat.minDuration(),
     },
     options
   );
@@ -44,7 +44,7 @@ module.exports = async function updateDatConfig(contracts, options) {
       callOptions.autoBurn,
       callOptions.revenueCommitmentBasisPoints,
       callOptions.minInvestment,
-      callOptions.openUntilAtLeast,
+      callOptions.minDuration,
       { from: await contracts.dat.control() }
     );
   } else {
@@ -58,7 +58,7 @@ module.exports = async function updateDatConfig(contracts, options) {
       callOptions.autoBurn,
       callOptions.revenueCommitmentBasisPoints,
       callOptions.minInvestment,
-      callOptions.openUntilAtLeast,
+      callOptions.openUntilAtLeast || 0,
       { from: await contracts.dat.control() }
     );
   }

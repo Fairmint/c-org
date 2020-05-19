@@ -222,11 +222,6 @@ contract("dat / upgrade", (accounts) => {
           investmentReserveBasisPointsBefore.toString(),
           investmentReserveBasisPoints.toString()
         );
-        const openUntilAtLeast = await contracts.dat.openUntilAtLeast();
-        assert.equal(
-          openUntilAtLeastBefore.toString(),
-          openUntilAtLeast.toString()
-        );
         const minInvestment = await contracts.dat.minInvestment();
         assert.equal(minInvestmentBefore.toString(), minInvestment.toString());
         const revenueCommitmentBasisPoints = await contracts.dat.revenueCommitmentBasisPoints();
