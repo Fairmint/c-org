@@ -11,8 +11,8 @@ contract("initializers", (accounts) => {
   });
 
   it("There are 2 public initializers", async () => {
-    const count = contracts.dat.abi.filter((x) =>
-      (x.name || "").toLowerCase().includes("initialize")
+    const count = contracts.dat.abi.filter(
+      (x) => (x.name || "").toLowerCase() === "initialize"
     ).length;
     assert.equal(count, 2);
   });

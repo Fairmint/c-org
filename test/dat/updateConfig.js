@@ -196,7 +196,7 @@ contract("dat / updateConfig", (accounts) => {
     );
   });
 
-  it("shouldFail with OPEN_UNTIL_MAY_NOT_BE_REDUCED", async () => {
+  it("shouldFail with MIN_DURATION_MAY_NOT_BE_REDUCED", async () => {
     contracts = await deployDat(accounts);
     await contracts.dat.updateConfig(
       await contracts.dat.whitelist(),
@@ -225,7 +225,7 @@ contract("dat / updateConfig", (accounts) => {
         "99",
         { from: await contracts.dat.control() }
       ),
-      "OPEN_UNTIL_MAY_NOT_BE_REDUCED"
+      "MIN_DURATION_MAY_NOT_BE_REDUCED"
     );
   });
 });

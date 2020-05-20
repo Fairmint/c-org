@@ -49,7 +49,7 @@ contract("wiki / close / run", (accounts) => {
   describe("when locked", async () => {
     beforeEach(async () => {
       await updateDatConfig(contracts, {
-        openUntilAtLeast: Math.round(Date.now() / 1000) + 10,
+        minDuration: Math.round(Date.now() / 1000) + 10,
       });
     });
 
