@@ -78,7 +78,7 @@ contract("dat / minDuration", (accounts) => {
         await approveAll(contracts, accounts);
       });
 
-      it.only("should fail to initialize again", async () => {
+      it("should fail to initialize again", async () => {
         await reverts(
           contracts.dat.initializeRunStartedOn(1, {
             from: await contracts.dat.control(),
@@ -87,7 +87,7 @@ contract("dat / minDuration", (accounts) => {
         );
       });
 
-      it.only("runStartedOn set if there is no INIT_GOAL", async () => {
+      it("runStartedOn set if there is no INIT_GOAL", async () => {
         assert.notEqual(await contracts.dat.runStartedOn(), "0");
       });
     });
