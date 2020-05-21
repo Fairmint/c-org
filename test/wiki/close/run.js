@@ -53,7 +53,7 @@ contract("wiki / close / run", (accounts) => {
       });
     });
 
-    it("If now < locked_until then close fails", async () => {
+    it("If now < minDuration then close fails", async () => {
       await reverts(
         contracts.dat.close({
           from: await contracts.dat.beneficiary(),
