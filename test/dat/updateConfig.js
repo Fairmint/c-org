@@ -17,7 +17,7 @@ contract("dat / updateConfig", (accounts) => {
         await contracts.dat.autoBurn(),
         await contracts.dat.revenueCommitmentBasisPoints(),
         await contracts.dat.minInvestment(),
-        await contracts.dat.openUntilAtLeast(),
+        await contracts.dat.minDuration(),
         { from: accounts[6] }
       ),
       "CONTROL_ONLY"
@@ -36,7 +36,7 @@ contract("dat / updateConfig", (accounts) => {
       await contracts.dat.autoBurn(),
       await contracts.dat.revenueCommitmentBasisPoints(),
       await contracts.dat.minInvestment(),
-      await contracts.dat.openUntilAtLeast(),
+      await contracts.dat.minDuration(),
       { from: await contracts.dat.control() }
     );
   });
@@ -54,7 +54,7 @@ contract("dat / updateConfig", (accounts) => {
         await contracts.dat.autoBurn(),
         await contracts.dat.revenueCommitmentBasisPoints(),
         await contracts.dat.minInvestment(),
-        await contracts.dat.openUntilAtLeast(),
+        await contracts.dat.minDuration(),
         { from: await contracts.dat.control() }
       ),
       "INVALID_ADDRESS"
@@ -74,7 +74,7 @@ contract("dat / updateConfig", (accounts) => {
         await contracts.dat.autoBurn(),
         await contracts.dat.revenueCommitmentBasisPoints(),
         await contracts.dat.minInvestment(),
-        await contracts.dat.openUntilAtLeast(),
+        await contracts.dat.minDuration(),
         { from: await contracts.dat.control() }
       ),
       "INVALID_ADDRESS"
@@ -95,7 +95,7 @@ contract("dat / updateConfig", (accounts) => {
       await contracts.dat.autoBurn(),
       "11",
       await contracts.dat.minInvestment(),
-      await contracts.dat.openUntilAtLeast(),
+      await contracts.dat.minDuration(),
       { from: await contracts.dat.control() }
     );
     await reverts(
@@ -109,7 +109,7 @@ contract("dat / updateConfig", (accounts) => {
         await contracts.dat.autoBurn(),
         "10",
         await contracts.dat.minInvestment(),
-        await contracts.dat.openUntilAtLeast(),
+        await contracts.dat.minDuration(),
         { from: await contracts.dat.control() }
       ),
       "COMMITMENT_MAY_NOT_BE_REDUCED"
@@ -129,7 +129,7 @@ contract("dat / updateConfig", (accounts) => {
         await contracts.dat.autoBurn(),
         "100000",
         await contracts.dat.minInvestment(),
-        await contracts.dat.openUntilAtLeast(),
+        await contracts.dat.minDuration(),
         { from: await contracts.dat.control() }
       ),
       "INVALID_COMMITMENT"
@@ -149,7 +149,7 @@ contract("dat / updateConfig", (accounts) => {
         await contracts.dat.autoBurn(),
         await contracts.dat.revenueCommitmentBasisPoints(),
         await contracts.dat.minInvestment(),
-        await contracts.dat.openUntilAtLeast(),
+        await contracts.dat.minDuration(),
         { from: await contracts.dat.control() }
       ),
       "INVALID_FEE"
@@ -169,7 +169,7 @@ contract("dat / updateConfig", (accounts) => {
         await contracts.dat.autoBurn(),
         await contracts.dat.revenueCommitmentBasisPoints(),
         "0",
-        await contracts.dat.openUntilAtLeast(),
+        await contracts.dat.minDuration(),
         { from: await contracts.dat.control() }
       ),
       "INVALID_MIN_INVESTMENT"
@@ -189,14 +189,14 @@ contract("dat / updateConfig", (accounts) => {
         await contracts.dat.autoBurn(),
         await contracts.dat.revenueCommitmentBasisPoints(),
         await contracts.dat.minInvestment(),
-        await contracts.dat.openUntilAtLeast(),
+        await contracts.dat.minDuration(),
         { from: await contracts.dat.control() }
       ),
       "INVALID_ADDRESS"
     );
   });
 
-  it("shouldFail with OPEN_UNTIL_MAY_NOT_BE_REDUCED", async () => {
+  it("shouldFail with MIN_DURATION_MAY_NOT_BE_REDUCED", async () => {
     contracts = await deployDat(accounts);
     await contracts.dat.updateConfig(
       await contracts.dat.whitelist(),
@@ -225,7 +225,7 @@ contract("dat / updateConfig", (accounts) => {
         "99",
         { from: await contracts.dat.control() }
       ),
-      "OPEN_UNTIL_MAY_NOT_BE_REDUCED"
+      "MIN_DURATION_MAY_NOT_BE_REDUCED"
     );
   });
 });

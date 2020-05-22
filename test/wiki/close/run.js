@@ -49,11 +49,11 @@ contract("wiki / close / run", (accounts) => {
   describe("when locked", async () => {
     beforeEach(async () => {
       await updateDatConfig(contracts, {
-        openUntilAtLeast: Math.round(Date.now() / 1000) + 10,
+        minDuration: Math.round(Date.now() / 1000) + 10,
       });
     });
 
-    it("If now < locked_until then close fails", async () => {
+    it("If now < minDuration then close fails", async () => {
       await reverts(
         contracts.dat.close({
           from: await contracts.dat.beneficiary(),

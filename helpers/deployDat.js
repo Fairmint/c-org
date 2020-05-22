@@ -1,4 +1,4 @@
-const { constants, helpers } = require("hardlydifficult-eth");
+const { constants } = require("hardlydifficult-eth");
 
 // Original deployment used 2.0.8 for the DAT and 2.2.0 for the whitelist
 const cOrgAbi208 = require("../versions/2.0.8/abi.json");
@@ -39,61 +39,84 @@ module.exports = async function deployDat(
     },
     options
   );
-  // console.log(`Deploy DAT: ${JSON.stringify(callOptions, null, 2)}`);
 
   if (useProxy) {
     // ProxyAdmin
     contracts.proxyAdmin = await proxyAdminArtifact.new({
       from: callOptions.control,
     });
-    console.log(`ProxyAdmin deployed ${contracts.proxyAdmin.address}`);
   }
 
   // DAT
   const datContract = await datArtifact.new({
     from: callOptions.control,
   });
-  console.log(`DAT template deployed ${datContract.address}`);
 
   let datProxy;
   if (useProxy) {
-    const originalDatContract = new web3.eth.Contract(cOrgAbi208.dat);
-    const originalDat = await originalDatContract
-      .deploy({
-        data: cOrgBytecode208.dat,
-      })
-      .send({
-        from: callOptions.control,
-        gas: constants.MAX_GAS,
-      });
+    if (upgrade) {
+      const originalDatContract = new web3.eth.Contract(cOrgAbi208.dat);
+      const originalDat = await originalDatContract
+        .deploy({
+          data: cOrgBytecode208.dat,
+        })
+        .send({
+          from: callOptions.control,
+          gas: constants.MAX_GAS,
+        });
 
-    datProxy = await proxyArtifact.new(
-      originalDat._address, // logic
-      contracts.proxyAdmin.address, // admin
-      [], // data
-      {
-        from: callOptions.control,
-      }
-    );
-    console.log(`DAT proxy deployed ${datProxy.address}`);
+      datProxy = await proxyArtifact.new(
+        originalDat._address, // logic
+        contracts.proxyAdmin.address, // admin
+        [], // data
+        {
+          from: callOptions.control,
+        }
+      );
 
-    contracts.dat = new web3.eth.Contract(cOrgAbi208.dat, datProxy.address);
+      contracts.dat = new web3.eth.Contract(cOrgAbi208.dat, datProxy.address);
 
-    await contracts.dat.methods
-      .initialize(
+      await contracts.dat.methods
+        .initialize(
+          callOptions.initReserve,
+          callOptions.currency,
+          callOptions.initGoal,
+          callOptions.buySlopeNum,
+          callOptions.buySlopeDen,
+          callOptions.investmentReserveBasisPoints,
+          callOptions.name,
+          callOptions.symbol
+        )
+        .send({ from: callOptions.control, gas: constants.MAX_GAS });
+      await contracts.dat.methods
+        .initializePermit()
+        .send({ from: callOptions.control, gas: constants.MAX_GAS });
+    } else {
+      datProxy = await proxyArtifact.new(
+        datContract.address, // logic
+        contracts.proxyAdmin.address, // admin
+        [], // data
+        {
+          from: callOptions.control,
+        }
+      );
+
+      contracts.dat = await datArtifact.at(datProxy.address);
+
+      await contracts.dat.initialize(
         callOptions.initReserve,
         callOptions.currency,
         callOptions.initGoal,
         callOptions.buySlopeNum,
         callOptions.buySlopeDen,
         callOptions.investmentReserveBasisPoints,
+        callOptions.setupFee,
+        callOptions.setupFeeRecipient,
         callOptions.name,
-        callOptions.symbol
-      )
-      .send({ from: callOptions.control, gas: constants.MAX_GAS });
-    await contracts.dat.methods
-      .initializePermit()
-      .send({ from: callOptions.control, gas: constants.MAX_GAS });
+        callOptions.symbol,
+        { from: callOptions.control, gas: constants.MAX_GAS }
+      );
+    }
   } else {
     contracts.dat = datContract;
 
@@ -122,12 +145,6 @@ module.exports = async function deployDat(
         }
       );
       contracts.dat = await datArtifact.at(datProxy.address);
-    } else {
-      contracts.dat = await helpers.truffleContract.at(
-        web3,
-        cOrgAbi208.dat,
-        datProxy.address
-      );
     }
   }
 
@@ -138,38 +155,59 @@ module.exports = async function deployDat(
     const whitelistContract = await whitelistArtifact.new({
       from: callOptions.control,
     });
-    console.log(`Whitelist template deployed ${whitelistContract.address}`);
 
     if (useProxy) {
-      const originalWhitelistContract = new web3.eth.Contract(
-        cOrgAbi220.whitelist
-      );
-      const originalWhitelist = await originalWhitelistContract
-        .deploy({
-          data: cOrgBytecode220.whitelist,
-        })
-        .send({
+      if (upgrade) {
+        const originalWhitelistContract = new web3.eth.Contract(
+          cOrgAbi220.whitelist
+        );
+        const originalWhitelist = await originalWhitelistContract
+          .deploy({
+            data: cOrgBytecode220.whitelist,
+          })
+          .send({
+            from: callOptions.control,
+            gas: constants.MAX_GAS,
+          });
+        whitelistProxy = await proxyArtifact.new(
+          originalWhitelist._address, // logic
+          contracts.proxyAdmin.address, // admin
+          [], // data
+          {
+            from: callOptions.control,
+          }
+        );
+
+        contracts.whitelist = new web3.eth.Contract(
+          cOrgAbi220.whitelist,
+          whitelistProxy.address
+        );
+
+        await contracts.whitelist.methods
+          .initialize(contracts.dat.address)
+          .send({
+            from: callOptions.control,
+            gas: constants.MAX_GAS,
+          });
+      } else {
+        whitelistProxy = await proxyArtifact.new(
+          whitelistContract.address, // logic
+          contracts.proxyAdmin.address, // admin
+          [], // data
+          {
+            from: callOptions.control,
+          }
+        );
+
+        contracts.whitelist = await whitelistArtifact.at(
+          whitelistProxy.address
+        );
+
+        await contracts.whitelist.initialize(contracts.dat.address, {
           from: callOptions.control,
           gas: constants.MAX_GAS,
         });
-      whitelistProxy = await proxyArtifact.new(
-        originalWhitelist._address, // logic
-        contracts.proxyAdmin.address, // admin
-        [], // data
-        {
-          from: callOptions.control,
-        }
-      );
-      console.log(`Whitelist proxy deployed ${whitelistProxy.address}`);
-
-      contracts.whitelist = new web3.eth.Contract(
-        cOrgAbi220.whitelist,
-        whitelistProxy.address
-      );
-      await contracts.whitelist.methods.initialize(contracts.dat.address).send({
-        from: callOptions.control,
-        gas: constants.MAX_GAS,
-      });
+      }
     } else {
       contracts.whitelist = whitelistContract;
 
@@ -190,24 +228,19 @@ module.exports = async function deployDat(
         contracts.whitelist = await whitelistArtifact.at(
           whitelistProxy.address
         );
-      } else {
-        contracts.whitelist = await helpers.truffleContract.at(
-          web3,
-          cOrgAbi220.whitelist,
-          whitelistProxy.address
-        );
       }
     }
     callOptions.whitelistAddress = contracts.whitelist.address;
-    await contracts.whitelist.updateJurisdictionFlows(
-      [1, 4, 4],
-      [4, 1, 4],
-      [1, 1, 1],
-      {
-        from: callOptions.control,
-      }
+    promises.push(
+      contracts.whitelist.updateJurisdictionFlows(
+        [1, 4, 4],
+        [4, 1, 4],
+        [1, 1, 1],
+        {
+          from: callOptions.control,
+        }
+      )
     );
-    // console.log(`Deployed whitelist: ${contracts.whitelist.address}`);
 
     promises.push(
       contracts.whitelist.approveNewUsers([callOptions.control], [4], {
@@ -257,7 +290,6 @@ module.exports = async function deployDat(
           from: callOptions.control,
         }
       );
-      console.log(`Vesting contract deployed ${contract.address}`);
 
       contracts.vesting.push(contract);
 

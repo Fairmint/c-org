@@ -39,7 +39,7 @@ contract("dat / closeRefund", (accounts) => {
       await contracts.dat.autoBurn(),
       await contracts.dat.revenueCommitmentBasisPoints(),
       await contracts.dat.minInvestment(),
-      await contracts.dat.openUntilAtLeast(),
+      await contracts.dat.minDuration(),
       { from: await contracts.dat.control() }
     );
 

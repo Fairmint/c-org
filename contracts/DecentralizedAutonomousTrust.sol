@@ -71,7 +71,7 @@ contract DecentralizedAutonomousTrust
     uint _revenueCommitmentBasisPoints,
     uint _feeBasisPoints,
     uint _minInvestment,
-    uint _openUntilAtLeast
+    uint _minDuration
   );
 
   /**
@@ -166,10 +166,8 @@ contract DecentralizedAutonomousTrust
   /// automatically funneled and held into the buyback_reserve expressed in basis points.
   uint public investmentReserveBasisPoints;
 
-  /// @notice The earliest date/time (in seconds) that the DAT may enter the `CLOSE` state, ensuring
-  /// that if the DAT reaches the `RUN` state it will remain running for at least this period of time.
-  /// @dev This value may be increased anytime by the control account
-  uint public openUntilAtLeast;
+  /// @dev unused slot which remains to ensure compatible upgrades
+  uint private __openUntilAtLeast;
 
   /// @notice The minimum amount of `currency` investment accepted.
   uint public minInvestment;
@@ -199,6 +197,15 @@ contract DecentralizedAutonomousTrust
 
   /// @notice The address to send tokens on pay. If zero, the caller may choose.
   address public overridePayTo;
+
+  /// @notice The minimum time before which the c-org contract cannot be closed once the contract has
+  /// reached the `run` state.
+  /// @dev When updated, the new value of `minimum_duration` cannot be earlier than the previous value.
+  uint public minDuration;
+
+  /// @notice Initialized at `0` and updated when the contract switches from `init` state to `run` state
+  /// with the current timestamp.
+  uint public runStartedOn;
 
   modifier authorizeTransfer(
     address _from,
@@ -390,6 +397,7 @@ contract DecentralizedAutonomousTrust
     {
       emit StateChange(state, STATE_RUN);
       state = STATE_RUN;
+      runStartedOn = block.timestamp;
     }
     else
     {
@@ -446,6 +454,22 @@ contract DecentralizedAutonomousTrust
       )
     );
   }
+
+  /// @notice A temporary function to set `runStartedOn`, to be used by contracts which were
+  /// already deployed before this feature was introduced.
+  /// @dev This function will be removed once known users have called the function.
+  function initializeRunStartedOn(
+    uint _runStartedOn
+  ) external
+  {
+    require(msg.sender == control, "CONTROL_ONLY");
+    require(state == STATE_RUN, "ONLY_CALL_IN_RUN");
+    require(runStartedOn == 0, "ONLY_CALL_IF_NOT_AUTO_SET");
+    require(_runStartedOn <= block.timestamp, "DATE_MUST_BE_IN_PAST");
+
+    runStartedOn = _runStartedOn;
+  }
+
   function getChainId(
   ) private pure
     returns (uint id)
@@ -467,7 +491,7 @@ contract DecentralizedAutonomousTrust
     bool _autoBurn,
     uint _revenueCommitmentBasisPoints,
     uint _minInvestment,
-    uint _openUntilAtLeast
+    uint _minDuration
   ) public
   {
     // This require(also confirms that initialize has been called.
@@ -496,8 +520,8 @@ contract DecentralizedAutonomousTrust
     require(_minInvestment > 0, "INVALID_MIN_INVESTMENT");
     minInvestment = _minInvestment;
 
-    require(_openUntilAtLeast >= openUntilAtLeast, "OPEN_UNTIL_MAY_NOT_BE_REDUCED");
-    openUntilAtLeast = _openUntilAtLeast;
+    require(_minDuration >= minDuration, "MIN_DURATION_MAY_NOT_BE_REDUCED");
+    minDuration = _minDuration;
 
     if(beneficiary != _beneficiary)
     {
@@ -522,7 +546,7 @@ contract DecentralizedAutonomousTrust
       _revenueCommitmentBasisPoints,
       _feeBasisPoints,
       _minInvestment,
-      _openUntilAtLeast
+      _minDuration
     );
   }
 
@@ -704,6 +728,8 @@ contract DecentralizedAutonomousTrust
       {
         emit StateChange(state, STATE_RUN);
         state = STATE_RUN;
+        runStartedOn = block.timestamp;
+
         // Math worst case:
         // MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE/2
         // / MAX_BEFORE_SQUARE * 2
@@ -1022,7 +1048,7 @@ contract DecentralizedAutonomousTrust
     else if(state == STATE_RUN)
     {
       // Collect the exitFee and close the c-org.
-      require(openUntilAtLeast <= block.timestamp, "TOO_EARLY");
+      require(minDuration + runStartedOn <= block.timestamp, "TOO_EARLY");
 
       exitFee = estimateExitFee(msg.value);
 

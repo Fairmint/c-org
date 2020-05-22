@@ -1,27 +1,172 @@
-const { approveAll, deployDat } = require("../helpers");
+const { tokens, constants, helpers } = require("hardlydifficult-eth");
+
+// Original deployment used 2.0.8 for the DAT and 2.2.0 for the whitelist
+const cOrgAbi208 = require("../../versions/2.0.8/abi.json");
+const cOrgBytecode208 = require("../../versions/2.0.8/bytecode.json");
+const cOrgAbi220 = require("../../versions/2.2.0/abi.json");
+const cOrgBytecode220 = require("../../versions/2.2.0/bytecode.json");
 const datArtifact = artifacts.require("DecentralizedAutonomousTrust");
-const { reverts } = require("truffle-assertions");
-const { tokens, constants } = require("hardlydifficult-eth");
+const proxyArtifact = artifacts.require("AdminUpgradeabilityProxy");
+const proxyAdminArtifact = artifacts.require("ProxyAdmin");
+const { updateDatConfig } = require("../../helpers");
+const { approveAll } = require("../helpers");
 
 contract("dat / upgrade", (accounts) => {
-  let contracts;
+  const contracts = {};
   const [owner, trader, otherAccount] = accounts;
 
   beforeEach(async () => {
     const dai = await tokens.dai.deploy(web3, accounts[0]);
-    contracts = await deployDat(
-      accounts,
+    const callOptions = {
+      autoBurn: true,
+      currency: dai.address,
+      control: owner,
+      feeBasisPoints: 987,
+      initGoal: 9812398,
+      openUntilAtLeast: 9182731982721,
+      initReserve: "42000000000000000000",
+      buySlopeNum: "1",
+      buySlopeDen: "100000000000000000000",
+      investmentReserveBasisPoints: "1000",
+      revenueCommitmentBasisPoints: "1000",
+      beneficiary: accounts[0],
+      feeCollector: accounts.length > 2 ? accounts[2] : accounts[0],
+      setupFee: 0,
+      setupFeeRecipient: constants.ZERO_ADDRESS,
+      name: "Test org",
+      symbol: "TFO",
+    };
+
+    // ProxyAdmin
+    contracts.proxyAdmin = await proxyAdminArtifact.new({
+      from: callOptions.control,
+    });
+
+    let datProxy;
+    const originalDatContract = new web3.eth.Contract(cOrgAbi208.dat);
+    const originalDat = await originalDatContract
+      .deploy({
+        data: cOrgBytecode208.dat,
+      })
+      .send({
+        from: callOptions.control,
+        gas: constants.MAX_GAS,
+      });
+
+    datProxy = await proxyArtifact.new(
+      originalDat._address, // logic
+      contracts.proxyAdmin.address, // admin
+      [], // data
       {
-        autoBurn: true,
-        currency: dai.address,
-        control: owner,
-        feeBasisPoints: 987,
-        initGoal: 9812398,
-        openUntilAtLeast: 9182731982721,
-      },
-      true,
-      false
+        from: callOptions.control,
+      }
     );
+
+    contracts.dat = new web3.eth.Contract(cOrgAbi208.dat, datProxy.address);
+
+    await contracts.dat.methods
+      .initialize(
+        callOptions.initReserve,
+        callOptions.currency,
+        callOptions.initGoal,
+        callOptions.buySlopeNum,
+        callOptions.buySlopeDen,
+        callOptions.investmentReserveBasisPoints,
+        callOptions.name,
+        callOptions.symbol
+      )
+      .send({ from: callOptions.control, gas: constants.MAX_GAS });
+    await contracts.dat.methods
+      .initializePermit()
+      .send({ from: callOptions.control, gas: constants.MAX_GAS });
+    contracts.dat = await helpers.truffleContract.at(
+      web3,
+      cOrgAbi208.dat,
+      datProxy.address
+    );
+
+    let promises = [];
+    // Whitelist
+    let whitelistProxy;
+    const originalWhitelistContract = new web3.eth.Contract(
+      cOrgAbi220.whitelist
+    );
+    const originalWhitelist = await originalWhitelistContract
+      .deploy({
+        data: cOrgBytecode220.whitelist,
+      })
+      .send({
+        from: callOptions.control,
+        gas: constants.MAX_GAS,
+      });
+    whitelistProxy = await proxyArtifact.new(
+      originalWhitelist._address, // logic
+      contracts.proxyAdmin.address, // admin
+      [], // data
+      {
+        from: callOptions.control,
+      }
+    );
+
+    contracts.whitelist = new web3.eth.Contract(
+      cOrgAbi220.whitelist,
+      whitelistProxy.address
+    );
+
+    await contracts.whitelist.methods.initialize(contracts.dat.address).send({
+      from: callOptions.control,
+      gas: constants.MAX_GAS,
+    });
+    contracts.whitelist = await helpers.truffleContract.at(
+      web3,
+      cOrgAbi220.whitelist,
+      whitelistProxy.address
+    );
+    callOptions.whitelistAddress = contracts.whitelist.address;
+
+    promises.push(
+      contracts.whitelist.updateJurisdictionFlows(
+        [1, 4, 4],
+        [4, 1, 4],
+        [1, 1, 1],
+        {
+          from: callOptions.control,
+        }
+      )
+    );
+
+    promises.push(
+      contracts.whitelist.approveNewUsers([callOptions.control], [4], {
+        from: callOptions.control,
+      })
+    );
+    if (callOptions.control != callOptions.beneficiary) {
+      promises.push(
+        contracts.whitelist.approveNewUsers([callOptions.beneficiary], [4], {
+          from: callOptions.control,
+        })
+      );
+    }
+    if (
+      callOptions.feeCollector != callOptions.control &&
+      callOptions.feeCollector != callOptions.beneficiary
+    ) {
+      promises.push(
+        contracts.whitelist.approveNewUsers([callOptions.feeCollector], [4], {
+          from: callOptions.control,
+        })
+      );
+    }
+    promises.push(
+      contracts.whitelist.approveNewUsers([web3.utils.padLeft(0, 40)], [1], {
+        from: callOptions.control,
+      })
+    );
+
+    // Update DAT (with new AUTH and other callOptions)
+    promises.push(updateDatConfig(contracts, callOptions));
+    await Promise.all(promises);
+
     await approveAll(contracts, accounts);
     await dai.mint(trader, "99999999999999999999999999", { from: accounts[0] });
     await dai.approve(contracts.dat.address, -1, { from: trader });
@@ -221,11 +366,6 @@ contract("dat / upgrade", (accounts) => {
         assert.equal(
           investmentReserveBasisPointsBefore.toString(),
           investmentReserveBasisPoints.toString()
-        );
-        const openUntilAtLeast = await contracts.dat.openUntilAtLeast();
-        assert.equal(
-          openUntilAtLeastBefore.toString(),
-          openUntilAtLeast.toString()
         );
         const minInvestment = await contracts.dat.minInvestment();
         assert.equal(minInvestmentBefore.toString(), minInvestment.toString());
