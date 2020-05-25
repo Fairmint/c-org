@@ -26,61 +26,66 @@ contract("dat / initialize", (accounts) => {
   });
 
   it("can deploy without any initReserve", async () => {
-    await deployDat(accounts, { initReserve: 0 });
+    await deployDat(accounts, { initReserve: 0 }, true, false);
   });
 
   it("shouldFail with EXCESSIVE_GOAL", async () => {
     await reverts(
-      deployDat(accounts, { initGoal: constants.MAX_UINT }),
+      deployDat(accounts, { initGoal: constants.MAX_UINT }, true, false),
       "EXCESSIVE_GOAL"
     );
   });
 
   it("shouldFail with INVALID_SLOPE_NUM", async () => {
     await reverts(
-      deployDat(accounts, { buySlopeNum: "0" }),
+      deployDat(accounts, { buySlopeNum: "0" }, true, false),
       "INVALID_SLOPE_NUM"
     );
   });
 
   it("shouldFail with INVALID_SLOPE_DEN", async () => {
     await reverts(
-      deployDat(accounts, { buySlopeDen: "0" }),
+      deployDat(accounts, { buySlopeDen: "0" }, true, false),
       "INVALID_SLOPE_DEN"
     );
   });
 
   it("shouldFail with EXCESSIVE_SLOPE_NUM", async () => {
     await reverts(
-      deployDat(accounts, { buySlopeNum: constants.MAX_UINT }),
+      deployDat(accounts, { buySlopeNum: constants.MAX_UINT }, true, false),
       "EXCESSIVE_SLOPE_NUM"
     );
   });
 
   it("shouldFail with EXCESSIVE_SLOPE_DEN", async () => {
     await reverts(
-      deployDat(accounts, { buySlopeDen: constants.MAX_UINT }),
+      deployDat(accounts, { buySlopeDen: constants.MAX_UINT }, true, false),
       "EXCESSIVE_SLOPE_DEN"
     );
   });
 
   it("shouldFail with INVALID_RESERVE", async () => {
     await reverts(
-      deployDat(accounts, { investmentReserveBasisPoints: "100000" }),
+      deployDat(
+        accounts,
+        { investmentReserveBasisPoints: "100000" },
+        true,
+        false
+      ),
       "INVALID_RESERVE"
     );
   });
 
   it("shouldFail if recipient is missing", async () => {
     await reverts(
-      deployDat(accounts, { setupFee: "1" }, false),
+      deployDat(accounts, { setupFee: "1" }, true, false),
       "MISSING_SETUP_FEE_RECIPIENT"
     );
   });
 
   it("shouldFail if fee is missing", async () => {
     await reverts(
-      deployDat(accounts, { setupFeeRecipient: accounts[3] }, false),
+      deployDat(accounts, { setupFeeRecipient: accounts[3] }, true, false),
       "MISSING_SETUP_FEE"
     );
   });
@@ -97,18 +102,22 @@ contract("dat / initialize", (accounts) => {
         .div(buySlopeDen)
         .times(new BigNumber(initGoal).pow(2))
         .div(2);
-      console.log(goal.toFixed());
       goal = goal.dp(0, BigNumber.ROUND_DOWN);
     });
 
     it("should work if fee is equal to the goal", async () => {
-      await deployDat(accounts, {
-        buySlopeNum,
-        buySlopeDen,
-        initGoal,
-        setupFee: goal,
-        setupFeeRecipient: accounts[3],
-      });
+      await deployDat(
+        accounts,
+        {
+          buySlopeNum,
+          buySlopeDen,
+          initGoal,
+          setupFee: goal,
+          setupFeeRecipient: accounts[3],
+        },
+        true,
+        false
+      );
     });
 
     it("shouldFail if fee is greater than goal", async () => {
@@ -122,6 +131,7 @@ contract("dat / initialize", (accounts) => {
             setupFee: goal.plus(1),
             setupFeeRecipient: accounts[3],
           },
+          true,
           false
         ),
         "EXCESSIVE_SETUP_FEE"
