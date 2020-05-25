@@ -185,8 +185,8 @@ contract DecentralizedAutonomousTrust
   // Original source: https://etherscan.io/address/0x6b175474e89094c44da98b954eedeac495271d0f#code
   mapping (address => uint) public nonces;
   bytes32 public DOMAIN_SEPARATOR;
-  // bytes32 public constant PERMIT_TYPEHASH = keccak256("Permit(address holder,address spender,uint256 nonce,uint256 expiry,bool allowed)");
-  bytes32 public constant PERMIT_TYPEHASH = 0xea2aa0a1be11a07ed86d755c93467f4f82362b452371d1ba94d1715123511acb;
+  // keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
+  bytes32 public constant PERMIT_TYPEHASH = 0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9;
 
   // The success fee (expressed in currency) that will be earned by setupFeeRecipient as soon as initGoal
   // is reached. We must have setup_fee <= buy_slope*init_goal^(2)/2
@@ -447,7 +447,7 @@ contract DecentralizedAutonomousTrust
     DOMAIN_SEPARATOR = keccak256(
       abi.encode(
         keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
-        keccak256(bytes(name())),
+        keccak256(bytes(_name)),
         keccak256(bytes(version)),
         getChainId(),
         address(this)
@@ -1076,39 +1076,27 @@ contract DecentralizedAutonomousTrust
   }
 
   // --- Approve by signature ---
-  // Original source: https://etherscan.io/address/0x6b175474e89094c44da98b954eedeac495271d0f#code
+  // EIP-2612
+  // Original source: https://github.com/Uniswap/uniswap-v2-core/blob/master/contracts/UniswapV2ERC20.sol
   function permit(
-    address holder,
+    address owner,
     address spender,
-    uint256 nonce,
-    uint256 expiry,
-    bool allowed,
+    uint value,
+    uint deadline,
     uint8 v,
     bytes32 r,
     bytes32 s
-  ) external
-  {
+  ) external {
+    require(deadline >= block.timestamp, "EXPIRED");
     bytes32 digest = keccak256(
       abi.encodePacked(
         "\x19\x01",
         DOMAIN_SEPARATOR,
-        keccak256(
-          abi.encode(PERMIT_TYPEHASH,
-                    holder,
-                    spender,
-                    nonce,
-                    expiry,
-                    allowed
-          )
-        )
+        keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, nonces[owner]++, deadline))
       )
     );
-
-    require(holder != address(0), "DAT/invalid-address-0");
-    require(holder == ecrecover(digest, v, r, s), "DAT/invalid-permit");
-    require(expiry == 0 || now <= expiry, "DAT/permit-expired");
-    require(nonce == nonces[holder]++, "DAT/invalid-nonce");
-    uint wad = allowed ? uint(-1) : 0;
-    _approve(holder, spender, wad);
+    address recoveredAddress = ecrecover(digest, v, r, s);
+    require(recoveredAddress != address(0) && recoveredAddress == owner, "INVALID_SIGNATURE");
+    _approve(owner, spender, value);
   }
 }
