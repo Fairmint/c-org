@@ -180,7 +180,7 @@ contract DecentralizedAutonomousTrust
   /// @dev See the constants above for possible state values.
   uint public state;
 
-  string public constant version = "2";
+  string public constant version = "3";
   // --- EIP712 niceties ---
   // Original source: https://etherscan.io/address/0x6b175474e89094c44da98b954eedeac495271d0f#code
   mapping (address => uint) public nonces;

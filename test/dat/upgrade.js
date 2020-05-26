@@ -376,8 +376,10 @@ contract("dat / upgrade", (accounts) => {
         );
         const state = await contracts.dat.state();
         assert.equal(stateBefore.toString(), state.toString());
+
+        // Version bumped with latest release
         const version = await contracts.dat.version();
-        assert.equal(versionBefore, version);
+        assert.notEqual(versionBefore, version);
         const accountNonce = await contracts.dat.nonces(trader);
         assert.equal(accountNonceBefore.toString(), accountNonce.toString());
         const domainSeparator = await contracts.dat.DOMAIN_SEPARATOR();
