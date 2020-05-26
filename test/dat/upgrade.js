@@ -382,10 +382,12 @@ contract("dat / upgrade", (accounts) => {
         assert.notEqual(versionBefore, version);
         const accountNonce = await contracts.dat.nonces(trader);
         assert.equal(accountNonceBefore.toString(), accountNonce.toString());
+
+        // These values changed with the upgrade to EIP-2612
         const domainSeparator = await contracts.dat.DOMAIN_SEPARATOR();
-        assert.equal(domainSeparatorBefore, domainSeparator);
+        assert.notEqual(domainSeparatorBefore, domainSeparator);
         const permitTypehash = await contracts.dat.PERMIT_TYPEHASH();
-        assert.equal(permitTypehashBefore, permitTypehash);
+        assert.notEqual(permitTypehashBefore, permitTypehash);
       });
     });
   });

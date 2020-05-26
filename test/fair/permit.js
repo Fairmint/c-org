@@ -1,13 +1,11 @@
 const { approveAll, deployDat } = require("../helpers");
+const { reverts } = require("truffle-assertions");
 const { constants } = require("hardlydifficult-eth");
 const Web3 = require("web3");
 const { MockProvider } = require("ethereum-waffle");
 const { ecsign } = require("ethereumjs-util");
 const {
-  BigNumber,
-  bigNumberify,
   hexlify,
-  getAddress,
   keccak256,
   defaultAbiCoder,
   toUtf8Bytes,
@@ -81,6 +79,14 @@ async function getApprovalDigest(token, approve, nonce, deadline) {
 
 contract("fair / permit", (accounts) => {
   let contracts;
+  const provider = new MockProvider({
+    hardfork: "istanbul",
+    mnemonic: "horn horn horn horn horn horn horn horn horn horn horn horn",
+    gasLimit: 9999999,
+  });
+  const [wallet, otherWallet] = provider.getWallets();
+  const other = accounts[6];
+  const TEST_AMOUNT = "42";
 
   beforeEach(async () => {
     contracts = await deployDat(accounts, {
@@ -104,16 +110,63 @@ contract("fair / permit", (accounts) => {
     assert.equal(actual, PERMIT_TYPEHASH);
   });
 
-  describe("on permit", () => {
-    const provider = new MockProvider({
-      hardfork: "istanbul",
-      mnemonic: "horn horn horn horn horn horn horn horn horn horn horn horn",
-      gasLimit: 9999999,
-    });
-    const [wallet] = provider.getWallets();
-    const other = accounts[6];
-    const TEST_AMOUNT = "42";
+  it("should fail if deadline is in the past", async () => {
+    const nonce = (await contracts.dat.nonces(wallet.address)).toString();
+    const deadline = "100";
+    const digest = await getApprovalDigest(
+      contracts.dat,
+      { owner: wallet.address, spender: other, value: TEST_AMOUNT },
+      nonce,
+      deadline
+    );
+    const { v, r, s } = ecsign(
+      Buffer.from(digest.slice(2), "hex"),
+      Buffer.from(wallet.privateKey.slice(2), "hex")
+    );
 
+    await reverts(
+      contracts.dat.permit(
+        wallet.address,
+        other,
+        TEST_AMOUNT,
+        deadline,
+        v,
+        hexlify(r),
+        hexlify(s)
+      ),
+      "EXPIRED"
+    );
+  });
+
+  it("should fail if signed by the wrong account", async () => {
+    const nonce = (await contracts.dat.nonces(wallet.address)).toString();
+    const deadline = constants.MAX_UINT;
+    const digest = await getApprovalDigest(
+      contracts.dat,
+      { owner: wallet.address, spender: other, value: TEST_AMOUNT },
+      nonce,
+      deadline
+    );
+    const { v, r, s } = ecsign(
+      Buffer.from(digest.slice(2), "hex"),
+      Buffer.from(otherWallet.privateKey.slice(2), "hex")
+    );
+
+    await reverts(
+      contracts.dat.permit(
+        wallet.address,
+        other,
+        TEST_AMOUNT,
+        deadline,
+        v,
+        hexlify(r),
+        hexlify(s)
+      ),
+      "INVALID_SIGNATURE"
+    );
+  });
+
+  describe("on permit", () => {
     beforeEach(async () => {
       const nonce = (await contracts.dat.nonces(wallet.address)).toString();
       const deadline = constants.MAX_UINT;
