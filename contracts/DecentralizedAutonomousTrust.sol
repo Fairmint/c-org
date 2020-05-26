@@ -1086,7 +1086,8 @@ contract DecentralizedAutonomousTrust
     uint8 v,
     bytes32 r,
     bytes32 s
-  ) external {
+  ) external
+  {
     require(deadline >= block.timestamp, "EXPIRED");
     bytes32 digest = keccak256(
       abi.encodePacked(
