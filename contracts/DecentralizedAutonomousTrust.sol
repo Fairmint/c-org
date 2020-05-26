@@ -563,6 +563,16 @@ contract DecentralizedAutonomousTrust
     _burn(msg.sender, _amount, false);
   }
 
+  /// @notice Burn the amount of tokens from the given address if approved.
+  function burnFrom(
+    address _from,
+    uint _amount
+  ) public
+  {
+    _approve(_from, msg.sender, allowance(_from, msg.sender).sub(_amount, "ERC20: burn amount exceeds allowance"));
+    _burn(_from, _amount, false);
+  }
+
   // Buy
 
   /// @dev Distributes _value currency between the buybackReserve, beneficiary, and feeCollector.
