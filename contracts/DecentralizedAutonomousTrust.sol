@@ -323,6 +323,7 @@ contract DecentralizedAutonomousTrust
 
   /// @notice Confirms the transfer of `_quantityToInvest` currency to the contract.
   function _collectInvestment(
+    address payable _from,
     uint _quantityToInvest,
     uint _msgValue,
     bool _refundRemainder
@@ -350,7 +351,7 @@ contract DecentralizedAutonomousTrust
       // currency is ERC20
       require(_msgValue == 0, "DO_NOT_SEND_ETH");
 
-      currency.safeTransferFrom(msg.sender, address(this), _quantityToInvest);
+      currency.safeTransferFrom(_from, address(this), _quantityToInvest);
     }
   }
 
@@ -729,7 +730,7 @@ contract DecentralizedAutonomousTrust
 
     emit Buy(msg.sender, _to, _currencyValue, tokenValue);
 
-    _collectInvestment(_currencyValue, msg.value, false);
+    _collectInvestment(msg.sender, _currencyValue, msg.value, false);
 
     // Update state, initInvestors, and distribute the investment when appropriate
     if(state == STATE_INIT)
@@ -942,7 +943,7 @@ contract DecentralizedAutonomousTrust
     uint _currencyValue
   ) public payable
   {
-    _collectInvestment(_currencyValue, msg.value, false);
+    _collectInvestment(msg.sender, _currencyValue, msg.value, false);
     require(_currencyValue > 0, "MISSING_CURRENCY");
     require(state == STATE_RUN, "INVALID_STATE");
 
@@ -1070,7 +1071,7 @@ contract DecentralizedAutonomousTrust
       emit StateChange(state, STATE_CLOSE);
       state = STATE_CLOSE;
 
-      _collectInvestment(exitFee, msg.value, true);
+      _collectInvestment(msg.sender, exitFee, msg.value, true);
     }
     else
     {
