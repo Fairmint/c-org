@@ -864,6 +864,35 @@ contract DecentralizedAutonomousTrust
     return currencyValue;
   }
 
+  function _sell(
+    address _from,
+    address payable _to,
+    uint _quantityToSell,
+    uint _minCurrencyReturned
+  ) private
+  {
+    require(_from != beneficiary || state >= STATE_CLOSE, "BENEFICIARY_ONLY_SELL_IN_CLOSE_OR_CANCEL");
+    require(_minCurrencyReturned > 0, "MUST_SELL_AT_LEAST_1");
+
+    uint currencyValue = estimateSellValue(_quantityToSell);
+    require(currencyValue >= _minCurrencyReturned, "PRICE_SLIPPAGE");
+
+    if(state == STATE_INIT || state == STATE_CANCEL)
+    {
+      initInvestors[_from] = initInvestors[_from].sub(_quantityToSell);
+    }
+
+    _burn(_from, _quantityToSell, true);
+    uint supply = totalSupply() + burnedSupply;
+    if(supply < initReserve)
+    {
+      initReserve = supply;
+    }
+
+    _transferCurrency(_to, currencyValue);
+    emit Sell(_from, _to, currencyValue, _quantityToSell);
+  }
+
   /// @notice Sell FAIR tokens for at least the given amount of currency.
   /// @param _to The account to receive the currency from this sale.
   /// @param _quantityToSell How many FAIR tokens to sell for currency value.
@@ -876,26 +905,7 @@ contract DecentralizedAutonomousTrust
     uint _minCurrencyReturned
   ) public
   {
-    require(msg.sender != beneficiary || state >= STATE_CLOSE, "BENEFICIARY_ONLY_SELL_IN_CLOSE_OR_CANCEL");
-    require(_minCurrencyReturned > 0, "MUST_SELL_AT_LEAST_1");
-
-    uint currencyValue = estimateSellValue(_quantityToSell);
-    require(currencyValue >= _minCurrencyReturned, "PRICE_SLIPPAGE");
-
-    if(state == STATE_INIT || state == STATE_CANCEL)
-    {
-      initInvestors[msg.sender] = initInvestors[msg.sender].sub(_quantityToSell);
-    }
-
-    _burn(msg.sender, _quantityToSell, true);
-    uint supply = totalSupply() + burnedSupply;
-    if(supply < initReserve)
-    {
-      initReserve = supply;
-    }
-
-    _transferCurrency(_to, currencyValue);
-    emit Sell(msg.sender, _to, currencyValue, _quantityToSell);
+    _sell(msg.sender, _to, _quantityToSell, _minCurrencyReturned);
   }
 
   /// Pay
