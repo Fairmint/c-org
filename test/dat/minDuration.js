@@ -1,5 +1,6 @@
 const { approveAll, deployDat } = require("../helpers");
 const { reverts } = require("truffle-assertions");
+const { constants } = require("hardlydifficult-eth");
 
 contract("dat / minDuration", (accounts) => {
   let contracts;
@@ -91,6 +92,7 @@ contract("dat / minDuration", (accounts) => {
         assert.notEqual(await contracts.dat.runStartedOn(), "0");
       });
     });
+
     describe("with INIT_GOAL", () => {
       beforeEach(async () => {
         contracts = await deployDat(
@@ -117,6 +119,24 @@ contract("dat / minDuration", (accounts) => {
           assert.notEqual(await contracts.dat.runStartedOn(), "0");
         });
       });
+    });
+  });
+
+  describe("deploy with max minDuration", () => {
+    beforeEach(async () => {
+      contracts = await deployDat(accounts, {
+        minDuration: constants.MAX_UINT,
+      });
+    });
+
+    it("If minDuration == -1 then close fails", async () => {
+      await reverts(
+        contracts.dat.close({
+          from: await contracts.dat.beneficiary(),
+          value: "10000000000000000000000",
+        }),
+        "MAY_NOT_CLOSE"
+      );
     });
   });
 });

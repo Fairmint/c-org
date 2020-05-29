@@ -208,6 +208,9 @@ contract DecentralizedAutonomousTrust
   /// with the current timestamp.
   uint public runStartedOn;
 
+  /// @notice The max possible value
+  uint private constant MAX_UINT = 2**256 - 1;
+
   modifier authorizeTransfer(
     address _from,
     address _to,
@@ -1059,6 +1062,7 @@ contract DecentralizedAutonomousTrust
     else if(state == STATE_RUN)
     {
       // Collect the exitFee and close the c-org.
+      require(MAX_UINT - minDuration > runStartedOn, "MAY_NOT_CLOSE");
       require(minDuration + runStartedOn <= block.timestamp, "TOO_EARLY");
 
       exitFee = estimateExitFee(msg.value);
