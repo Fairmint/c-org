@@ -803,6 +803,32 @@ contract DecentralizedAutonomousTrust
     _buy(msg.sender, _to, _currencyValue, _minTokensBought);
   }
 
+  /// @notice Allow users to sign a message authorizing a buy
+  function permitBuy(
+    address payable _from,
+    address _to,
+    uint _currencyValue,
+    uint _minTokensBought,
+    uint _deadline,
+    uint8 _v,
+    bytes32 _r,
+    bytes32 _s
+  ) external
+  {
+    require(_deadline >= block.timestamp, "EXPIRED");
+    bytes32 digest = keccak256(abi.encode(PERMIT_BUY_TYPEHASH, _from, _to, _currencyValue, _minTokensBought, nonces[_from]++, _deadline));
+    digest = keccak256(
+      abi.encodePacked(
+        "\x19\x01",
+        DOMAIN_SEPARATOR,
+        digest
+      )
+    );
+    address recoveredAddress = ecrecover(digest, _v, _r, _s);
+    require(recoveredAddress != address(0) && recoveredAddress == _from, "INVALID_SIGNATURE");
+    _buy(_from, _to, _currencyValue, _minTokensBought);
+  }
+
   /// Sell
 
   function estimateSellValue(
