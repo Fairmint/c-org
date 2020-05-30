@@ -715,17 +715,12 @@ contract DecentralizedAutonomousTrust
     return tokenValue;
   }
 
-  /// @notice Purchase FAIR tokens with the given amount of currency.
-  /// @param _to The account to receive the FAIR tokens from this purchase.
-  /// @param _currencyValue How much currency to spend in order to buy FAIR.
-  /// @param _minTokensBought Buy at least this many FAIR tokens or the transaction reverts.
-  /// @dev _minTokensBought is necessary as the price will change if some elses transaction mines after
-  /// yours was submitted.
-  function buy(
+  function _buy(
+    address payable _from,
     address _to,
     uint _currencyValue,
     uint _minTokensBought
-  ) public payable
+  ) private
   {
     require(_to != address(0), "INVALID_ADDRESS");
     require(_minTokensBought > 0, "MUST_BUY_AT_LEAST_1");
@@ -734,9 +729,9 @@ contract DecentralizedAutonomousTrust
     uint tokenValue = estimateBuyValue(_currencyValue);
     require(tokenValue >= _minTokensBought, "PRICE_SLIPPAGE");
 
-    emit Buy(msg.sender, _to, _currencyValue, tokenValue);
+    emit Buy(_from, _to, _currencyValue, tokenValue);
 
-    _collectInvestment(msg.sender, _currencyValue, msg.value, false);
+    _collectInvestment(_from, _currencyValue, msg.value, false);
 
     // Update state, initInvestors, and distribute the investment when appropriate
     if(state == STATE_INIT)
@@ -786,11 +781,26 @@ contract DecentralizedAutonomousTrust
 
     _mint(_to, tokenValue);
 
-    if(state == STATE_RUN && msg.sender == beneficiary && _to == beneficiary && autoBurn)
+    if(state == STATE_RUN && _from == beneficiary && _to == beneficiary && autoBurn)
     {
       // must mint before this call
       _burn(beneficiary, tokenValue, false);
     }
+  }
+
+  /// @notice Purchase FAIR tokens with the given amount of currency.
+  /// @param _to The account to receive the FAIR tokens from this purchase.
+  /// @param _currencyValue How much currency to spend in order to buy FAIR.
+  /// @param _minTokensBought Buy at least this many FAIR tokens or the transaction reverts.
+  /// @dev _minTokensBought is necessary as the price will change if some elses transaction mines after
+  /// yours was submitted.
+  function buy(
+    address _to,
+    uint _currencyValue,
+    uint _minTokensBought
+  ) public payable
+  {
+    _buy(msg.sender, _to, _currencyValue, _minTokensBought);
   }
 
   /// Sell
