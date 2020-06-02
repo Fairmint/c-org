@@ -211,11 +211,11 @@ contract DecentralizedAutonomousTrust
   /// @notice The max possible value
   uint private constant MAX_UINT = 2**256 - 1;
 
-  // keccak256("PermitBuy(address _from,address _to,uint256 _currencyValue, uint256 _minTokensBought,uint256 _nonce,uint256 _deadline)");
-  bytes32 public constant PERMIT_BUY_TYPEHASH = 0x668357e399e448c9327ae5d7d954c0a27bc467d34c7d4cba342785e76c618372;
+  // keccak256("buyFor(address _from,address _to,uint256 _currencyValue, uint256 _minTokensBought,uint256 _nonce,uint256 _deadline)");
+  bytes32 public constant PERMIT_BUY_TYPEHASH = 0xd123d77940c7cb946c9e65464d35e880602ee4b2b22496c367fc7a34d72fb48e;
 
-  // keccak256("PermitSell(address _from,address _to,uint256 _quantityToSell, uint256 _minCurrencyReturned,uint256 _nonce,uint256 _deadline)");
-  bytes32 public constant PERMIT_SELL_TYPEHASH = 0xacf17581377028afbe8897c95529f92e57a5465a0b57796c72d9345f3322ccb6;
+  // keccak256("sellFrom(address _from,address _to,uint256 _quantityToSell, uint256 _minCurrencyReturned,uint256 _nonce,uint256 _deadline)");
+  bytes32 public constant PERMIT_SELL_TYPEHASH = 0xb6008eb1f19a7bd8665befaf65645faf8e4b8c1da557fa6e1d702242b34b1abc;
 
   modifier authorizeTransfer(
     address _from,
@@ -803,6 +803,32 @@ contract DecentralizedAutonomousTrust
     _buy(msg.sender, _to, _currencyValue, _minTokensBought);
   }
 
+  /// @notice Allow users to sign a message authorizing a buy
+  function buyFor(
+    address payable _from,
+    address _to,
+    uint _currencyValue,
+    uint _minTokensBought,
+    uint _deadline,
+    uint8 _v,
+    bytes32 _r,
+    bytes32 _s
+  ) external
+  {
+    require(_deadline >= block.timestamp, "EXPIRED");
+    bytes32 digest = keccak256(abi.encode(PERMIT_BUY_TYPEHASH, _from, _to, _currencyValue, _minTokensBought, nonces[_from]++, _deadline));
+    digest = keccak256(
+      abi.encodePacked(
+        "\x19\x01",
+        DOMAIN_SEPARATOR,
+        digest
+      )
+    );
+    address recoveredAddress = ecrecover(digest, _v, _r, _s);
+    require(recoveredAddress != address(0) && recoveredAddress == _from, "INVALID_SIGNATURE");
+    _buy(_from, _to, _currencyValue, _minTokensBought);
+  }
+
   /// Sell
 
   function estimateSellValue(
@@ -919,7 +945,7 @@ contract DecentralizedAutonomousTrust
   }
 
   /// @notice Allow users to sign a message authorizing a sell
-  function permitSell(
+  function sellFrom(
     address _from,
     address payable _to,
     uint _quantityToSell,
