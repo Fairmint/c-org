@@ -377,12 +377,14 @@ contract("dat / upgrade", (accounts) => {
         const state = await contracts.dat.state();
         assert.equal(stateBefore.toString(), state.toString());
 
-        const version = await contracts.dat.version();
-        assert.equal(versionBefore, version);
         const accountNonce = await contracts.dat.nonces(trader);
         assert.equal(accountNonceBefore.toString(), accountNonce.toString());
         const domainSeparator = await contracts.dat.DOMAIN_SEPARATOR();
         assert.equal(domainSeparatorBefore, domainSeparator);
+
+        // This value should change with each major change
+        const version = await contracts.dat.version();
+        assert.notEqual(versionBefore, version);
 
         // This value changed with the upgrade to EIP-2612
         const permitTypehash = await contracts.dat.PERMIT_TYPEHASH();

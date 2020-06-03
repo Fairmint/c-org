@@ -181,7 +181,7 @@ contract DecentralizedAutonomousTrust
   uint public state;
 
   /// @dev If this value changes we need to reconstruct the DOMAIN_SEPARATOR
-  string public constant version = "2";
+  string public constant version = "3";
   // --- EIP712 niceties ---
   // Original source: https://etherscan.io/address/0x6b175474e89094c44da98b954eedeac495271d0f#code
   mapping (address => uint) public nonces;
@@ -454,13 +454,26 @@ contract DecentralizedAutonomousTrust
       _mint(beneficiary, initReserve);
     }
 
-    // Initialize permit
+    initializeDomainSeparator();
+  }
+
+  /// @notice Used to initialize the domain separator used in meta-transactions
+  /// @dev This is separate from `initialize` to allow upgraded contracts to update the version
+  /// There is no harm in calling this multiple times / no permissions required
+  function initializeDomainSeparator() public
+  {
+    uint id;
+    // solium-disable-next-line
+    assembly
+    {
+      id := chainid()
+    }
     DOMAIN_SEPARATOR = keccak256(
       abi.encode(
         keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
-        keccak256(bytes(_name)),
+        keccak256(bytes(name())),
         keccak256(bytes(version)),
-        getChainId(),
+        id,
         address(this)
       )
     );
@@ -479,17 +492,6 @@ contract DecentralizedAutonomousTrust
     require(_runStartedOn <= block.timestamp, "DATE_MUST_BE_IN_PAST");
 
     runStartedOn = _runStartedOn;
-  }
-
-  function getChainId(
-  ) private pure
-    returns (uint id)
-  {
-    // solium-disable-next-line
-    assembly
-    {
-      id := chainid()
-    }
   }
 
   function updateConfig(

@@ -145,6 +145,7 @@ module.exports = async function deployDat(
         }
       );
       contracts.dat = await datArtifact.at(datProxy.address);
+      await contracts.dat.initializeDomainSeparator();
     }
   }
 
