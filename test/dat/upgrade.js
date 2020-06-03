@@ -187,7 +187,6 @@ contract("dat / upgrade", (accounts) => {
   uint8 private _decimals;
   IWhitelist public whitelist;
   uint public burnedSupply;
-  bool public autoBurn;
   address payable public beneficiary;
   uint public buySlopeNum;
   uint public buySlopeDen;
@@ -216,7 +215,6 @@ contract("dat / upgrade", (accounts) => {
     let decimalsBefore;
     let whitelistBefore;
     let burnedSupplyBefore;
-    let autoBurnBefore;
     let beneficiaryBefore;
     let buySlopeNumBefore;
     let buySlopeDenBefore;
@@ -246,7 +244,6 @@ contract("dat / upgrade", (accounts) => {
       decimalsBefore = await contracts.dat.decimals();
       whitelistBefore = await contracts.dat.whitelist();
       burnedSupplyBefore = await contracts.dat.burnedSupply();
-      autoBurnBefore = await contracts.dat.autoBurn();
       beneficiaryBefore = await contracts.dat.beneficiary();
       buySlopeNumBefore = await contracts.dat.buySlopeNum();
       buySlopeDenBefore = await contracts.dat.buySlopeDen();
@@ -277,7 +274,6 @@ contract("dat / upgrade", (accounts) => {
       assert.notEqual(decimalsBefore.toString(), "0");
       assert.notEqual(whitelistBefore, constants.ZERO_ADDRESS);
       assert.notEqual(burnedSupplyBefore.toString(), "0");
-      assert.notEqual(autoBurnBefore, false);
       assert.notEqual(beneficiaryBefore, constants.ZERO_ADDRESS);
       assert.notEqual(buySlopeNumBefore.toString(), "0");
       assert.notEqual(buySlopeDenBefore.toString(), "0");
@@ -334,8 +330,6 @@ contract("dat / upgrade", (accounts) => {
         assert.equal(whitelistBefore, whitelist);
         const burnedSupply = await contracts.dat.burnedSupply();
         assert.equal(burnedSupplyBefore.toString(), burnedSupply.toString());
-        const autoBurn = await contracts.dat.autoBurn();
-        assert.equal(autoBurnBefore, autoBurn);
         const beneficiary = await contracts.dat.beneficiary();
         assert.equal(beneficiaryBefore, beneficiary);
         const buySlopeNum = await contracts.dat.buySlopeNum();

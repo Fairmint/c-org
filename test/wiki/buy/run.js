@@ -9,7 +9,6 @@ contract("wiki / buy / run", (accounts) => {
     contracts = await deployDat(accounts, {
       initGoal: 0,
       feeBasisPoints: 10,
-      autoBurn: true,
     });
 
     await approveAll(contracts, accounts);
@@ -152,9 +151,6 @@ contract("wiki / buy / run", (accounts) => {
     describe("if (x+investor_balance)/(total_supply+burnt_supply) >= burn_threshold", () => {
       beforeEach(async () => {
         x = new BigNumber(await contracts.dat.estimateBuyValue(amount));
-        const investorBalance = new BigNumber(
-          await contracts.dat.balanceOf(from)
-        );
         burnAmount = x;
 
         burnBefore = new BigNumber(await contracts.dat.burnedSupply());
@@ -173,12 +169,11 @@ contract("wiki / buy / run", (accounts) => {
         assert.equal(state, constants.STATE.RUN);
       });
 
-      it("burn((x+investor_balance)-(burn_threshold*(total_supply+burnt_supply))", async () => {
+      it("no additional tokens are burned", async () => {
         const burned = new BigNumber(await contracts.dat.burnedSupply()).minus(
           burnBefore
         );
-        assert.equal(burnAmount.toFixed(), burned.toFixed());
-        assert(burned.gt(0));
+        assert.equal(burned, 0);
       });
 
       it("the full amount is added to the buyback_reserve", async () => {

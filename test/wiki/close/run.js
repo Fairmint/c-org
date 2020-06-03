@@ -17,7 +17,6 @@ contract("wiki / close / run", (accounts) => {
   beforeEach(async () => {
     contracts = await deployDat(accounts, {
       initGoal: "0", // Start in the run state
-      autoBurn: true,
     });
 
     await approveAll(contracts, accounts);

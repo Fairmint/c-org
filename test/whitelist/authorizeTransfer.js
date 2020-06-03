@@ -108,7 +108,7 @@ contract("dat / whitelist / authorizeTransfer", (accounts) => {
     it("cannot receive tokens from pay", async () => {
       const payAmount = web3.utils.toWei("100", "ether");
       const balanceBefore = await contracts.dat.balanceOf(trader);
-      await contracts.dat.pay(trader, payAmount, {
+      await contracts.dat.pay(payAmount, {
         from: trader,
         value: payAmount,
       });

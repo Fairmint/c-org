@@ -9,7 +9,6 @@
     "buySlopeDen": "100000000000000000000000000000000000",
     "initGoal": "141421360000000000000000",
     "initReserve": "140000000000000000000000",
-    "autoBurn": false,
     "feeBasisPoints": "0",
     "minInvestment": "100000000",
     "openUntilAtLeast": "1735689599",

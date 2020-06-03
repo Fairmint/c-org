@@ -19,15 +19,15 @@ contract("dat / noWhitelist", (accounts) => {
       }
     }
 
-    await contracts.dat.pay(investor, "100000000000000000000", {
+    await contracts.dat.pay("100000000000000000000", {
       value: "100000000000000000000",
       from: investor,
     });
   });
 
-  it("balanceOf should have increased", async () => {
+  it("FAIR balanceOf should not have changed on pay", async () => {
     const balance = await contracts.dat.balanceOf(investor);
 
-    assert.equal(balance.toString(), "2256682560881688309");
+    assert.equal(balance.toString(), "0");
   });
 });
