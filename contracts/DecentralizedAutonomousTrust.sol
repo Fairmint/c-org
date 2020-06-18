@@ -448,13 +448,13 @@ contract DecentralizedAutonomousTrust
       _mint(beneficiary, initReserve);
     }
 
-    initializeDomainSeparator();
+    initializeDomain();
   }
 
   /// @notice Used to initialize the domain separator used in meta-transactions
   /// @dev This is separate from `initialize` to allow upgraded contracts to update the version
   /// There is no harm in calling this multiple times / no permissions required
-  function initializeDomainSeparator() public
+  function initializeDomain() public
   {
     uint id;
     // solium-disable-next-line
