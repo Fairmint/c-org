@@ -9,7 +9,7 @@ contract("dat / pay", (accounts) => {
   const investor = accounts[3];
   const payAmount = "42000000000000000000";
 
-  before(async () => {
+  beforeEach(async () => {
     contracts = await deployDat(
       accounts,
       {
@@ -35,30 +35,25 @@ contract("dat / pay", (accounts) => {
 
   describe("on pay", () => {
     let investorBalanceBefore;
-    let payValue;
 
     beforeEach(async () => {
       investorBalanceBefore = new BigNumber(
         await contracts.dat.balanceOf(investor)
       );
-      payValue = new BigNumber(await contracts.dat.estimatePayValue(payAmount));
-      await contracts.dat.pay(investor, payAmount, {
+      await contracts.dat.pay(payAmount, {
         from: investor,
         value: payAmount,
       });
     });
 
-    it("The investor balance went up", async () => {
+    it("The investor balance did not change", async () => {
       const balance = new BigNumber(await contracts.dat.balanceOf(investor));
-      assert.equal(
-        balance.toFixed(),
-        investorBalanceBefore.plus(payValue).toFixed()
-      );
+      assert.equal(balance.toFixed(), investorBalanceBefore.toFixed());
     });
   });
 
   it("can make a tiny payment", async () => {
-    await contracts.dat.pay(investor, "1", {
+    await contracts.dat.pay("1", {
       from: investor,
       value: "1",
     });
@@ -81,7 +76,7 @@ contract("dat / pay", (accounts) => {
     });
     await approveAll(contracts, accounts);
     await reverts(
-      contracts.dat.pay(accounts[0], "0", {
+      contracts.dat.pay("0", {
         from: accounts[0],
       }),
       "MISSING_CURRENCY"
@@ -107,7 +102,7 @@ contract("dat / pay", (accounts) => {
     });
 
     it("Can pay even if account is restricted", async () => {
-      await contracts.dat.pay(investor, payAmount, {
+      await contracts.dat.pay(payAmount, {
         from: investor,
         value: payAmount,
       });
@@ -117,7 +112,6 @@ contract("dat / pay", (accounts) => {
       let investorBalanceBefore;
       let investorCurrencyBalanceBefore;
       let beneficiaryBalanceBefore;
-      let payValue;
       let gasCost;
 
       beforeEach(async () => {
@@ -130,11 +124,8 @@ contract("dat / pay", (accounts) => {
         beneficiaryBalanceBefore = new BigNumber(
           await contracts.dat.balanceOf(await contracts.dat.beneficiary())
         );
-        payValue = new BigNumber(
-          await contracts.dat.estimatePayValue(payAmount)
-        );
 
-        const tx = await contracts.dat.pay(investor, payAmount, {
+        const tx = await contracts.dat.pay(payAmount, {
           from: investor,
           value: payAmount,
         });
@@ -154,16 +145,6 @@ contract("dat / pay", (accounts) => {
             .minus(payAmount)
             .minus(gasCost)
             .toFixed()
-        );
-      });
-
-      it("Tokens went to the beneficiary account instead", async () => {
-        const balance = new BigNumber(
-          await contracts.dat.balanceOf(await contracts.dat.beneficiary())
-        );
-        assert.equal(
-          balance.toFixed(),
-          beneficiaryBalanceBefore.plus(payValue).toFixed()
         );
       });
     });

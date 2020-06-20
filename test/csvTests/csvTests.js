@@ -300,14 +300,10 @@ contract("dat / csvTests", (accounts) => {
             });
             break;
           case "pay":
-            tx = await contracts.dat.pay(
-              constants.ZERO_ADDRESS,
-              quantity.toFixed(),
-              {
-                from: row.account.address,
-                value: currency ? 0 : quantity.toFixed(),
-              }
-            );
+            tx = await contracts.dat.pay(quantity.toFixed(), {
+              from: row.account.address,
+              value: currency ? 0 : quantity.toFixed(),
+            });
             break;
           case "xfer":
             if (isCurrency) {

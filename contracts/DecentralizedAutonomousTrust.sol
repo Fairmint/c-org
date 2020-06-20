@@ -50,9 +50,7 @@ contract DecentralizedAutonomousTrust
   );
   event Pay(
     address indexed _from,
-    address indexed _to,
-    uint _currencyValue,
-    uint _fairValue
+    uint _currencyValue
   );
   event Close(
     uint _exitFee
@@ -66,8 +64,6 @@ contract DecentralizedAutonomousTrust
     address indexed _beneficiary,
     address indexed _control,
     address indexed _feeCollector,
-    address _overridePayTo,
-    bool _autoBurn,
     uint _revenueCommitmentBasisPoints,
     uint _feeBasisPoints,
     uint _minInvestment,
@@ -114,10 +110,8 @@ contract DecentralizedAutonomousTrust
    * Data for DAT business logic
    */
 
-  /// @notice Set if the FAIRs minted by the organization when it commits its revenues are
-  /// automatically burnt (`true`) or not (`false`). Defaults to `false` meaning that there
-  /// is no automatic burn.
-  bool public autoBurn;
+  /// @dev unused slot which remains to ensure compatible upgrades
+  bool private __autoBurn;
 
   /// @notice The address of the beneficiary organization which receives the investments.
   /// Points to the wallet of the organization.
@@ -196,8 +190,8 @@ contract DecentralizedAutonomousTrust
   // The recipient of the setup_fee once init_goal is reached
   address payable public setupFeeRecipient;
 
-  /// @notice The address to send tokens on pay. If zero, the caller may choose.
-  address public overridePayTo;
+  /// @dev unused slot which remains to ensure compatible upgrades
+  address private __overridePayTo;
 
   /// @notice The minimum time before which the c-org contract cannot be closed once the contract has
   /// reached the `run` state.
@@ -211,11 +205,11 @@ contract DecentralizedAutonomousTrust
   /// @notice The max possible value
   uint private constant MAX_UINT = 2**256 - 1;
 
-  // keccak256("buyFor(address _from,address _to,uint256 _currencyValue, uint256 _minTokensBought,uint256 _nonce,uint256 _deadline)");
-  bytes32 public constant PERMIT_BUY_TYPEHASH = 0xd123d77940c7cb946c9e65464d35e880602ee4b2b22496c367fc7a34d72fb48e;
+  // keccak256("permitBuy(address _from,address _to,uint256 _currencyValue, uint256 _minTokensBought,uint256 _nonce,uint256 _deadline)");
+  bytes32 public constant PERMIT_BUY_TYPEHASH = 0x429d00939ab3ff127f73935be774744f44e2af6460c6e9c3b2e5b6d0a87c054b;
 
-  // keccak256("sellFrom(address _from,address _to,uint256 _quantityToSell, uint256 _minCurrencyReturned,uint256 _nonce,uint256 _deadline)");
-  bytes32 public constant PERMIT_SELL_TYPEHASH = 0xb6008eb1f19a7bd8665befaf65645faf8e4b8c1da557fa6e1d702242b34b1abc;
+  // keccak256("permitSell(address _from,address _to,uint256 _quantityToSell, uint256 _minCurrencyReturned,uint256 _nonce,uint256 _deadline)");
+  bytes32 public constant PERMIT_SELL_TYPEHASH = 0x4a316d1df77561ced12c9800904d84dfe0e4544c1cddc39365f8dd689eae7d88;
 
   modifier authorizeTransfer(
     address _from,
@@ -499,9 +493,7 @@ contract DecentralizedAutonomousTrust
     address payable _beneficiary,
     address _control,
     address payable _feeCollector,
-    address _overridePayTo,
     uint _feeBasisPoints,
-    bool _autoBurn,
     uint _revenueCommitmentBasisPoints,
     uint _minInvestment,
     uint _minDuration
@@ -518,10 +510,6 @@ contract DecentralizedAutonomousTrust
 
     require(_feeCollector != address(0), "INVALID_ADDRESS");
     feeCollector = _feeCollector;
-
-    overridePayTo = _overridePayTo;
-
-    autoBurn = _autoBurn;
 
     require(_revenueCommitmentBasisPoints <= BASIS_POINTS_DEN, "INVALID_COMMITMENT");
     require(_revenueCommitmentBasisPoints >= revenueCommitmentBasisPoints, "COMMITMENT_MAY_NOT_BE_REDUCED");
@@ -554,8 +542,6 @@ contract DecentralizedAutonomousTrust
       _beneficiary,
       _control,
       _feeCollector,
-      _overridePayTo,
-      _autoBurn,
       _revenueCommitmentBasisPoints,
       _feeBasisPoints,
       _minInvestment,
@@ -782,12 +768,6 @@ contract DecentralizedAutonomousTrust
     }
 
     _mint(_to, tokenValue);
-
-    if(state == STATE_RUN && _from == beneficiary && _to == beneficiary && autoBurn)
-    {
-      // must mint before this call
-      _burn(beneficiary, tokenValue, false);
-    }
   }
 
   /// @notice Purchase FAIR tokens with the given amount of currency.
@@ -806,7 +786,7 @@ contract DecentralizedAutonomousTrust
   }
 
   /// @notice Allow users to sign a message authorizing a buy
-  function buyFor(
+  function permitBuy(
     address payable _from,
     address _to,
     uint _currencyValue,
@@ -947,7 +927,7 @@ contract DecentralizedAutonomousTrust
   }
 
   /// @notice Allow users to sign a message authorizing a sell
-  function sellFrom(
+  function permitSell(
     address _from,
     address payable _to,
     uint _quantityToSell,
@@ -974,98 +954,25 @@ contract DecentralizedAutonomousTrust
 
   /// Pay
 
-  function estimatePayValue(
-    uint _currencyValue
-  ) public view
-    returns (uint)
-  {
-    // buy_slope = n/d
-    // revenue_commitment = c/g
-    // sqrt(
-    //  (2 a c d)
-    //  /
-    //  (g n)
-    //  + s^2
-    // ) - s
-
-    uint supply = totalSupply() + burnedSupply;
-
-    // Math: worst case
-    // MAX * 2 * 10000 * MAX_BEFORE_SQUARE
-    // / 10000 * MAX_BEFORE_SQUARE
-    uint tokenValue = BigDiv.bigDiv2x1(
-      _currencyValue.mul(2 * revenueCommitmentBasisPoints),
-      buySlopeDen,
-      BASIS_POINTS_DEN * buySlopeNum
-    );
-
-    tokenValue = tokenValue.add(supply * supply);
-    tokenValue = tokenValue.sqrt();
-
-    if(tokenValue > supply)
-    {
-      tokenValue -= supply;
-    }
-    else
-    {
-      tokenValue = 0;
-    }
-
-    return tokenValue;
-  }
-
   /// @dev Pay the organization on-chain.
-  /// @param _to The account which receives tokens for the contribution. If this address
-  /// is not authorized to receive tokens then they will be sent to the beneficiary account instead.
   /// @param _currencyValue How much currency which was paid.
   function pay(
-    address _to,
     uint _currencyValue
   ) public payable
   {
     _collectInvestment(msg.sender, _currencyValue, msg.value, false);
-    require(_currencyValue > 0, "MISSING_CURRENCY");
     require(state == STATE_RUN, "INVALID_STATE");
+    require(_currencyValue > 0, "MISSING_CURRENCY");
 
     // Send a portion of the funds to the beneficiary, the rest is added to the buybackReserve
     // Math: if _currencyValue is < (2^256 - 1) / 10000 this will not overflow
-    uint reserve = _currencyValue.mul(investmentReserveBasisPoints);
+    uint reserve = _currencyValue.mul(revenueCommitmentBasisPoints);
     reserve /= BASIS_POINTS_DEN;
 
-    uint tokenValue = estimatePayValue(_currencyValue);
-
-    // Update the to address to the overridePayTo value if set,
-    // and the beneficiary if the address is not whitelisted
-    address to = _to;
-    if(overridePayTo != address(0))
-    {
-      to = overridePayTo;
-    }
-    else if(to == address(0))
-    {
-      to = beneficiary;
-    }
-
-    if(to != beneficiary && _detectTransferRestriction(address(0), to, tokenValue) != 0)
-    {
-      to = beneficiary;
-    }
-
-    // Math: this will never underflow since investmentReserveBasisPoints is capped to BASIS_POINTS_DEN
+    // Math: this will never underflow since revenueCommitmentBasisPoints is capped to BASIS_POINTS_DEN
     _transferCurrency(beneficiary, _currencyValue - reserve);
 
-    // Distribute tokens
-    if(tokenValue > 0)
-    {
-      _mint(to, tokenValue);
-      if(to == beneficiary && autoBurn)
-      {
-        // must mint before this call
-        _burn(beneficiary, tokenValue, false);
-      }
-    }
-
-    emit Pay(msg.sender, _to, _currencyValue, tokenValue);
+    emit Pay(msg.sender, _currencyValue);
   }
 
   /// @notice Pay the organization on-chain without minting any tokens.

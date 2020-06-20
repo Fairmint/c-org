@@ -108,49 +108,4 @@ contract("dat / to", (accounts) => {
       });
     });
   });
-
-  describe("pay", () => {
-    const amount = "100000000000000000";
-    let fairHolderBalanceBefore;
-    let currencyHolderBalanceBefore;
-    let tokensIssued;
-    let gasPaid;
-
-    beforeEach(async () => {
-      fairHolderBalanceBefore = new BigNumber(
-        await contracts.dat.balanceOf(fairHolder)
-      );
-      currencyHolderBalanceBefore = new BigNumber(
-        await web3.eth.getBalance(currencyHolder)
-      );
-      tokensIssued = new BigNumber(
-        await contracts.dat.estimatePayValue(amount)
-      );
-      const tx = await contracts.dat.pay(fairHolder, amount, {
-        from: currencyHolder,
-        value: amount,
-      });
-      gasPaid = await getGasCost(tx);
-    });
-
-    it("sanity check, tokensIssued > 0", async () => {
-      assert.notEqual(tokensIssued.toFixed(), 0);
-    });
-
-    it("currencyHolder's balance went down", async () => {
-      const balance = new BigNumber(await web3.eth.getBalance(currencyHolder));
-      assert.equal(
-        balance.toFixed(),
-        currencyHolderBalanceBefore.minus(amount).minus(gasPaid).toFixed()
-      );
-    });
-
-    it("fairHolder's balance went up", async () => {
-      const balance = new BigNumber(await contracts.dat.balanceOf(fairHolder));
-      assert.equal(
-        balance.toFixed(),
-        fairHolderBalanceBefore.plus(tokensIssued).toFixed()
-      );
-    });
-  });
 });

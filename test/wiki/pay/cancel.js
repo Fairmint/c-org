@@ -30,7 +30,7 @@ contract("wiki / pay / cancel", (accounts) => {
 
   it("pay should fail", async () => {
     await reverts(
-      contracts.dat.pay(investor, "1", {
+      contracts.dat.pay("1", {
         from: investor,
         value: "1",
       }),
