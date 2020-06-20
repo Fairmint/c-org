@@ -205,11 +205,11 @@ contract DecentralizedAutonomousTrust
   /// @notice The max possible value
   uint private constant MAX_UINT = 2**256 - 1;
 
-  // keccak256("buyFor(address _from,address _to,uint256 _currencyValue, uint256 _minTokensBought,uint256 _nonce,uint256 _deadline)");
-  bytes32 public constant PERMIT_BUY_TYPEHASH = 0xd123d77940c7cb946c9e65464d35e880602ee4b2b22496c367fc7a34d72fb48e;
+  // keccak256("permitBuy(address _from,address _to,uint256 _currencyValue, uint256 _minTokensBought,uint256 _nonce,uint256 _deadline)");
+  bytes32 public constant PERMIT_BUY_TYPEHASH = 0x429d00939ab3ff127f73935be774744f44e2af6460c6e9c3b2e5b6d0a87c054b;
 
-  // keccak256("sellFrom(address _from,address _to,uint256 _quantityToSell, uint256 _minCurrencyReturned,uint256 _nonce,uint256 _deadline)");
-  bytes32 public constant PERMIT_SELL_TYPEHASH = 0xb6008eb1f19a7bd8665befaf65645faf8e4b8c1da557fa6e1d702242b34b1abc;
+  // keccak256("permitSell(address _from,address _to,uint256 _quantityToSell, uint256 _minCurrencyReturned,uint256 _nonce,uint256 _deadline)");
+  bytes32 public constant PERMIT_SELL_TYPEHASH = 0x4a316d1df77561ced12c9800904d84dfe0e4544c1cddc39365f8dd689eae7d88;
 
   modifier authorizeTransfer(
     address _from,
@@ -786,7 +786,7 @@ contract DecentralizedAutonomousTrust
   }
 
   /// @notice Allow users to sign a message authorizing a buy
-  function buyFor(
+  function permitBuy(
     address payable _from,
     address _to,
     uint _currencyValue,
@@ -927,7 +927,7 @@ contract DecentralizedAutonomousTrust
   }
 
   /// @notice Allow users to sign a message authorizing a sell
-  function sellFrom(
+  function permitSell(
     address _from,
     address payable _to,
     uint _quantityToSell,

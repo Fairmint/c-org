@@ -9,7 +9,7 @@ const BigNumber = require("bignumber.js");
 
 const PERMIT_BUY_TYPEHASH = keccak256(
   toUtf8Bytes(
-    "buyFor(address _from,address _to,uint256 _currencyValue, uint256 _minTokensBought,uint256 _nonce,uint256 _deadline)"
+    "permitBuy(address _from,address _to,uint256 _currencyValue, uint256 _minTokensBought,uint256 _nonce,uint256 _deadline)"
   )
 );
 
@@ -37,7 +37,7 @@ async function getBuyApprovalDigest(token, buy, nonce, deadline) {
   );
 }
 
-contract("dat / buyFor", (accounts) => {
+contract("dat / permitBuy", (accounts) => {
   let contracts, usdc;
   const tokenOwner = accounts[8];
   const provider = new MockProvider({
@@ -93,7 +93,7 @@ contract("dat / buyFor", (accounts) => {
     );
 
     await reverts(
-      contracts.dat.buyFor(
+      contracts.dat.permitBuy(
         buyOptions.from,
         buyOptions.to,
         buyOptions.currencyValue,
@@ -122,7 +122,7 @@ contract("dat / buyFor", (accounts) => {
     );
 
     await reverts(
-      contracts.dat.buyFor(
+      contracts.dat.permitBuy(
         buyOptions.from,
         buyOptions.to,
         buyOptions.currencyValue,
@@ -156,7 +156,7 @@ contract("dat / buyFor", (accounts) => {
         Buffer.from(wallet.privateKey.slice(2), "hex")
       );
 
-      await contracts.dat.buyFor(
+      await contracts.dat.permitBuy(
         buyOptions.from,
         buyOptions.to,
         buyOptions.currencyValue,

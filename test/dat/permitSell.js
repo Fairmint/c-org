@@ -9,7 +9,7 @@ const BigNumber = require("bignumber.js");
 
 const PERMIT_SELL_TYPEHASH = keccak256(
   toUtf8Bytes(
-    "sellFrom(address _from,address _to,uint256 _quantityToSell, uint256 _minCurrencyReturned,uint256 _nonce,uint256 _deadline)"
+    "permitSell(address _from,address _to,uint256 _quantityToSell, uint256 _minCurrencyReturned,uint256 _nonce,uint256 _deadline)"
   )
 );
 
@@ -37,7 +37,7 @@ async function getSellApprovalDigest(token, sell, nonce, deadline) {
   );
 }
 
-contract("dat / sellFrom", (accounts) => {
+contract("dat / permitSell", (accounts) => {
   let contracts;
   const provider = new MockProvider({
     hardfork: "istanbul",
@@ -98,7 +98,7 @@ contract("dat / sellFrom", (accounts) => {
     );
 
     await reverts(
-      contracts.dat.sellFrom(
+      contracts.dat.permitSell(
         sellOptions.from,
         sellOptions.to,
         sellOptions.quantityToSell,
@@ -127,7 +127,7 @@ contract("dat / sellFrom", (accounts) => {
     );
 
     await reverts(
-      contracts.dat.sellFrom(
+      contracts.dat.permitSell(
         sellOptions.from,
         sellOptions.to,
         sellOptions.quantityToSell,
@@ -161,7 +161,7 @@ contract("dat / sellFrom", (accounts) => {
         Buffer.from(wallet.privateKey.slice(2), "hex")
       );
 
-      await contracts.dat.sellFrom(
+      await contracts.dat.permitSell(
         sellOptions.from,
         sellOptions.to,
         sellOptions.quantityToSell,
