@@ -9,7 +9,7 @@ const BigNumber = require("bignumber.js");
 
 const PERMIT_SELL_TYPEHASH = keccak256(
   toUtf8Bytes(
-    "permitSell(address _from,address _to,uint256 _quantityToSell, uint256 _minCurrencyReturned,uint256 _nonce,uint256 _deadline)"
+    "PermitSell(address from,address to,uint256 quantityToSell,uint256 minCurrencyReturned,uint256 nonce,uint256 deadline)"
   )
 );
 
