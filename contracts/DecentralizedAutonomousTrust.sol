@@ -205,11 +205,11 @@ contract DecentralizedAutonomousTrust
   /// @notice The max possible value
   uint private constant MAX_UINT = 2**256 - 1;
 
-  // keccak256("permitBuy(address _from,address _to,uint256 _currencyValue, uint256 _minTokensBought,uint256 _nonce,uint256 _deadline)");
-  bytes32 public constant PERMIT_BUY_TYPEHASH = 0x429d00939ab3ff127f73935be774744f44e2af6460c6e9c3b2e5b6d0a87c054b;
+  // keccak256("PermitBuy(address from,address to,uint256 currencyValue,uint256 minTokensBought,uint256 nonce,uint256 deadline)");
+  bytes32 public constant PERMIT_BUY_TYPEHASH = 0xaf42a244b3020d6a2253d9f291b4d3e82240da42b22129a8113a58aa7a3ddb6a;
 
-  // keccak256("permitSell(address _from,address _to,uint256 _quantityToSell, uint256 _minCurrencyReturned,uint256 _nonce,uint256 _deadline)");
-  bytes32 public constant PERMIT_SELL_TYPEHASH = 0x4a316d1df77561ced12c9800904d84dfe0e4544c1cddc39365f8dd689eae7d88;
+  // keccak256("PermitSell(address from,address to,uint256 quantityToSell,uint256 minCurrencyReturned,uint256 nonce,uint256 deadline)");
+  bytes32 public constant PERMIT_SELL_TYPEHASH = 0x5dfdc7fb4c68a4c249de5e08597626b84fbbe7bfef4ed3500f58003e722cc548;
 
   modifier authorizeTransfer(
     address _from,
@@ -1082,11 +1082,12 @@ contract DecentralizedAutonomousTrust
   ) external
   {
     require(deadline >= block.timestamp, "EXPIRED");
-    bytes32 digest = keccak256(
+    bytes32 digest = keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, nonces[owner]++, deadline));
+    digest = keccak256(
       abi.encodePacked(
         "\x19\x01",
         DOMAIN_SEPARATOR,
-        keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, nonces[owner]++, deadline))
+        digest
       )
     );
     address recoveredAddress = ecrecover(digest, v, r, s);
