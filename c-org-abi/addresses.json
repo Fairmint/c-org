@@ -37,6 +37,12 @@
         "token": "0xef7b6b4f78b2f14740413bd2676a87230de2008a",
         "proxyAdmin": "0x63434a746d37534793f1da8d16f426d9e9ae9ecd",
         "whitelist": "0x342bce9a2a74b23ff968e7508c0251fa905fd67d"
+      },
+      { 
+        "name": "V3 test",
+        "token": "0x9b84d0fe940111d167982fa1f41fed5dc76de0f8",
+        "proxyAdmin": "0x26692ed700f17d637ae470d9a8cb386a59afacfd",
+        "whitelist": "0x165901301192ce300077dace01a236df19c33e61"
       }
     ]
   }
