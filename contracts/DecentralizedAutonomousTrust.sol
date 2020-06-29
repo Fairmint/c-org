@@ -190,9 +190,6 @@ contract DecentralizedAutonomousTrust
   // The recipient of the setup_fee once init_goal is reached
   address payable public setupFeeRecipient;
 
-  /// @dev unused slot which remains to ensure compatible upgrades
-  address private __overridePayTo;
-
   /// @notice The minimum time before which the c-org contract cannot be closed once the contract has
   /// reached the `run` state.
   /// @dev When updated, the new value of `minimum_duration` cannot be earlier than the previous value.
