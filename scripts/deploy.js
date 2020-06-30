@@ -82,7 +82,6 @@ contract("deploy script", (accounts) => {
         accounts,
         Object.assign(
           {
-            whitelistAddress: addresses.whitelist,
             currency: currencyToken.address,
             minInvestment: new BigNumber("100")
               .shiftedBy(currencyDecimals)
