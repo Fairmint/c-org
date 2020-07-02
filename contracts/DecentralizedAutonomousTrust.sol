@@ -853,11 +853,19 @@ contract DecentralizedAutonomousTrust
       // Math: worst case
       // MAX * MAX * MAX_BEFORE_SQUARE
       // / MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE/2
-      currencyValue -= BigDiv.bigDiv2x1RoundUp(
+      temp = BigDiv.bigDiv2x1RoundUp(
         _quantityToSell.mul(_quantityToSell),
         reserve,
         supply * supply
       );
+      if(currencyValue > temp)
+      {
+        currencyValue -= temp;
+      }
+      else
+      {
+        currencyValue = 0;
+      }
     }
     else if(state == STATE_CLOSE)
     {
