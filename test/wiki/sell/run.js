@@ -62,7 +62,7 @@ contract("wiki / sell / run", (accounts) => {
     await contracts.dat.transfer(investor, sellAmount, { from: beneficiary });
     await reverts(
       contracts.dat.sell(investor, sellAmount, 1, { from: investor }),
-      "Address: insufficient balance" // from the currency (buyback reserve)
+      "PRICE_SLIPPAGE"
     );
   });
 
