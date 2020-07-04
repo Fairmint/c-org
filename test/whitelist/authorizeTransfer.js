@@ -128,7 +128,7 @@ contract("dat / whitelist / authorizeTransfer", (accounts) => {
 
     it("cannot sell", async () => {
       await reverts(
-        contracts.dat.sell(trader, 1, 1, {
+        contracts.dat.sell(trader, "100000000", 1, {
           from: trader,
         }),
         "DENIED: JURISDICTION_FLOW"
