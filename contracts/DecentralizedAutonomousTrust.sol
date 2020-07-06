@@ -430,7 +430,6 @@ contract DecentralizedAutonomousTrust
     setupFeeRecipient = _setupFeeRecipient;
 
     // Set default values (which may be updated using `updateConfig`)
-    minInvestment = 100 ether;
     beneficiary = msg.sender;
     control = msg.sender;
     feeCollector = msg.sender;
