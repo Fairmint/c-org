@@ -1,6 +1,7 @@
 pragma solidity 0.5.17;
 
 import "./interfaces/IWhitelist.sol";
+import "./interfaces/IERC20Detailed.sol";
 import "./math/BigDiv.sol";
 import "./math/Sqrt.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/IERC20.sol";
@@ -430,7 +431,12 @@ contract DecentralizedAutonomousTrust
     setupFeeRecipient = _setupFeeRecipient;
 
     // Set default values (which may be updated using `updateConfig`)
-    minInvestment = 100 ether;
+    uint decimals = 18;
+    if(_currencyAddress != address(0))
+    {
+      decimals = IERC20Detailed(_currencyAddress).decimals();
+    }
+    minInvestment = 100 * 10 ** decimals;
     beneficiary = msg.sender;
     control = msg.sender;
     feeCollector = msg.sender;
