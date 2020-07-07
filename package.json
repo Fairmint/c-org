@@ -42,7 +42,7 @@
     "eslint-config-airbnb-base": "14.1.0",
     "eslint-config-prettier": "6.11.0",
     "eslint-plugin-import": "2.22.0",
-    "eslint-plugin-prettier": "3.1.3",
+    "eslint-plugin-prettier": "3.1.4",
     "eth-gas-reporter": "0.2.17",
     "ethlint": "1.2.5",
     "ganache-cli": "6.9.1",
