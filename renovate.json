@@ -1,0 +1,23 @@
+{
+  "extends": [
+    "config:base",
+    ":prHourlyLimitNone",
+    ":prConcurrentLimitNone",
+    ":pinVersions"
+  ],
+  "timezone": "America/Los_Angeles",
+  "schedule": ["on sunday"],
+  "separateMinorPatch": true,
+  "patch": {
+    "groupName": "all patch updates"
+  },
+  "packageRules": [
+    {
+      "packagePatterns": ["hardlydifficult", "fairmint", "unlock"],
+      "schedule": ["at any time"],
+      "patch": {
+        "groupName": null
+      }
+    }
+  ]
+}
