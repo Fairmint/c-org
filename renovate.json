@@ -8,9 +8,6 @@
   "timezone": "America/Los_Angeles",
   "schedule": ["before 2pm"],
   "separateMinorPatch": true,
-  "patch": {
-    "groupName": "all patch updates"
-  },
   "packageRules": [
     {
       "packagePatterns": ["hardlydifficult", "fairmint", "unlock"],
