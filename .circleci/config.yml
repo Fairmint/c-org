@@ -58,7 +58,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/repo
-      - run: cp build c-org-abi/build/
+      - run: cp -a build c-org-abi/build/
       - run:
           name: Authenticate with registry
           command: echo "//registry.npmjs.org/:_authToken=$npm_TOKEN" > ~/repo/c-org-abi/.npmrc
