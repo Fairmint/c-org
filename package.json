@@ -1,5 +1,6 @@
 {
-  "name": "c-org",
+  "name": "@fairmint/c-org-contracts",
+  "version": "2.4.4",
   "description": "Smart-contracts for continuous organizations.",
   "scripts": {
     "build": "npm run compile",
@@ -13,10 +14,21 @@
     "coverage": "truffle run coverage && cat coverage/lcov.info | coveralls",
     "flatten": "(truffle-flattener contracts/DecentralizedAutonomousTrust.sol > build/DecentralizedAutonomousTrust-Flattened.sol) && (truffle-flattener contracts/Whitelist.sol > build/Whitelist-Flattened.sol) && (truffle-flattener node_modules/@openzeppelin/upgrades/contracts/upgradeability/ProxyAdmin.sol > build/ProxyAdmin-Flattened.sol)  && (truffle-flattener node_modules/@openzeppelin/upgrades/contracts/upgradeability/AdminUpgradeabilityProxy.sol > build/AdminUpgradeabilityProxy-Flattened.sol) && (echo Wrote flattened files: build/*-Flattened.sol)"
   },
+  "files": [
+    "build",
+    "contracts",
+    "test"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Fairmint/c-org.git"
   },
+  "author": "Fairmint",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Fairmint/c-org/issues"
+  },
+  "homepage": "https://github.com/Fairmint/c-org",
   "dependencies": {
     "@openzeppelin/contracts": "2.5.1",
     "@openzeppelin/contracts-ethereum-package": "2.5.0",
