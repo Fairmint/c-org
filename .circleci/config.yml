@@ -58,13 +58,16 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/repo
-      - run: mv build c-org-abi/build/
+      - run: cp build c-org-abi/build/
       - run:
           name: Authenticate with registry
           command: echo "//registry.npmjs.org/:_authToken=$npm_TOKEN" > ~/repo/c-org-abi/.npmrc
       - run:
-          name: Publish package
+          name: Publish ABI package
           command: cd c-org-abi && npm publish --access public
+      - run:
+          name: Publish contracts package
+          command: npm publish --access public
 
 workflows:
   version: 2
