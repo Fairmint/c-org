@@ -1,10 +1,10 @@
 const { constants } = require("hardlydifficult-eth");
 
 // Original deployment used 2.0.8 for the DAT and 2.2.0 for the whitelist
-const cOrgAbi208 = require("../versions/2.0.8/abi.json");
-const cOrgBytecode208 = require("../versions/2.0.8/bytecode.json");
-const cOrgAbi220 = require("../versions/2.2.0/abi.json");
-const cOrgBytecode220 = require("../versions/2.2.0/bytecode.json");
+const cOrgAbi208 = require("../../versions/2.0.8/abi.json");
+const cOrgBytecode208 = require("../../versions/2.0.8/bytecode.json");
+const cOrgAbi220 = require("../../versions/2.2.0/abi.json");
+const cOrgBytecode220 = require("../../versions/2.2.0/bytecode.json");
 const datArtifact = artifacts.require("DecentralizedAutonomousTrust");
 const whitelistArtifact = artifacts.require("Whitelist");
 const proxyArtifact = artifacts.require("AdminUpgradeabilityProxy");

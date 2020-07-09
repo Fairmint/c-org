@@ -1,5 +1,5 @@
 const BigNumber = require("bignumber.js");
-const { deployDat } = require("../helpers");
+const { deployDat } = require("../test/helpers");
 const fs = require("fs");
 
 const { tokens } = require("hardlydifficult-ethereum-contracts");
