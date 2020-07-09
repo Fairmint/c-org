@@ -68,20 +68,19 @@ contract("wiki / buy / initWithSetupFee", (accounts) => {
         constants.BASIS_POINTS_DEN
       );
 
-      const max = buySlope.times(initGoal).times(initGoal).div(2).dp(0);
+      const max = buySlope.times(initGoal).times(initGoal).dp(0);
       for (let i = 0; i < 2; i++) {
         await contracts.dat.buy(accounts[5], max.toFixed(), 1, {
           from: accounts[5],
           value: max.toFixed(),
         });
       }
-      // y=init_investors[beneficiary]*buy_slope*init_goal/2
+      // y=init_investors[beneficiary]*buy_slope*init_goal
       y = new BigNumber(
         await contracts.dat.initInvestors(await contracts.dat.beneficiary())
       )
         .times(buySlope)
-        .times(initGoal)
-        .div(2);
+        .times(initGoal);
       if (y.gt(setupFee)) {
         y = y.minus(setupFee);
       } else {
@@ -172,7 +171,7 @@ contract("wiki / buy / initWithSetupFee", (accounts) => {
         constants.BASIS_POINTS_DEN
       );
 
-      const max = buySlope.times(initGoal).times(initGoal).div(2).dp(0);
+      const max = buySlope.times(initGoal).times(initGoal).dp(0);
       await contracts.dat.buy(accounts[0], max.toFixed(), 1, {
         from: accounts[0],
         value: max.toFixed(),
@@ -184,13 +183,12 @@ contract("wiki / buy / initWithSetupFee", (accounts) => {
         from: accounts[5],
         value: max.toFixed(),
       });
-      // y=init_investors[beneficiary]*buy_slope*init_goal/2
+      // y=init_investors[beneficiary]*buy_slope*init_goal
       y = new BigNumber(
         await contracts.dat.initInvestors(await contracts.dat.beneficiary())
       )
         .times(buySlope)
-        .times(initGoal)
-        .div(2);
+        .times(initGoal);
       if (y.gt(setupFee)) {
         y = y.minus(setupFee);
       } else {

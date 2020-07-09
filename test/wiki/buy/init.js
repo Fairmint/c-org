@@ -137,7 +137,7 @@ contract("wiki / buy / init", (accounts) => {
     });
   });
 
-  describe("If amount > (buy_slope*init_goal^2)/2 then the function exits", () => {
+  describe("If amount > (buy_slope*init_goal^2) then the function exits", () => {
     const fromAccount = accounts[5];
     let max;
 
@@ -145,7 +145,7 @@ contract("wiki / buy / init", (accounts) => {
       const buySlope = new BigNumber(await contracts.dat.buySlopeNum()).div(
         await contracts.dat.buySlopeDen()
       );
-      max = buySlope.times(initGoal).times(initGoal).div(2).dp(0);
+      max = buySlope.times(initGoal).times(initGoal).dp(0);
     });
 
     it("Sanity check: buy works if amount is less than max", async () => {
@@ -224,7 +224,7 @@ contract("wiki / buy / init", (accounts) => {
     );
   });
 
-  describe("Add x to the investor's balance with x=2*amount/(buy_slope*init_goal)", () => {
+  describe("Add x to the investor's balance with x=amount/(buy_slope*init_goal)", () => {
     const fromAccount = accounts[5];
     const amount = "100000000000000000000";
     let x;
@@ -237,7 +237,7 @@ contract("wiki / buy / init", (accounts) => {
       const buySlope = new BigNumber(await contracts.dat.buySlopeNum()).div(
         await contracts.dat.buySlopeDen()
       );
-      x = new BigNumber(2).times(amount).div(buySlope.times(initGoal));
+      x = new BigNumber(amount).div(buySlope.times(initGoal));
     });
 
     it("Investor's balance went up by x", async () => {
@@ -325,13 +325,12 @@ contract("wiki / buy / init", (accounts) => {
           value: max.toFixed(),
         });
       }
-      // y=init_investors[beneficiary]*buy_slope*init_goal/2
+      // y=init_investors[beneficiary]*buy_slope*init_goal
       y = new BigNumber(
         await contracts.dat.initInvestors(await contracts.dat.beneficiary())
       )
         .times(buySlope)
-        .times(initGoal)
-        .div(2);
+        .times(initGoal);
       buybackReserveBefore = max.times(2);
     });
 
@@ -415,13 +414,12 @@ contract("wiki / buy / init", (accounts) => {
         from: accounts[5],
         value: max.toFixed(),
       });
-      // y=init_investors[beneficiary]*buy_slope*init_goal/2
+      // y=init_investors[beneficiary]*buy_slope*init_goal
       y = new BigNumber(
         await contracts.dat.initInvestors(await contracts.dat.beneficiary())
       )
         .times(buySlope)
-        .times(initGoal)
-        .div(2);
+        .times(initGoal);
       buybackReserveBefore = max.times(2);
     });
 
