@@ -615,28 +615,28 @@ contract DecentralizedAutonomousTrust
     {
       uint currencyValue = _currencyValue;
       uint _totalSupply = totalSupply();
-      // (buy_slope*init_goal)*(init_goal+init_reserve-total_supply)/2
+      // (buy_slope*init_goal)*(init_goal+init_reserve-total_supply)
       // n/d: buy_slope (MAX_BEFORE_SQUARE / MAX_BEFORE_SQUARE)
-      // g: init_goal (MAX_BEFORE_SQUARE/2)
-      // t: total_supply (MAX_BEFORE_SQUARE/2)
-      // r: init_reserve (MAX_BEFORE_SQUARE/2)
-      // source: ((n/d)*g)*(g+r-t)/2
-      // impl: (g n (g + r - t))/(2 d)
+      // g: init_goal (MAX_BEFORE_SQUARE)
+      // t: total_supply (MAX_BEFORE_SQUARE)
+      // r: init_reserve (MAX_BEFORE_SQUARE)
+      // source: ((n/d)*g)*(g+r-t)
+      // impl: (g n (g + r - t))/(d)
       uint max = BigDiv.bigDiv2x1(
         initGoal * buySlopeNum,
         initGoal + initReserve - _totalSupply,
-        2 * buySlopeDen
+        buySlopeDen
       );
       if(currencyValue > max)
       {
         currencyValue = max;
       }
       // Math: worst case
-      // MAX * 2 * MAX_BEFORE_SQUARE
+      // MAX * MAX_BEFORE_SQUARE
       // / MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE
       tokenValue = BigDiv.bigDiv2x1(
         currencyValue,
-        2 * buySlopeDen,
+        buySlopeDen,
         initGoal * buySlopeNum
       );
 
@@ -739,11 +739,11 @@ contract DecentralizedAutonomousTrust
 
         // Math worst case:
         // MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE/2
-        // / MAX_BEFORE_SQUARE * 2
+        // / MAX_BEFORE_SQUARE
         uint beneficiaryContribution = BigDiv.bigDiv2x1(
           initInvestors[beneficiary],
           buySlopeNum * initGoal,
-          buySlopeDen * 2
+          buySlopeDen
         );
 
         if(setupFee > 0)
