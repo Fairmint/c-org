@@ -7,7 +7,7 @@ const datArtifact = artifacts.require("DecentralizedAutonomousTrust");
 const proxyArtifact = artifacts.require("AdminUpgradeabilityProxy");
 const proxyAdminArtifact = artifacts.require("ProxyAdmin");
 const whitelistArtifact = artifacts.require("Whitelist");
-const { updateDatConfig } = require("../../helpers");
+const { updateDatConfig } = require("../helpers");
 
 contract("whitelist / upgrade", (accounts) => {
   const contracts = {};
