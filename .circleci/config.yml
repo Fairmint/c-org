@@ -60,11 +60,14 @@ jobs:
           at: ~/repo
       - run: cp -a build c-org-abi/build/
       - run:
-          name: Authenticate with registry
+          name: Authenticate ABI with registry
           command: echo "//registry.npmjs.org/:_authToken=$npm_TOKEN" > ~/repo/c-org-abi/.npmrc
       - run:
           name: Publish ABI package
           command: cd c-org-abi && npm publish --access public
+      - run:
+          name: Authenticate contracts with registry
+          command: echo "//registry.npmjs.org/:_authToken=$npm_TOKEN" > ~/repo/.npmrc
       - run:
           name: Publish contracts package
           command: npm publish --access public
