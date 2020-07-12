@@ -55,7 +55,7 @@ const numbers = [
   // MAX_UINT128.div("2")
   //   .dp(0)
   //   .minus("1"),
-  MAX_UINT128.div("2").dp(0),
+  // MAX_UINT128.div("2").dp(0),
   // MAX_UINT128.div("2")
   //   .dp(0)
   //   .plus("1"),
@@ -66,7 +66,7 @@ const numbers = [
   // MAX_UINT128.plus("2"),
   // MAX_UINT128.plus("3"),
   // MAX_UINT128.times("2").minus("1"),
-  MAX_UINT128.times("2"),
+  // MAX_UINT128.times("2"),
   // MAX_UINT128.times("2").plus("1"),
   // MAX_UINT128.times("10"),
   // MAX_UINT128.times("1009"),
@@ -93,9 +93,9 @@ const numbers = [
   // MAX_UINT192.times('1009'),
   // MAX_UINT256.div("1009").dp(0),
   // MAX_UINT256.div("10").dp(0),
-  MAX_UINT256.div("2").dp(0).minus("1"),
-  MAX_UINT256.div("2").dp(0),
-  MAX_UINT256.div("2").dp(0).plus("1"),
+  // MAX_UINT256.div("2").dp(0).minus("1"),
+  // MAX_UINT256.div("2").dp(0),
+  // MAX_UINT256.div("2").dp(0).plus("1"),
   MAX_UINT256.minus("2"),
   MAX_UINT256.minus("1"),
   MAX_UINT256,
