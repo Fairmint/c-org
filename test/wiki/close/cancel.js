@@ -1,4 +1,4 @@
-const { deployDat } = require("../datHelpers");
+const { deployDat } = require("../../datHelpers");
 const { approveAll, constants } = require("../../helpers");
 const { reverts } = require("truffle-assertions");
 

@@ -1,6 +1,6 @@
 const BigNumber = require("bignumber.js");
 const vestingArtifact = artifacts.require("TokenVesting");
-const { deployDat } = require("../datHelpers");
+const { deployDat } = require("../../datHelpers");
 const { approveAll, constants } = require("../../helpers");
 const { reverts } = require("truffle-assertions");
 
