@@ -1,4 +1,5 @@
-const { approveAll, deployDat } = require("../../helpers");
+const { deployDat } = require("../../datHelpers");
+const { approveAll } = require("../../helpers");
 
 contract("fair / erc20 / transfer", (accounts) => {
   let contracts;

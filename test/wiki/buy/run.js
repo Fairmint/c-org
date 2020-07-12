@@ -1,5 +1,6 @@
 const BigNumber = require("bignumber.js");
-const { approveAll, constants, deployDat } = require("../../helpers");
+const { deployDat } = require("../../datHelpers");
+const { approveAll, constants } = require("../../helpers");
 const { reverts } = require("truffle-assertions");
 
 contract("wiki / buy / run", (accounts) => {
@@ -139,8 +140,6 @@ contract("wiki / buy / run", (accounts) => {
   describe("If the investor is the beneficiary", () => {
     const amount = "100000000000000000000";
     let from;
-    let x;
-    let burnAmount;
     let burnBefore;
     let buybackReserveBefore;
 
@@ -150,9 +149,6 @@ contract("wiki / buy / run", (accounts) => {
 
     describe("if (x+investor_balance)/(total_supply+burnt_supply) >= burn_threshold", () => {
       beforeEach(async () => {
-        x = new BigNumber(await contracts.dat.estimateBuyValue(amount));
-        burnAmount = x;
-
         burnBefore = new BigNumber(await contracts.dat.burnedSupply());
         buybackReserveBefore = new BigNumber(
           await contracts.dat.buybackReserve()

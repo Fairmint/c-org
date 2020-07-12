@@ -1,6 +1,7 @@
-const { approveAll, deployDat, getApprovalDigest } = require("../helpers");
+const { deployDat } = require("../datHelpers");
+const { approveAll, getApprovalDigest } = require("../helpers");
 const { reverts } = require("truffle-assertions");
-const { constants, tokens } = require("hardlydifficult-eth");
+const { constants } = require("hardlydifficult-eth");
 const { MockProvider } = require("ethereum-waffle");
 const { ecsign } = require("ethereumjs-util");
 const { hexlify, keccak256, toUtf8Bytes } = require("ethers/utils");

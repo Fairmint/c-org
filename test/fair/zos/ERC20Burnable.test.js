@@ -1,4 +1,5 @@
-const { approveAll, deployDat } = require("../../helpers");
+const { deployDat } = require("../../datHelpers");
+const { approveAll } = require("../../helpers");
 
 // Source: https://github.com/OpenZeppelin/openzeppelin-contracts
 
@@ -9,7 +10,7 @@ const {
 } = require("./behaviors/ERC20Burnable.behavior");
 
 contract("ERC20Burnable", function (accounts) {
-  const [_, owner, ...otherAccounts] = accounts;
+  const [owner, ...otherAccounts] = accounts;
   const initialBalance = new BN(1000);
 
   beforeEach(async function () {

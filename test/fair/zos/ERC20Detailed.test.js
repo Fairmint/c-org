@@ -1,4 +1,5 @@
-const { approveAll, deployDat } = require("../../helpers");
+const { deployDat } = require("../../datHelpers");
+const { approveAll } = require("../../helpers");
 
 // Source: https://github.com/OpenZeppelin/openzeppelin-contracts
 

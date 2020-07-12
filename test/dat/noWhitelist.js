@@ -1,4 +1,5 @@
-const { constants, deployDat } = require("../helpers");
+const { deployDat } = require("../datHelpers");
+const { constants } = require("../helpers");
 
 contract("dat / noWhitelist", (accounts) => {
   let contracts;

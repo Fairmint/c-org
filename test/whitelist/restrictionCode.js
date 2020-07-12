@@ -1,4 +1,5 @@
-const { approveAll, deployDat } = require("../helpers");
+const { approveAll } = require("../helpers");
+const { deployDat } = require("../datHelpers");
 
 contract("dat / whitelist / restrictionCode", (accounts) => {
   let contracts;

@@ -1,4 +1,5 @@
-const { deployDat, getDomainSeparator } = require("../helpers");
+const { deployDat } = require("../datHelpers");
+const { getDomainSeparator } = require("../helpers");
 
 contract("dat / domainSeparator", (accounts) => {
   let contracts;

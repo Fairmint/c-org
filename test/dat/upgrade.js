@@ -8,7 +8,8 @@ const cOrgBytecode220 = require("../../versions/2.2.0/bytecode.json");
 const datArtifact = artifacts.require("DecentralizedAutonomousTrust");
 const proxyArtifact = artifacts.require("AdminUpgradeabilityProxy");
 const proxyAdminArtifact = artifacts.require("ProxyAdmin");
-const { approveAll, updateDatConfig } = require("../helpers");
+const { updateDatConfig } = require("../datHelpers");
+const { approveAll } = require("../helpers");
 
 contract("dat / upgrade", (accounts) => {
   const contracts = {};

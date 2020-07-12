@@ -1,6 +1,7 @@
 const BigNumber = require("bignumber.js");
 const vestingArtifact = artifacts.require("TokenVesting");
-const { approveAll, constants, deployDat } = require("../../helpers");
+const { deployDat } = require("../datHelpers");
+const { approveAll, constants } = require("../../helpers");
 const { reverts } = require("truffle-assertions");
 
 contract("wiki / buy / init", (accounts) => {

@@ -1,4 +1,5 @@
-const { constants, deployDat } = require("../helpers");
+const { deployDat } = require("../datHelpers");
+const { constants } = require("../helpers");
 const { reverts } = require("truffle-assertions");
 
 contract("dat / whitelist / shouldFail", (accounts) => {

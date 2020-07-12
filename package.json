@@ -1,6 +1,6 @@
 {
   "name": "@fairmint/c-org-contracts",
-  "version": "2.4.5",
+  "version": "2.4.6",
   "description": "Smart-contracts for continuous organizations.",
   "scripts": {
     "build": "npm run compile",
@@ -17,7 +17,8 @@
   "files": [
     "build",
     "contracts",
-    "test/behaviors"
+    "test/behaviors",
+    "test/helpers"
   ],
   "repository": {
     "type": "git",
