@@ -50,7 +50,7 @@ jobs:
           command: npm run coverage
           no_output_timeout: 120m
 
-  publish:
+  publishABI:
     context: docker-hub-credentials
     docker:
       - image: circleci/node:10
@@ -65,6 +65,15 @@ jobs:
       - run:
           name: Publish ABI package
           command: cd c-org-abi && npm publish --access public
+
+  publishContracts:
+    context: docker-hub-credentials
+    docker:
+      - image: circleci/node:10
+    working_directory: ~/repo
+    steps:
+      - attach_workspace:
+          at: ~/repo
       - run:
           name: Authenticate contracts with registry
           command: echo "//registry.npmjs.org/:_authToken=$npm_TOKEN" > ~/repo/.npmrc
@@ -86,7 +95,15 @@ workflows:
       - coverage:
          requires:
            - test
-      - publish:
+      - publishABI:
+          requires:
+            - build
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
+      - publishContracts:
           requires:
             - build
           filters:
