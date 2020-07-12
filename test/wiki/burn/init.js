@@ -1,4 +1,5 @@
-const { approveAll, constants, deployDat } = require("../../helpers");
+const { deployDat } = require("../../datHelpers");
+const { approveAll, constants } = require("../../helpers");
 const { reverts } = require("truffle-assertions");
 
 contract("wiki / burn / run", (accounts) => {

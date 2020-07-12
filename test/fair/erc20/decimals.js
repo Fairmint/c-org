@@ -1,4 +1,4 @@
-const { deployDat } = require("../../helpers");
+const { deployDat } = require("../../datHelpers");
 
 contract("fair / erc20 / decimals", (accounts) => {
   let contracts;

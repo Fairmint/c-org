@@ -1,4 +1,4 @@
-const { deployDat } = require("../helpers");
+const { deployDat } = require("../datHelpers");
 const truffleAssert = require("truffle-assertions");
 
 contract("dat / whitelist / operators", (accounts) => {

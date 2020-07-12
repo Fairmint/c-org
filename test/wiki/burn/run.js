@@ -1,5 +1,6 @@
 const BigNumber = require("bignumber.js");
-const { approveAll, constants, deployDat } = require("../../helpers");
+const { deployDat } = require("../../datHelpers");
+const { approveAll, constants } = require("../../helpers");
 
 contract("wiki / burn / run", (accounts) => {
   let contracts;

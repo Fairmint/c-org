@@ -1,10 +1,6 @@
 const BigNumber = require("bignumber.js");
-const {
-  approveAll,
-  constants,
-  deployDat,
-  getGasCost,
-} = require("../../helpers");
+const { deployDat } = require("../../datHelpers");
+const { approveAll, constants, getGasCost } = require("../../helpers");
 const { reverts } = require("truffle-assertions");
 
 contract("wiki / sell / init", (accounts) => {

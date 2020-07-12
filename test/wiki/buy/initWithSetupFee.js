@@ -1,5 +1,6 @@
 const BigNumber = require("bignumber.js");
-const { approveAll, constants, deployDat } = require("../../helpers");
+const { deployDat } = require("../../datHelpers");
+const { approveAll, constants } = require("../../helpers");
 
 contract("wiki / buy / initWithSetupFee", (accounts) => {
   const initGoal = "10000000000000000000000";

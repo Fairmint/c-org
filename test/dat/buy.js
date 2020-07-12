@@ -2,7 +2,8 @@
  * Tests the ability to buy dat tokens
  */
 
-const { approveAll, deployDat } = require("../helpers");
+const { deployDat } = require("../datHelpers");
+const { approveAll } = require("../helpers");
 const { reverts } = require("truffle-assertions");
 
 contract("dat / buy", (accounts) => {

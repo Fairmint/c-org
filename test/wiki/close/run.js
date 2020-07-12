@@ -2,13 +2,8 @@ const { tokens } = require("hardlydifficult-ethereum-contracts");
 
 const sleep = require("sleep");
 const BigNumber = require("bignumber.js");
-const {
-  approveAll,
-  constants,
-  deployDat,
-  getGasCost,
-  updateDatConfig,
-} = require("../../helpers");
+const { deployDat, updateDatConfig } = require("../../datHelpers");
+const { approveAll, constants, getGasCost } = require("../../helpers");
 const { reverts } = require("truffle-assertions");
 
 contract("wiki / close / run", (accounts) => {

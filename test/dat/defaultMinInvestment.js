@@ -1,5 +1,5 @@
-const { approveAll, deployDat } = require("../helpers");
-const { constants, tokens } = require("hardlydifficult-eth");
+const { deployDat } = require("../datHelpers");
+const { tokens } = require("hardlydifficult-eth");
 const BigNumber = require("bignumber.js");
 
 contract("dat / defaultMinInvestment", (accounts) => {

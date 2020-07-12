@@ -1,7 +1,8 @@
 const { tokens } = require("hardlydifficult-ethereum-contracts");
 
 const BigNumber = require("bignumber.js");
-const { approveAll, constants, deployDat, getGasCost } = require("../helpers");
+const { deployDat } = require("../datHelpers");
+const { approveAll, constants, getGasCost } = require("../helpers");
 const { reverts } = require("truffle-assertions");
 
 contract("dat / pay", (accounts) => {
@@ -111,7 +112,6 @@ contract("dat / pay", (accounts) => {
     describe("on pay", () => {
       let investorBalanceBefore;
       let investorCurrencyBalanceBefore;
-      let beneficiaryBalanceBefore;
       let gasCost;
 
       beforeEach(async () => {
@@ -120,9 +120,6 @@ contract("dat / pay", (accounts) => {
         );
         investorCurrencyBalanceBefore = new BigNumber(
           await web3.eth.getBalance(investor)
-        );
-        beneficiaryBalanceBefore = new BigNumber(
-          await contracts.dat.balanceOf(await contracts.dat.beneficiary())
         );
 
         const tx = await contracts.dat.pay(payAmount, {

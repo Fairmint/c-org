@@ -1,5 +1,6 @@
 const BigNumber = require("bignumber.js");
-const { approveAll, constants, deployDat } = require("../../helpers");
+const { deployDat } = require("../../datHelpers");
+const { approveAll, constants } = require("../../helpers");
 
 contract("wiki / pay / run", (accounts) => {
   let contracts;
@@ -88,8 +89,6 @@ contract("wiki / pay / run", (accounts) => {
   });
 
   describe("on pay to the beneficiary", async () => {
-    let burnedSupplyBefore;
-
     beforeEach(async () => {
       await contracts.whitelist.updateJurisdictionsForUserIds(
         [investor],
@@ -98,7 +97,6 @@ contract("wiki / pay / run", (accounts) => {
           from: await contracts.dat.control(),
         }
       );
-      burnedSupplyBefore = new BigNumber(await contracts.dat.burnedSupply());
 
       await contracts.dat.pay(payAmount, {
         from: investor,
@@ -113,7 +111,6 @@ contract("wiki / pay / run", (accounts) => {
   });
 
   describe("on pay to the beneficiary going over the burn threshold", async () => {
-    let beneficiaryFairBalanceBefore;
     let burnedSupplyBefore;
     let payAmount = "4200000000000000000000";
 
@@ -131,9 +128,6 @@ contract("wiki / pay / run", (accounts) => {
         );
       }
 
-      beneficiaryFairBalanceBefore = new BigNumber(
-        await contracts.dat.balanceOf(await contracts.dat.beneficiary())
-      );
       burnedSupplyBefore = new BigNumber(await contracts.dat.burnedSupply());
 
       await contracts.whitelist.updateJurisdictionsForUserIds(

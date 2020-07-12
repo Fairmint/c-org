@@ -1,6 +1,5 @@
-const { approveAll, deployDat } = require("../helpers");
-const { reverts } = require("truffle-assertions");
-const { assert } = require("chai");
+const { deployDat } = require("../datHelpers");
+const { approveAll } = require("../helpers");
 
 /*
 Testing the following scenario, which was a bug in version <= 2:

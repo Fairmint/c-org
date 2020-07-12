@@ -1,4 +1,5 @@
-const { approveAll, deployDat } = require("../helpers");
+const { deployDat } = require("../datHelpers");
+const { approveAll } = require("../helpers");
 const { tokens } = require("hardlydifficult-ethereum-contracts");
 const { constants } = require("../helpers");
 

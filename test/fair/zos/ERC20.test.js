@@ -1,4 +1,5 @@
-const { approveAll, deployDat } = require("../../helpers");
+const { deployDat } = require("../../datHelpers");
+const { approveAll } = require("../../helpers");
 
 // Source: https://github.com/OpenZeppelin/openzeppelin-contracts
 
@@ -18,7 +19,7 @@ const {
 } = require("./ERC20.behavior");
 
 contract("ERC20", function (accounts) {
-  const [_, initialHolder, recipient, anotherAccount] = accounts;
+  const [initialHolder, recipient, anotherAccount] = accounts;
   const initialSupply = new BN(100);
 
   beforeEach(async function () {

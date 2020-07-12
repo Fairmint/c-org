@@ -1,5 +1,6 @@
 const BigNumber = require("bignumber.js");
-const { approveAll, deployDat, getGasCost } = require("../helpers");
+const { deployDat } = require("../datHelpers");
+const { approveAll, getGasCost } = require("../helpers");
 
 contract("dat / to", (accounts) => {
   let contracts;

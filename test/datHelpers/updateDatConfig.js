@@ -1,5 +1,3 @@
-const { constants } = require("hardlydifficult-eth");
-
 module.exports = async function updateDatConfig(contracts, options) {
   /* Original version:
     address _whitelistAddress,

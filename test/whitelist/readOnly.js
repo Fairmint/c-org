@@ -1,4 +1,4 @@
-const { approveAll, deployDat } = require("../helpers");
+const { deployDat } = require("../datHelpers");
 
 contract("dat / whitelist / readOnly", (accounts) => {
   let contracts;

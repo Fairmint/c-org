@@ -10,7 +10,7 @@ const { ZERO_ADDRESS } = constants;
 
 const { expect } = require("chai");
 
-function shouldBehaveLikeERC20Burnable(owner, initialBalance, [burner]) {
+function shouldBehaveLikeERC20Burnable(owner, initialBalance) {
   describe("burn", function () {
     describe("when the given amount is not greater than balance of the sender", function () {
       context("for a zero amount", function () {

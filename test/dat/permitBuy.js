@@ -1,4 +1,5 @@
-const { approveAll, deployDat, getApprovalDigest } = require("../helpers");
+const { deployDat } = require("../datHelpers");
+const { approveAll, getApprovalDigest } = require("../helpers");
 const { reverts } = require("truffle-assertions");
 const { constants, tokens } = require("hardlydifficult-eth");
 const { MockProvider } = require("ethereum-waffle");
