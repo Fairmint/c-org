@@ -1,3 +1,4 @@
+const BigNumber = require("bignumber.js");
 const { deployDat } = require("../datHelpers");
 const { reverts } = require("truffle-assertions");
 const { time } = require("@openzeppelin/test-helpers");
