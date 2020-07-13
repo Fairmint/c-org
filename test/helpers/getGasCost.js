@@ -1,8 +1,5 @@
 const BigNumber = require("bignumber.js");
-
-async function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
+const { time } = require("@openzeppelin/test-helpers");
 
 async function getRequest(tx) {
   if (tx.request) return tx.request;
@@ -22,7 +19,7 @@ async function getReceipt(tx) {
       tx.tx || tx.hash || tx.transactionHash || tx
     );
     if (receipt) return (tx.receipt = receipt);
-    await sleep(2000);
+    await time.increase(2);
   }
 }
 

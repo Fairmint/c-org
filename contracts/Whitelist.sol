@@ -209,7 +209,7 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
     for(uint i = info.startIndex; i < endIndex; i++)
     {
       Lockup memory lockup = userIdLockups[_userId][i];
-      if(lockup.lockupExpirationDate > now)
+      if(lockup.lockupExpirationDate > block.timestamp)
       {
         // no more eligible entries
         break;
@@ -439,7 +439,7 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
     uint _numberOfTokensLocked
   ) internal
   {
-    if(_numberOfTokensLocked == 0 || _lockupExpirationDate <= now)
+    if(_numberOfTokensLocked == 0 || _lockupExpirationDate <= block.timestamp)
     {
       // This is a no-op
       return;
@@ -506,7 +506,7 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
       return true;
     }
     Lockup storage lockup = userIdLockups[_userId][info.startIndex];
-    if(lockup.lockupExpirationDate > now && !_ignoreExpiration)
+    if(lockup.lockupExpirationDate > block.timestamp && !_ignoreExpiration)
     {
       // no more eligable entries
       return true;
@@ -608,14 +608,14 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
       if(lockupLength > 1 && _to != address(0))
       {
         // Lockup may apply for any action other than burn/sell (e.g. buy/pay/transfer)
-        uint lockupExpirationDate = now + lockupLength;
+        uint lockupExpirationDate = block.timestamp + lockupLength;
         _addLockup(toUserId, lockupExpirationDate, _value);
       }
 
       if(_from == address(0))
       {
         // This is minting (buy or pay)
-        require(now >= startDate, "WAIT_FOR_START_DATE");
+        require(block.timestamp >= startDate, "WAIT_FOR_START_DATE");
       }
       else
       {

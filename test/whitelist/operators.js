@@ -1,7 +1,7 @@
 const { deployDat } = require("../datHelpers");
 const truffleAssert = require("truffle-assertions");
 
-contract("dat / whitelist / operators", (accounts) => {
+contract("whitelist / operators", (accounts) => {
   let contracts;
   let operatorAccount = accounts[5];
 

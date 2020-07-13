@@ -2,7 +2,7 @@ const { deployDat } = require("../datHelpers");
 const { constants } = require("../helpers");
 const { reverts } = require("truffle-assertions");
 
-contract("dat / whitelist / shouldFail", (accounts) => {
+contract("whitelist / shouldFail", (accounts) => {
   let contracts;
 
   before(async () => {

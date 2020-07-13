@@ -1,6 +1,6 @@
 const { tokens } = require("hardlydifficult-ethereum-contracts");
+const { time } = require("@openzeppelin/test-helpers");
 
-const sleep = require("sleep");
 const BigNumber = require("bignumber.js");
 const { deployDat, updateDatConfig } = require("../../datHelpers");
 const { approveAll, constants, getGasCost } = require("../../helpers");
@@ -42,8 +42,9 @@ contract("wiki / close / run", (accounts) => {
 
   describe("when locked", async () => {
     beforeEach(async () => {
+      const currentTime = new BigNumber(await time.latest());
       await updateDatConfig(contracts, {
-        minDuration: Math.round(Date.now() / 1000) + 10,
+        minDuration: currentTime.plus(10).toFixed(),
       });
     });
 
@@ -59,7 +60,7 @@ contract("wiki / close / run", (accounts) => {
 
     describe("after the lock expires", () => {
       beforeEach(async () => {
-        sleep.sleep(11);
+        await time.increase(11);
       });
 
       it("then close works again", async () => {

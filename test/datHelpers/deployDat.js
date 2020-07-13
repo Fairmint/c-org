@@ -1,3 +1,5 @@
+const BigNumber = require("bignumber.js");
+const { time } = require("@openzeppelin/test-helpers");
 const { constants } = require("hardlydifficult-eth");
 
 // Original deployment used 2.0.8 for the DAT and 2.2.0 for the whitelist
@@ -279,11 +281,12 @@ module.exports = async function deployDat(
   // Move the initReserve to vesting contracts
   if (callOptions.vesting) {
     contracts.vesting = [];
+    const currentTime = new BigNumber(await time.latest());
     for (let i = 0; i < callOptions.vesting.length; i++) {
       const vestingBeneficiary = callOptions.vesting[i].address;
       const contract = await vestingArtifact.new(
         vestingBeneficiary, // beneficiary
-        Math.round(Date.now() / 1000) + 100, // startDate is seconds
+        currentTime.plus(100).toFixed(), // startDate is seconds
         120, // cliffDuration in seconds
         200, // duration in seconds
         false, // non-revocable

@@ -1,13 +1,9 @@
+const BigNumber = require("bignumber.js");
 const { deployDat } = require("../datHelpers");
 const { reverts } = require("truffle-assertions");
+const { time } = require("@openzeppelin/test-helpers");
 
-async function sleep(ms) {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
-}
-
-contract("dat / whitelist / forceUnlockUpTo", (accounts) => {
+contract("whitelist / forceUnlockUpTo", (accounts) => {
   let contracts;
   let ownerAccount;
   let operatorAccount = accounts[3];
@@ -22,9 +18,10 @@ contract("dat / whitelist / forceUnlockUpTo", (accounts) => {
     await contracts.whitelist.approveNewUsers([trader], [4], {
       from: operatorAccount,
     });
+    const currentTime = new BigNumber(await time.latest());
     await contracts.whitelist.addLockups(
       [trader],
-      [Math.round(Date.now() / 1000) + 5],
+      [currentTime.plus(5).toFixed()],
       [42],
       {
         from: operatorAccount,
@@ -65,7 +62,7 @@ contract("dat / whitelist / forceUnlockUpTo", (accounts) => {
 
   describe("on forceUnlockUpTo", () => {
     beforeEach(async () => {
-      await sleep(6000);
+      await time.increase(6);
       await contracts.whitelist.forceUnlockUpTo(trader, -1, {
         from: operatorAccount,
       });
@@ -100,15 +97,22 @@ contract("dat / whitelist / forceUnlockUpTo", (accounts) => {
       const notReadToFreeCount = 10;
 
       beforeEach(async () => {
-        let lockupTime = Math.round(Date.now() / 1000) + 5;
+        const currentTime = new BigNumber(await time.latest());
+        let lockupTime = currentTime.plus(5);
         for (let i = 0; i < readyToFreeCount + notReadToFreeCount; i++) {
           if (i == readyToFreeCount) {
             // Move the expiration to far in the future
-            lockupTime += 10000;
+            lockupTime = lockupTime.plus(10000);
           }
-          await contracts.whitelist.addLockups([trader], [lockupTime++], [42], {
-            from: operatorAccount,
-          });
+          await contracts.whitelist.addLockups(
+            [trader],
+            [lockupTime.toFixed()],
+            [42],
+            {
+              from: operatorAccount,
+            }
+          );
+          lockupTime = lockupTime.plus(1);
         }
       });
 
@@ -129,7 +133,7 @@ contract("dat / whitelist / forceUnlockUpTo", (accounts) => {
       });
 
       it("before processing transferable token count is correct", async () => {
-        await sleep((5 + readyToFreeCount) * 1000);
+        await time.increase(5 + readyToFreeCount);
         // mine a block to update the ganache time
         await web3.eth.sendTransaction({
           from: accounts[0],
