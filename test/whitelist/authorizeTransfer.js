@@ -225,7 +225,7 @@ contract("whitelist / authorizeTransfer", (accounts) => {
           });
         });
 
-        it.only("can transfer", async () => {
+        it("can transfer", async () => {
           await contracts.dat.transfer(accounts[1], 1, {
             from: trader,
           });
