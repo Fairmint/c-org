@@ -1,6 +1,6 @@
 const { deployDat } = require("../datHelpers");
 
-contract("dat / whitelist / readOnly", (accounts) => {
+contract("whitelist / readOnly", (accounts) => {
   let contracts;
   let control;
 

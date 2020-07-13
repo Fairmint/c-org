@@ -1,7 +1,9 @@
+const BigNumber = require("bignumber.js");
+const { time } = require("@openzeppelin/test-helpers");
 const { deployDat } = require("../datHelpers");
 const { reverts } = require("truffle-assertions");
 
-contract("dat / whitelist / startDate", (accounts) => {
+contract("whitelist / startDate", (accounts) => {
   let contracts;
   let ownerAccount;
   let operatorAccount = accounts[5];
@@ -17,7 +19,8 @@ contract("dat / whitelist / startDate", (accounts) => {
     await contracts.whitelist.approveNewUsers([trader], [4], {
       from: operatorAccount,
     });
-    startDate = Math.round(Date.now() / 1000) + 30;
+    const currentTime = new BigNumber(await time.latest());
+    startDate = currentTime.plus(30).toFixed();
     await contracts.whitelist.configWhitelist(startDate, 84, {
       from: ownerAccount,
     });
@@ -40,7 +43,8 @@ contract("dat / whitelist / startDate", (accounts) => {
 
   describe("on config again", () => {
     beforeEach(async () => {
-      startDate = Math.round(Date.now() / 1000) - 1;
+      const currentTime = new BigNumber(await time.latest());
+      startDate = currentTime.minus(1).toFixed();
       await contracts.whitelist.configWhitelist(startDate, 0, {
         from: ownerAccount,
       });

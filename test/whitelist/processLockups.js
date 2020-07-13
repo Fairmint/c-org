@@ -1,13 +1,8 @@
 const { deployDat } = require("../datHelpers");
 const { reverts } = require("truffle-assertions");
+const { time } = require("@openzeppelin/test-helpers");
 
-async function sleep(ms) {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
-}
-
-contract("dat / whitelist / processLockups", (accounts) => {
+contract("whitelist / processLockups", (accounts) => {
   let contracts;
   let ownerAccount;
   let operatorAccount = accounts[3];
@@ -22,9 +17,10 @@ contract("dat / whitelist / processLockups", (accounts) => {
     await contracts.whitelist.approveNewUsers([trader], [4], {
       from: operatorAccount,
     });
+    const currentTime = new BigNumber(await time.latest());
     await contracts.whitelist.addLockups(
       [trader],
-      [Math.round(Date.now() / 1000) + 5],
+      [currentTime.plus(5).toFixed()],
       [42],
       {
         from: operatorAccount,
@@ -33,7 +29,7 @@ contract("dat / whitelist / processLockups", (accounts) => {
   });
 
   it("anyone can processLockups", async () => {
-    await sleep(6000);
+    await time.increase(6);
     await contracts.whitelist.processLockups(trader, -1, {
       from: accounts[8],
     });
@@ -63,7 +59,7 @@ contract("dat / whitelist / processLockups", (accounts) => {
 
   describe("on processLockups", () => {
     beforeEach(async () => {
-      await sleep(6000);
+      await time.increase(6);
       await contracts.whitelist.processLockups(trader, -1, {
         from: accounts[8],
       });
@@ -89,7 +85,8 @@ contract("dat / whitelist / processLockups", (accounts) => {
       const notReadToFreeCount = 10;
 
       beforeEach(async () => {
-        let lockupTime = Math.round(Date.now() / 1000) + 5;
+        const currentTime = new BigNumber(await time.latest());
+        let lockupTime = currentTime.plus(5).toNumber();
         for (let i = 0; i < readyToFreeCount + notReadToFreeCount; i++) {
           if (i == readyToFreeCount) {
             // Move the expiration to far in the future
@@ -118,7 +115,7 @@ contract("dat / whitelist / processLockups", (accounts) => {
       });
 
       it("before processing transferable token count is correct", async () => {
-        await sleep((5 + readyToFreeCount) * 1000);
+        await time.increase(5 + readyToFreeCount);
         // mine a block to update the ganache time
         await web3.eth.sendTransaction({
           from: accounts[0],
@@ -142,7 +139,7 @@ contract("dat / whitelist / processLockups", (accounts) => {
 
       describe("after process", () => {
         beforeEach(async () => {
-          await sleep((5 + readyToFreeCount) * 1000);
+          await time.increase(5 + readyToFreeCount);
           for (let i = 0; i < 5; i++) {
             await contracts.whitelist.processLockups(trader, maxToFreePerLoop, {
               from: accounts[8],

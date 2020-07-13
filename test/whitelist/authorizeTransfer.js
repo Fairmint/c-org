@@ -1,12 +1,9 @@
 const BigNumber = require("bignumber.js");
 const { deployDat } = require("../datHelpers");
 const { reverts } = require("truffle-assertions");
+const { time } = require("@openzeppelin/test-helpers");
 
-async function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-contract("dat / whitelist / authorizeTransfer", (accounts) => {
+contract("whitelist / authorizeTransfer", (accounts) => {
   let contracts;
   let ownerAccount;
   let operatorAccount = accounts[3];
@@ -171,7 +168,7 @@ contract("dat / whitelist / authorizeTransfer", (accounts) => {
       });
       const price = web3.utils.toWei("100", "ether");
       tokenCount = await contracts.dat.estimateBuyValue(price);
-      contracts.dat.buy(trader, price, 1, {
+      await contracts.dat.buy(trader, price, 1, {
         from: trader,
         value: price,
       });
@@ -201,7 +198,7 @@ contract("dat / whitelist / authorizeTransfer", (accounts) => {
 
     describe("after unlock", async () => {
       beforeEach(async () => {
-        await sleep(30000);
+        await time.increase(31);
       });
 
       it("can transfer", async () => {
@@ -228,7 +225,7 @@ contract("dat / whitelist / authorizeTransfer", (accounts) => {
           });
         });
 
-        it("can transfer", async () => {
+        it.only("can transfer", async () => {
           await contracts.dat.transfer(accounts[1], 1, {
             from: trader,
           });

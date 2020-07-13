@@ -3,6 +3,7 @@ const vestingArtifact = artifacts.require("TokenVesting");
 const { deployDat } = require("../../datHelpers");
 const { approveAll, constants } = require("../../helpers");
 const { reverts } = require("truffle-assertions");
+const { time } = require("@openzeppelin/test-helpers");
 
 contract("wiki / buy / init", (accounts) => {
   const initGoal = "10000000000000000000000";
@@ -90,9 +91,10 @@ contract("wiki / buy / init", (accounts) => {
     });
 
     it("beneficiary can transfer to a vesting contract", async () => {
+      const currentTime = new BigNumber(await time.latest());
       const vesting = await vestingArtifact.new(
         accounts[0], // beneficiary
-        Math.round(Date.now() / 1000) + 100, // startDate is seconds
+        currentTime.plus(100).toFixed(), // startDate is seconds
         120, // cliffDuration in seconds
         200, // duration in seconds
         false, // non-revocable

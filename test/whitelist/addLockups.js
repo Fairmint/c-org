@@ -1,7 +1,9 @@
+const BigNumber = require("bignumber.js");
 const { deployDat } = require("../datHelpers");
 const { reverts } = require("truffle-assertions");
+const { time } = require("@openzeppelin/test-helpers");
 
-contract("dat / whitelist / addLockups", (accounts) => {
+contract("whitelist / addLockups", (accounts) => {
   let contracts;
   let ownerAccount;
   let operatorAccount = accounts[3];
@@ -19,10 +21,11 @@ contract("dat / whitelist / addLockups", (accounts) => {
   });
 
   it("non-operators cannot addLockup", async () => {
+    const currentTime = new BigNumber(await time.latest());
     await reverts(
       contracts.whitelist.addLockups(
         [trader],
-        [Math.round(Date.now() / 1000) + 1000],
+        [currentTime.plus(1000).toFixed()],
         [4],
         {
           from: accounts[9],
@@ -33,9 +36,10 @@ contract("dat / whitelist / addLockups", (accounts) => {
   });
 
   it("operators can addLockup", async () => {
+    const currentTime = new BigNumber(await time.latest());
     await contracts.whitelist.addLockups(
       [trader],
-      [Math.round(Date.now() / 1000) + 1000],
+      [currentTime.plus(1000).toFixed()],
       [4],
       {
         from: operatorAccount,
@@ -44,10 +48,11 @@ contract("dat / whitelist / addLockups", (accounts) => {
   });
 
   it("cannot addLockup for an unknown user id", async () => {
+    const currentTime = new BigNumber(await time.latest());
     await reverts(
       contracts.whitelist.addLockups(
         [accounts[9]],
-        [Math.round(Date.now() / 1000) + 1000],
+        [currentTime.plus(1000).toFixed()],
         [4],
         {
           from: operatorAccount,
@@ -59,9 +64,10 @@ contract("dat / whitelist / addLockups", (accounts) => {
 
   describe("adding 0 locked tokens", () => {
     beforeEach(async () => {
+      const currentTime = new BigNumber(await time.latest());
       await contracts.whitelist.addLockups(
         [trader],
-        [Math.round(Date.now() / 1000) + 1000],
+        [currentTime.plus(1000).toFixed()],
         [0],
         {
           from: operatorAccount,
@@ -94,9 +100,10 @@ contract("dat / whitelist / addLockups", (accounts) => {
 
   describe("adding an already expired lockup", () => {
     beforeEach(async () => {
+      const currentTime = new BigNumber(await time.latest());
       await contracts.whitelist.addLockups(
         [trader],
-        [Math.round(Date.now() / 1000) - 1],
+        [currentTime.minus(1).toFixed()],
         [42],
         {
           from: operatorAccount,
@@ -132,10 +139,11 @@ contract("dat / whitelist / addLockups", (accounts) => {
     let locked1Count = 42;
 
     beforeEach(async () => {
-      locked1Expiration = Math.round(Date.now() / 1000) + 20;
+      const currentTime = new BigNumber(await time.latest());
+      locked1Expiration = currentTime.plus(20);
       await contracts.whitelist.addLockups(
         [trader],
-        [locked1Expiration],
+        [locked1Expiration.toFixed()],
         [locked1Count],
         {
           from: operatorAccount,
@@ -161,8 +169,11 @@ contract("dat / whitelist / addLockups", (accounts) => {
         lockupExpirationDate,
         numberOfTokensLocked,
       } = await contracts.whitelist.getUserIdLockup(trader, 0);
-      assert.equal(lockupExpirationDate, locked1Expiration);
-      assert.equal(numberOfTokensLocked, locked1Count);
+      assert.equal(
+        lockupExpirationDate.toString(),
+        locked1Expiration.toFixed()
+      );
+      assert.equal(numberOfTokensLocked.toString(), locked1Count);
     });
 
     describe("adding another lockup with 0 granularity", () => {
@@ -170,10 +181,10 @@ contract("dat / whitelist / addLockups", (accounts) => {
       let locked2Count = 99;
 
       beforeEach(async () => {
-        locked2Expiration = locked1Expiration + 20;
+        locked2Expiration = locked1Expiration.plus(20);
         await contracts.whitelist.addLockups(
           [trader],
-          [locked2Expiration],
+          [locked2Expiration.toFixed()],
           [locked2Count],
           {
             from: operatorAccount,
@@ -199,8 +210,11 @@ contract("dat / whitelist / addLockups", (accounts) => {
           lockupExpirationDate,
           numberOfTokensLocked,
         } = await contracts.whitelist.getUserIdLockup(trader, 0);
-        assert.equal(lockupExpirationDate, locked1Expiration);
-        assert.equal(numberOfTokensLocked, locked1Count);
+        assert.equal(
+          lockupExpirationDate.toString(),
+          locked1Expiration.toFixed()
+        );
+        assert.equal(numberOfTokensLocked.toString(), locked1Count);
       });
 
       it("getUserIdLockup 1 updated", async () => {
@@ -208,7 +222,10 @@ contract("dat / whitelist / addLockups", (accounts) => {
           lockupExpirationDate,
           numberOfTokensLocked,
         } = await contracts.whitelist.getUserIdLockup(trader, 1);
-        assert.equal(lockupExpirationDate, locked2Expiration);
+        assert.equal(
+          lockupExpirationDate.toString(),
+          locked2Expiration.toFixed()
+        );
         assert.equal(numberOfTokensLocked, locked2Count);
       });
     });
@@ -218,13 +235,13 @@ contract("dat / whitelist / addLockups", (accounts) => {
       let locked2Count = 99;
 
       beforeEach(async () => {
-        locked2Expiration = locked1Expiration + 2000;
+        locked2Expiration = locked1Expiration.plus(2000);
         await contracts.whitelist.configWhitelist(0, 2000, {
           from: ownerAccount,
         });
         await contracts.whitelist.addLockups(
           [trader],
-          [locked2Expiration],
+          [locked2Expiration.toFixed()],
           [locked2Count],
           {
             from: operatorAccount,
@@ -241,8 +258,8 @@ contract("dat / whitelist / addLockups", (accounts) => {
         } = await contracts.whitelist.getAuthorizedUserIdInfo(trader);
         assert.equal(jurisdictionId, 4);
         assert.equal(totalTokensLocked.toString(), locked1Count + locked2Count);
-        assert.equal(startIndex, 0);
-        assert.equal(endIndex, 1); // not changed
+        assert.equal(startIndex.toString(), 0);
+        assert.equal(endIndex.toString(), 1); // not changed
       });
 
       it("getUserIdLockup 0 updated", async () => {
@@ -250,7 +267,10 @@ contract("dat / whitelist / addLockups", (accounts) => {
           lockupExpirationDate,
           numberOfTokensLocked,
         } = await contracts.whitelist.getUserIdLockup(trader, 0);
-        assert.equal(lockupExpirationDate, locked1Expiration);
+        assert.equal(
+          lockupExpirationDate.toString(),
+          locked1Expiration.toFixed()
+        );
         assert.equal(
           numberOfTokensLocked.toString(),
           locked1Count + locked2Count
@@ -271,10 +291,10 @@ contract("dat / whitelist / addLockups", (accounts) => {
         let locked3Count = 99;
 
         beforeEach(async () => {
-          locked3Expiration = locked2Expiration + 1;
+          locked3Expiration = locked2Expiration.plus(1);
           await contracts.whitelist.addLockups(
             [trader],
-            [locked3Expiration],
+            [locked3Expiration.toFixed()],
             [locked3Count],
             {
               from: operatorAccount,
@@ -303,7 +323,10 @@ contract("dat / whitelist / addLockups", (accounts) => {
             lockupExpirationDate,
             numberOfTokensLocked,
           } = await contracts.whitelist.getUserIdLockup(trader, 0);
-          assert.equal(lockupExpirationDate, locked1Expiration);
+          assert.equal(
+            lockupExpirationDate.toString(),
+            locked1Expiration.toFixed()
+          );
           assert.equal(numberOfTokensLocked, locked1Count + locked2Count);
         });
 
@@ -312,7 +335,10 @@ contract("dat / whitelist / addLockups", (accounts) => {
             lockupExpirationDate,
             numberOfTokensLocked,
           } = await contracts.whitelist.getUserIdLockup(trader, 1);
-          assert.equal(lockupExpirationDate, locked3Expiration);
+          assert.equal(
+            lockupExpirationDate.toString(),
+            locked3Expiration.toFixed()
+          );
           assert.equal(numberOfTokensLocked, locked3Count);
         });
       });

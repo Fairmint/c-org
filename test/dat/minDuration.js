@@ -1,3 +1,5 @@
+const BigNumber = require("bignumber.js");
+const { time } = require("@openzeppelin/test-helpers");
 const { deployDat } = require("../datHelpers");
 const { approveAll } = require("../helpers");
 const { reverts } = require("truffle-assertions");
@@ -47,8 +49,9 @@ contract("dat / minDuration", (accounts) => {
     });
 
     it("should fail to set the date in the future", async () => {
+      const currentTime = new BigNumber(await time.latest()).plus(10);
       await reverts(
-        contracts.dat.initializeRunStartedOn(Date.now(), {
+        contracts.dat.initializeRunStartedOn(currentTime.toFixed(), {
           from: await contracts.dat.control(),
         }),
         "DATE_MUST_BE_IN_PAST"
