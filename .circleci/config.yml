@@ -13,7 +13,7 @@ jobs:
     steps:
       - checkout
 
-      # Cache disabled as `npm i` occasionally fails on dependancies which use websocket
+      # Cache disabled as `npm i` occasionally fails on dependencies which use websocket
       - run: npm i
 
       - run: npm run compile
