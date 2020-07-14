@@ -105,7 +105,9 @@ module.exports = async function deployDat(
 
       contracts.dat = await datArtifact.at(datProxy.address);
 
-      await contracts.dat.initialize(
+      await contracts.dat.methods[
+        "initialize(uint256,address,uint256,uint256,uint256,uint256,uint256,address,string,string)"
+      ](
         callOptions.initReserve,
         callOptions.currency,
         callOptions.initGoal,
@@ -122,7 +124,9 @@ module.exports = async function deployDat(
   } else {
     contracts.dat = datContract;
 
-    await contracts.dat.initialize(
+    await contracts.dat.methods[
+      "initialize(uint256,address,uint256,uint256,uint256,uint256,uint256,address,string,string)"
+    ](
       callOptions.initReserve,
       callOptions.currency,
       callOptions.initGoal,
