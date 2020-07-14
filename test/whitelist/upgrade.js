@@ -52,7 +52,9 @@ contract("whitelist / upgrade", (accounts) => {
 
     contracts.dat = await datArtifact.at(datProxy.address);
 
-    await contracts.dat.initialize(
+    await contracts.dat.methods[
+      "initialize(uint256,address,uint256,uint256,uint256,uint256,uint256,address,string,string)"
+    ](
       callOptions.initReserve,
       callOptions.currency,
       callOptions.initGoal,

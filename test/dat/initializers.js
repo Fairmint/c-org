@@ -20,7 +20,9 @@ contract("initializers", (accounts) => {
 
   it("initialize may not be called again", async () => {
     await reverts(
-      contracts.dat.initialize(
+      contracts.dat.methods[
+        "initialize(uint256,address,uint256,uint256,uint256,uint256,uint256,address,string,string)"
+      ](
         1,
         constants.ZERO_ADDRESS,
         1,

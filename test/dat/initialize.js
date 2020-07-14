@@ -9,7 +9,9 @@ contract("dat / initialize", (accounts) => {
   it("shouldFail to init twice", async () => {
     contracts = await deployDat(accounts);
     await reverts(
-      contracts.dat.initialize(
+      contracts.dat.methods[
+        "initialize(uint256,address,uint256,uint256,uint256,uint256,uint256,address,string,string)"
+      ](
         await contracts.dat.initReserve(),
         await contracts.dat.currency(),
         await contracts.dat.initGoal(),
