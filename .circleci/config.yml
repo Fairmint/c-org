@@ -94,7 +94,7 @@ workflows:
             - build
       - coverage:
          requires:
-           - test
+           - build
       - publishABI:
           requires:
             - build
