@@ -237,26 +237,6 @@ contract ContinuousOffering
   }
 
   /**
-   * Functions required for the whitelist
-   */
-
-  function _detectTransferRestriction(
-    address _from,
-    address _to,
-    uint _value
-  ) internal view
-    returns (uint)
-  {
-    if(address(whitelist) != address(0))
-    {
-      // This is not set for the minting of initialReserve
-      return whitelist.detectTransferRestriction(_from, _to, _value);
-    }
-
-    return 0;
-  }
-
-  /**
    * Functions required by the ERC-20 token standard
    */
 
