@@ -43,9 +43,6 @@ contract ContinuousOffering
     address indexed _from,
     uint _fairValue
   );
-  event Close(
-    uint _exitFee
-  );
   event StateChange(
     uint _previousState,
     uint _newState
@@ -935,62 +932,15 @@ contract ContinuousOffering
 
   /// Close
 
-  function estimateExitFee(
-    uint _msgValue
-  ) public view
-    returns(uint)
-  {
-    uint exitFee;
-
-    if(state == STATE_RUN)
-    {
-      uint reserve = buybackReserve();
-      reserve = reserve.sub(_msgValue);
-
-      // Source: t*(t+b)*(n/d)-r
-      // Implementation: (b n t)/d + (n t^2)/d - r
-
-      uint _totalSupply = totalSupply();
-
-      // Math worst case:
-      // MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE
-      exitFee = BigDiv.bigDiv2x1(
-        _totalSupply,
-        burnedSupply * buySlopeNum,
-        buySlopeDen
-      );
-      // Math worst case:
-      // MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE
-      exitFee += BigDiv.bigDiv2x1(
-        _totalSupply,
-        buySlopeNum * _totalSupply,
-        buySlopeDen
-      );
-      // Math: this if condition avoids a potential overflow
-      if(exitFee <= reserve)
-      {
-        exitFee = 0;
-      }
-      else
-      {
-        exitFee -= reserve;
-      }
-    }
-
-    return exitFee;
-  }
-
   /// @notice Called by the beneficiary account to STATE_CLOSE or STATE_CANCEL the c-org,
   /// preventing any more tokens from being minted.
   /// @dev Requires an `exitFee` to be paid.  If the currency is ETH, include a little more than
   /// what appears to be required and any remainder will be returned to your account.  This is
   /// because another user may have a transaction mined which changes the exitFee required.
   /// For other `currency` types, the beneficiary account will be billed the exact amount required.
-  function close() public payable
+  function _close() internal
   {
     require(msg.sender == beneficiary, "BENEFICIARY_ONLY");
-
-    uint exitFee = 0;
 
     if(state == STATE_INIT)
     {
@@ -1004,19 +954,13 @@ contract ContinuousOffering
       require(MAX_UINT - minDuration > runStartedOn, "MAY_NOT_CLOSE");
       require(minDuration + runStartedOn <= block.timestamp, "TOO_EARLY");
 
-      exitFee = estimateExitFee(msg.value);
-
       emit StateChange(state, STATE_CLOSE);
       state = STATE_CLOSE;
-
-      _collectInvestment(msg.sender, exitFee, msg.value, true);
     }
     else
     {
       revert("INVALID_STATE");
     }
-
-    emit Close(exitFee);
   }
 
   // --- Approve by signature ---

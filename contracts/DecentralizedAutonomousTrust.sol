@@ -14,10 +14,80 @@ import "./ContinuousOffering.sol";
  */
 contract DecentralizedAutonomousTrust is ContinuousOffering
 {
+  event Close(
+    uint _exitFee
+  );
   event Pay(
     address indexed _from,
     uint _currencyValue
   );
+
+  /// Close
+
+  function estimateExitFee(
+    uint _msgValue
+  ) public view
+    returns(uint)
+  {
+    uint exitFee;
+
+    if(state == STATE_RUN)
+    {
+      uint reserve = buybackReserve();
+      reserve = reserve.sub(_msgValue);
+
+      // Source: t*(t+b)*(n/d)-r
+      // Implementation: (b n t)/d + (n t^2)/d - r
+
+      uint _totalSupply = totalSupply();
+
+      // Math worst case:
+      // MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE/2 * MAX_BEFORE_SQUARE
+      exitFee = BigDiv.bigDiv2x1(
+        _totalSupply,
+        burnedSupply * buySlopeNum,
+        buySlopeDen
+      );
+      // Math worst case:
+      // MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE
+      exitFee += BigDiv.bigDiv2x1(
+        _totalSupply,
+        buySlopeNum * _totalSupply,
+        buySlopeDen
+      );
+      // Math: this if condition avoids a potential overflow
+      if(exitFee <= reserve)
+      {
+        exitFee = 0;
+      }
+      else
+      {
+        exitFee -= reserve;
+      }
+    }
+
+    return exitFee;
+  }
+
+  /// @notice Called by the beneficiary account to STATE_CLOSE or STATE_CANCEL the c-org,
+  /// preventing any more tokens from being minted.
+  /// @dev Requires an `exitFee` to be paid.  If the currency is ETH, include a little more than
+  /// what appears to be required and any remainder will be returned to your account.  This is
+  /// because another user may have a transaction mined which changes the exitFee required.
+  /// For other `currency` types, the beneficiary account will be billed the exact amount required.
+  function close() public payable
+  {
+    uint exitFee = 0;
+
+    if(state == STATE_RUN)
+    {
+      exitFee = estimateExitFee(msg.value);
+      _collectInvestment(msg.sender, exitFee, msg.value, true);
+    }
+
+    super._close();
+    emit Close(exitFee);
+  }
 
   /// Pay
 
