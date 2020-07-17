@@ -18,6 +18,24 @@ contract DecentralizedAutonomousTrust is ContinuousOffering
     address indexed _from,
     uint _currencyValue
   );
+  event UpdateConfig(
+    address _whitelistAddress,
+    address indexed _beneficiary,
+    address indexed _control,
+    address indexed _feeCollector,
+    uint _revenueCommitmentBasisPoints,
+    uint _feeBasisPoints,
+    uint _minInvestment,
+    uint _minDuration
+  );
+
+  /// @notice The revenue commitment of the organization. Defines the percentage of the value paid through the contract
+  /// that is automatically funneled and held into the buyback_reserve expressed in basis points.
+  /// Internal since this is n/a to all derivative contracts.
+  function revenueCommitmentBasisPoints() public view returns (uint)
+  {
+    return __revenueCommitmentBasisPoints;
+  }
 
   /// Pay
 
@@ -33,7 +51,7 @@ contract DecentralizedAutonomousTrust is ContinuousOffering
 
     // Send a portion of the funds to the beneficiary, the rest is added to the buybackReserve
     // Math: if _currencyValue is < (2^256 - 1) / 10000 this will not overflow
-    uint reserve = _currencyValue.mul(revenueCommitmentBasisPoints);
+    uint reserve = _currencyValue.mul(__revenueCommitmentBasisPoints);
     reserve /= BASIS_POINTS_DEN;
 
     // Math: this will never underflow since revenueCommitmentBasisPoints is capped to BASIS_POINTS_DEN
@@ -47,5 +65,34 @@ contract DecentralizedAutonomousTrust is ContinuousOffering
   function () external payable
   {
     require(address(currency) == address(0), "ONLY_FOR_CURRENCY_ETH");
+  }
+
+  function updateConfig(
+    address _whitelistAddress,
+    address payable _beneficiary,
+    address _control,
+    address payable _feeCollector,
+    uint _feeBasisPoints,
+    uint _revenueCommitmentBasisPoints,
+    uint _minInvestment,
+    uint _minDuration
+  ) public
+  {
+    super.updateConfig(_whitelistAddress, _beneficiary, _control, _feeCollector, _feeBasisPoints, _minInvestment, _minDuration);
+
+    require(_revenueCommitmentBasisPoints <= BASIS_POINTS_DEN, "INVALID_COMMITMENT");
+    require(_revenueCommitmentBasisPoints >= __revenueCommitmentBasisPoints, "COMMITMENT_MAY_NOT_BE_REDUCED");
+    __revenueCommitmentBasisPoints = _revenueCommitmentBasisPoints;
+
+    emit UpdateConfig(
+      _whitelistAddress,
+      _beneficiary,
+      _control,
+      _feeCollector,
+      _revenueCommitmentBasisPoints,
+      _feeBasisPoints,
+      _minInvestment,
+      _minDuration
+    );
   }
 }
