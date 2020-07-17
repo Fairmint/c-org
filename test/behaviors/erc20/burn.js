@@ -16,13 +16,13 @@ module.exports = (tokenOwner) => {
     initialBalance = new BigNumber(await this.contract.balanceOf(tokenOwner));
   });
 
-  describe("Behavior / ERC20 / Burn", () => {
+  describe("Behavior / ERC20 / Burn", function () {
     it("sanity check: balance >= 100", async function () {
       const actual = new BigNumber(await this.contract.balanceOf(tokenOwner));
       assert(actual.isGreaterThanOrEqualTo("100"));
     });
 
-    describe("when the given amount is not greater than balance of the sender", () => {
+    describe("when the given amount is not greater than balance of the sender", function () {
       context("for a zero amount", function () {
         shouldBurn("0");
       });
@@ -59,7 +59,7 @@ module.exports = (tokenOwner) => {
       }
     });
 
-    describe("when the given amount is greater than the balance of the sender", () => {
+    describe("when the given amount is greater than the balance of the sender", function () {
       it("reverts", async function () {
         const amount = initialBalance.plus(1);
         await expectRevert(

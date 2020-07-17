@@ -2,13 +2,14 @@ const { deployDat } = require("../datHelpers");
 const { approveAll } = require("../helpers");
 const behaviors = require("../behaviors");
 
-contract("fair / burn", (accounts) => {
+contract("fair / ERC20", (accounts) => {
   let contracts;
-  const tokenOwner = accounts[1];
+  const [beneficiary, tokenOwner, nonTokenHolder, operator] = accounts;
 
   beforeEach(async function () {
     contracts = await deployDat(accounts, {
-      initGoal: 0,
+      initReserve: 0,
+      beneficiary,
     });
     await approveAll(contracts, accounts);
 
@@ -20,5 +21,5 @@ contract("fair / burn", (accounts) => {
     this.contract = contracts.dat;
   });
 
-  behaviors.erc20.burn(tokenOwner);
+  behaviors.erc20.all(tokenOwner, nonTokenHolder, operator);
 });
