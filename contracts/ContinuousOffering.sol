@@ -50,16 +50,6 @@ contract ContinuousOffering
     uint _previousState,
     uint _newState
   );
-  event UpdateConfig(
-    address _whitelistAddress,
-    address indexed _beneficiary,
-    address indexed _control,
-    address indexed _feeCollector,
-    uint _revenueCommitmentBasisPoints,
-    uint _feeBasisPoints,
-    uint _minInvestment,
-    uint _minDuration
-  );
 
   /**
    * Constants
@@ -157,9 +147,10 @@ contract ContinuousOffering
   /// @notice The minimum amount of `currency` investment accepted.
   uint public minInvestment;
 
-  /// @notice The revenue commitment of the organization. Defines the percentage of the value paid through the contract
+  /// @dev The revenue commitment of the organization. Defines the percentage of the value paid through the contract
   /// that is automatically funneled and held into the buyback_reserve expressed in basis points.
-  uint public revenueCommitmentBasisPoints;
+  /// Internal since this is n/a to all derivative contracts.
+  uint internal __revenueCommitmentBasisPoints;
 
   /// @notice The current state of the contract.
   /// @dev See the constants above for possible state values.
@@ -467,10 +458,9 @@ contract ContinuousOffering
     address _control,
     address payable _feeCollector,
     uint _feeBasisPoints,
-    uint _revenueCommitmentBasisPoints,
     uint _minInvestment,
     uint _minDuration
-  ) public
+  ) internal
   {
     // This require(also confirms that initialize has been called.
     require(msg.sender == control, "CONTROL_ONLY");
@@ -483,10 +473,6 @@ contract ContinuousOffering
 
     require(_feeCollector != address(0), "INVALID_ADDRESS");
     feeCollector = _feeCollector;
-
-    require(_revenueCommitmentBasisPoints <= BASIS_POINTS_DEN, "INVALID_COMMITMENT");
-    require(_revenueCommitmentBasisPoints >= revenueCommitmentBasisPoints, "COMMITMENT_MAY_NOT_BE_REDUCED");
-    revenueCommitmentBasisPoints = _revenueCommitmentBasisPoints;
 
     require(_feeBasisPoints <= BASIS_POINTS_DEN, "INVALID_FEE");
     feeBasisPoints = _feeBasisPoints;
@@ -509,17 +495,6 @@ contract ContinuousOffering
       }
       beneficiary = _beneficiary;
     }
-
-    emit UpdateConfig(
-      _whitelistAddress,
-      _beneficiary,
-      _control,
-      _feeCollector,
-      _revenueCommitmentBasisPoints,
-      _feeBasisPoints,
-      _minInvestment,
-      _minDuration
-    );
   }
 
   /**
