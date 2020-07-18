@@ -23,7 +23,9 @@ module.exports = function (tokenOwner, nonTokenHolder) {
       const transferAmount = 42;
 
       beforeEach(async function () {
-        await this.contract.transfer(nonTokenHolder, transferAmount, {from: tokenOwner});
+        await this.contract.transfer(nonTokenHolder, transferAmount, {
+          from: tokenOwner,
+        });
       });
 
       it("has expected after after transfer", async function () {
