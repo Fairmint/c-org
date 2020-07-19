@@ -1,6 +1,6 @@
 const BigNumber = require("bignumber.js");
-const { time } = require("@openzeppelin/test-helpers");
-const { constants } = require("hardlydifficult-eth");
+const {time} = require("@openzeppelin/test-helpers");
+const {constants} = require("hardlydifficult-eth");
 
 // Original deployment used 2.0.8 for the DAT and 2.2.0 for the whitelist
 const cOrgAbi208 = require("../../versions/2.0.8/abi.json");
@@ -12,8 +12,10 @@ const whitelistArtifact = artifacts.require("Whitelist");
 const proxyArtifact = artifacts.require("AdminUpgradeabilityProxy");
 const proxyAdminArtifact = artifacts.require("ProxyAdmin");
 const vestingArtifact = artifacts.require("TokenVesting");
+const erc20Detailed = artifacts.require("IERC20Detailed");
 
 const updateDatConfig = require("./updateDatConfig");
+const {web3} = require("@openzeppelin/test-helpers/src/setup");
 
 module.exports = async function deployDat(
   accounts,
@@ -22,13 +24,20 @@ module.exports = async function deployDat(
   upgrade = true
 ) {
   const contracts = {};
+  let decimals;
+  if (options.currency && options.currency != constants.ZERO_ADDRESS) {
+    const currency = await erc20Detailed.at(options.currency);
+    decimals = parseInt(await currency.decimals());
+  } else {
+    decimals = 18;
+  }
   const callOptions = Object.assign(
     {
-      initReserve: "42000000000000000000",
+      initReserve: web3.utils("42", "ether"),
       currency: constants.ZERO_ADDRESS,
       initGoal: "0",
       buySlopeNum: "1",
-      buySlopeDen: "100000000000000000000",
+      buySlopeDen: new BigNumber(100).shiftedBy(18 + 18 - decimals).toFixed(),
       investmentReserveBasisPoints: "1000",
       revenueCommitmentBasisPoints: "1000",
       control: accounts.length > 2 ? accounts[1] : accounts[0],
@@ -89,10 +98,10 @@ module.exports = async function deployDat(
           callOptions.name,
           callOptions.symbol
         )
-        .send({ from: callOptions.control, gas: constants.MAX_GAS });
+        .send({from: callOptions.control, gas: constants.MAX_GAS});
       await contracts.dat.methods
         .initializePermit()
-        .send({ from: callOptions.control, gas: constants.MAX_GAS });
+        .send({from: callOptions.control, gas: constants.MAX_GAS});
     } else {
       datProxy = await proxyArtifact.new(
         datContract.address, // logic
@@ -118,7 +127,7 @@ module.exports = async function deployDat(
         callOptions.setupFeeRecipient,
         callOptions.name,
         callOptions.symbol,
-        { from: callOptions.control, gas: constants.MAX_GAS }
+        {from: callOptions.control, gas: constants.MAX_GAS}
       );
     }
   } else {
@@ -137,7 +146,7 @@ module.exports = async function deployDat(
       callOptions.setupFeeRecipient,
       callOptions.name,
       callOptions.symbol,
-      { from: callOptions.control }
+      {from: callOptions.control}
     );
   }
 
