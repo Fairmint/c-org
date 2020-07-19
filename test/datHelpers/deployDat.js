@@ -33,7 +33,7 @@ module.exports = async function deployDat(
   }
   const callOptions = Object.assign(
     {
-      initReserve: web3.utils("42", "ether"),
+      initReserve: web3.utils.toWei("42", "ether"),
       currency: constants.ZERO_ADDRESS,
       initGoal: "0",
       buySlopeNum: "1",
