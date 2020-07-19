@@ -5,7 +5,7 @@ const { constants } = require("hardlydifficult-eth");
  * Requires `this.contract`
  */
 module.exports = function (tokenOwner, operator) {
-  describe("Behavior / ERC20 / BurnFrom", function () {
+  describe("Behavior / ERC20 / burnFrom", function () {
     const burnAmount = 20;
 
     it("should fail to burnFrom without approval", async function () {

@@ -1,7 +1,6 @@
 const BigNumber = require("bignumber.js");
 const { deployDat } = require("../datHelpers");
 const { approveAll } = require("../helpers");
-const { assert } = require("chai");
 
 contract("dat / sellPremint", (accounts) => {
   const [beneficiary, buyer, other] = accounts;

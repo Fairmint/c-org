@@ -4,7 +4,7 @@ const BigNumber = require("bignumber.js");
  * Requires `this.contract`
  */
 module.exports = function (tokenOwner) {
-  describe("Behavior / ERC20 / TotalSupply", function () {
+  describe("Behavior / ERC20 / totalSupply", function () {
     let initialBalance;
 
     beforeEach(async function () {
