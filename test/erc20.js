@@ -1,6 +1,6 @@
-const { deployDat } = require("../datHelpers");
-const { approveAll } = require("../helpers");
-const behaviors = require("../behaviors");
+const { deployDat } = require("./datHelpers");
+const { approveAll } = require("./helpers");
+const behaviors = require("./behaviors");
 
 contract("fair / ERC20", (accounts) => {
   let contracts;
