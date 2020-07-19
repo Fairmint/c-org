@@ -449,7 +449,7 @@ contract ContinuousOffering
     runStartedOn = _runStartedOn;
   }
 
-  function updateConfig(
+  function _updateConfig(
     address _whitelistAddress,
     address payable _beneficiary,
     address _control,

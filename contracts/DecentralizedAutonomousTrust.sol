@@ -148,7 +148,7 @@ contract DecentralizedAutonomousTrust is ContinuousOffering
     uint _minDuration
   ) public
   {
-    super.updateConfig(_whitelistAddress, _beneficiary, _control, _feeCollector, _feeBasisPoints, _minInvestment, _minDuration);
+    _updateConfig(_whitelistAddress, _beneficiary, _control, _feeCollector, _feeBasisPoints, _minInvestment, _minDuration);
 
     require(_revenueCommitmentBasisPoints <= BASIS_POINTS_DEN, "INVALID_COMMITMENT");
     require(_revenueCommitmentBasisPoints >= __revenueCommitmentBasisPoints, "COMMITMENT_MAY_NOT_BE_REDUCED");
