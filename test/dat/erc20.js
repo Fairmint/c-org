@@ -1,8 +1,8 @@
-const { deployDat } = require("./datHelpers");
-const { approveAll } = require("./helpers");
-const behaviors = require("./behaviors");
+const {deployDat} = require("../datHelpers");
+const {approveAll} = require("../helpers");
+const behaviors = require("../behaviors");
 
-contract("ERC20", (accounts) => {
+contract("dat / ERC20", (accounts) => {
   let contracts;
   const [beneficiary, tokenOwner, nonTokenHolder, operator] = accounts;
 
