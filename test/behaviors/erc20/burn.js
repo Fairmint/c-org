@@ -10,13 +10,13 @@ const BigNumber = require("bignumber.js");
  * Original source: https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/test/token/ERC20/behaviors/ERC20Burnable.behavior.js
  */
 module.exports = (tokenOwner) => {
-  let initialBalance;
+  describe("Behavior / ERC20 / burn", function () {
+    let initialBalance;
 
-  beforeEach(async function () {
-    initialBalance = new BigNumber(await this.contract.balanceOf(tokenOwner));
-  });
+    beforeEach(async function () {
+      initialBalance = new BigNumber(await this.contract.balanceOf(tokenOwner));
+    });
 
-  describe("Behavior / ERC20 / Burn", function () {
     it("sanity check: balance >= 100", async function () {
       const actual = new BigNumber(await this.contract.balanceOf(tokenOwner));
       assert(actual.isGreaterThanOrEqualTo("100"));
@@ -66,6 +66,64 @@ module.exports = (tokenOwner) => {
           this.contract.burn(amount.toFixed(), { from: tokenOwner }),
           "ERC20: burn amount exceeds balance"
         );
+      });
+    });
+
+    describe("_burn", function () {
+      describe("for a non zero account", function () {
+        it("rejects burning more than balance", async function () {
+          await expectRevert(
+            this.contract.burn(initialBalance.plus(1).toFixed(), {
+              from: tokenOwner,
+            }),
+            "ERC20: burn amount exceeds balance"
+          );
+        });
+
+        const describeBurn = function (description, delta) {
+          let amount;
+
+          beforeEach(async () => {
+            amount = initialBalance.minus(delta);
+          });
+
+          describe(description, function () {
+            beforeEach("burning", async function () {
+              const { logs } = await this.contract.burn(amount.toFixed(), {
+                from: tokenOwner,
+              });
+              this.logs = logs;
+            });
+
+            it("decrements totalSupply", async function () {
+              const expectedSupply = initialBalance.minus(amount);
+              assert.equal(
+                (await this.contract.totalSupply()).toString(),
+                expectedSupply.toFixed()
+              );
+            });
+
+            it("decrements initialHolder balance", async function () {
+              const expectedBalance = initialBalance.minus(amount);
+              assert.equal(
+                (await this.contract.balanceOf(tokenOwner)).toString(),
+                expectedBalance.toFixed()
+              );
+            });
+
+            it("emits Transfer event", async function () {
+              const event = expectEvent.inLogs(this.logs, "Transfer", {
+                from: tokenOwner,
+                to: constants.ZERO_ADDRESS,
+              });
+
+              assert.equal(event.args.value.toString(), amount.toFixed());
+            });
+          });
+        };
+
+        describeBurn("for entire balance", 0);
+        describeBurn("for less amount than balance", 1);
       });
     });
   });
