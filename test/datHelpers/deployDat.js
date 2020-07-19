@@ -25,7 +25,11 @@ module.exports = async function deployDat(
 ) {
   const contracts = {};
   let decimals;
-  if (options.currency && options.currency != constants.ZERO_ADDRESS) {
+  if (
+    options &&
+    options.currency &&
+    options.currency != constants.ZERO_ADDRESS
+  ) {
     const currency = await erc20Detailed.at(options.currency);
     decimals = parseInt(await currency.decimals());
   } else {
