@@ -2,7 +2,7 @@ const { deployDat } = require("./datHelpers");
 const { approveAll } = require("./helpers");
 const behaviors = require("./behaviors");
 
-contract("fair / ERC20", (accounts) => {
+contract("ERC20", (accounts) => {
   let contracts;
   const [beneficiary, tokenOwner, nonTokenHolder, operator] = accounts;
 
