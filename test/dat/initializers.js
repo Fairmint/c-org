@@ -1,7 +1,7 @@
 const { deployDat } = require("../datHelpers");
 const { approveAll } = require("../helpers");
 const { reverts } = require("truffle-assertions");
-const { constants } = require("hardlydifficult-ethereum-contracts");
+const { constants } = require("hardlydifficult-eth");
 
 contract("initializers", (accounts) => {
   let contracts;

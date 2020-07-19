@@ -1,4 +1,4 @@
-const { tokens } = require("hardlydifficult-ethereum-contracts");
+const { tokens } = require("hardlydifficult-eth");
 
 const BigNumber = require("bignumber.js");
 const { deployDat } = require("../datHelpers");

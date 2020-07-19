@@ -1,8 +1,8 @@
 const BigNumber = require("bignumber.js");
-const { deployDat } = require("../test/datHelpers");
+const {deployDat} = require("../test/datHelpers");
 const fs = require("fs");
 
-const { tokens } = require("hardlydifficult-ethereum-contracts");
+const {tokens} = require("hardlydifficult-eth");
 const proxyArtifact = artifacts.require("AdminUpgradeabilityProxy");
 const whitelistArtifact = artifacts.require("Whitelist");
 const vestingArtifact = artifacts.require("TokenVesting");
