@@ -1,4 +1,4 @@
-const { tokens } = require("hardlydifficult-ethereum-contracts");
+const { tokens } = require("hardlydifficult-eth");
 const { time } = require("@openzeppelin/test-helpers");
 
 const BigNumber = require("bignumber.js");

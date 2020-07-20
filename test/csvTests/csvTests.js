@@ -5,7 +5,7 @@ const { deployDat } = require("../datHelpers");
 const { approveAll, constants, getGasCost } = require("../helpers");
 const sheets = require("./test-data/script.json");
 
-const { tokens } = require("hardlydifficult-ethereum-contracts");
+const { tokens } = require("hardlydifficult-eth");
 
 contract("dat / csvTests", (accounts) => {
   const beneficiary = accounts[0];
