@@ -1,10 +1,10 @@
-const {tokens} = require("hardlydifficult-eth");
-const {time} = require("@openzeppelin/test-helpers");
+const { tokens } = require("hardlydifficult-eth");
+const { time } = require("@openzeppelin/test-helpers");
 
 const BigNumber = require("bignumber.js");
-const {deployDat, updateDatConfig} = require("../../datHelpers");
-const {approveAll, constants, getGasCost} = require("../../helpers");
-const {reverts} = require("truffle-assertions");
+const { deployDat, updateDatConfig } = require("../../datHelpers");
+const { approveAll, constants, getGasCost } = require("../../helpers");
+const { reverts } = require("truffle-assertions");
 
 contract("wiki / close / run", (accounts) => {
   let contracts;
@@ -162,7 +162,7 @@ contract("wiki / close / run", (accounts) => {
     beforeEach(async () => {
       // Redeploy using an ERC-20
       const token = await tokens.sai.deploy(web3, accounts[0]);
-      contracts = await deployDat(accounts, {currency: token.address});
+      contracts = await deployDat(accounts, { currency: token.address });
       await approveAll(contracts, accounts);
       await token.mint(contracts.dat.address, constants.MAX_UINT, {
         from: accounts[0],

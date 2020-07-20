@@ -1,5 +1,5 @@
 const BigNumber = require("bignumber.js");
-const {constants} = require("hardlydifficult-eth");
+const { constants } = require("hardlydifficult-eth");
 
 const bigDivArtifact = artifacts.require("BigDivMock");
 
