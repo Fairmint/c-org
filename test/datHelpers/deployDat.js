@@ -1,6 +1,6 @@
 const BigNumber = require("bignumber.js");
-const {time} = require("@openzeppelin/test-helpers");
-const {constants} = require("hardlydifficult-eth");
+const { time } = require("@openzeppelin/test-helpers");
+const { constants } = require("hardlydifficult-eth");
 
 // Original deployment used 2.0.8 for the DAT and 2.2.0 for the whitelist
 const cOrgAbi208 = require("../../versions/2.0.8/abi.json");
@@ -15,7 +15,7 @@ const vestingArtifact = artifacts.require("TokenVesting");
 const erc20Detailed = artifacts.require("IERC20Detailed");
 
 const updateDatConfig = require("./updateDatConfig");
-const {web3} = require("@openzeppelin/test-helpers/src/setup");
+const { web3 } = require("@openzeppelin/test-helpers/src/setup");
 
 module.exports = async function deployDat(
   accounts,
@@ -102,10 +102,10 @@ module.exports = async function deployDat(
           callOptions.name,
           callOptions.symbol
         )
-        .send({from: callOptions.control, gas: constants.MAX_GAS});
+        .send({ from: callOptions.control, gas: constants.MAX_GAS });
       await contracts.dat.methods
         .initializePermit()
-        .send({from: callOptions.control, gas: constants.MAX_GAS});
+        .send({ from: callOptions.control, gas: constants.MAX_GAS });
     } else {
       datProxy = await proxyArtifact.new(
         datContract.address, // logic
@@ -131,7 +131,7 @@ module.exports = async function deployDat(
         callOptions.setupFeeRecipient,
         callOptions.name,
         callOptions.symbol,
-        {from: callOptions.control, gas: constants.MAX_GAS}
+        { from: callOptions.control, gas: constants.MAX_GAS }
       );
     }
   } else {
@@ -150,7 +150,7 @@ module.exports = async function deployDat(
       callOptions.setupFeeRecipient,
       callOptions.name,
       callOptions.symbol,
-      {from: callOptions.control}
+      { from: callOptions.control }
     );
   }
 
