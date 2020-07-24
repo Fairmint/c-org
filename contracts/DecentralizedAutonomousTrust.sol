@@ -126,7 +126,7 @@ contract DecentralizedAutonomousTrust is ContinuousOffering {
     uint _minInvestment,
     uint _minDuration
   ) public {
-    super.updateConfig(
+    _updateConfig(
       _whitelistAddress,
       _beneficiary,
       _control,
