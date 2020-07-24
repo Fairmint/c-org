@@ -1,7 +1,6 @@
 pragma solidity 0.5.17;
 
-interface IERC20Detailed
-{
+interface IERC20Detailed {
   /**
    * @dev Returns the number of decimals used to get its user representation.
    * For example, if `decimals` equals `2`, a balance of `505` tokens should

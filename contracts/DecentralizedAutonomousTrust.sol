@@ -12,15 +12,9 @@ import "./ContinuousOffering.sol";
  * solution using this contract, you might be interested in Fairmint's
  * offering. Do not hesitate to get in touch with us: https://fairmint.co
  */
-contract DecentralizedAutonomousTrust is ContinuousOffering
-{
-  event Close(
-    uint _exitFee
-  );
-  event Pay(
-    address indexed _from,
-    uint _currencyValue
-  );
+contract DecentralizedAutonomousTrust is ContinuousOffering {
+  event Close(uint _exitFee);
+  event Pay(address indexed _from, uint _currencyValue);
   event UpdateConfig(
     address _whitelistAddress,
     address indexed _beneficiary,
@@ -35,22 +29,16 @@ contract DecentralizedAutonomousTrust is ContinuousOffering
   /// @notice The revenue commitment of the organization. Defines the percentage of the value paid through the contract
   /// that is automatically funneled and held into the buyback_reserve expressed in basis points.
   /// Internal since this is n/a to all derivative contracts.
-  function revenueCommitmentBasisPoints() public view returns (uint)
-  {
+  function revenueCommitmentBasisPoints() public view returns (uint) {
     return __revenueCommitmentBasisPoints;
   }
 
   /// Close
 
-  function estimateExitFee(
-    uint _msgValue
-  ) public view
-    returns(uint)
-  {
+  function estimateExitFee(uint _msgValue) public view returns (uint) {
     uint exitFee;
 
-    if(state == STATE_RUN)
-    {
+    if (state == STATE_RUN) {
       uint reserve = buybackReserve();
       reserve = reserve.sub(_msgValue);
 
@@ -74,12 +62,9 @@ contract DecentralizedAutonomousTrust is ContinuousOffering
         buySlopeDen
       );
       // Math: this if condition avoids a potential overflow
-      if(exitFee <= reserve)
-      {
+      if (exitFee <= reserve) {
         exitFee = 0;
-      }
-      else
-      {
+      } else {
         exitFee -= reserve;
       }
     }
@@ -93,12 +78,10 @@ contract DecentralizedAutonomousTrust is ContinuousOffering
   /// what appears to be required and any remainder will be returned to your account.  This is
   /// because another user may have a transaction mined which changes the exitFee required.
   /// For other `currency` types, the beneficiary account will be billed the exact amount required.
-  function close() public payable
-  {
+  function close() public payable {
     uint exitFee = 0;
 
-    if(state == STATE_RUN)
-    {
+    if (state == STATE_RUN) {
       exitFee = estimateExitFee(msg.value);
       _collectInvestment(msg.sender, exitFee, msg.value, true);
     }
@@ -111,10 +94,7 @@ contract DecentralizedAutonomousTrust is ContinuousOffering
 
   /// @dev Pay the organization on-chain.
   /// @param _currencyValue How much currency which was paid.
-  function pay(
-    uint _currencyValue
-  ) public payable
-  {
+  function pay(uint _currencyValue) public payable {
     _collectInvestment(msg.sender, _currencyValue, msg.value, false);
     require(state == STATE_RUN, "INVALID_STATE");
     require(_currencyValue > 0, "MISSING_CURRENCY");
@@ -132,8 +112,7 @@ contract DecentralizedAutonomousTrust is ContinuousOffering
 
   /// @notice Pay the organization on-chain without minting any tokens.
   /// @dev This allows you to add funds directly to the buybackReserve.
-  function () external payable
-  {
+  function() external payable {
     require(address(currency) == address(0), "ONLY_FOR_CURRENCY_ETH");
   }
 
@@ -146,12 +125,25 @@ contract DecentralizedAutonomousTrust is ContinuousOffering
     uint _revenueCommitmentBasisPoints,
     uint _minInvestment,
     uint _minDuration
-  ) public
-  {
-    _updateConfig(_whitelistAddress, _beneficiary, _control, _feeCollector, _feeBasisPoints, _minInvestment, _minDuration);
+  ) public {
+    super.updateConfig(
+      _whitelistAddress,
+      _beneficiary,
+      _control,
+      _feeCollector,
+      _feeBasisPoints,
+      _minInvestment,
+      _minDuration
+    );
 
-    require(_revenueCommitmentBasisPoints <= BASIS_POINTS_DEN, "INVALID_COMMITMENT");
-    require(_revenueCommitmentBasisPoints >= __revenueCommitmentBasisPoints, "COMMITMENT_MAY_NOT_BE_REDUCED");
+    require(
+      _revenueCommitmentBasisPoints <= BASIS_POINTS_DEN,
+      "INVALID_COMMITMENT"
+    );
+    require(
+      _revenueCommitmentBasisPoints >= __revenueCommitmentBasisPoints,
+      "COMMITMENT_MAY_NOT_BE_REDUCED"
+    );
     __revenueCommitmentBasisPoints = _revenueCommitmentBasisPoints;
 
     emit UpdateConfig(
