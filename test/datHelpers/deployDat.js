@@ -12,8 +12,10 @@ const whitelistArtifact = artifacts.require("Whitelist");
 const proxyArtifact = artifacts.require("AdminUpgradeabilityProxy");
 const proxyAdminArtifact = artifacts.require("ProxyAdmin");
 const vestingArtifact = artifacts.require("TokenVesting");
+const erc20Detailed = artifacts.require("IERC20Detailed");
 
 const updateDatConfig = require("./updateDatConfig");
+const { web3 } = require("@openzeppelin/test-helpers/src/setup");
 
 module.exports = async function deployDat(
   accounts,
@@ -22,13 +24,24 @@ module.exports = async function deployDat(
   upgrade = true
 ) {
   const contracts = {};
+  let decimals;
+  if (
+    options &&
+    options.currency &&
+    options.currency != constants.ZERO_ADDRESS
+  ) {
+    const currency = await erc20Detailed.at(options.currency);
+    decimals = parseInt(await currency.decimals());
+  } else {
+    decimals = 18;
+  }
   const callOptions = Object.assign(
     {
-      initReserve: "42000000000000000000",
+      initReserve: web3.utils.toWei("42", "ether"),
       currency: constants.ZERO_ADDRESS,
       initGoal: "0",
       buySlopeNum: "1",
-      buySlopeDen: "100000000000000000000",
+      buySlopeDen: new BigNumber(100).shiftedBy(18 + 18 - decimals).toFixed(),
       investmentReserveBasisPoints: "1000",
       revenueCommitmentBasisPoints: "1000",
       control: accounts.length > 2 ? accounts[1] : accounts[0],
