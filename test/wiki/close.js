@@ -13,12 +13,17 @@ contract("wiki / close", (accounts) => {
 
   beforeEach(async function () {
     const usdc = await tokens.usdc.deploy(web3, control, tokenOwner);
-    contracts = await deployDat(accounts, {
-      initGoal: "0",
-      control,
-      beneficiary,
-      currency: usdc.address,
-    });
+    contracts = await deployDat(
+      accounts,
+      {
+        initGoal: "0",
+        control,
+        beneficiary,
+        currency: usdc.address,
+      },
+      true,
+      false
+    );
 
     await approveAll(contracts, accounts);
 
@@ -52,5 +57,5 @@ contract("wiki / close", (accounts) => {
     this.contract = contracts.dat;
   });
 
-  behaviors.wiki.close.all(investor);
+  behaviors.wiki.close.all(beneficiary, investor);
 });

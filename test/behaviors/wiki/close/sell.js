@@ -1,15 +1,14 @@
 const BigNumber = require("bignumber.js");
-const { constants, getGasCost } = require("../../../helpers");
+const { constants } = require("../../../helpers");
 const { reverts } = require("truffle-assertions");
+const ERC20 = artifacts.require("IERC20");
 
 /**
  * Requires `this.contract`
  */
-module.exports = function () {
+module.exports = function (beneficiary, investor) {
   describe("Behavior / Wiki / Close / sell", function () {
     const sellAmount = "1000000000000000000";
-    let beneficiary;
-    const investor = accounts[3];
 
     it("state is close", async function () {
       const state = await this.contract.state();
@@ -27,23 +26,23 @@ module.exports = function () {
       let investorCurrencyBalanceBefore;
       let totalSupplyBefore;
       let x;
-      let gasCost;
+      let currency;
 
       beforeEach(async function () {
+        currency = await ERC20.at(await this.contract.currency());
         investorFairBalanceBefore = new BigNumber(
           await this.contract.balanceOf(investor)
         );
         investorCurrencyBalanceBefore = new BigNumber(
-          await web3.eth.getBalance(investor)
+          await currency.balanceOf(investor)
         );
         totalSupplyBefore = new BigNumber(await this.contract.totalSupply());
 
         x = new BigNumber(await this.contract.estimateSellValue(sellAmount));
 
-        const tx = await this.contract.sell(investor, sellAmount, 1, {
+        await this.contract.sell(investor, sellAmount, 1, {
           from: investor,
         });
-        gasCost = await getGasCost(tx);
       });
 
       it("amount is being subtracted from the investor's balance.", async function () {
@@ -55,10 +54,10 @@ module.exports = function () {
       });
 
       it("The investor receives x collateral value from the buyback_reserve.", async function () {
-        const balance = new BigNumber(await web3.eth.getBalance(investor));
+        const balance = new BigNumber(await currency.balanceOf(investor));
         assert.equal(
           balance.toFixed(),
-          investorCurrencyBalanceBefore.plus(x).minus(gasCost).toFixed()
+          investorCurrencyBalanceBefore.plus(x).toFixed()
         );
         assert.notEqual(x.toFixed(), 0);
       });

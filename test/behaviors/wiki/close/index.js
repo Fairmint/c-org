@@ -3,11 +3,11 @@ const buy = require("./buy");
 const close = require("./close");
 const sell = require("./sell");
 
-function all(investor) {
-  //burn(investor);
-  //buy(investor);
+function all(beneficiary, investor) {
+  burn(investor);
+  buy(investor);
   close();
-  // sell();
+  sell(beneficiary, investor);
 }
 
 module.exports = {
