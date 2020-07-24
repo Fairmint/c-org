@@ -578,8 +578,7 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole {
       uint toJurisdictionId = authorizedUserIdInfo[toUserId].jurisdictionId;
 
 
-        uint lockupLength
-       = jurisdictionFlows[fromJurisdictionId][toJurisdictionId];
+      uint lockupLength = jurisdictionFlows[fromJurisdictionId][toJurisdictionId];
       require(lockupLength > 0, "DENIED: JURISDICTION_FLOW");
 
       // If the lockupLength is 1 then we interpret this as approved without any lockup
