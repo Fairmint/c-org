@@ -1,6 +1,5 @@
 pragma solidity 0.5.17;
 
-
 import "./interfaces/IWhitelist.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol";
@@ -11,15 +10,14 @@ import "./mixins/OperatorRole.sol";
  * @notice whitelist which manages KYC approvals, token lockup, and transfer
  * restrictions for a DAT token.
  */
-contract Whitelist is IWhitelist, Ownable, OperatorRole
-{
+contract Whitelist is IWhitelist, Ownable, OperatorRole {
   using SafeMath for uint;
 
   // uint8 status codes as suggested by the ERC-1404 spec
-  uint8 constant private STATUS_SUCCESS = 0;
-  uint8 constant private STATUS_ERROR_JURISDICTION_FLOW = 1;
-  uint8 constant private STATUS_ERROR_LOCKUP = 2;
-  uint8 constant private STATUS_ERROR_USER_UNKNOWN = 3;
+  uint8 private constant STATUS_SUCCESS = 0;
+  uint8 private constant STATUS_ERROR_JURISDICTION_FLOW = 1;
+  uint8 private constant STATUS_ERROR_LOCKUP = 2;
+  uint8 private constant STATUS_ERROR_USER_UNKNOWN = 3;
 
   event ConfigWhitelist(
     uint _startDate,
@@ -42,10 +40,7 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
     address indexed _newWallet,
     address indexed _operator
   );
-  event RevokeUserWallet(
-    address indexed _wallet,
-    address indexed _operator
-  );
+  event RevokeUserWallet(address indexed _wallet, address indexed _operator);
   event UpdateJurisdictionForUserId(
     address indexed _userId,
     uint indexed _jurisdictionId,
@@ -106,8 +101,7 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
   /**
    * @notice info stored for each userId.
    */
-  struct UserInfo
-  {
+  struct UserInfo {
     // The user's current jurisdictionId or 0 for unknown (the default)
     uint jurisdictionId;
     // The number of tokens locked, with details tracked in userIdLockups
@@ -127,8 +121,7 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
   /**
    * @notice info stored for each token lockup.
    */
-  struct Lockup
-  {
+  struct Lockup {
     // The date/time that this lockup entry has expired and the tokens may be transferred
     uint lockupExpirationDate;
     // How many tokens locked until the given expiration date.
@@ -156,18 +149,16 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
   function getJurisdictionFlow(
     uint _fromJurisdictionId,
     uint _toJurisdictionId
-  ) external view
-    returns (uint lockupLength)
-  {
+  ) external view returns (uint lockupLength) {
     return jurisdictionFlows[_fromJurisdictionId][_toJurisdictionId];
   }
 
   /**
    * @notice checks details for a given userId.
    */
-  function getAuthorizedUserIdInfo(
-    address _userId
-  ) external view
+  function getAuthorizedUserIdInfo(address _userId)
+    external
+    view
     returns (
       uint jurisdictionId,
       uint totalTokensLocked,
@@ -176,17 +167,21 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
     )
   {
     UserInfo memory info = authorizedUserIdInfo[_userId];
-    return (info.jurisdictionId, info.totalTokensLocked, info.startIndex, info.endIndex);
+    return (
+      info.jurisdictionId,
+      info.totalTokensLocked,
+      info.startIndex,
+      info.endIndex
+    );
   }
 
   /**
    * @notice gets a specific lockup entry for a userId.
    * @dev use `getAuthorizedUserIdInfo` to determine the range of applicable lockupIndex.
    */
-  function getUserIdLockup(
-    address _userId,
-    uint _lockupIndex
-  ) external view
+  function getUserIdLockup(address _userId, uint _lockupIndex)
+    external
+    view
     returns (uint lockupExpirationDate, uint numberOfTokensLocked)
   {
     Lockup memory lockup = userIdLockups[_userId][_lockupIndex];
@@ -198,19 +193,17 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
    * @dev this is a `view`-only way to determine how many tokens are still locked
    * (info.totalTokensLocked is only accurate after processing lockups which changes state)
    */
-  function getLockedTokenCount(
-    address _userId
-  ) external view
+  function getLockedTokenCount(address _userId)
+    external
+    view
     returns (uint lockedTokens)
   {
     UserInfo memory info = authorizedUserIdInfo[_userId];
     lockedTokens = info.totalTokensLocked;
     uint endIndex = info.endIndex;
-    for(uint i = info.startIndex; i < endIndex; i++)
-    {
+    for (uint i = info.startIndex; i < endIndex; i++) {
       Lockup memory lockup = userIdLockups[_userId][i];
-      if(lockup.lockupExpirationDate > block.timestamp)
-      {
+      if (lockup.lockupExpirationDate > block.timestamp) {
         // no more eligible entries
         break;
       }
@@ -229,24 +222,20 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
     address _from,
     address _to,
     uint /* _value */
-  ) external view
-    returns(uint8 status)
-  {
+  ) external view returns (uint8 status) {
     address fromUserId = authorizedWalletToUserId[_from];
     address toUserId = authorizedWalletToUserId[_to];
-    if(
+    if (
       (fromUserId == address(0) && _from != address(0)) ||
       (toUserId == address(0) && _to != address(0))
-    )
-    {
+    ) {
       return STATUS_ERROR_USER_UNKNOWN;
     }
-    if(fromUserId != toUserId)
-    {
-      uint fromJurisdictionId = authorizedUserIdInfo[fromUserId].jurisdictionId;
+    if (fromUserId != toUserId) {
+      uint fromJurisdictionId = authorizedUserIdInfo[fromUserId]
+        .jurisdictionId;
       uint toJurisdictionId = authorizedUserIdInfo[toUserId].jurisdictionId;
-      if(jurisdictionFlows[fromJurisdictionId][toJurisdictionId] == 0)
-      {
+      if (jurisdictionFlows[fromJurisdictionId][toJurisdictionId] == 0) {
         return STATUS_ERROR_JURISDICTION_FLOW;
       }
     }
@@ -254,25 +243,21 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
     return STATUS_SUCCESS;
   }
 
-  function messageForTransferRestriction(
-    uint8 _restrictionCode
-  ) external pure
+  function messageForTransferRestriction(uint8 _restrictionCode)
+    external
+    pure
     returns (string memory)
   {
-    if(_restrictionCode == STATUS_SUCCESS)
-    {
+    if (_restrictionCode == STATUS_SUCCESS) {
       return "SUCCESS";
     }
-    if(_restrictionCode == STATUS_ERROR_JURISDICTION_FLOW)
-    {
+    if (_restrictionCode == STATUS_ERROR_JURISDICTION_FLOW) {
       return "DENIED: JURISDICTION_FLOW";
     }
-    if(_restrictionCode == STATUS_ERROR_LOCKUP)
-    {
+    if (_restrictionCode == STATUS_ERROR_LOCKUP) {
       return "DENIED: LOCKUP";
     }
-    if(_restrictionCode == STATUS_ERROR_USER_UNKNOWN)
-    {
+    if (_restrictionCode == STATUS_ERROR_USER_UNKNOWN) {
       return "DENIED: USER_UNKNOWN";
     }
     return "DENIED: UNKNOWN_ERROR";
@@ -283,10 +268,7 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
    * @dev Done with `initialize` instead of a constructor in order to support
    * using this contract via an Upgradable Proxy.
    */
-  function initialize(
-    address _callingContract
-  ) public
-  {
+  function initialize(address _callingContract) public {
     Ownable.initialize(msg.sender);
     _initializeOperatorRole();
     callingContract = IERC20(_callingContract);
@@ -295,10 +277,8 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
   /**
    * @notice Called by the owner to update the startDate or lockupGranularity.
    */
-  function configWhitelist(
-    uint _startDate,
-    uint _lockupGranularity
-  ) external
+  function configWhitelist(uint _startDate, uint _lockupGranularity)
+    external
     onlyOwner()
   {
     startDate = _startDate;
@@ -319,15 +299,15 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
     uint[] calldata _fromJurisdictionIds,
     uint[] calldata _toJurisdictionIds,
     uint[] calldata _lockupLengths
-  ) external
-    onlyOwner()
-  {
+  ) external onlyOwner() {
     uint count = _fromJurisdictionIds.length;
-    for(uint i = 0; i < count; i++)
-    {
+    for (uint i = 0; i < count; i++) {
       uint fromJurisdictionId = _fromJurisdictionIds[i];
       uint toJurisdictionId = _toJurisdictionIds[i];
-      require(fromJurisdictionId > 0 && toJurisdictionId > 0, "INVALID_JURISDICTION_ID");
+      require(
+        fromJurisdictionId > 0 && toJurisdictionId > 0,
+        "INVALID_JURISDICTION_ID"
+      );
       jurisdictionFlows[fromJurisdictionId][toJurisdictionId] = _lockupLengths[i];
       emit UpdateJurisdictionFlow(
         fromJurisdictionId,
@@ -345,14 +325,14 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
   function approveNewUsers(
     address[] calldata _traders,
     uint[] calldata _jurisdictionIds
-  ) external
-    onlyOperator()
-  {
+  ) external onlyOperator() {
     uint length = _traders.length;
-    for(uint i = 0; i < length; i++)
-    {
+    for (uint i = 0; i < length; i++) {
       address trader = _traders[i];
-      require(authorizedWalletToUserId[trader] == address(0), "USER_WALLET_ALREADY_ADDED");
+      require(
+        authorizedWalletToUserId[trader] == address(0),
+        "USER_WALLET_ALREADY_ADDED"
+      );
       uint jurisdictionId = _jurisdictionIds[i];
       require(jurisdictionId != 0, "INVALID_JURISDICTION_ID");
 
@@ -368,16 +348,19 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
   function addApprovedUserWallets(
     address[] calldata _userIds,
     address[] calldata _newWallets
-  ) external
-    onlyOperator()
-  {
+  ) external onlyOperator() {
     uint length = _userIds.length;
-    for(uint i = 0; i < length; i++)
-    {
+    for (uint i = 0; i < length; i++) {
       address userId = _userIds[i];
-      require(authorizedUserIdInfo[userId].jurisdictionId != 0, "USER_ID_UNKNOWN");
+      require(
+        authorizedUserIdInfo[userId].jurisdictionId != 0,
+        "USER_ID_UNKNOWN"
+      );
       address newWallet = _newWallets[i];
-      require(authorizedWalletToUserId[newWallet] == address(0), "WALLET_ALREADY_ADDED");
+      require(
+        authorizedWalletToUserId[newWallet] == address(0),
+        "WALLET_ALREADY_ADDED"
+      );
 
       authorizedWalletToUserId[newWallet] = userId;
       emit AddApprovedUserWallet(userId, newWallet, msg.sender);
@@ -388,16 +371,17 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
    * @notice Called by an operator to revoke approval for the given wallets.
    * @dev If this is called in error, you can restore access with `addApprovedUserWallets`.
    */
-  function revokeUserWallets(
-    address[] calldata _wallets
-  ) external
+  function revokeUserWallets(address[] calldata _wallets)
+    external
     onlyOperator()
   {
     uint length = _wallets.length;
-    for(uint i = 0; i < length; i++)
-    {
+    for (uint i = 0; i < length; i++) {
       address wallet = _wallets[i];
-      require(authorizedWalletToUserId[wallet] != address(0), "WALLET_NOT_FOUND");
+      require(
+        authorizedWalletToUserId[wallet] != address(0),
+        "WALLET_NOT_FOUND"
+      );
 
       authorizedWalletToUserId[wallet] = address(0);
       emit RevokeUserWallet(wallet, msg.sender);
@@ -411,14 +395,14 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
   function updateJurisdictionsForUserIds(
     address[] calldata _userIds,
     uint[] calldata _jurisdictionIds
-  ) external
-    onlyOperator()
-  {
+  ) external onlyOperator() {
     uint length = _userIds.length;
-    for(uint i = 0; i < length; i++)
-    {
+    for (uint i = 0; i < length; i++) {
       address userId = _userIds[i];
-      require(authorizedUserIdInfo[userId].jurisdictionId != 0, "USER_ID_UNKNOWN");
+      require(
+        authorizedUserIdInfo[userId].jurisdictionId != 0,
+        "USER_ID_UNKNOWN"
+      );
       uint jurisdictionId = _jurisdictionIds[i];
       require(jurisdictionId != 0, "INVALID_JURISDICTION_ID");
 
@@ -437,22 +421,27 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
     address _userId,
     uint _lockupExpirationDate,
     uint _numberOfTokensLocked
-  ) internal
-  {
-    if(_numberOfTokensLocked == 0 || _lockupExpirationDate <= block.timestamp)
-    {
+  ) internal {
+    if (
+      _numberOfTokensLocked == 0 || _lockupExpirationDate <= block.timestamp
+    ) {
       // This is a no-op
       return;
     }
-    emit AddLockup(_userId, _lockupExpirationDate, _numberOfTokensLocked, msg.sender);
+    emit AddLockup(
+      _userId,
+      _lockupExpirationDate,
+      _numberOfTokensLocked,
+      msg.sender
+    );
     UserInfo storage info = authorizedUserIdInfo[_userId];
     require(info.jurisdictionId != 0, "USER_ID_UNKNOWN");
     info.totalTokensLocked = info.totalTokensLocked.add(_numberOfTokensLocked);
-    if(info.endIndex > 0)
-    {
+    if (info.endIndex > 0) {
       Lockup storage lockup = userIdLockups[_userId][info.endIndex - 1];
-      if(lockup.lockupExpirationDate + lockupGranularity >= _lockupExpirationDate)
-      {
+      if (
+        lockup.lockupExpirationDate + lockupGranularity >= _lockupExpirationDate
+      ) {
         // Merge with the previous entry
         // if totalTokensLocked can't overflow then this value will not either
         lockup.numberOfTokensLocked += _numberOfTokensLocked;
@@ -460,7 +449,10 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
       }
     }
     // Add a new lockup entry
-    userIdLockups[_userId][info.endIndex] = Lockup(_lockupExpirationDate, _numberOfTokensLocked);
+    userIdLockups[_userId][info.endIndex] = Lockup(
+      _lockupExpirationDate,
+      _numberOfTokensLocked
+    );
     info.endIndex++;
   }
 
@@ -473,12 +465,9 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
     address[] calldata _userIds,
     uint[] calldata _lockupExpirationDates,
     uint[] calldata _numberOfTokensLocked
-  ) external
-    onlyOperator()
-  {
+  ) external onlyOperator() {
     uint length = _userIds.length;
-    for(uint i = 0; i < length; i++)
-    {
+    for (uint i = 0; i < length; i++) {
       _addLockup(
         _userIds[i],
         _lockupExpirationDates[i],
@@ -497,17 +486,13 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
     UserInfo storage info,
     address _userId,
     bool _ignoreExpiration
-  ) internal
-    returns (bool isDone)
-  {
-    if(info.startIndex >= info.endIndex)
-    {
+  ) internal returns (bool isDone) {
+    if (info.startIndex >= info.endIndex) {
       // no lockups for this user
       return true;
     }
     Lockup storage lockup = userIdLockups[_userId][info.startIndex];
-    if(lockup.lockupExpirationDate > block.timestamp && !_ignoreExpiration)
-    {
+    if (lockup.lockupExpirationDate > block.timestamp && !_ignoreExpiration) {
       // no more eligable entries
       return true;
     }
@@ -526,17 +511,11 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
    * This is generally unused but may be required if a given userId
    * has a lot of individual lockup entries which are expired.
    */
-  function processLockups(
-    address _userId,
-    uint _maxCount
-  ) external
-  {
+  function processLockups(address _userId, uint _maxCount) external {
     UserInfo storage info = authorizedUserIdInfo[_userId];
     require(info.jurisdictionId > 0, "USER_ID_UNKNOWN");
-    for(uint i = 0; i < _maxCount; i++)
-    {
-      if(_processLockup(info, _userId, false))
-      {
+    for (uint i = 0; i < _maxCount; i++) {
+      if (_processLockup(info, _userId, false)) {
         break;
       }
     }
@@ -548,20 +527,16 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
    * @dev This should generally remain unused. It could be used in combination with
    * `addLockups` to fix an incorrect lockup expiration date or quantity.
    */
-  function forceUnlockUpTo(
-    address _userId,
-    uint _maxLockupIndex
-  ) external
+  function forceUnlockUpTo(address _userId, uint _maxLockupIndex)
+    external
     onlyOperator()
   {
     UserInfo storage info = authorizedUserIdInfo[_userId];
     require(info.jurisdictionId > 0, "USER_ID_UNKNOWN");
     require(_maxLockupIndex > info.startIndex, "ALREADY_UNLOCKED");
     uint maxCount = _maxLockupIndex - info.startIndex;
-    for(uint i = 0; i < maxCount; i++)
-    {
-      if(_processLockup(info, _userId, true))
-      {
+    for (uint i = 0; i < maxCount; i++) {
+      if (_processLockup(info, _userId, true)) {
         break;
       }
     }
@@ -578,12 +553,10 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
     address _to,
     uint _value,
     bool _isSell
-  ) external
-  {
+  ) external {
     require(address(callingContract) == msg.sender, "CALL_VIA_CONTRACT_ONLY");
 
-    if(_to == address(0) && !_isSell)
-    {
+    if (_to == address(0) && !_isSell) {
       // This is a burn, no authorization required
       // You can burn locked tokens. Burning will effectively burn unlocked tokens,
       // and then burn locked tokens starting with those that will be unlocked first.
@@ -591,50 +564,46 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole
     }
 
     address fromUserId = authorizedWalletToUserId[_from];
-    require(fromUserId != address(0) || _from == address(0), "FROM_USER_UNKNOWN");
+    require(
+      fromUserId != address(0) || _from == address(0),
+      "FROM_USER_UNKNOWN"
+    );
     address toUserId = authorizedWalletToUserId[_to];
     require(toUserId != address(0) || _to == address(0), "TO_USER_UNKNOWN");
 
     // A single user can move funds between wallets they control without restriction
-    if(fromUserId != toUserId)
-    {
-      uint fromJurisdictionId = authorizedUserIdInfo[fromUserId].jurisdictionId;
+    if (fromUserId != toUserId) {
+      uint fromJurisdictionId = authorizedUserIdInfo[fromUserId]
+        .jurisdictionId;
       uint toJurisdictionId = authorizedUserIdInfo[toUserId].jurisdictionId;
+
+
       uint lockupLength = jurisdictionFlows[fromJurisdictionId][toJurisdictionId];
       require(lockupLength > 0, "DENIED: JURISDICTION_FLOW");
 
       // If the lockupLength is 1 then we interpret this as approved without any lockup
       // This means any token lockup period must be at least 2 seconds long in order to apply.
-      if(lockupLength > 1 && _to != address(0))
-      {
+      if (lockupLength > 1 && _to != address(0)) {
         // Lockup may apply for any action other than burn/sell (e.g. buy/pay/transfer)
         uint lockupExpirationDate = block.timestamp + lockupLength;
         _addLockup(toUserId, lockupExpirationDate, _value);
       }
 
-      if(_from == address(0))
-      {
+      if (_from == address(0)) {
         // This is minting (buy or pay)
         require(block.timestamp >= startDate, "WAIT_FOR_START_DATE");
-      }
-      else
-      {
+      } else {
         // This is a transfer (or sell)
         UserInfo storage info = authorizedUserIdInfo[fromUserId];
-        while(true)
-        {
-          if(_processLockup(info, fromUserId, false))
-          {
+        while (true) {
+          if (_processLockup(info, fromUserId, false)) {
             break;
           }
         }
         uint balance = callingContract.balanceOf(_from);
         // This first require is redundant, but allows us to provide
         // a more clear error message.
-        require(
-          balance >= _value,
-          "INSUFFICIENT_BALANCE"
-        );
+        require(balance >= _value, "INSUFFICIENT_BALANCE");
         require(
           balance >= info.totalTokensLocked.add(_value),
           "INSUFFICIENT_TRANSFERABLE_BALANCE"

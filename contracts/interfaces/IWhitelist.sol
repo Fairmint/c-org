@@ -1,13 +1,11 @@
 pragma solidity 0.5.17;
 
-
 /**
  * Source: https://raw.githubusercontent.com/simple-restricted-token/reference-implementation/master/contracts/token/ERC1404/ERC1404.sol
  * With ERC-20 APIs removed (will be implemented as a separate contract).
  * And adding authorizeTransfer.
  */
-interface IWhitelist
-{
+interface IWhitelist {
   /**
    * @notice Detects if a transfer will be reverted and if so returns an appropriate reference code
    * @param from Sending address
@@ -20,8 +18,7 @@ interface IWhitelist
     address from,
     address to,
     uint value
-  ) external view
-    returns (uint8);
+  ) external view returns (uint8);
 
   /**
    * @notice Returns a human-readable message for a given restriction code
@@ -29,9 +26,9 @@ interface IWhitelist
    * @return Text showing the restriction's reasoning
    * @dev Overwrite with your custom message and restrictionCode handling
    */
-  function messageForTransferRestriction(
-    uint8 restrictionCode
-  ) external pure
+  function messageForTransferRestriction(uint8 restrictionCode)
+    external
+    pure
     returns (string memory);
 
   /**

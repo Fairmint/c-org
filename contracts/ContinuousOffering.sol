@@ -394,7 +394,7 @@ contract ContinuousOffering
     {
       decimals = IERC20Detailed(_currencyAddress).decimals();
     }
-    minInvestment = 100 * 10 ** decimals;
+    minInvestment = 100 * (10 ** decimals);
     beneficiary = msg.sender;
     control = msg.sender;
     feeCollector = msg.sender;
