@@ -15,7 +15,6 @@ module.exports = function () {
       await reverts(
         this.contract.close({
           from: await this.contract.beneficiary(),
-          value: "10000000000000000000000",
         }),
         "INVALID_STATE"
       );
