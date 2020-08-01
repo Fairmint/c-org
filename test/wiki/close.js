@@ -8,7 +8,14 @@ const { tokens } = require("hardlydifficult-eth");
 const constants = require("../helpers/constants");
 
 contract("wiki / close", (accounts) => {
-  const [beneficiary, control, tokenOwner, investor] = accounts;
+  const [
+    beneficiary,
+    control,
+    tokenOwner,
+    investor,
+    nonTokenHolder,
+    operator,
+  ] = accounts;
   let contracts;
 
   beforeEach(async function () {
@@ -58,4 +65,15 @@ contract("wiki / close", (accounts) => {
   });
 
   behaviors.wiki.close.all(beneficiary, investor);
+
+  it("can transfer on close", async function () {
+    await this.contract.transfer(nonTokenHolder, "1", { from: tokenOwner });
+  });
+
+  it("can transferFrom on close", async function () {
+    await this.contract.approve(operator, -1, { from: tokenOwner });
+    await this.contract.transferFrom(tokenOwner, nonTokenHolder, "1", {
+      from: operator,
+    });
+  });
 });
