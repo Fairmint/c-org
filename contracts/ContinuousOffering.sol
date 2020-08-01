@@ -964,4 +964,6 @@ contract ContinuousOffering
     require(recoveredAddress != address(0) && recoveredAddress == owner, "INVALID_SIGNATURE");
     _approve(owner, spender, value);
   }
+
+  uint256[50] private __gap;
 }
