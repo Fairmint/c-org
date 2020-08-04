@@ -1,6 +1,9 @@
 const BigNumber = require("bignumber.js");
-const { expectRevert, constants } = require("@openzeppelin/test-helpers");
-const expectEvent = require("@openzeppelin/test-helpers/src/expectEvent");
+const {
+  expectEvent,
+  expectRevert,
+  constants,
+} = require("@openzeppelin/test-helpers");
 
 /**
  * Requires `this.contract`
