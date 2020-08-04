@@ -67,12 +67,12 @@ contract("wiki / close", (accounts) => {
   behaviors.wiki.close.all(beneficiary, investor);
 
   it("can transfer on close", async function () {
-    await this.contract.transfer(nonTokenHolder, "1", { from: tokenOwner });
+    await this.contract.transfer(nonTokenHolder, "1", { from: investor });
   });
 
   it("can transferFrom on close", async function () {
-    await this.contract.approve(operator, -1, { from: tokenOwner });
-    await this.contract.transferFrom(tokenOwner, nonTokenHolder, "1", {
+    await this.contract.approve(operator, -1, { from: investor });
+    await this.contract.transferFrom(investor, nonTokenHolder, "1", {
       from: operator,
     });
   });
