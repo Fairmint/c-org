@@ -32,7 +32,7 @@ contract("wiki / burn / run", (accounts) => {
       contracts.dat.burn(burnAmount, {
         from: investor,
       }),
-      "ONLY_DURING_RUN"
+      "INVALID_STATE"
     );
   });
 });
