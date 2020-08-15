@@ -253,7 +253,7 @@ contract ContinuousOffering
     if(!_isSell)
     {
       // This is a burn
-      require(state == STATE_RUN, "ONLY_DURING_RUN");
+      require(state == STATE_RUN, "INVALID_STATE");
       // SafeMath not required as we cap how high this value may get during mint
       burnedSupply += _amount;
       emit Burn(_from, _amount);

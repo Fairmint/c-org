@@ -16,7 +16,7 @@ module.exports = function (investor) {
         this.contract.burn("42", {
           from: investor,
         }),
-        "ONLY_DURING_RUN"
+        "INVALID_STATE"
       );
     });
   });
