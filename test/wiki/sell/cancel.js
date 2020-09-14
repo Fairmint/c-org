@@ -74,7 +74,7 @@ contract("wiki / sell / cancel", (accounts) => {
       gasCost = await getGasCost(tx);
     });
 
-    it("amount is being substracted from the investor's balance.", async () => {
+    it("amount is being subtracted from the investor's balance.", async () => {
       const balance = new BigNumber(await contracts.dat.balanceOf(investor));
       assert.equal(
         balance.toFixed(),
