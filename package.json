@@ -5,7 +5,7 @@
   "scripts": {
     "build": "npm run compile",
     "compile": "truffle compile",
-    "ganache": "ganache-cli -e 10000000000 -a 100",
+    "ganache": "ganache-cli -e 1000000000000 -a 100",
     "dev": "npm run compile && npm run test",
     "lint": "eslint . --fix && solium -d contracts/ --fix",
     "lintNoFix": "eslint . && solium -d contracts/",

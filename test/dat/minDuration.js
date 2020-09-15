@@ -2,7 +2,7 @@ const BigNumber = require("bignumber.js");
 const { time } = require("@openzeppelin/test-helpers");
 const { deployDat } = require("../datHelpers");
 const { approveAll } = require("../helpers");
-const { reverts } = require("truffle-assertions");
+const { expectRevert } = require("@openzeppelin/test-helpers");
 const { constants } = require("hardlydifficult-eth");
 
 contract("dat / minDuration", (accounts) => {
@@ -14,7 +14,7 @@ contract("dat / minDuration", (accounts) => {
     });
 
     it("should fail to initialize from another account", async () => {
-      await reverts(
+      await expectRevert(
         contracts.dat.initializeRunStartedOn(1, { from: accounts[0] }),
         "CONTROL_ONLY"
       );
@@ -22,7 +22,7 @@ contract("dat / minDuration", (accounts) => {
 
     it("should fail to initialize when in INIT", async () => {
       assert.equal(await contracts.dat.state(), 0);
-      await reverts(
+      await expectRevert(
         contracts.dat.initializeRunStartedOn(1, {
           from: await contracts.dat.control(),
         }),
@@ -33,7 +33,7 @@ contract("dat / minDuration", (accounts) => {
     it("should fail to initialize when in CANCEL", async () => {
       await contracts.dat.close({ from: await contracts.dat.beneficiary() });
       assert.equal(await contracts.dat.state(), 3);
-      await reverts(
+      await expectRevert(
         contracts.dat.initializeRunStartedOn(1, {
           from: await contracts.dat.control(),
         }),
@@ -50,7 +50,7 @@ contract("dat / minDuration", (accounts) => {
 
     it("should fail to set the date in the future", async () => {
       const currentTime = new BigNumber(await time.latest()).plus(10);
-      await reverts(
+      await expectRevert(
         contracts.dat.initializeRunStartedOn(currentTime.toFixed(), {
           from: await contracts.dat.control(),
         }),
@@ -66,7 +66,7 @@ contract("dat / minDuration", (accounts) => {
       });
 
       it("should fail to initialize again", async () => {
-        await reverts(
+        await expectRevert(
           contracts.dat.initializeRunStartedOn(1, {
             from: await contracts.dat.control(),
           }),
@@ -84,7 +84,7 @@ contract("dat / minDuration", (accounts) => {
       });
 
       it("should fail to initialize again", async () => {
-        await reverts(
+        await expectRevert(
           contracts.dat.initializeRunStartedOn(1, {
             from: await contracts.dat.control(),
           }),
@@ -134,7 +134,7 @@ contract("dat / minDuration", (accounts) => {
     });
 
     it("If minDuration == -1 then close fails", async () => {
-      await reverts(
+      await expectRevert(
         contracts.dat.close({
           from: await contracts.dat.beneficiary(),
           value: "10000000000000000000000",

@@ -1,5 +1,5 @@
 const { deployDat } = require("../datHelpers");
-const { reverts } = require("truffle-assertions");
+const { expectRevert } = require("@openzeppelin/test-helpers");
 
 contract("whitelist / updateJurisdictionFlows", (accounts) => {
   let contracts;
@@ -15,7 +15,7 @@ contract("whitelist / updateJurisdictionFlows", (accounts) => {
   });
 
   it("Operator cannot updateJurisdictionFlows", async () => {
-    await reverts(
+    await expectRevert(
       contracts.whitelist.updateJurisdictionFlows([1], [1], [1], {
         from: operatorAccount,
       }),
@@ -24,7 +24,7 @@ contract("whitelist / updateJurisdictionFlows", (accounts) => {
   });
 
   it("updateJurisdictionFlows does not accept 0", async () => {
-    await reverts(
+    await expectRevert(
       contracts.whitelist.updateJurisdictionFlows([0], [1], [1], {
         from: ownerAccount,
       }),
@@ -33,7 +33,7 @@ contract("whitelist / updateJurisdictionFlows", (accounts) => {
   });
 
   it("updateJurisdictionFlows does not accept 0", async () => {
-    await reverts(
+    await expectRevert(
       contracts.whitelist.updateJurisdictionFlows([1], [0], [1], {
         from: ownerAccount,
       }),

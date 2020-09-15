@@ -1,5 +1,5 @@
 const { deployDat } = require("../datHelpers");
-const { reverts } = require("truffle-assertions");
+const { expectRevert } = require("@openzeppelin/test-helpers");
 
 contract("whitelist / approveNewUsers", (accounts) => {
   let contracts;
@@ -15,7 +15,7 @@ contract("whitelist / approveNewUsers", (accounts) => {
   });
 
   it("non-operators cannot approveNewUsers", async () => {
-    await reverts(
+    await expectRevert(
       contracts.whitelist.approveNewUsers([accounts[5]], [4], {
         from: accounts[9],
       }),
@@ -30,7 +30,7 @@ contract("whitelist / approveNewUsers", (accounts) => {
   });
 
   it("should fail to approve a 0 jurisdiction", async () => {
-    await reverts(
+    await expectRevert(
       contracts.whitelist.approveNewUsers([accounts[5]], [0], {
         from: operatorAccount,
       }),
@@ -72,7 +72,7 @@ contract("whitelist / approveNewUsers", (accounts) => {
     });
 
     it("should fail to approve a known user", async () => {
-      await reverts(
+      await expectRevert(
         contracts.whitelist.approveNewUsers([accounts[5]], [4], {
           from: operatorAccount,
         }),

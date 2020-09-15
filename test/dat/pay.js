@@ -3,7 +3,7 @@ const { tokens } = require("hardlydifficult-eth");
 const BigNumber = require("bignumber.js");
 const { deployDat } = require("../datHelpers");
 const { approveAll, constants, getGasCost } = require("../helpers");
-const { reverts } = require("truffle-assertions");
+const { expectRevert } = require("@openzeppelin/test-helpers");
 
 contract("dat / pay", (accounts) => {
   let contracts;
@@ -76,7 +76,7 @@ contract("dat / pay", (accounts) => {
       from: accounts[0],
     });
     await approveAll(contracts, accounts);
-    await reverts(
+    await expectRevert(
       contracts.dat.pay("0", {
         from: accounts[0],
       }),

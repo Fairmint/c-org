@@ -1,5 +1,5 @@
 const { getApprovalDigest } = require("../../helpers");
-const { reverts } = require("truffle-assertions");
+const { expectRevert } = require("@openzeppelin/test-helpers");
 const { constants } = require("hardlydifficult-eth");
 const { MockProvider } = require("ethereum-waffle");
 const { ecsign } = require("ethereumjs-util");
@@ -57,7 +57,7 @@ module.exports = function (operator) {
         Buffer.from(wallet.privateKey.slice(2), "hex")
       );
 
-      await reverts(
+      await expectRevert(
         this.contract.permit(
           wallet.address,
           operator,
@@ -85,7 +85,7 @@ module.exports = function (operator) {
         Buffer.from(otherWallet.privateKey.slice(2), "hex")
       );
 
-      await reverts(
+      await expectRevert(
         this.contract.permit(
           wallet.address,
           operator,

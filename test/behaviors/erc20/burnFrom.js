@@ -1,4 +1,4 @@
-const { reverts } = require("truffle-assertions");
+const { expectRevert } = require("@openzeppelin/test-helpers");
 const { constants } = require("hardlydifficult-eth");
 
 /**
@@ -9,7 +9,7 @@ module.exports = function (tokenOwner, operator) {
     const burnAmount = 20;
 
     it("should fail to burnFrom without approval", async function () {
-      await reverts(
+      await expectRevert(
         this.contract.burnFrom(tokenOwner, burnAmount, { from: operator }),
         "ERC20: burn amount exceeds allowance"
       );

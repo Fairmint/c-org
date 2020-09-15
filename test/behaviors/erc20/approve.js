@@ -71,7 +71,7 @@ module.exports = function (tokenOwner, operator) {
       describe("when the sender does not have enough balance", function () {
         let amount;
 
-        beforeEach(async () => {
+        beforeEach(async function () {
           amount = initialBalance.plus(1);
         });
 

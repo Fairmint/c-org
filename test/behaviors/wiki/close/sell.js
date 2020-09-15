@@ -1,6 +1,5 @@
 const BigNumber = require("bignumber.js");
 const { constants } = require("../../../helpers");
-const { reverts } = require("truffle-assertions");
 const { expectRevert } = require("@openzeppelin/test-helpers");
 const ERC20 = artifacts.require("IERC20");
 
@@ -87,7 +86,7 @@ module.exports = function (beneficiary, investor, areTransactionsFrozen) {
           await this.contract.estimateSellValue(sellAmount)
         );
 
-        await reverts(
+        await expectRevert(
           this.contract.sell(investor, sellAmount, x.plus(1).toFixed(), {
             from: investor,
           }),
@@ -105,7 +104,7 @@ module.exports = function (beneficiary, investor, areTransactionsFrozen) {
         });
       });
     } else {
-      it("shouldFail to sell", async () => {
+      it("shouldFail to sell", async function () {
         const x = new BigNumber(
           await this.contract.estimateSellValue(sellAmount)
         );

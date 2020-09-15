@@ -1,7 +1,7 @@
 const BigNumber = require("bignumber.js");
 const { time } = require("@openzeppelin/test-helpers");
 const { deployDat } = require("../datHelpers");
-const { reverts } = require("truffle-assertions");
+const { expectRevert } = require("@openzeppelin/test-helpers");
 
 contract("whitelist / startDate", (accounts) => {
   let contracts;
@@ -32,7 +32,7 @@ contract("whitelist / startDate", (accounts) => {
 
   it("cannot buy when startDate is in the future", async () => {
     const price = web3.utils.toWei("100", "ether");
-    await reverts(
+    await expectRevert(
       contracts.dat.buy(trader, price, 1, {
         from: trader,
         value: price,

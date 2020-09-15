@@ -1,5 +1,5 @@
 const { deployDat } = require("../datHelpers");
-const { reverts } = require("truffle-assertions");
+const { expectRevert } = require("@openzeppelin/test-helpers");
 
 contract("whitelist / addApprovedUserWallets", (accounts) => {
   let contracts;
@@ -18,7 +18,7 @@ contract("whitelist / addApprovedUserWallets", (accounts) => {
   });
 
   it("non-operators cannot addApprovedUserWallets", async () => {
-    await reverts(
+    await expectRevert(
       contracts.whitelist.addApprovedUserWallets([accounts[5]], [accounts[4]], {
         from: accounts[8],
       }),
@@ -37,7 +37,7 @@ contract("whitelist / addApprovedUserWallets", (accounts) => {
   });
 
   it("shouldFail to add known wallets 1", async () => {
-    await reverts(
+    await expectRevert(
       contracts.whitelist.addApprovedUserWallets([accounts[5]], [accounts[5]], {
         from: operatorAccount,
       }),
@@ -57,7 +57,7 @@ contract("whitelist / addApprovedUserWallets", (accounts) => {
     });
 
     it("shouldFail to add known wallets 2", async () => {
-      await reverts(
+      await expectRevert(
         contracts.whitelist.addApprovedUserWallets(
           [accounts[5]],
           [accounts[4]],
@@ -70,7 +70,7 @@ contract("whitelist / addApprovedUserWallets", (accounts) => {
     });
 
     it("shouldFail to add to unknown userIds", async () => {
-      await reverts(
+      await expectRevert(
         contracts.whitelist.addApprovedUserWallets(
           [accounts[8]],
           [accounts[7]],

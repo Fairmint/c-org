@@ -1,5 +1,5 @@
 const { constants } = require("../../../helpers");
-const { reverts } = require("truffle-assertions");
+const { expectRevert } = require("@openzeppelin/test-helpers");
 
 /**
  * Requires `this.contract`
@@ -13,7 +13,7 @@ module.exports = function (investor) {
 
     it("The buy() functions fails in close state", async function () {
       const value = web3.utils.toWei("100", "ether");
-      await reverts(
+      await expectRevert(
         this.contract.buy(investor, value, 1, {
           value,
           from: investor,

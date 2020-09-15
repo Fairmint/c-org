@@ -1,6 +1,6 @@
 const { deployDat } = require("../../datHelpers");
 const { approveAll, constants } = require("../../helpers");
-const { reverts } = require("truffle-assertions");
+const { expectRevert } = require("@openzeppelin/test-helpers");
 
 contract("wiki / pay / close", (accounts) => {
   let contracts;
@@ -33,7 +33,7 @@ contract("wiki / pay / close", (accounts) => {
   });
 
   it("pay should fail", async () => {
-    await reverts(
+    await expectRevert(
       contracts.dat.pay("1", {
         from: investor,
         value: "1",

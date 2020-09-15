@@ -2,7 +2,7 @@ const { deployDat } = require("../datHelpers");
 const { approveAll } = require("../helpers");
 const { tokens } = require("hardlydifficult-eth");
 const { constants } = require("../helpers");
-const { reverts } = require("truffle-assertions");
+const { expectRevert } = require("@openzeppelin/test-helpers");
 
 contract("dat / capSupply", (accounts) => {
   let contracts;
@@ -34,7 +34,7 @@ contract("dat / capSupply", (accounts) => {
   });
 
   it("buying over cap shouldFail", async () => {
-    await reverts(
+    await expectRevert(
       contracts.dat.buy(
         accounts[1],
         "30000000000000000000000000000000000000000000000000000000",
