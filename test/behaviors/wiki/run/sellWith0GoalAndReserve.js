@@ -18,6 +18,16 @@ module.exports = function (beneficiary, investors) {
       );
     });
 
+    it("If init_goal=0 && buyback_reserve=0, then the function exits.", async function () {
+      await this.contract.transfer(investors[0], sellAmount, {
+        from: beneficiary,
+      });
+      await expectRevert(
+        this.contract.sell(investors[0], sellAmount, 1, { from: investors[0] }),
+        "PRICE_SLIPPAGE"
+      );
+    });
+
     // x=(total_supply+burnt_supply)*amount*sell_slope-((sell_slope*amount^2)/2)+(sell_slope*amount*burnt_supply^2)/(2*(total_supply)) with sell_slope=(2*buyback_reserve)/((total_supply+burnt_supply)^2).
 
     it("If x < minimum then the call fails.", async function () {

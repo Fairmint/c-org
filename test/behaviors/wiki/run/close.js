@@ -1,6 +1,3 @@
-const { tokens } = require("hardlydifficult-eth");
-const { time } = require("@openzeppelin/test-helpers");
-
 const BigNumber = require("bignumber.js");
 const { constants, getGasCost } = require("../../../helpers");
 const { expectRevert } = require("@openzeppelin/test-helpers");
@@ -16,42 +13,10 @@ module.exports = function (control, investor) {
       await expectRevert(
         this.contract.close({
           from: investor,
-          value: "10000000000000000000000",
+          value: "100000000000000000000000",
         }),
         "BENEFICIARY_ONLY"
       );
-    });
-
-    describe("when locked", async function () {
-      beforeEach(async function () {
-        const currentTime = new BigNumber(await time.latest());
-        await updateDatConfig(contracts, {
-          minDuration: currentTime.plus(10).toFixed(),
-        });
-      });
-
-      it("If now < minDuration then close fails", async function () {
-        await expectRevert(
-          this.contract.close({
-            from: await this.contract.beneficiary(),
-            value: "10000000000000000000000",
-          }),
-          "TOO_EARLY"
-        );
-      });
-
-      describe("after the lock expires", function () {
-        beforeEach(async function () {
-          await time.increase(11);
-        });
-
-        it("then close works again", async function () {
-          await this.contract.close({
-            from: await this.contract.beneficiary(),
-            value: "10000000000000000000000",
-          });
-        });
-      });
     });
 
     describe("on close", function () {
@@ -137,23 +102,6 @@ module.exports = function (control, investor) {
           balance.toFixed(),
           beneficiaryBalanceBefore.minus(exitFee).minus(gasCost).toFixed()
         );
-      });
-    });
-
-    describe("when reserve is high", function () {
-      beforeEach(async function () {
-        // Redeploy using an ERC-20
-        const token = await tokens.sai.deploy(web3, control);
-        contracts = await deployDat(accounts, { currency: token.address });
-        await approveAll(contracts, accounts);
-        await token.mint(this.contract.address, constants.MAX_UINT, {
-          from: control,
-        });
-      });
-
-      it("exitFee is 0", async function () {
-        const exitFee = new BigNumber(await this.contract.estimateExitFee(0));
-        assert.equal(exitFee, 0);
       });
     });
   });
