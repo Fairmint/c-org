@@ -2,7 +2,6 @@ const burn = require("./burn");
 const buy = require("./buy");
 const close = require("./close");
 const closeWithMinDuration = require("./closeWithMinDuration");
-const closeWithHighReserve = require("./closeWithHighReserve");
 const sell = require("./sell");
 const sellWith0GoalAndReserve = require("./sellWith0GoalAndReserve");
 
@@ -27,13 +26,11 @@ function allWith0GoalAndReserve(beneficiary, investors) {
 module.exports = {
   all,
   allWithMinDuration,
-  allWithHighReserve,
   allWith0GoalAndReserve,
   burn,
   buy,
   close,
   closeWithMinDuration,
-  closeWithHighReserve,
   sell,
   sellWith0GoalAndReserve,
 };
