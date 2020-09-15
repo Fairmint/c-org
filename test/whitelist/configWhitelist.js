@@ -1,5 +1,5 @@
 const { deployDat } = require("../datHelpers");
-const { reverts } = require("truffle-assertions");
+const { expectRevert } = require("@openzeppelin/test-helpers");
 
 contract("whitelist / configWhitelist", (accounts) => {
   let contracts;
@@ -15,7 +15,7 @@ contract("whitelist / configWhitelist", (accounts) => {
   });
 
   it("Operator cannot change config", async () => {
-    await reverts(
+    await expectRevert(
       contracts.whitelist.configWhitelist(0, 0, { from: operatorAccount }),
       "Ownable: caller is not the owner"
     );

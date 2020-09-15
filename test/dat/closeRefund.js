@@ -1,6 +1,6 @@
 const { deployDat } = require("../datHelpers");
 const { approveAll } = require("../helpers");
-const { reverts } = require("truffle-assertions");
+const { expectRevert } = require("@openzeppelin/test-helpers");
 const noFallbackProxyArtifact = artifacts.require("NoFallbackProxy");
 
 contract("dat / closeRefund", (accounts) => {
@@ -46,7 +46,7 @@ contract("dat / closeRefund", (accounts) => {
       contracts.dat.abi.find((e) => e.name === "close"),
       []
     );
-    await reverts(
+    await expectRevert(
       proxy.proxyCall(contracts.dat.address, callData, {
         value: "1000000000000000000000000000",
         from: await contracts.dat.control(),

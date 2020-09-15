@@ -1,6 +1,6 @@
 const { deployDat } = require("../datHelpers");
 const { approveAll, getApprovalDigest } = require("../helpers");
-const { reverts } = require("truffle-assertions");
+const { expectRevert } = require("@openzeppelin/test-helpers");
 const { constants } = require("hardlydifficult-eth");
 const { MockProvider } = require("ethereum-waffle");
 const { ecsign } = require("ethereumjs-util");
@@ -97,7 +97,7 @@ contract("dat / permitSell", (accounts) => {
       Buffer.from(wallet.privateKey.slice(2), "hex")
     );
 
-    await reverts(
+    await expectRevert(
       contracts.dat.permitSell(
         sellOptions.from,
         sellOptions.to,
@@ -126,7 +126,7 @@ contract("dat / permitSell", (accounts) => {
       Buffer.from(otherWallet.privateKey.slice(2), "hex")
     );
 
-    await reverts(
+    await expectRevert(
       contracts.dat.permitSell(
         sellOptions.from,
         sellOptions.to,

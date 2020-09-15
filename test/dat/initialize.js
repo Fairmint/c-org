@@ -1,6 +1,6 @@
 const { deployDat } = require("../datHelpers");
 const { constants } = require("../helpers");
-const { reverts } = require("truffle-assertions");
+const { expectRevert } = require("@openzeppelin/test-helpers");
 const BigNumber = require("bignumber.js");
 
 contract("dat / initialize", (accounts) => {
@@ -8,7 +8,7 @@ contract("dat / initialize", (accounts) => {
 
   it("shouldFail to init twice", async () => {
     contracts = await deployDat(accounts);
-    await reverts(
+    await expectRevert(
       contracts.dat.methods[
         "initialize(uint256,address,uint256,uint256,uint256,uint256,uint256,address,string,string)"
       ](
@@ -33,42 +33,42 @@ contract("dat / initialize", (accounts) => {
   });
 
   it("shouldFail with EXCESSIVE_GOAL", async () => {
-    await reverts(
+    await expectRevert(
       deployDat(accounts, { initGoal: constants.MAX_UINT }, true, false),
       "EXCESSIVE_GOAL"
     );
   });
 
   it("shouldFail with INVALID_SLOPE_NUM", async () => {
-    await reverts(
+    await expectRevert(
       deployDat(accounts, { buySlopeNum: "0" }, true, false),
       "INVALID_SLOPE_NUM"
     );
   });
 
   it("shouldFail with INVALID_SLOPE_DEN", async () => {
-    await reverts(
+    await expectRevert(
       deployDat(accounts, { buySlopeDen: "0" }, true, false),
       "INVALID_SLOPE_DEN"
     );
   });
 
   it("shouldFail with EXCESSIVE_SLOPE_NUM", async () => {
-    await reverts(
+    await expectRevert(
       deployDat(accounts, { buySlopeNum: constants.MAX_UINT }, true, false),
       "EXCESSIVE_SLOPE_NUM"
     );
   });
 
   it("shouldFail with EXCESSIVE_SLOPE_DEN", async () => {
-    await reverts(
+    await expectRevert(
       deployDat(accounts, { buySlopeDen: constants.MAX_UINT }, true, false),
       "EXCESSIVE_SLOPE_DEN"
     );
   });
 
   it("shouldFail with INVALID_RESERVE", async () => {
-    await reverts(
+    await expectRevert(
       deployDat(
         accounts,
         { investmentReserveBasisPoints: "100000" },
@@ -80,14 +80,14 @@ contract("dat / initialize", (accounts) => {
   });
 
   it("shouldFail if recipient is missing", async () => {
-    await reverts(
+    await expectRevert(
       deployDat(accounts, { setupFee: "1" }, true, false),
       "MISSING_SETUP_FEE_RECIPIENT"
     );
   });
 
   it("shouldFail if fee is missing", async () => {
-    await reverts(
+    await expectRevert(
       deployDat(accounts, { setupFeeRecipient: accounts[3] }, true, false),
       "MISSING_SETUP_FEE"
     );
@@ -124,7 +124,7 @@ contract("dat / initialize", (accounts) => {
     });
 
     it("shouldFail if fee is greater than goal", async () => {
-      await reverts(
+      await expectRevert(
         deployDat(
           accounts,
           {

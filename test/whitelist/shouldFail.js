@@ -1,6 +1,6 @@
 const { deployDat } = require("../datHelpers");
 const { constants } = require("../helpers");
-const { reverts } = require("truffle-assertions");
+const { expectRevert } = require("@openzeppelin/test-helpers");
 
 contract("whitelist / shouldFail", (accounts) => {
   let contracts;
@@ -10,7 +10,7 @@ contract("whitelist / shouldFail", (accounts) => {
   });
 
   it("shouldFail to init again", async () => {
-    await reverts(
+    await expectRevert(
       contracts.whitelist.initialize(constants.ZERO_ADDRESS, {
         from: accounts[0],
       }),
@@ -19,7 +19,7 @@ contract("whitelist / shouldFail", (accounts) => {
   });
 
   it("shouldFail to approve by a non-operator", async () => {
-    await reverts(
+    await expectRevert(
       contracts.whitelist.approveNewUsers([accounts[1]], [1], {
         from: accounts[5],
       }),
@@ -28,7 +28,7 @@ contract("whitelist / shouldFail", (accounts) => {
   });
 
   it("shouldFail if called directly", async () => {
-    await reverts(
+    await expectRevert(
       contracts.whitelist.authorizeTransfer(accounts[1], accounts[1], 1, true),
       "CALL_VIA_CONTRACT_ONLY"
     );

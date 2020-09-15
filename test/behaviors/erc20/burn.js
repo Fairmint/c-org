@@ -83,7 +83,7 @@ module.exports = (tokenOwner) => {
         const describeBurn = function (description, delta) {
           let amount;
 
-          beforeEach(async () => {
+          beforeEach(async function () {
             amount = initialBalance.minus(delta);
           });
 

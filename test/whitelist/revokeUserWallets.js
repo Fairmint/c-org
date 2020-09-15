@@ -1,5 +1,5 @@
 const { deployDat } = require("../datHelpers");
-const { reverts } = require("truffle-assertions");
+const { expectRevert } = require("@openzeppelin/test-helpers");
 
 contract("whitelist / revokeUserWallets", (accounts) => {
   let contracts;
@@ -32,7 +32,7 @@ contract("whitelist / revokeUserWallets", (accounts) => {
   });
 
   it("cannot revoke an unknown wallet", async () => {
-    await reverts(
+    await expectRevert(
       contracts.whitelist.revokeUserWallets([accounts[9]], {
         from: operatorAccount,
       }),
@@ -48,7 +48,7 @@ contract("whitelist / revokeUserWallets", (accounts) => {
     });
 
     it("cannot buy", async () => {
-      await reverts(
+      await expectRevert(
         contracts.dat.buy(accounts[5], "100000000000000000000", 1, {
           value: "100000000000000000000",
           from: accounts[5],
@@ -66,7 +66,7 @@ contract("whitelist / revokeUserWallets", (accounts) => {
     });
 
     it("cannot buy", async () => {
-      await reverts(
+      await expectRevert(
         contracts.dat.buy(accounts[4], "100000000000000000000", 1, {
           value: "100000000000000000000",
           from: accounts[4],

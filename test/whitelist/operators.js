@@ -1,5 +1,5 @@
 const { deployDat } = require("../datHelpers");
-const truffleAssert = require("truffle-assertions");
+const { expectRevert } = require("@openzeppelin/test-helpers");
 
 contract("whitelist / operators", (accounts) => {
   let contracts;
@@ -28,14 +28,14 @@ contract("whitelist / operators", (accounts) => {
   });
 
   it("other accounts cannot add operators", async () => {
-    await truffleAssert.reverts(
+    await expectRevert(
       contracts.whitelist.addOperator(operatorAccount, { from: accounts[4] }),
       "Ownable: caller is not the owner"
     );
   });
 
   it("other accounts cannot remove operators", async () => {
-    await truffleAssert.reverts(
+    await expectRevert(
       contracts.whitelist.removeOperator(operatorAccount, {
         from: accounts[4],
       }),

@@ -1,6 +1,6 @@
 const BigNumber = require("bignumber.js");
 const { deployDat } = require("../datHelpers");
-const { reverts } = require("truffle-assertions");
+const { expectRevert } = require("@openzeppelin/test-helpers");
 const { time } = require("@openzeppelin/test-helpers");
 
 contract("whitelist / processLockups", (accounts) => {
@@ -37,7 +37,7 @@ contract("whitelist / processLockups", (accounts) => {
   });
 
   it("should fail to for a userId that does not exist", async () => {
-    await reverts(
+    await expectRevert(
       contracts.whitelist.processLockups(accounts[8], -1, {
         from: accounts[8],
       }),

@@ -1,5 +1,5 @@
 const { deployDat } = require("../datHelpers");
-const { reverts } = require("truffle-assertions");
+const { expectRevert } = require("@openzeppelin/test-helpers");
 
 contract("whitelist / updateJurisdictionsForUserIds", (accounts) => {
   let contracts;
@@ -18,7 +18,7 @@ contract("whitelist / updateJurisdictionsForUserIds", (accounts) => {
   });
 
   it("non-operators cannot updateJurisdictionsForUserIds", async () => {
-    await reverts(
+    await expectRevert(
       contracts.whitelist.updateJurisdictionsForUserIds([accounts[5]], [1], {
         from: accounts[9],
       }),
@@ -37,7 +37,7 @@ contract("whitelist / updateJurisdictionsForUserIds", (accounts) => {
   });
 
   it("shouldFail to update an unknown entry", async () => {
-    await reverts(
+    await expectRevert(
       contracts.whitelist.updateJurisdictionsForUserIds([accounts[6]], [1], {
         from: operatorAccount,
       }),
@@ -46,7 +46,7 @@ contract("whitelist / updateJurisdictionsForUserIds", (accounts) => {
   });
 
   it("shouldFail to update to an invalid jurisdiction", async () => {
-    await reverts(
+    await expectRevert(
       contracts.whitelist.updateJurisdictionsForUserIds([accounts[5]], [0], {
         from: operatorAccount,
       }),

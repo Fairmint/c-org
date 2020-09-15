@@ -1,6 +1,6 @@
 const BigNumber = require("bignumber.js");
 const { deployDat } = require("../datHelpers");
-const { reverts } = require("truffle-assertions");
+const { expectRevert } = require("@openzeppelin/test-helpers");
 const { time } = require("@openzeppelin/test-helpers");
 
 contract("whitelist / addLockups", (accounts) => {
@@ -22,7 +22,7 @@ contract("whitelist / addLockups", (accounts) => {
 
   it("non-operators cannot addLockup", async () => {
     const currentTime = new BigNumber(await time.latest());
-    await reverts(
+    await expectRevert(
       contracts.whitelist.addLockups(
         [trader],
         [currentTime.plus(1000).toFixed()],
@@ -49,7 +49,7 @@ contract("whitelist / addLockups", (accounts) => {
 
   it("cannot addLockup for an unknown user id", async () => {
     const currentTime = new BigNumber(await time.latest());
-    await reverts(
+    await expectRevert(
       contracts.whitelist.addLockups(
         [accounts[9]],
         [currentTime.plus(1000).toFixed()],

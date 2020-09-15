@@ -1,7 +1,7 @@
 const BigNumber = require("bignumber.js");
 const { deployDat } = require("../datHelpers");
 const { tokens } = require("hardlydifficult-eth");
-const { reverts } = require("truffle-assertions");
+const { expectRevert } = require("@openzeppelin/test-helpers");
 
 contract("dat / collectInvestment", (accounts) => {
   let contracts;
@@ -21,7 +21,7 @@ contract("dat / collectInvestment", (accounts) => {
     });
 
     it("Users cannot send ETH to an ERC-20 DAT", async () => {
-      await reverts(
+      await expectRevert(
         web3.eth.sendTransaction({
           to: contracts.dat.address,
           value: 1,

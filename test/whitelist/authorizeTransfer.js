@@ -1,6 +1,6 @@
 const BigNumber = require("bignumber.js");
 const { deployDat } = require("../datHelpers");
-const { reverts } = require("truffle-assertions");
+const { expectRevert } = require("@openzeppelin/test-helpers");
 const { time } = require("@openzeppelin/test-helpers");
 
 contract("whitelist / authorizeTransfer", (accounts) => {
@@ -29,7 +29,7 @@ contract("whitelist / authorizeTransfer", (accounts) => {
     await contracts.whitelist.revokeUserWallets([trader], {
       from: operatorAccount,
     });
-    await reverts(
+    await expectRevert(
       contracts.dat.transfer(accounts[1], 1, {
         from: trader,
       }),
@@ -55,7 +55,7 @@ contract("whitelist / authorizeTransfer", (accounts) => {
   });
 
   it("owner cannot call authorizeTransfer directly", async () => {
-    await reverts(
+    await expectRevert(
       contracts.whitelist.authorizeTransfer(
         accounts[0],
         accounts[0],
@@ -68,7 +68,7 @@ contract("whitelist / authorizeTransfer", (accounts) => {
   });
 
   it("operator cannot call authorizeTransfer directly", async () => {
-    await reverts(
+    await expectRevert(
       contracts.whitelist.authorizeTransfer(
         accounts[0],
         accounts[0],
@@ -93,7 +93,7 @@ contract("whitelist / authorizeTransfer", (accounts) => {
 
     it("cannot buy", async () => {
       const price = web3.utils.toWei("100", "ether");
-      await reverts(
+      await expectRevert(
         contracts.dat.buy(trader, price, 1, {
           from: trader,
           value: price,
@@ -115,7 +115,7 @@ contract("whitelist / authorizeTransfer", (accounts) => {
     });
 
     it("cannot transfer: flow", async () => {
-      await reverts(
+      await expectRevert(
         contracts.dat.transfer(accounts[1], 1, {
           from: trader,
         }),
@@ -124,7 +124,7 @@ contract("whitelist / authorizeTransfer", (accounts) => {
     });
 
     it("cannot sell", async () => {
-      await reverts(
+      await expectRevert(
         contracts.dat.sell(trader, "100000000", 1, {
           from: trader,
         }),
@@ -188,7 +188,7 @@ contract("whitelist / authorizeTransfer", (accounts) => {
     });
 
     it("cannot transfer: lockup", async () => {
-      await reverts(
+      await expectRevert(
         contracts.dat.transfer(accounts[1], 1, {
           from: trader,
         }),
@@ -208,7 +208,7 @@ contract("whitelist / authorizeTransfer", (accounts) => {
       });
 
       it("cannot transfer more than balance", async () => {
-        await reverts(
+        await expectRevert(
           contracts.dat.transfer(accounts[1], "1000000000000000000000000", {
             from: trader,
           }),
@@ -235,7 +235,7 @@ contract("whitelist / authorizeTransfer", (accounts) => {
           const balance = new BigNumber(
             await contracts.dat.balanceOf(trader)
           ).minus(100);
-          await reverts(
+          await expectRevert(
             contracts.dat.transfer(accounts[1], balance.toFixed(), {
               from: trader,
             }),

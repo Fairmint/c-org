@@ -1,6 +1,6 @@
 const BigNumber = require("bignumber.js");
 const { deployDat } = require("../datHelpers");
-const { reverts } = require("truffle-assertions");
+const { expectRevert } = require("@openzeppelin/test-helpers");
 const { time } = require("@openzeppelin/test-helpers");
 
 contract("whitelist / forceUnlockUpTo", (accounts) => {
@@ -30,7 +30,7 @@ contract("whitelist / forceUnlockUpTo", (accounts) => {
   });
 
   it("non-operator should fail to forceUnlockUpTo", async () => {
-    await reverts(
+    await expectRevert(
       contracts.whitelist.forceUnlockUpTo(trader, -1, {
         from: accounts[8],
       }),
@@ -39,7 +39,7 @@ contract("whitelist / forceUnlockUpTo", (accounts) => {
   });
 
   it("should fail to for a userId that does not exist", async () => {
-    await reverts(
+    await expectRevert(
       contracts.whitelist.forceUnlockUpTo(accounts[8], -1, {
         from: operatorAccount,
       }),
@@ -69,7 +69,7 @@ contract("whitelist / forceUnlockUpTo", (accounts) => {
     });
 
     it("should fail if the entries were already processed", async () => {
-      await reverts(
+      await expectRevert(
         contracts.whitelist.forceUnlockUpTo(trader, 1, {
           from: operatorAccount,
         }),

@@ -1,6 +1,6 @@
 const { deployDat } = require("../datHelpers");
 const { approveAll } = require("../helpers");
-const { reverts } = require("truffle-assertions");
+const { expectRevert } = require("@openzeppelin/test-helpers");
 const { constants } = require("hardlydifficult-eth");
 
 contract("initializers", (accounts) => {
@@ -19,7 +19,7 @@ contract("initializers", (accounts) => {
   });
 
   it("initialize may not be called again", async () => {
-    await reverts(
+    await expectRevert(
       contracts.dat.methods[
         "initialize(uint256,address,uint256,uint256,uint256,uint256,uint256,address,string,string)"
       ](
@@ -39,7 +39,7 @@ contract("initializers", (accounts) => {
   });
 
   it("initialize(string, string, uint) may not be called", async () => {
-    await reverts(
+    await expectRevert(
       contracts.dat.initialize("test", "test", 1),
       "Contract instance has already been initialized."
     );

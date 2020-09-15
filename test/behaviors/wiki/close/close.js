@@ -1,5 +1,4 @@
 const { constants } = require("../../../helpers");
-const { reverts } = require("truffle-assertions");
 const { expectRevert } = require("@openzeppelin/test-helpers");
 
 /**
@@ -18,7 +17,7 @@ module.exports = function (
     });
 
     it("close should fail", async function () {
-      await reverts(
+      await expectRevert(
         this.contract.close({
           from: await this.contract.beneficiary(),
         }),
