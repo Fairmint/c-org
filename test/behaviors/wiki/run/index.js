@@ -20,10 +20,6 @@ function allWithMinDuration(control, beneficiary, investors) {
   sell(beneficiary, investors);
 }
 
-function allWithHighReserve() {
-  closeWithHighReserve();
-}
-
 function allWith0GoalAndReserve(beneficiary, investors) {
   sellWith0GoalAndReserve(beneficiary, investors);
 }

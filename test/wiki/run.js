@@ -47,28 +47,6 @@ contract("wiki / run", (accounts) => {
     });
   });
 
-  describe("With highReserve", () => {
-    const initReserve = "1000000000000000000000";
-
-    beforeEach(async function () {
-      // Redeploy using an ERC-20
-      const token = await tokens.sai.deploy(web3, control);
-      contracts = await deployDat(accounts, {
-        currency: token.address,
-        initReserve,
-      });
-      await approveAll(contracts, accounts);
-      await token.mint(this.contract.address, constants.MAX_UINT, {
-        from: control,
-      });
-
-      this.contract = contracts.dat;
-      this.whitelist = contracts.whitelist;
-    });
-
-    behaviors.wiki.run.allWithHighReserve();
-  });
-
   describe("With 0 initGoal and 0 reserve", () => {
     beforeEach(async function () {
       contracts = await deployDat(accounts, {
