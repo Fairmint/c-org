@@ -61,6 +61,9 @@ contract("wiki / run", (accounts) => {
       await token.mint(this.contract.address, constants.MAX_UINT, {
         from: control,
       });
+
+      this.contract = contracts.dat;
+      this.whitelist = contracts.whitelist;
     });
 
     behaviors.wiki.run.allWithHighReserve(control, beneficiary, investors);
@@ -73,6 +76,9 @@ contract("wiki / run", (accounts) => {
         initReserve: "0",
       });
       await approveAll(contracts, accounts);
+
+      this.contract = contracts.dat;
+      this.whitelist = contracts.whitelist;
     });
 
     behaviors.wiki.run.allWith0GoalAndReserve(control, beneficiary, investors);
