@@ -13,7 +13,7 @@ function allWithoutSetupFee(control, beneficiary, investors, nonTokenHolder) {
 
 function allWithSetupFee(beneficiary, investors, setupFeeRecipient) {
   burn(investors[0]);
-  buyWithSetupFee(investors[0], setupFeeRecipient);
+  buyWithSetupFee(beneficiary, investors[0], setupFeeRecipient);
   close(beneficiary);
   sell(beneficiary, investors[0]);
 }

@@ -1,7 +1,7 @@
 const BigNumber = require("bignumber.js");
 const { constants } = require("../../../helpers");
 
-module.exports = function (investor, setupFeeRecipient) {
+module.exports = function (beneficiary, investor, setupFeeRecipient) {
   describe("Behavior / Wiki / Init / buyWithSetupFee", () => {
     const initGoal = "10000000000000000000000";
     const setupFee = "420000000";
@@ -154,8 +154,8 @@ module.exports = function (investor, setupFeeRecipient) {
         );
 
         const max = buySlope.times(initGoal).times(initGoal).dp(0);
-        await this.contract.buy(investor, max.toFixed(), 1, {
-          from: investor,
+        await this.contract.buy(beneficiary, max.toFixed(), 1, {
+          from: beneficiary,
           value: max.toFixed(),
         });
         beneficiaryBalanceBefore = new BigNumber(
