@@ -4,8 +4,6 @@ const { approveAll } = require("../helpers");
 const behaviors = require("../behaviors");
 const { default: BigNumber } = require("bignumber.js");
 const { time } = require("@openzeppelin/test-helpers");
-const constants = require("../helpers/constants");
-const tokens = require("hardlydifficult-eth/src/tokens");
 
 contract("wiki / run", (accounts) => {
   const initReserve = "1000000000000000000000";
@@ -50,8 +48,10 @@ contract("wiki / run", (accounts) => {
   describe("With 0 initGoal and 0 reserve", () => {
     beforeEach(async function () {
       contracts = await deployDat(accounts, {
-        initGoal: "0",
-        initReserve: "0",
+        initGoal: 0,
+        initReserve,
+        feeBasisPoints: "10",
+        beneficiary,
       });
       await approveAll(contracts, accounts);
 
