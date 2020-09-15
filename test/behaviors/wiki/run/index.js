@@ -30,7 +30,7 @@ function allWithHighReserve(control, beneficiary, investors) {
 function allWith0GoalAndReserve(control, beneficiary, investors) {
   burn(investors[0]);
   buy(investors[0]);
-  closeWithHighReserve();
+  close(control, investors[0]);
   sellWith0GoalAndReserve(beneficiary, investors);
 }
 
