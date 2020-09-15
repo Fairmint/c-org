@@ -66,7 +66,7 @@ contract("wiki / run", (accounts) => {
       this.whitelist = contracts.whitelist;
     });
 
-    behaviors.wiki.run.allWithHighReserve(control, beneficiary, investors);
+    behaviors.wiki.run.allWithHighReserve();
   });
 
   describe("With 0 initGoal and 0 reserve", () => {
@@ -81,6 +81,6 @@ contract("wiki / run", (accounts) => {
       this.whitelist = contracts.whitelist;
     });
 
-    behaviors.wiki.run.allWith0GoalAndReserve(control, beneficiary, investors);
+    behaviors.wiki.run.allWith0GoalAndReserve(beneficiary, investors);
   });
 });

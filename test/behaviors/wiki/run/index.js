@@ -20,17 +20,11 @@ function allWithMinDuration(control, beneficiary, investors) {
   sell(beneficiary, investors);
 }
 
-function allWithHighReserve(control, beneficiary, investors) {
-  burn(investors[0]);
-  buy(investors[0]);
+function allWithHighReserve() {
   closeWithHighReserve();
-  sell(beneficiary, investors);
 }
 
-function allWith0GoalAndReserve(control, beneficiary, investors) {
-  burn(investors[0]);
-  buy(investors[0]);
-  close(control, investors[0]);
+function allWith0GoalAndReserve(beneficiary, investors) {
   sellWith0GoalAndReserve(beneficiary, investors);
 }
 
