@@ -12,7 +12,7 @@ function all(control, beneficiary, investors) {
   sell(beneficiary, investors);
 }
 
-function allWithMinDuration(control, beneficiary, investors) {
+function allWithMinDuration(beneficiary, investors) {
   burn(investors[0]);
   buy(investors[0]);
   closeWithMinDuration();
