@@ -3,7 +3,6 @@ const { approveAll } = require("../helpers");
 
 const behaviors = require("../behaviors");
 const { default: BigNumber } = require("bignumber.js");
-const { time } = require("@openzeppelin/test-helpers");
 const { tokens } = require("hardlydifficult-eth");
 const constants = require("../helpers/constants");
 
@@ -14,14 +13,18 @@ contract("wiki / run", (accounts) => {
   let contracts;
 
   beforeEach(async function () {
-    contracts = await deployDat(accounts, {
-      initGoal: "0",
-      initReserve,
-      control,
-      beneficiary,
-      feeCollector,
-      feeBasisPoints: "10",
-    });
+    contracts = await deployDat(
+      accounts,
+      {
+        initGoal: "0",
+        initReserve,
+        control,
+        beneficiary,
+        feeCollector,
+        feeBasisPoints: "10",
+      },
+      false
+    );
     await approveAll(contracts, accounts);
 
     for (let i = 0; i < investors.length; i++) {
@@ -39,9 +42,8 @@ contract("wiki / run", (accounts) => {
 
   describe("With minDuration", () => {
     beforeEach(async function () {
-      const currentTime = new BigNumber(await time.latest());
       await updateDatConfig(contracts, {
-        minDuration: currentTime.plus(10).toFixed(),
+        minDuration: "10",
       });
     });
 
