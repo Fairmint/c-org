@@ -32,7 +32,11 @@ module.exports = function (control, investor) {
         buybackReserveBefore = new BigNumber(
           await this.contract.buybackReserve()
         );
-        exitFee = new BigNumber(await this.contract.estimateExitFee(0));
+        if (this.contract.estimateExitFee) {
+          exitFee = new BigNumber(await this.contract.estimateExitFee(0));
+        } else {
+          exitFee = new BigNumber("0");
+        }
         const tx = await this.contract.close({
           from: await this.contract.beneficiary(),
           value: exitFee.toFixed(),
@@ -67,7 +71,12 @@ module.exports = function (control, investor) {
     });
 
     it("should fail if send less than exitFee.", async function () {
-      const exitFee = new BigNumber(await this.contract.estimateExitFee(0));
+      let exitFee;
+      if (this.contract.estimateExitFee) {
+        exitFee = new BigNumber(await this.contract.estimateExitFee(0));
+      } else {
+        exitFee = new BigNumber("0");
+      }
       await expectRevert(
         this.contract.close({
           from: await this.contract.beneficiary(),
@@ -86,7 +95,11 @@ module.exports = function (control, investor) {
         beneficiaryBalanceBefore = new BigNumber(
           await web3.eth.getBalance(await this.contract.beneficiary())
         );
-        exitFee = new BigNumber(await this.contract.estimateExitFee(0));
+        if (this.contract.estimateExitFee) {
+          exitFee = new BigNumber(await this.contract.estimateExitFee(0));
+        } else {
+          exitFee = new BigNumber("0");
+        }
         const tx = await this.contract.close({
           from: await this.contract.beneficiary(),
           value: exitFee.plus(web3.utils.toWei("1", "ether")).toFixed(),

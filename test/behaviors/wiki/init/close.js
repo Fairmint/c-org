@@ -8,8 +8,10 @@ module.exports = function (beneficiary) {
     });
 
     it("exitFee estimate is 0", async function () {
-      const fee = await this.contract.estimateExitFee(0);
-      assert.equal(fee, 0);
+      if (this.contract.estimateExitFee) {
+        const fee = await this.contract.estimateExitFee(0);
+        assert.equal(fee, 0);
+      }
     });
 
     describe("on close", function () {
