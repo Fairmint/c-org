@@ -4,6 +4,8 @@ const { approveAll } = require("../helpers");
 const behaviors = require("../behaviors");
 const { default: BigNumber } = require("bignumber.js");
 const { time } = require("@openzeppelin/test-helpers");
+const { tokens } = require("hardlydifficult-eth");
+const constants = require("../helpers/constants");
 
 contract("wiki / run", (accounts) => {
   const initReserve = "1000000000000000000000";
@@ -61,5 +63,22 @@ contract("wiki / run", (accounts) => {
     });
 
     behaviors.wiki.run.allWith0GoalAndReserve(beneficiary, investors);
+  });
+
+  describe("when reserve is high", () => {
+    beforeEach(async () => {
+      // Redeploy using an ERC-20
+      const token = await tokens.sai.deploy(web3, accounts[0]);
+      contracts = await deployDat(accounts, { currency: token.address });
+      await approveAll(contracts, accounts);
+      await token.mint(contracts.dat.address, constants.MAX_UINT, {
+        from: accounts[0],
+      });
+    });
+
+    it("exitFee is 0", async () => {
+      const exitFee = new BigNumber(await contracts.dat.estimateExitFee(0));
+      assert.equal(exitFee, 0);
+    });
   });
 });
