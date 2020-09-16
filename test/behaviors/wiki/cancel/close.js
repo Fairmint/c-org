@@ -12,7 +12,9 @@ module.exports = function (beneficiary) {
       await expectRevert(
         this.contract.close({
           from: await beneficiary,
-          value: "10000000000000000000000",
+          value: this.contract.estimateExitFee
+            ? "10000000000000000000000"
+            : "0",
         }),
         "INVALID_STATE"
       );

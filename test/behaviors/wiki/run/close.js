@@ -13,7 +13,9 @@ module.exports = function (control, investor) {
       await expectRevert(
         this.contract.close({
           from: investor,
-          value: "100000000000000000000000",
+          value: this.contract.estimateExitFee
+            ? "100000000000000000000000"
+            : "0",
         }),
         "BENEFICIARY_ONLY"
       );
@@ -71,21 +73,18 @@ module.exports = function (control, investor) {
     });
 
     it("should fail if send less than exitFee.", async function () {
-      let exitFee;
       if (this.contract.estimateExitFee) {
-        exitFee = new BigNumber(await this.contract.estimateExitFee(0)).minus(
-          1
+        const exitFee = new BigNumber(
+          await this.contract.estimateExitFee(0)
+        ).minus(1);
+        await expectRevert(
+          this.contract.close({
+            from: await this.contract.beneficiary(),
+            value: exitFee.toFixed(),
+          }),
+          "SafeMath: subtraction overflow"
         );
-      } else {
-        exitFee = new BigNumber("0");
       }
-      await expectRevert(
-        this.contract.close({
-          from: await this.contract.beneficiary(),
-          value: exitFee.toFixed(),
-        }),
-        "SafeMath: subtraction overflow"
-      );
     });
 
     describe("when sending too much", function () {
@@ -94,29 +93,29 @@ module.exports = function (control, investor) {
       let gasCost;
 
       beforeEach(async function () {
-        beneficiaryBalanceBefore = new BigNumber(
-          await web3.eth.getBalance(await this.contract.beneficiary())
-        );
         if (this.contract.estimateExitFee) {
+          beneficiaryBalanceBefore = new BigNumber(
+            await web3.eth.getBalance(await this.contract.beneficiary())
+          );
           exitFee = new BigNumber(await this.contract.estimateExitFee(0));
-        } else {
-          exitFee = new BigNumber("0");
+          const tx = await this.contract.close({
+            from: await this.contract.beneficiary(),
+            value: exitFee.plus(web3.utils.toWei("1", "ether")).toFixed(),
+          });
+          gasCost = await getGasCost(tx);
         }
-        const tx = await this.contract.close({
-          from: await this.contract.beneficiary(),
-          value: exitFee.plus(web3.utils.toWei("1", "ether")).toFixed(),
-        });
-        gasCost = await getGasCost(tx);
       });
 
       it("the remainder was refunded", async function () {
-        const balance = new BigNumber(
-          await web3.eth.getBalance(await this.contract.beneficiary())
-        );
-        assert.equal(
-          balance.toFixed(),
-          beneficiaryBalanceBefore.minus(exitFee).minus(gasCost).toFixed()
-        );
+        if (this.contract.estimateExitFee) {
+          const balance = new BigNumber(
+            await web3.eth.getBalance(await this.contract.beneficiary())
+          );
+          assert.equal(
+            balance.toFixed(),
+            beneficiaryBalanceBefore.minus(exitFee).minus(gasCost).toFixed()
+          );
+        }
       });
     });
   });
