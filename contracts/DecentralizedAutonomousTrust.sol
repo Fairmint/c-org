@@ -32,6 +32,44 @@ contract DecentralizedAutonomousTrust is ContinuousOffering {
   function revenueCommitmentBasisPoints() public view returns (uint) {
     return __revenueCommitmentBasisPoints;
   }
+  
+  /// @notice The investment reserve of the c-org. Defines the percentage of the value invested that is
+  /// automatically funneled and held into the buyback_reserve expressed in basis points.
+  /// Internal since this is n/a to all derivative contracts.
+  function investmentReserveBasisPoints() public view returns (uint) {
+    return __investmentReserveBasisPoints;
+  }
+
+  function initialize(
+    uint _initReserve,
+    address _currencyAddress,
+    uint _initGoal,
+    uint _buySlopeNum,
+    uint _buySlopeDen,
+    uint _investmentReserveBasisPoints,
+    uint _setupFee,
+    address payable _setupFeeRecipient,
+    string memory _name,
+    string memory _symbol
+  ) public
+  {
+    // _initialize will enforce this is only called once
+    super._initialize(
+      _initReserve,
+      _currencyAddress,
+      _initGoal,
+      _buySlopeNum,
+      _buySlopeDen,
+      _setupFee,
+      _setupFeeRecipient,
+      _name,
+      _symbol
+    );
+
+    // 100% or less
+    require(_investmentReserveBasisPoints <= BASIS_POINTS_DEN, "INVALID_RESERVE");
+    __investmentReserveBasisPoints = _investmentReserveBasisPoints;
+  }
 
   /// Close
 
@@ -156,5 +194,25 @@ contract DecentralizedAutonomousTrust is ContinuousOffering {
       _minInvestment,
       _minDuration
     );
+  }
+
+  /// @dev Distributes _value currency between the buybackReserve, beneficiary, and feeCollector.
+  function _distributeInvestment(
+    uint _value
+  ) internal
+  {
+    // Rounding favors buybackReserve, then beneficiary, and feeCollector is last priority.
+
+    // Math: if investment value is < (2^256 - 1) / 10000 this will never overflow.
+    // Except maybe with a huge single investment, but they can try again with multiple smaller investments.
+    uint reserve = __investmentReserveBasisPoints.mul(_value);
+    reserve /= BASIS_POINTS_DEN;
+    reserve = _value.sub(reserve);
+    uint fee = reserve.mul(feeBasisPoints);
+    fee /= BASIS_POINTS_DEN;
+
+    // Math: since feeBasisPoints is <= BASIS_POINTS_DEN, this will never underflow.
+    _transferCurrency(beneficiary, reserve - fee);
+    _transferCurrency(feeCollector, fee);
   }
 }

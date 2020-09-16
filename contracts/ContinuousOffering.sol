@@ -136,7 +136,8 @@ contract ContinuousOffering
 
   /// @notice The investment reserve of the c-org. Defines the percentage of the value invested that is
   /// automatically funneled and held into the buyback_reserve expressed in basis points.
-  uint public investmentReserveBasisPoints;
+  /// Internal since this is n/a to all derivative contracts.
+  uint internal __investmentReserveBasisPoints;
 
   /// @dev unused slot which remains to ensure compatible upgrades
   uint private __openUntilAtLeast;
@@ -337,18 +338,17 @@ contract ContinuousOffering
   /// @notice Called once after deploy to set the initial configuration.
   /// None of the values provided here may change once initially set.
   /// @dev using the init pattern in order to support zos upgrades
-  function initialize(
+  function _initialize(
     uint _initReserve,
     address _currencyAddress,
     uint _initGoal,
     uint _buySlopeNum,
     uint _buySlopeDen,
-    uint _investmentReserveBasisPoints,
     uint _setupFee,
     address payable _setupFeeRecipient,
     string memory _name,
     string memory _symbol
-  ) public
+  ) internal
   {
     // The ERC-20 implementation will confirm initialize is only run once
     ERC20Detailed.initialize(_name, _symbol, 18);
@@ -373,9 +373,6 @@ contract ContinuousOffering
     require(_buySlopeDen < MAX_BEFORE_SQUARE, "EXCESSIVE_SLOPE_DEN");
     buySlopeNum = _buySlopeNum;
     buySlopeDen = _buySlopeDen;
-    // 100% or less
-    require(_investmentReserveBasisPoints <= BASIS_POINTS_DEN, "INVALID_RESERVE");
-    investmentReserveBasisPoints = _investmentReserveBasisPoints;
 
     // Setup Fee
     require(_setupFee == 0 || _setupFeeRecipient != address(0), "MISSING_SETUP_FEE_RECIPIENT");
@@ -522,22 +519,7 @@ contract ContinuousOffering
   /// @dev Distributes _value currency between the buybackReserve, beneficiary, and feeCollector.
   function _distributeInvestment(
     uint _value
-  ) internal
-  {
-    // Rounding favors buybackReserve, then beneficiary, and feeCollector is last priority.
-
-    // Math: if investment value is < (2^256 - 1) / 10000 this will never overflow.
-    // Except maybe with a huge single investment, but they can try again with multiple smaller investments.
-    uint reserve = investmentReserveBasisPoints.mul(_value);
-    reserve /= BASIS_POINTS_DEN;
-    reserve = _value.sub(reserve);
-    uint fee = reserve.mul(feeBasisPoints);
-    fee /= BASIS_POINTS_DEN;
-
-    // Math: since feeBasisPoints is <= BASIS_POINTS_DEN, this will never underflow.
-    _transferCurrency(beneficiary, reserve - fee);
-    _transferCurrency(feeCollector, fee);
-  }
+  ) internal;
 
   /// @notice Calculate how many FAIR tokens you would buy with the given amount of currency if `buy` was called now.
   /// @param _currencyValue How much currency to spend in order to buy FAIR.
