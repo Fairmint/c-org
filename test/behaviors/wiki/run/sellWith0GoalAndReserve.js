@@ -1,5 +1,3 @@
-const BigNumber = require("bignumber.js");
-const { getGasCost } = require("../../../helpers");
 const { expectRevert } = require("@openzeppelin/test-helpers");
 
 module.exports = function (beneficiary, investors) {
