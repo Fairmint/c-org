@@ -41,8 +41,9 @@ contract("wiki / run", (accounts) => {
       await updateDatConfig(contracts, {
         minDuration: currentTime.plus(10).toFixed(),
       });
-      behaviors.wiki.run.allWithMinDuration(control, beneficiary, investors);
     });
+
+    behaviors.wiki.run.allWithMinDuration(beneficiary, investors);
   });
 
   describe("With 0 initGoal and 0 reserve", () => {
