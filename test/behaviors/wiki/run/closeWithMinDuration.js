@@ -7,7 +7,7 @@ module.exports = function () {
         await expectRevert(
           this.contract.close({
             from: await this.contract.beneficiary(),
-            value: "10000000000000000000000",
+            value: "1000000000000000000000000",
           }),
           "TOO_EARLY"
         );
@@ -21,7 +21,7 @@ module.exports = function () {
         it("then close works again", async function () {
           await this.contract.close({
             from: await this.contract.beneficiary(),
-            value: "10000000000000000000000",
+            value: "1000000000000000000000000",
           });
         });
       });
