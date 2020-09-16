@@ -73,14 +73,16 @@ module.exports = function (control, investor) {
     it("should fail if send less than exitFee.", async function () {
       let exitFee;
       if (this.contract.estimateExitFee) {
-        exitFee = new BigNumber(await this.contract.estimateExitFee(0));
+        exitFee = new BigNumber(await this.contract.estimateExitFee(0)).minus(
+          1
+        );
       } else {
         exitFee = new BigNumber("0");
       }
       await expectRevert(
         this.contract.close({
           from: await this.contract.beneficiary(),
-          value: exitFee.minus(1).toFixed(),
+          value: exitFee.toFixed(),
         }),
         "SafeMath: subtraction overflow"
       );
