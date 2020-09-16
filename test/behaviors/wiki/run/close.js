@@ -13,7 +13,9 @@ module.exports = function (control, investor) {
       await expectRevert(
         this.contract.close({
           from: investor,
-          value: "100000000000000000000000",
+          value: this.contract.estimateExitFee
+            ? "100000000000000000000000"
+            : "0",
         }),
         "BENEFICIARY_ONLY"
       );
