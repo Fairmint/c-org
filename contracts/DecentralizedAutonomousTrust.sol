@@ -32,7 +32,7 @@ contract DecentralizedAutonomousTrust is ContinuousOffering {
   function revenueCommitmentBasisPoints() public view returns (uint) {
     return __revenueCommitmentBasisPoints;
   }
-  
+
   /// @notice The investment reserve of the c-org. Defines the percentage of the value invested that is
   /// automatically funneled and held into the buyback_reserve expressed in basis points.
   /// Internal since this is n/a to all derivative contracts.
