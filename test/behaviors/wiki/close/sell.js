@@ -105,15 +105,11 @@ module.exports = function (beneficiary, investor, areTransactionsFrozen) {
       });
     } else {
       it("shouldFail to sell", async function () {
-        const x = new BigNumber(
-          await this.contract.estimateSellValue(sellAmount)
-        );
-
         await expectRevert(
-          this.contract.sell(investor, sellAmount, x.toFixed(), {
+          this.contract.sell(investor, sellAmount, "1", {
             from: investor,
           }),
-          "INVALID_STATE"
+          "PRICE_SLIPPAGE"
         );
       });
     }
