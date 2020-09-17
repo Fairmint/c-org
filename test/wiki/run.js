@@ -38,7 +38,7 @@ contract("wiki / run", (accounts) => {
     this.whitelist = contracts.whitelist;
   });
 
-  behaviors.wiki.run.all(control, beneficiary, investors);
+  behaviors.wiki.run.all(control, beneficiary, investors, false);
 
   describe("With minDuration", () => {
     beforeEach(async function () {
@@ -47,7 +47,7 @@ contract("wiki / run", (accounts) => {
       });
     });
 
-    behaviors.wiki.run.allWithMinDuration(beneficiary, investors);
+    behaviors.wiki.run.allWithMinDuration(beneficiary, investors, false);
   });
 
   describe("With 0 initGoal and 0 reserve", () => {
