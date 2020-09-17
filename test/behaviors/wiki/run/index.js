@@ -5,18 +5,18 @@ const closeWithMinDuration = require("./closeWithMinDuration");
 const sell = require("./sell");
 const sellWith0GoalAndReserve = require("./sellWith0GoalAndReserve");
 
-function all(control, beneficiary, investors) {
+function all(control, beneficiary, investors, areTransactionsFrozen) {
   burn(investors[0]);
   buy(investors[0]);
   close(control, investors[0]);
-  sell(beneficiary, investors);
+  sell(beneficiary, investors, areTransactionsFrozen);
 }
 
-function allWithMinDuration(beneficiary, investors) {
+function allWithMinDuration(beneficiary, investors, areTransactionsFrozen) {
   burn(investors[0]);
   buy(investors[0]);
   closeWithMinDuration();
-  sell(beneficiary, investors);
+  sell(beneficiary, investors, areTransactionsFrozen);
 }
 
 function allWith0GoalAndReserve(beneficiary, investors) {
