@@ -50,6 +50,18 @@ jobs:
           command: npm run coverage
           no_output_timeout: 120m
 
+  csv:
+    context: docker-hub-credentials
+    docker:
+      - image: circleci/node:10
+    working_directory: ~/repo
+    steps:
+      - attach_workspace:
+          at: ~/repo
+      - run:
+          command: npm run csvTests
+          no_output_timeout: 120m
+
   publishABI:
     context: docker-hub-credentials
     docker:
@@ -90,6 +102,9 @@ workflows:
             tags:
               only: /^v.*/
       - test:
+          requires:
+            - build
+      - csv:
           requires:
             - build
       - coverage:

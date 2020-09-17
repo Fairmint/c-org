@@ -1,8 +1,8 @@
 const Papa = require("papaparse");
 const fs = require("fs");
 const BigNumber = require("bignumber.js");
-const { deployDat } = require("../datHelpers");
-const { approveAll, constants, getGasCost } = require("../helpers");
+const { deployDat } = require("../test/datHelpers");
+const { approveAll, constants, getGasCost } = require("../test/helpers");
 const sheets = require("./test-data/script.json");
 
 const { tokens } = require("hardlydifficult-eth");
