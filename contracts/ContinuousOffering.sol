@@ -517,9 +517,7 @@ contract ContinuousOffering
   // Buy
 
   /// @dev Distributes _value currency between the buybackReserve, beneficiary, and feeCollector.
-  function _distributeInvestment(
-    uint _value
-  ) internal;
+  function _distributeInvestment(uint _value) internal;
 
   /// @notice Calculate how many FAIR tokens you would buy with the given amount of currency if `buy` was called now.
   /// @param _currencyValue How much currency to spend in order to buy FAIR.
