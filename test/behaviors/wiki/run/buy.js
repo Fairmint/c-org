@@ -182,9 +182,14 @@ module.exports = function (investor) {
       let buybackReserveBefore, beneficiaryBefore, feeCollectorBefore;
 
       beforeEach(async function () {
-        investmentReserve = new BigNumber(
-          await this.contract.investmentReserveBasisPoints()
-        ).div(constants.BASIS_POINTS_DEN);
+        if (this.contract.investmentReserveBasisPoints) {
+          investmentReserve = new BigNumber(
+            await this.contract.investmentReserveBasisPoints()
+          ).div(constants.BASIS_POINTS_DEN);
+        } else {
+          investmentReserve = new BigNumber("0");
+        }
+
         fee = new BigNumber(await this.contract.feeBasisPoints()).div(
           constants.BASIS_POINTS_DEN
         );
