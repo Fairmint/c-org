@@ -18,6 +18,7 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole {
   uint8 private constant STATUS_ERROR_JURISDICTION_FLOW = 1;
   uint8 private constant STATUS_ERROR_LOCKUP = 2;
   uint8 private constant STATUS_ERROR_USER_UNKNOWN = 3;
+  uint8 private constant STATUS_ERROR_JURISDICTION_HALT = 4;
 
   event ConfigWhitelist(
     uint _startDate,
@@ -140,10 +141,6 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole {
    */
   mapping(address => mapping(uint => Lockup)) internal userIdLockups;
 
- 
-  // error code to be returnd on detectTransferRestriction
-  // returned when from/to jurisdictionId is in halted state
-  uint8 private constant STATUS_ERROR_JURISDICTION_HALT = 4;
   /**
    * @notice Maps Jurisdiction Id to it's halt due
    */
