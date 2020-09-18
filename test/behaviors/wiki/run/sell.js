@@ -33,7 +33,7 @@ module.exports = function (beneficiary, investors, areTransactionsFrozen) {
       );
     });
 
-    if (areTransactionsFrozen) {
+    if (!areTransactionsFrozen) {
       describe("On a successful sell", function () {
         let investorFairBalanceBefore;
         let investorCurrencyBalanceBefore;
