@@ -220,7 +220,6 @@ module.exports = function (investor) {
           buybackReserve.toFixed(),
           buybackReserveBefore.plus(delta).toFixed()
         );
-        assert(delta.gt(0));
       });
 
       it("(1-investment_reserve)*amount*(1-fee) is being transfered to beneficiary", async function () {
