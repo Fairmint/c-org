@@ -57,6 +57,8 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole {
     uint _tokensUnlocked,
     address indexed _operator
   );
+  event Halt(uint indexed _jurisdictionId, uint _until);
+  event Resume(uint indexed _jurisdictionId);
 
   /**
    * @notice the address of the contract this whitelist manages.
@@ -137,6 +139,15 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole {
    * until older lockup entries from that user have expired.
    */
   mapping(address => mapping(uint => Lockup)) internal userIdLockups;
+
+ 
+  // error code to be returnd on detectTransferRestriction
+  // returned when from/to jurisdictionId is in halted state
+  uint8 private constant STATUS_ERROR_JURISDICTION_HALT = 4;
+  /**
+   * @notice Maps Jurisdiction Id to it's halt due
+   */
+  mapping(uint => uint) public jurisdictionHaltsUntil;
 
   /**
    * @notice checks for transfer restrictions between jurisdictions.
@@ -235,6 +246,9 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole {
       uint fromJurisdictionId = authorizedUserIdInfo[fromUserId]
         .jurisdictionId;
       uint toJurisdictionId = authorizedUserIdInfo[toUserId].jurisdictionId;
+      if (_isJurisdictionHalted(fromJurisdictionId) || _isJurisdictionHalted(toJurisdictionId)){
+        return STATUS_ERROR_JURISDICTION_HALT;
+      }
       if (jurisdictionFlows[fromJurisdictionId][toJurisdictionId] == 0) {
         return STATUS_ERROR_JURISDICTION_FLOW;
       }
@@ -542,12 +556,55 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole {
     }
   }
 
+  
+  function _isJurisdictionHalted(uint _jurisdictionId) internal view returns(bool){
+    uint until = jurisdictionHaltsUntil[_jurisdictionId];
+    return until != 0 && until > now;
+  }
+
+  /**
+   * @notice halts jurisdictions of id `_jurisdictionIds` for `_duration` seconds
+   * @dev only owner can call this function
+   * @param _jurisdictionIds ids of the jurisdictions to halt
+   * @param _expirationTimestamps due when halt ends
+   **/
+  function halt(uint[] calldata _jurisdictionIds, uint[] calldata _expirationTimestamps) external onlyOwner {
+    uint length = _jurisdictionIds.length;
+    for(uint i = 0; i<length; i++){
+      _halt(_jurisdictionIds[i], _expirationTimestamps[i]);
+    }
+  }
+
+  function _halt(uint _jurisdictionId, uint _until) internal {
+    require(_until > now, "HALT_DUE_SHOULD_BE_FUTURE");
+    jurisdictionHaltsUntil[_jurisdictionId] = _until;
+    emit Halt(_jurisdictionId, _until);
+  }
+
+  /**
+   * @notice resume halted jurisdiction
+   * @dev only owner can call this function
+   * @param _jurisdictionIds list of jurisdiction ids to resume
+   **/
+  function resume(uint[] calldata _jurisdictionIds) external onlyOwner{
+    uint length = _jurisdictionIds.length;
+    for(uint i = 0; i < length; i++){
+      _resume(_jurisdictionIds[i]);
+    }
+  }
+
+  function _resume(uint _jurisdictionId) internal {
+    require(jurisdictionHaltsUntil[_jurisdictionId] != 0, "ATTEMPT_TO_RESUME_NONE_HALTED_JURISDICATION");
+    jurisdictionHaltsUntil[_jurisdictionId] = 0;
+    emit Resume(_jurisdictionId);
+  }
+
   /**
    * @notice Called by the callingContract before a transfer occurs.
    * @dev This call will revert when the transfer is not authorized.
    * This is a mutable call to allow additional data to be recorded,
    * such as when the user aquired their tokens.
-   */
+   **/
   function authorizeTransfer(
     address _from,
     address _to,
@@ -574,9 +631,11 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole {
     // A single user can move funds between wallets they control without restriction
     if (fromUserId != toUserId) {
       uint fromJurisdictionId = authorizedUserIdInfo[fromUserId]
-        .jurisdictionId;
+      .jurisdictionId;
       uint toJurisdictionId = authorizedUserIdInfo[toUserId].jurisdictionId;
 
+      require(!_isJurisdictionHalted(fromJurisdictionId), "FROM_JURISDICTION_HALTED");
+      require(!_isJurisdictionHalted(toJurisdictionId), "TO_JURISDICTION_HALTED");
 
       uint lockupLength = jurisdictionFlows[fromJurisdictionId][toJurisdictionId];
       require(lockupLength > 0, "DENIED: JURISDICTION_FLOW");
