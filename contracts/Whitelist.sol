@@ -553,7 +553,6 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole {
     }
   }
 
-  
   function _isJurisdictionHalted(uint _jurisdictionId) internal view returns(bool){
     uint until = jurisdictionHaltsUntil[_jurisdictionId];
     return until != 0 && until > now;
