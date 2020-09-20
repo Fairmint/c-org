@@ -116,6 +116,8 @@ contract("whitelist / halt", (accounts) => {
         100
       );
       assert.equal(error_code, 4);
+      const message = await contracts.whitelist.messageForTransferRestriction(error_code);
+      assert.equal(message, "DENIED: JURISDICTION_HALT");
     });
 
     it("shouldFail to transfer when reciever's jurisdiction is halted", async () => {
@@ -129,6 +131,8 @@ contract("whitelist / halt", (accounts) => {
         100
       );
       assert.equal(error_code, 4);
+      const message = await contracts.whitelist.messageForTransferRestriction(error_code);
+      assert.equal(message, "DENIED: JURISDICTION_HALT");
     });
 
     it("shouldFail to buy when buyer's jurisdiction is halted", async () => {
@@ -146,6 +150,8 @@ contract("whitelist / halt", (accounts) => {
         100
       );
       assert.equal(error_code, 4);
+      const message = await contracts.whitelist.messageForTransferRestriction(error_code);
+      assert.equal(message, "DENIED: JURISDICTION_HALT");
     });
 
     it("shouldFail to sell when seller's jurisdiction is halted", async () => {
@@ -159,6 +165,8 @@ contract("whitelist / halt", (accounts) => {
         100
       );
       assert.equal(error_code, 4);
+      const message = await contracts.whitelist.messageForTransferRestriction(error_code);
+      assert.equal(message, "DENIED: JURISDICTION_HALT");
     });
 
     describe("when halt ended", () => {
