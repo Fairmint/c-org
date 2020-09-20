@@ -271,6 +271,9 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole {
     if (_restrictionCode == STATUS_ERROR_USER_UNKNOWN) {
       return "DENIED: USER_UNKNOWN";
     }
+    if (_restrictionCode == STATUS_ERROR_JURISDICTION_HALT){
+      return "DENIED: JURISDICTION_HALT";
+    }
     return "DENIED: UNKNOWN_ERROR";
   }
 
