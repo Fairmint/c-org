@@ -43,4 +43,16 @@ interface IWhitelist {
     uint _value,
     bool _isSell
   ) external;
+
+  function activateWallet(
+    address _wallet
+  ) external;
+
+  function deactivateWallet(
+    address _wallet
+  ) external;
+
+  function walletActivated(
+    address _wallet
+  ) external returns(bool);
 }

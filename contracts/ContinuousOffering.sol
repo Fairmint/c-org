@@ -197,10 +197,23 @@ contract ContinuousOffering
   {
     if(address(whitelist) != address(0))
     {
+      if(!whitelist.walletActivated(_from)){
+        //assume wallet is not migrated
+        whitelist.activateWallet(_from);
+      }
+      if(!whitelist.walletActivated(_to)){
+        whitelist.activateWallet(_to);
+      }
       // This is not set for the minting of initialReserve
       whitelist.authorizeTransfer(_from, _to, _value, _isSell);
     }
     _;
+    if(balanceOf(_from) == 0){
+      whitelist.deactivateWallet(_from);
+    }
+    if(balanceOf(_to) == 0){
+      whitelist.deactivateWallet(_to);
+    }
   }
 
   /**
