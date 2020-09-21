@@ -40,6 +40,12 @@ contract DecentralizedAutonomousTrust is ContinuousOffering {
     return __investmentReserveBasisPoints;
   }
 
+  /// @notice Initialized at `0` and updated when the contract switches from `init` state to `run` state
+  /// with the current timestamp.
+  function runStartedOn() public view returns (uint) {
+    return __startedOn;
+  }
+
   function initialize(
     uint _initReserve,
     address _currencyAddress,
@@ -65,6 +71,20 @@ contract DecentralizedAutonomousTrust is ContinuousOffering {
       _name,
       _symbol
     );
+
+    // Set initGoal, which in turn defines the initial state
+    if(_initGoal == 0)
+    {
+      emit StateChange(state, STATE_RUN);
+      state = STATE_RUN;
+      __startedOn = block.timestamp;
+    }
+    else
+    {
+      // Math: If this value got too large, the DAT would overflow on sell
+      require(_initGoal < MAX_SUPPLY, "EXCESSIVE_GOAL");
+      initGoal = _initGoal;
+    }
 
     // 100% or less
     require(_investmentReserveBasisPoints <= BASIS_POINTS_DEN, "INVALID_RESERVE");
@@ -194,6 +214,21 @@ contract DecentralizedAutonomousTrust is ContinuousOffering {
       _minInvestment,
       _minDuration
     );
+  }
+  
+  /// @notice A temporary function to set `runStartedOn`, to be used by contracts which were
+  /// already deployed before this feature was introduced.
+  /// @dev This function will be removed once known users have called the function.
+  function initializeRunStartedOn(
+    uint _runStartedOn
+  ) external
+  {
+    require(msg.sender == control, "CONTROL_ONLY");
+    require(state == STATE_RUN, "ONLY_CALL_IN_RUN");
+    require(__startedOn == 0, "ONLY_CALL_IF_NOT_AUTO_SET");
+    require(_runStartedOn <= block.timestamp, "DATE_MUST_BE_IN_PAST");
+
+    __startedOn = _runStartedOn;
   }
 
   /// @dev Distributes _value currency between the buybackReserve, beneficiary, and feeCollector.
