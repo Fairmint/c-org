@@ -116,7 +116,9 @@ contract("whitelist / halt", (accounts) => {
         100
       );
       assert.equal(error_code, 4);
-      const message = await contracts.whitelist.messageForTransferRestriction(error_code);
+      const message = await contracts.whitelist.messageForTransferRestriction(
+        error_code
+      );
       assert.equal(message, "DENIED: JURISDICTION_HALT");
     });
 
@@ -131,7 +133,9 @@ contract("whitelist / halt", (accounts) => {
         100
       );
       assert.equal(error_code, 4);
-      const message = await contracts.whitelist.messageForTransferRestriction(error_code);
+      const message = await contracts.whitelist.messageForTransferRestriction(
+        error_code
+      );
       assert.equal(message, "DENIED: JURISDICTION_HALT");
     });
 
@@ -150,7 +154,9 @@ contract("whitelist / halt", (accounts) => {
         100
       );
       assert.equal(error_code, 4);
-      const message = await contracts.whitelist.messageForTransferRestriction(error_code);
+      const message = await contracts.whitelist.messageForTransferRestriction(
+        error_code
+      );
       assert.equal(message, "DENIED: JURISDICTION_HALT");
     });
 
@@ -165,7 +171,9 @@ contract("whitelist / halt", (accounts) => {
         100
       );
       assert.equal(error_code, 4);
-      const message = await contracts.whitelist.messageForTransferRestriction(error_code);
+      const message = await contracts.whitelist.messageForTransferRestriction(
+        error_code
+      );
       assert.equal(message, "DENIED: JURISDICTION_HALT");
     });
 
