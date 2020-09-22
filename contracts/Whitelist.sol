@@ -733,7 +733,7 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole {
       return;
     }
     require(walletActivated[_from] || _from == address(0),"FROM_DEACTIVATED_WALLET");
-    require(walletActivated[_to] || _to == address(0),"FROM_DEACTIVATED_WALLET");
+    require(walletActivated[_to] || _to == address(0),"TO_DEACTIVATED_WALLET");
     address fromUserId = authorizedWalletToUserId[_from];
     require(
       fromUserId != address(0) || _from == address(0),
