@@ -46,7 +46,7 @@ contract("whitelist / updateJurisdictionsForUserIds", (accounts) => {
 
   it("shouldFail to update an unknown entry", async () => {
     await expectRevert(
-      contracts.whitelist.updateJurisdictionsForUserIds([accounts[6]], [1], {
+      contracts.whitelist.updateJurisdictionsForUserIds([accounts[7]], [1], {
         from: operatorAccount,
       }),
       "USER_ID_UNKNOWN"

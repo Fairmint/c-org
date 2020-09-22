@@ -16,12 +16,17 @@ contract("whitelist / revokeUserWallets", (accounts) => {
       from: operatorAccount,
     });
     await contracts.whitelist.addApprovedUserWallets(
-      [accounts[5]],
-      [accounts[4]],
+      [accounts[5], accounts[5]],
+      [accounts[4], accounts[6]],
       {
         from: operatorAccount,
       }
     );
+    // to activate wallet
+    await contracts.dat.buy(accounts[6], "100000000000000000000", 1, {
+      value: "100000000000000000000",
+      from: accounts[6],
+    });
   });
 
   it("sanity check: trader can buy", async () => {
@@ -40,6 +45,15 @@ contract("whitelist / revokeUserWallets", (accounts) => {
     );
   });
 
+  it("cannot revoke active wallet", async () => {
+    await expectRevert(
+      contracts.whitelist.revokeUserWallets([accounts[6]], {
+        from: operatorAccount,
+      }),
+      "ATTEMPT_TO_REVOKE_ACTIVE_WALLET"
+    );
+  });
+
   describe("on revoke user id", () => {
     beforeEach(async () => {
       await contracts.whitelist.revokeUserWallets([accounts[5]], {
@@ -53,12 +67,12 @@ contract("whitelist / revokeUserWallets", (accounts) => {
           value: "100000000000000000000",
           from: accounts[5],
         }),
-        "TO_USER_UNKNOWN"
+        "USER_UNKNOWN"
       );
     });
   });
 
-  describe("on revoke user id", () => {
+  describe("on revoke wallet", () => {
     beforeEach(async () => {
       await contracts.whitelist.revokeUserWallets([accounts[4]], {
         from: operatorAccount,
@@ -71,7 +85,7 @@ contract("whitelist / revokeUserWallets", (accounts) => {
           value: "100000000000000000000",
           from: accounts[4],
         }),
-        "TO_USER_UNKNOWN"
+        "USER_UNKNOWN"
       );
     });
   });

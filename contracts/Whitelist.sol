@@ -434,10 +434,13 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole {
     for (uint i = 0; i < length; i++) {
       address wallet = _wallets[i];
       require(
+        !walletActivated[wallet],
+        "ATTEMPT_TO_REVOKE_ACTIVE_WALLET"
+      );
+      require(
         authorizedWalletToUserId[wallet] != address(0),
         "WALLET_NOT_FOUND"
       );
-      //TODO check if wallet is activated, remove from userActiveWalletCount when needed
       authorizedWalletToUserId[wallet] = address(0);
       emit RevokeUserWallet(wallet, msg.sender);
     }
@@ -650,7 +653,7 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole {
    */
   function activateWallet(
     address _wallet
-  ) external {
+  ) public {
     require(!walletActivated[_wallet],"ALREADY_ACTIVATED_WALLET");
     //get userId of the wallet
     address userId = authorizedWalletToUserId[_wallet];
@@ -669,7 +672,7 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole {
    */
   function deactivateWallet(
     address _wallet
-  ) external {
+  ) public {
     require(callingContract.balanceOf(_wallet) == 0, "ATTEMPT_TO_DEACTIVATE_WALLET_WITH_BALANCE");
     require(walletActivated[_wallet],"ALREADY_DEACTIVATED_WALLET");
     //get userId of the wallet
