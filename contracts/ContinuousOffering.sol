@@ -175,9 +175,9 @@ contract ContinuousOffering
   /// @dev When updated, the new value of `minimum_duration` cannot be earlier than the previous value.
   uint public minDuration;
 
-  /// @notice Initialized at `0` and updated when the contract switches from `init` state to `run` state
-  /// with the current timestamp.
-  uint public runStartedOn;
+  /// @dev Initialized at `0` and updated when the contract switches from `init` state to `run` state
+  /// or when the initial trial period ends.
+  uint public __startedOn;
 
   /// @notice The max possible value
   uint internal constant MAX_UINT = 2**256 - 1;
@@ -353,20 +353,6 @@ contract ContinuousOffering
     // The ERC-20 implementation will confirm initialize is only run once
     ERC20Detailed.initialize(_name, _symbol, 18);
 
-    // Set initGoal, which in turn defines the initial state
-    if(_initGoal == 0)
-    {
-      emit StateChange(state, STATE_RUN);
-      state = STATE_RUN;
-      runStartedOn = block.timestamp;
-    }
-    else
-    {
-      // Math: If this value got too large, the DAT would overflow on sell
-      require(_initGoal < MAX_SUPPLY, "EXCESSIVE_GOAL");
-      initGoal = _initGoal;
-    }
-
     require(_buySlopeNum > 0, "INVALID_SLOPE_NUM");
     require(_buySlopeDen > 0, "INVALID_SLOPE_DEN");
     require(_buySlopeNum < MAX_BEFORE_SQUARE, "EXCESSIVE_SLOPE_NUM");
@@ -429,21 +415,6 @@ contract ContinuousOffering
         address(this)
       )
     );
-  }
-
-  /// @notice A temporary function to set `runStartedOn`, to be used by contracts which were
-  /// already deployed before this feature was introduced.
-  /// @dev This function will be removed once known users have called the function.
-  function initializeRunStartedOn(
-    uint _runStartedOn
-  ) external
-  {
-    require(msg.sender == control, "CONTROL_ONLY");
-    require(state == STATE_RUN, "ONLY_CALL_IN_RUN");
-    require(runStartedOn == 0, "ONLY_CALL_IF_NOT_AUTO_SET");
-    require(_runStartedOn <= block.timestamp, "DATE_MUST_BE_IN_PAST");
-
-    runStartedOn = _runStartedOn;
   }
 
   function _updateConfig(
@@ -657,7 +628,9 @@ contract ContinuousOffering
       {
         emit StateChange(state, STATE_RUN);
         state = STATE_RUN;
-        runStartedOn = block.timestamp;
+        if(__startedOn == 0) {
+          __startedOn = block.timestamp;
+        }
 
         // Math worst case:
         // MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE/2
@@ -906,8 +879,8 @@ contract ContinuousOffering
     else if(state == STATE_RUN)
     {
       // Collect the exitFee and close the c-org.
-      require(MAX_UINT - minDuration > runStartedOn, "MAY_NOT_CLOSE");
-      require(minDuration + runStartedOn <= block.timestamp, "TOO_EARLY");
+      require(MAX_UINT - minDuration > __startedOn, "MAY_NOT_CLOSE");
+      require(minDuration + __startedOn <= block.timestamp, "TOO_EARLY");
 
       emit StateChange(state, STATE_CLOSE);
       state = STATE_CLOSE;
