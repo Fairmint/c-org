@@ -646,7 +646,6 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole {
   function activateWallet(
     address _wallet
   ) external {
-    require(address(callingContract) == msg.sender, "CALL_VIA_CONTRACT_ONLY");
     require(!walletActivated[_wallet],"ALREADY_ACTIVATED_WALLET");
     //get userId of the wallet
     address userId = authorizedWalletToUserId[_wallet];
@@ -666,7 +665,7 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole {
   function deactivateWallet(
     address _wallet
   ) external {
-    require(address(callingContract) == msg.sender, "CALL_VIA_CONTRACT_ONLY");
+    require(callingContract.balanceOf(_wallet) == 0, "ATTEMPT_TO_DEACTIVATE_WALLET_WITH_BALANCE");
     require(walletActivated[_wallet],"ALREADY_DEACTIVATED_WALLET");
     //get userId of the wallet
     address userId = authorizedWalletToUserId[_wallet];
@@ -725,7 +724,8 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole {
       // and then burn locked tokens starting with those that will be unlocked first.
       return;
     }
-
+    require(walletActivated[_from] || _from == address(0),"FROM_DEACTIVATED_WALLET");
+    require(walletActivated[_to] || _to == address(0),"FROM_DEACTIVATED_WALLET");
     address fromUserId = authorizedWalletToUserId[_from];
     require(
       fromUserId != address(0) || _from == address(0),

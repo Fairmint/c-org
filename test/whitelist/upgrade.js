@@ -1,6 +1,6 @@
 const { constants, helpers } = require("hardlydifficult-eth");
 
-// Original deployment used 2.0.8 for the DAT and 2.2.0 for the whitelist
+// Original deployment used 2.2.0 for the DAT and 2.2.0 for the whitelist
 const cOrgAbi220 = require("../../versions/2.2.0/abi.json");
 const cOrgBytecode220 = require("../../versions/2.2.0/bytecode.json");
 const datArtifact = artifacts.require("DecentralizedAutonomousTrust");
@@ -35,6 +35,19 @@ contract("whitelist / upgrade", (accounts) => {
     contracts.proxyAdmin = await proxyAdminArtifact.new({
       from: callOptions.control,
     });
+    // Dat
+    
+    const originalDatContract = new web3.eth.Contract(
+      cOrgAbi220.dat
+    );
+    const originalDat = await originalDatContract
+      .deploy({
+        data: cOrgBytecode220.dat,
+      })
+      .send({
+        from: callOptions.control,
+        gas: constants.MAX_GAS,
+      });
 
     const datContract = await datArtifact.new({
       from: callOptions.control,
@@ -42,7 +55,7 @@ contract("whitelist / upgrade", (accounts) => {
 
     let datProxy;
     datProxy = await proxyArtifact.new(
-      datContract.address, // logic
+      originalDat._address, // logic
       contracts.proxyAdmin.address, // admin
       [], // data
       {
@@ -50,22 +63,27 @@ contract("whitelist / upgrade", (accounts) => {
       }
     );
 
-    contracts.dat = await datArtifact.at(datProxy.address);
+    contracts.dat = new web3.eth.Contract(cOrgAbi220.dat, datProxy.address);
 
-    await contracts.dat.methods[
-      "initialize(uint256,address,uint256,uint256,uint256,uint256,uint256,address,string,string)"
-    ](
-      callOptions.initReserve,
-      callOptions.currency,
-      callOptions.initGoal,
-      callOptions.buySlopeNum,
-      callOptions.buySlopeDen,
-      callOptions.investmentReserveBasisPoints,
-      callOptions.setupFee,
-      callOptions.setupFeeRecipient,
-      callOptions.name,
-      callOptions.symbol,
-      { from: callOptions.control, gas: constants.MAX_GAS }
+    await contracts.dat.methods
+      .initialize(
+        callOptions.initReserve,
+        callOptions.currency,
+        callOptions.initGoal,
+        callOptions.buySlopeNum,
+        callOptions.buySlopeDen,
+        callOptions.investmentReserveBasisPoints,
+        callOptions.name,
+        callOptions.symbol
+      )
+      .send({ from: callOptions.control, gas: constants.MAX_GAS });
+    await contracts.dat.methods
+      .initializePermit()
+      .send({ from: callOptions.control, gas: constants.MAX_GAS });
+    contracts.dat = await helpers.truffleContract.at(
+      web3,
+      cOrgAbi220.dat,
+      datProxy.address
     );
 
     let promises = [];
@@ -95,7 +113,6 @@ contract("whitelist / upgrade", (accounts) => {
       cOrgAbi220.whitelist,
       whitelistProxy.address
     );
-
     await contracts.whitelist.methods.initialize(contracts.dat.address).send({
       from: callOptions.control,
       gas: constants.MAX_GAS,
@@ -268,6 +285,17 @@ contract("whitelist / upgrade", (accounts) => {
 
     describe("after upgrade", async () => {
       beforeEach(async () => {
+        const datContract = await datArtifact.new({
+          from: await contracts.dat.control(),
+        });
+        await contracts.proxyAdmin.upgrade(
+          contracts.dat.address,
+          datContract.address,
+          {
+            from: await contracts.dat.control(),
+          }
+        );
+        contracts.dat = await datArtifact.at(contracts.dat.address);
         const whitelistContract = await whitelistArtifact.new({
           from: owner,
         });
