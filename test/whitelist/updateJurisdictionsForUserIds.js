@@ -12,8 +12,16 @@ contract("whitelist / updateJurisdictionsForUserIds", (accounts) => {
     await contracts.whitelist.addOperator(operatorAccount, {
       from: ownerAccount,
     });
-    await contracts.whitelist.approveNewUsers([accounts[5]], [4], {
-      from: operatorAccount,
+    await contracts.whitelist.approveNewUsers(
+      [accounts[5], accounts[6]],
+      [4, 4],
+      {
+        from: operatorAccount,
+      }
+    );
+    await contracts.dat.buy(accounts[6], "100000000000000000000", 1, {
+      value: "100000000000000000000",
+      from: accounts[6],
     });
   });
 
@@ -65,8 +73,8 @@ contract("whitelist / updateJurisdictionsForUserIds", (accounts) => {
         42
       );
       await contracts.whitelist.updateJurisdictionsForUserIds(
-        [accounts[5]],
-        [42],
+        [accounts[5], accounts[6]],
+        [42, 42],
         {
           from: operatorAccount,
         }
@@ -111,6 +119,21 @@ contract("whitelist / updateJurisdictionsForUserIds", (accounts) => {
       });
     });
 
+    it("currentInvestorsByJuridiction updated", async () => {
+      const delisted = await contracts.whitelist.investorEnlisted(accounts[5]);
+      const enlisted = await contracts.whitelist.investorEnlisted(accounts[6]);
+      assert.equal(delisted, false);
+      assert.equal(enlisted, true);
+      assert.equal(
+        await contracts.whitelist.currentInvestorsByJurisdiction(4),
+        investorsOfOldJurisdiction.toNumber() - 1
+      );
+      assert.equal(
+        await contracts.whitelist.currentInvestorsByJurisdiction(42),
+        investorsOfNewJurisdiction.toNumber() + 1
+      );
+    });
+
     describe("after lockup", () => {
       let expectedTokens;
 
@@ -153,17 +176,6 @@ contract("whitelist / updateJurisdictionsForUserIds", (accounts) => {
         assert.equal(
           numberOfTokensLocked.toString(),
           expectedTokens.toString()
-        );
-      });
-
-      it.only("currentInvestorsByJuridiction updated", async () => {
-        assert.equal(
-          await contracts.whitelist.currentInvestorsByJurisdiction(4),
-          investorsOfOldJurisdiction.subn(1)
-        );
-        assert.equal(
-          await contracts.whitelist.currentInvestorsByJurisdiction(42),
-          investorsOfNewJurisdiction.addn(1)
         );
       });
 
