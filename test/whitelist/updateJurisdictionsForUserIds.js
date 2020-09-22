@@ -55,7 +55,15 @@ contract("whitelist / updateJurisdictionsForUserIds", (accounts) => {
   });
 
   describe("after updateJurisdictionsForUserIds", () => {
+    let investorsOfOldJurisdiction;
+    let investorsOfNewJurisdiction;
     beforeEach(async () => {
+      investorsOfOldJurisdiction = await contracts.whitelist.currentInvestorsByJurisdiction(
+        4
+      );
+      investorsOfNewJurisdiction = await contracts.whitelist.currentInvestorsByJurisdiction(
+        42
+      );
       await contracts.whitelist.updateJurisdictionsForUserIds(
         [accounts[5]],
         [42],
@@ -145,6 +153,17 @@ contract("whitelist / updateJurisdictionsForUserIds", (accounts) => {
         assert.equal(
           numberOfTokensLocked.toString(),
           expectedTokens.toString()
+        );
+      });
+
+      it.only("currentInvestorsByJuridiction updated", async () => {
+        assert.equal(
+          await contracts.whitelist.currentInvestorsByJurisdiction(4),
+          investorsOfOldJurisdiction.subn(1)
+        );
+        assert.equal(
+          await contracts.whitelist.currentInvestorsByJurisdiction(42),
+          investorsOfNewJurisdiction.addn(1)
         );
       });
 

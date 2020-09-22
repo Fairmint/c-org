@@ -36,10 +36,8 @@ contract("whitelist / upgrade", (accounts) => {
       from: callOptions.control,
     });
     // Dat
-    
-    const originalDatContract = new web3.eth.Contract(
-      cOrgAbi220.dat
-    );
+
+    const originalDatContract = new web3.eth.Contract(cOrgAbi220.dat);
     const originalDat = await originalDatContract
       .deploy({
         data: cOrgBytecode220.dat,
@@ -48,10 +46,6 @@ contract("whitelist / upgrade", (accounts) => {
         from: callOptions.control,
         gas: constants.MAX_GAS,
       });
-
-    const datContract = await datArtifact.new({
-      from: callOptions.control,
-    });
 
     let datProxy;
     datProxy = await proxyArtifact.new(

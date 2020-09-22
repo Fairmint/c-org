@@ -464,7 +464,7 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole {
         //decrease current user count from old jurisdiction
         currentInvestorsByJurisdiction[authorizedUserIdInfo[userId].jurisdictionId]--;
         //increase current user count for new jurisdiction
-        currentInvestorsByJurisdiction[jurisdictionId]++; 
+        currentInvestorsByJurisdiction[jurisdictionId]++;
       }
       authorizedUserIdInfo[userId].jurisdictionId = jurisdictionId;
       emit UpdateJurisdictionForUserId(userId, jurisdictionId, msg.sender);
