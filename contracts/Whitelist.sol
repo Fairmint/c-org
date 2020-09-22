@@ -460,7 +460,12 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole {
       );
       uint jurisdictionId = _jurisdictionIds[i];
       require(jurisdictionId != 0, "INVALID_JURISDICTION_ID");
-
+      if(investorEnlisted[userId]){
+        //decrease current user count from old jurisdiction
+        currentInvestorsByJurisdiction[authorizedUserIdInfo[userId].jurisdictionId]--;
+        //increase current user count for new jurisdiction
+        currentInvestorsByJurisdiction[jurisdictionId]++; 
+      }
       authorizedUserIdInfo[userId].jurisdictionId = jurisdictionId;
       emit UpdateJurisdictionForUserId(userId, jurisdictionId, msg.sender);
     }
