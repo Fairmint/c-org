@@ -45,13 +45,10 @@ contract("whitelist / revokeUserWallets", (accounts) => {
     );
   });
 
-  it("cannot revoke active wallet", async () => {
-    await expectRevert(
-      contracts.whitelist.revokeUserWallets([accounts[6]], {
-        from: operatorAccount,
-      }),
-      "ATTEMPT_TO_REVOKE_ACTIVE_WALLET"
-    );
+  it("can revoke active wallet", async () => {
+    await contracts.whitelist.revokeUserWallets([accounts[6]], {
+      from: operatorAccount,
+    });
   });
 
   describe("on revoke user id", () => {
