@@ -61,6 +61,8 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole {
   );
   event Halt(uint indexed _jurisdictionId, uint _until);
   event Resume(uint indexed _jurisdictionId);
+  event MaxInvestorsChanged(uint _limit);
+  event MaxInvestorsByJurisdictionChanged(uint indexed _jurisdictionId, uint _limit);
   event InvestorEnlisted(address indexed _userId, uint indexed _jurisdictionId);
   event InvestorDelisted(address indexed _userId, uint indexed _jurisdictionId);
   event WalletActivated(address indexed _userId, address indexed _wallet);
@@ -647,16 +649,46 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole {
   }
 
   /**
+   * @notice changes max investors limit of the contract to `_limit`
+   * @dev only owner can call this function
+   * @param _limit new investor limit for contract
+   */
+  function setInvestorLimit(uint _limit) external onlyOwner {
+    require(_limit >= currentInvestors, "LIMIT_SHOULD_BE_LARGER_THAN_CURRENT_INVESTORS");
+    maxInvestors = _limit;
+    emit MaxInvestorsChanged(_limit);
+  }
+
+  /**
+   * @notice changes max investors limit of the `_jurisdcitionId` to `_limit`
+   * @dev only owner can call this function
+   * @param _jurisdictionId jurisdiction id to update
+   * @param _limit new investor limit for jurisdiction
+   */
+  function setInvestorLimitForJurisdiction(uint _jurisdictionId, uint _limit) external onlyOwner {
+    require(_limit >= currentInvestorsByJurisdiction[_jurisdictionId], "LIMIT_SHOULD_BE_LARGER_THAN_CURRENT_INVESTORS");
+    maxInvestorsByJurisdiction[_jurisdictionId] = _limit;
+    emit MaxInvestorsByJurisdictionChanged(_jurisdictionId, _limit);
+  }
+
+  /**
    * @notice activate wallet enlist user when user is not enlisted
-   * @dev This function can only be called by callingContract
+   * @dev This function can be called even user does not have balance
+   * only owner or callingContract can call this function
    */
   function activateWallet(
     address _wallet
-  ) public {
-    require(!walletActivated[_wallet],"ALREADY_ACTIVATED_WALLET");
-    //get userId of the wallet
+  ) external {
+    require(msg.sender == address(callingContract) || isOperator(msg.sender), "CALL_VIA_CONTRACT_OR_OPERATOR_ONLY");
+    _activateWallet(_wallet);
+  }
+
+  function _activateWallet(
+    address _wallet
+  ) internal {
     address userId = authorizedWalletToUserId[_wallet];
     require(userId != address(0), "USER_UNKNOWN");
+    require(!walletActivated[_wallet],"ALREADY_ACTIVATED_WALLET");
     if(!investorEnlisted[userId]){
       _enlistUser(userId);
     }
@@ -667,13 +699,12 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole {
 
   /**
    * @notice deactivate wallet delist user if user does not have any wallet left
-   * @dev This function can only be called by callingContract
+   * @dev This function can only be called when _wallet has zero balance
    */
   function deactivateWallet(
     address _wallet
   ) external {
     require(callingContract.balanceOf(_wallet) == 0, "ATTEMPT_TO_DEACTIVATE_WALLET_WITH_BALANCE");
-    //get userId of the wallet
     _deactivateWallet(_wallet);
   }
 
@@ -710,7 +741,8 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole {
     address _userId
   ) internal {
     require(investorEnlisted[_userId],"ALREADY_DELISTED_USER");
-    investorEnlisted[_userId] = true;
+    require(userActiveWalletCount[_userId]==0,"ATTEMPT_TO_DELIST_USER_WITH_ACTIVE_WALLET");
+    investorEnlisted[_userId] = false;
     uint jurisdictionId = authorizedUserIdInfo[_userId]
       .jurisdictionId;
     --currentInvestors;
@@ -737,8 +769,6 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole {
       // and then burn locked tokens starting with those that will be unlocked first.
       return;
     }
-    require(walletActivated[_from] || _from == address(0),"FROM_DEACTIVATED_WALLET");
-    require(walletActivated[_to] || _to == address(0),"TO_DEACTIVATED_WALLET");
     address fromUserId = authorizedWalletToUserId[_from];
     require(
       fromUserId != address(0) || _from == address(0),
@@ -746,6 +776,8 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole {
     );
     address toUserId = authorizedWalletToUserId[_to];
     require(toUserId != address(0) || _to == address(0), "TO_USER_UNKNOWN");
+    require(walletActivated[_from] || _from == address(0),"FROM_DEACTIVATED_WALLET");
+    require(walletActivated[_to] || _to == address(0),"TO_DEACTIVATED_WALLET");
 
     // A single user can move funds between wallets they control without restriction
     if (fromUserId != toUserId) {
