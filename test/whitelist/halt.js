@@ -40,7 +40,7 @@ contract("whitelist / halt", (accounts) => {
     );
   });
 
-  it("non-operators cannot halt", async () => {
+  it("only owner cannot halt", async () => {
     const due = (await time.latest()).add(time.duration.weeks(1));
     await expectRevert(
       contracts.whitelist.halt([haltedJurisdiction], [due], {
@@ -50,7 +50,7 @@ contract("whitelist / halt", (accounts) => {
     );
   });
 
-  it("operators can addApprovedUserWallets", async () => {
+  it("owner can addApprovedUserWallets", async () => {
     const due = (await time.latest()).add(time.duration.weeks(1));
     await contracts.whitelist.halt([haltedJurisdiction], [due], {
       from: ownerAccount,
