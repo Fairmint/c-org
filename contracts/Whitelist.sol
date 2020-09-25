@@ -189,6 +189,12 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole {
    */
   mapping(address => bool) public walletActivated;
 
+
+  /**
+   * @notice mapping to check wallet's previous owner userId
+   */
+  mapping(address => address) public revokedFrom;
+
   /**
    * @notice checks for transfer restrictions between jurisdictions.
    * @return if transfers between these jurisdictions are allowed and if a
@@ -390,6 +396,10 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole {
         authorizedWalletToUserId[trader] == address(0),
         "USER_WALLET_ALREADY_ADDED"
       );
+//      require(
+//        callingContract.balanceOf(trader) == 0,
+//        "ATTEMPT_TO_ADD_USER_WITH_BALANCE"
+//      );
       uint jurisdictionId = _jurisdictionIds[i];
       require(jurisdictionId != 0, "INVALID_JURISDICTION_ID");
 
@@ -418,6 +428,11 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole {
         authorizedWalletToUserId[newWallet] == address(0),
         "WALLET_ALREADY_ADDED"
       );
+      require(
+        revokedFrom[newWallet] == address(0) ||
+        revokedFrom[newWallet] == userId,
+        "ATTEMPT_TO_EXCHANGE_WALLET"
+      );
 
       authorizedWalletToUserId[newWallet] = userId;
       emit AddApprovedUserWallet(userId, newWallet, msg.sender);
@@ -439,9 +454,15 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole {
         authorizedWalletToUserId[wallet] != address(0),
         "WALLET_NOT_FOUND"
       );
+
+      // deactivate wallet
       if(walletActivated[wallet]){
         _deactivateWallet(wallet);
       }
+
+      // save previous userId to prevent offchain wallet trade
+      revokedFrom[wallet] = authorizedWalletToUserId[wallet];
+
       authorizedWalletToUserId[wallet] = address(0);
       emit RevokeUserWallet(wallet, msg.sender);
     }
@@ -662,13 +683,17 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole {
   /**
    * @notice changes max investors limit of the `_jurisdcitionId` to `_limit`
    * @dev only owner can call this function
-   * @param _jurisdictionId jurisdiction id to update
-   * @param _limit new investor limit for jurisdiction
+   * @param _jurisdictionIds jurisdiction id to update
+   * @param _limits new investor limit for jurisdiction
    */
-  function setInvestorLimitForJurisdiction(uint _jurisdictionId, uint _limit) external onlyOwner {
-    require(_limit >= currentInvestorsByJurisdiction[_jurisdictionId], "LIMIT_SHOULD_BE_LARGER_THAN_CURRENT_INVESTORS");
-    maxInvestorsByJurisdiction[_jurisdictionId] = _limit;
-    emit MaxInvestorsByJurisdictionChanged(_jurisdictionId, _limit);
+  function setInvestorLimitForJurisdiction(uint[] calldata _jurisdictionIds, uint[] calldata _limits) external onlyOwner {
+    for(uint i = 0; i<_jurisdictionIds.length; i++){
+      uint jurisdictionId = _jurisdictionIds[i];
+      uint limit = _limits[i];
+      require(limit >= currentInvestorsByJurisdiction[jurisdictionId], "LIMIT_SHOULD_BE_LARGER_THAN_CURRENT_INVESTORS");
+      maxInvestorsByJurisdiction[jurisdictionId] = limit;
+      emit MaxInvestorsByJurisdictionChanged(jurisdictionId, limit);
+    }
   }
 
   /**

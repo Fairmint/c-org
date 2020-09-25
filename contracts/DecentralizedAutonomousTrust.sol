@@ -215,7 +215,7 @@ contract DecentralizedAutonomousTrust is ContinuousOffering {
       _minDuration
     );
   }
-  
+
   /// @notice A temporary function to set `runStartedOn`, to be used by contracts which were
   /// already deployed before this feature was introduced.
   /// @dev This function will be removed once known users have called the function.
