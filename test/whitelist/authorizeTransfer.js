@@ -33,7 +33,7 @@ contract("whitelist / authorizeTransfer", (accounts) => {
       contracts.dat.transfer(accounts[1], 1, {
         from: trader,
       }),
-      "FROM_USER_UNKNOWN"
+      "USER_UNKNOWN"
     );
   });
 
