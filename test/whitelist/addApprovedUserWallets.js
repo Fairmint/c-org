@@ -45,6 +45,45 @@ contract("whitelist / addApprovedUserWallets", (accounts) => {
     );
   });
 
+  it("shouldFail to add if wallet is previously owned by other user", async () => {
+    await contracts.whitelist.addApprovedUserWallets(
+      [accounts[5]],
+      [accounts[4]],
+      {
+        from: operatorAccount,
+      }
+    );
+    await contracts.whitelist.revokeUserWallets([accounts[4]], {
+      from: operatorAccount,
+    });
+    await expectRevert(
+      contracts.whitelist.addApprovedUserWallets([accounts[6]], [accounts[4]], {
+        from: operatorAccount,
+      }),
+      "ATTEMPT_TO_EXCHANGE_WALLET"
+    );
+  });
+
+  it("should be able to add if wallet is revoked but owned by same user", async () => {
+    await contracts.whitelist.addApprovedUserWallets(
+      [accounts[5]],
+      [accounts[4]],
+      {
+        from: operatorAccount,
+      }
+    );
+    await contracts.whitelist.revokeUserWallets([accounts[4]], {
+      from: operatorAccount,
+    });
+    await contracts.whitelist.addApprovedUserWallets(
+      [accounts[5]],
+      [accounts[4]],
+      {
+        from: operatorAccount,
+      }
+    );
+  });
+
   describe("after addApprovedUserWallets", () => {
     beforeEach(async () => {
       await contracts.whitelist.addApprovedUserWallets(

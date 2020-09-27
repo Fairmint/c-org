@@ -39,11 +39,24 @@ contract("whitelist / approveNewUsers", (accounts) => {
   });
 
   it("should fail if user is revoked from other user", async () => {
-  
-    await contracts.whitelist.approveNewUsers([accounts[5]],[4],{from:operatorAccount});
-    await contracts.whitelist.addApprovedUserWallets([accounts[5]],[accounts[6]],{from:operatorAccount});
+    await contracts.whitelist.approveNewUsers([accounts[5]], [4], {
+      from: operatorAccount,
+    });
+    await contracts.whitelist.addApprovedUserWallets(
+      [accounts[5]],
+      [accounts[6]],
+      { from: operatorAccount }
+    );
+    await contracts.whitelist.revokUserWallets([accounts[6]], {
+      from: operatorAccount,
+    });
 
-    await expectRevert(contracts.whitelist.approveNewUsers([accounts[6]],[4],{from:operatorAccount}),"ATTEMPT_TO_ADD_PREVIOUS_WALLET_AS_NEW_USER");
+    await expectRevert(
+      contracts.whitelist.approveNewUsers([accounts[6]], [4], {
+        from: operatorAccount,
+      }),
+      "ATTEMPT_TO_ADD_PREVIOUS_WALLET_AS_NEW_USER"
+    );
   });
 
   describe("after approval", () => {
