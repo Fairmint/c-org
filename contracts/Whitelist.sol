@@ -396,10 +396,11 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole {
         authorizedWalletToUserId[trader] == address(0),
         "USER_WALLET_ALREADY_ADDED"
       );
-//      require(
-//        callingContract.balanceOf(trader) == 0,
-//        "ATTEMPT_TO_ADD_USER_WITH_BALANCE"
-//      );
+      require(
+        revokedFrom[trader] == address(0) ||
+        revokedFrom[trader] == trader,
+        "ATTEMPT_TO_ADD_PREVIOUS_WALLET_AS_NEW_USER"
+      );
       uint jurisdictionId = _jurisdictionIds[i];
       require(jurisdictionId != 0, "INVALID_JURISDICTION_ID");
 
