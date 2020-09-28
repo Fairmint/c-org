@@ -12,9 +12,13 @@ contract("whitelist / addApprovedUserWallets", (accounts) => {
     await contracts.whitelist.addOperator(operatorAccount, {
       from: ownerAccount,
     });
-    await contracts.whitelist.approveNewUsers([accounts[5], accounts[6]], [4,4], {
-      from: operatorAccount,
-    });
+    await contracts.whitelist.approveNewUsers(
+      [accounts[5], accounts[6]],
+      [4, 4],
+      {
+        from: operatorAccount,
+      }
+    );
   });
 
   it("non-operators cannot addApprovedUserWallets", async () => {
