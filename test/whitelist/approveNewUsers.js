@@ -47,7 +47,7 @@ contract("whitelist / approveNewUsers", (accounts) => {
       [accounts[6]],
       { from: operatorAccount }
     );
-    await contracts.whitelist.revokUserWallets([accounts[6]], {
+    await contracts.whitelist.revokeUserWallets([accounts[6]], {
       from: operatorAccount,
     });
 
