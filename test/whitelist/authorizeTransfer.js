@@ -2,7 +2,7 @@ const BigNumber = require("bignumber.js");
 const { deployDat } = require("../datHelpers");
 const { expectRevert } = require("@openzeppelin/test-helpers");
 const { time } = require("@openzeppelin/test-helpers");
-
+const WhitelistArtifact = artifacts.require("Whitelist");
 contract("whitelist / authorizeTransfer", (accounts) => {
   let contracts;
   let ownerAccount;
@@ -78,6 +78,49 @@ contract("whitelist / authorizeTransfer", (accounts) => {
       ),
       "CALL_VIA_CONTRACT_ONLY"
     );
+  });
+
+  describe("when calling contract is not c-org and does not automatically activate wallets", async ()=>{
+    let whitelist;
+    beforeEach(async ()=>{
+      whitelist = await WhitelistArtifact.new({from:accounts[0]});
+      await whitelist.initialize(accounts[1], {from:accounts[0]});
+      await whitelist.updateJurisdictionFlows(
+        [1, 4, 4],
+        [4, 1, 4],
+        [1, 1, 1],
+        {
+          from: accounts[0],
+        }
+      );
+
+      await whitelist.approveNewUsers([accounts[4],accounts[7]],[4,4],{from:accounts[0]});
+    });
+
+    it('should fail if _from is not registered to user', async ()=>{
+      await whitelist.addApprovedUserWallets([accounts[4]],[accounts[5]],{from:accounts[0]});
+      await expectRevert(whitelist.authorizeTransfer(accounts[6], accounts[5],100,false,{from:accounts[1]}),"FROM_USER_UNKNOWN");
+    });
+    
+    it('should fail if _to is not registered to user', async ()=>{
+      await whitelist.addApprovedUserWallets([accounts[4]],[accounts[5]],{from:accounts[0]});
+      await expectRevert(whitelist.authorizeTransfer(accounts[5], accounts[6],100,false,{from:accounts[1]}),"TO_USER_UNKNOWN");
+    });
+
+    it('should fail if _from is not activated', async ()=>{
+      await whitelist.addApprovedUserWallets([accounts[4]],[accounts[5]],{from:accounts[0]});
+      await whitelist.addApprovedUserWallets([accounts[7]],[accounts[6]],{from:accounts[0]});
+      await whitelist.activateWallet(accounts[6],{from:accounts[1]});
+      await expectRevert(whitelist.authorizeTransfer(accounts[5], accounts[6],100,false,{from:accounts[1]}),"FROM_DEACTIVATED_WALLET");
+
+    });
+
+    it('should fail if _to is not activated', async ()=>{
+      await whitelist.addApprovedUserWallets([accounts[4]],[accounts[5]],{from:accounts[0]});
+      await whitelist.addApprovedUserWallets([accounts[7]],[accounts[6]],{from:accounts[0]});
+      await whitelist.activateWallet(accounts[5],{from:accounts[1]});
+      await expectRevert(whitelist.authorizeTransfer(accounts[5], accounts[6],100,false,{from:accounts[1]}),"TO_DEACTIVATED_WALLET");
+    });
   });
 
   describe("when blocked by jurisdiction flow", () => {
