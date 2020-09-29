@@ -3,7 +3,7 @@ const { expectRevert } = require("@openzeppelin/test-helpers");
 
 const { assert } = require("chai");
 
-contract.only("whitelist / deactivateWallet", (accounts) => {
+contract("whitelist / deactivateWallet", (accounts) => {
   let contracts;
 
   const operatorAccount = accounts[1];
