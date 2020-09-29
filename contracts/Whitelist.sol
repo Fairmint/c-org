@@ -738,6 +738,7 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole {
   function deactivateWallet(
     address _wallet
   ) external {
+    require(callingContract.balanceOf(_wallet) == 0, "ATTEMPT_TO_DEACTIVATE_WALLET_WITH_BALANCE");
     _deactivateWallet(_wallet);
   }
 
@@ -745,6 +746,7 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole {
     address[] calldata _wallets
   ) external onlyOperator {
     for(uint i = 0; i<_wallets.length; i++){
+      require(callingContract.balanceOf(_wallets[i]) == 0, "ATTEMPT_TO_DEACTIVATE_WALLET_WITH_BALANCE");
       _deactivateWallet(_wallets[i]);
     }
   }
@@ -752,7 +754,6 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole {
   function _deactivateWallet(
     address _wallet
   ) internal {
-    require(callingContract.balanceOf(_wallet) == 0, "ATTEMPT_TO_DEACTIVATE_WALLET_WITH_BALANCE");
     address userId = authorizedWalletToUserId[_wallet];
     require(userId != address(0), "USER_UNKNOWN");
     require(walletActivated[_wallet],"ALREADY_DEACTIVATED_WALLET");
