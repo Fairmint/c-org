@@ -709,6 +709,14 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole {
     _activateWallet(_wallet);
   }
 
+  function activateWallets(
+    address[] calldata _wallets
+  ) external onlyOperator {
+    for(uint i = 0; i<_wallets.length; i++){
+      _activateWallet(_wallets[i]);
+    }
+  }
+
   function _activateWallet(
     address _wallet
   ) internal {
@@ -730,13 +738,21 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole {
   function deactivateWallet(
     address _wallet
   ) external {
-    require(callingContract.balanceOf(_wallet) == 0, "ATTEMPT_TO_DEACTIVATE_WALLET_WITH_BALANCE");
     _deactivateWallet(_wallet);
+  }
+
+  function deactivateWallets(
+    address[] calldata _wallets
+  ) external onlyOperator {
+    for(uint i = 0; i<_wallets.length; i++){
+      _deactivateWallet(_wallets[i]);
+    }
   }
 
   function _deactivateWallet(
     address _wallet
   ) internal {
+    require(callingContract.balanceOf(_wallet) == 0, "ATTEMPT_TO_DEACTIVATE_WALLET_WITH_BALANCE");
     address userId = authorizedWalletToUserId[_wallet];
     require(userId != address(0), "USER_UNKNOWN");
     require(walletActivated[_wallet],"ALREADY_DEACTIVATED_WALLET");
@@ -748,9 +764,21 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole {
     }
   }
 
+  function enlistUsers(
+    address[] calldata _userIds
+  ) external onlyOperator {
+    for(uint i = 0; i<_userIds.length; i++){
+      _enlistUser(_userIds[i]);
+    }
+  }
+
   function _enlistUser(
     address _userId
   ) internal {
+    require(
+      authorizedUserIdInfo[_userId].jurisdictionId != 0,
+      "USER_ID_UNKNOWN"
+    );
     require(!investorEnlisted[_userId],"ALREADY_ENLISTED_USER");
     investorEnlisted[_userId] = true;
     uint jurisdictionId = authorizedUserIdInfo[_userId]
@@ -761,6 +789,14 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole {
     uint maxJurisdictionLimit = maxInvestorsByJurisdiction[jurisdictionId];
     require(maxJurisdictionLimit == 0 || jurisdictionCount <= maxJurisdictionLimit,"EXCEEDING_JURISDICTION_MAX_INVESTORS");
     emit InvestorEnlisted(_userId, jurisdictionId);
+  }
+
+  function delistUsers(
+    address[] calldata _userIds
+  ) external onlyOperator {
+    for(uint i = 0; i<_userIds.length; i++){
+      _delistUser(_userIds[i]);
+    }
   }
 
   function _delistUser(

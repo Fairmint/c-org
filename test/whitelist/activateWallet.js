@@ -36,7 +36,7 @@ contract("whitelist / activateWallet", (accounts) => {
 
   it("shouldFail when wallet does not have approvedUserId", async () => {
     await expectRevert(
-      contracts.whitelist.activateWallet(accounts[9], {
+      contracts.whitelist.activateWallets([accounts[9]], {
         from: operatorAccount,
       }),
       "USER_UNKNOWN"
@@ -44,7 +44,7 @@ contract("whitelist / activateWallet", (accounts) => {
   });
 
   it("shouldFail when wallet is already activated", async () => {
-    await contracts.whitelist.activateWallet(accounts[4], {
+    await contracts.whitelist.activateWallets([accounts[4]], {
       from: operatorAccount,
     });
     await expectRevert(

@@ -3,7 +3,7 @@ const { expectRevert } = require("@openzeppelin/test-helpers");
 
 const { assert } = require("chai");
 
-contract("whitelist / deactivateWallet", (accounts) => {
+contract.only("whitelist / deactivateWallet", (accounts) => {
   let contracts;
 
   const operatorAccount = accounts[1];
@@ -63,7 +63,7 @@ contract("whitelist / deactivateWallet", (accounts) => {
 
   it("shouldFail if wallet has balance", async () => {
     await expectRevert(
-      contracts.whitelist.deactivateWallet(accounts[4], {
+      contracts.whitelist.deactivateWallets([accounts[4]], {
         from: operatorAccount,
       }),
       "ATTEMPT_TO_DEACTIVATE_WALLET_WITH_BALANCE"
