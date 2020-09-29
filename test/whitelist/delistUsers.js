@@ -38,4 +38,19 @@ contract("whitelist / delistUsers", (accounts) => {
       "ALREADY_DELISTED_USER"
     );
   });
+
+  it("should fail if currentUser exceeds total limit", async () => {
+    await contracts.whitelist.enlistUsers([accounts[5]], {
+      from: operatorAccount,
+    }),
+      await contracts.whitelist.activateWallets([accounts[6]], {
+        from: operatorAccount,
+      });
+    await expectRevert(
+      contracts.whitelist.delistUsers([accounts[5]], {
+        from: operatorAccount,
+      }),
+      "ATTEMPT_TO_DELIST_USER_WITH_ACTIVE_WALLET"
+    );
+  });
 });
