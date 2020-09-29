@@ -169,5 +169,10 @@ contract("whitelist / deactivateWallet", (accounts) => {
       await contracts.whitelist.investorEnlisted(accounts[5]),
       false
     );
+
+    await contracts.whitelist.activateWallets([accounts[4],accounts[6]],{from:operatorAccount});
+    await contracts.whitelist.deactivateWallets([accounts[4],accounts[6]],{from:operatorAccount});
+    assert.equal(await contracts.whitelist.walletActivated(accounts[4]), false);
+    assert.equal(await contracts.whitelist.walletActivated(accounts[6]), false);
   });
 });
