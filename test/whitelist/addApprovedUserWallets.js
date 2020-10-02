@@ -12,9 +12,13 @@ contract("whitelist / addApprovedUserWallets", (accounts) => {
     await contracts.whitelist.addOperator(operatorAccount, {
       from: ownerAccount,
     });
-    await contracts.whitelist.approveNewUsers([accounts[5]], [4], {
-      from: operatorAccount,
-    });
+    await contracts.whitelist.approveNewUsers(
+      [accounts[5], accounts[6]],
+      [4, 4],
+      {
+        from: operatorAccount,
+      }
+    );
   });
 
   it("non-operators cannot addApprovedUserWallets", async () => {
@@ -42,6 +46,45 @@ contract("whitelist / addApprovedUserWallets", (accounts) => {
         from: operatorAccount,
       }),
       "WALLET_ALREADY_ADDED"
+    );
+  });
+
+  it("shouldFail to add if wallet is previously owned by other user", async () => {
+    await contracts.whitelist.addApprovedUserWallets(
+      [accounts[5]],
+      [accounts[4]],
+      {
+        from: operatorAccount,
+      }
+    );
+    await contracts.whitelist.revokeUserWallets([accounts[4]], {
+      from: operatorAccount,
+    });
+    await expectRevert(
+      contracts.whitelist.addApprovedUserWallets([accounts[6]], [accounts[4]], {
+        from: operatorAccount,
+      }),
+      "ATTEMPT_TO_EXCHANGE_WALLET"
+    );
+  });
+
+  it("should be able to add if wallet is revoked but owned by same user", async () => {
+    await contracts.whitelist.addApprovedUserWallets(
+      [accounts[5]],
+      [accounts[4]],
+      {
+        from: operatorAccount,
+      }
+    );
+    await contracts.whitelist.revokeUserWallets([accounts[4]], {
+      from: operatorAccount,
+    });
+    await contracts.whitelist.addApprovedUserWallets(
+      [accounts[5]],
+      [accounts[4]],
+      {
+        from: operatorAccount,
+      }
     );
   });
 
