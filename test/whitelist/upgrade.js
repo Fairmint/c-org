@@ -305,6 +305,10 @@ contract("whitelist / upgrade", (accounts) => {
         );
       });
 
+      it('should be able to transfer without activation', async () => {
+        await contracts.dat.transfer(accounts[0], 100, {from:trader});
+      });
+
       it("data has not changed", async () => {
         const callingContract = await contracts.whitelist.callingContract();
         assert.equal(callingContract, callingContractBefore);
