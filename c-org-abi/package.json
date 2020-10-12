@@ -1,6 +1,6 @@
 {
   "name": "@fairmint/c-org-abi",
-  "version": "2.4.17",
+  "version": "2.4.22",
   "description": "ABI for c-org contracts including FAIR and DAT.",
   "repository": {
     "type": "git",
