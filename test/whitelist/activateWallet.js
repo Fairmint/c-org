@@ -29,8 +29,8 @@ contract("whitelist / activateWallet", (accounts) => {
 
   it("shouldFail when msg.sender is not callingContract nor owner", async () => {
     await expectRevert(
-      contracts.whitelist.activateWallet(accounts[4], { from: accounts[4] }),
-      "CALL_VIA_CONTRACT_OR_OPERATOR_ONLY"
+      contracts.whitelist.activateWallets([accounts[4]], { from: accounts[4] }),
+      "OperatorRole: caller does not have the Operator role"
     );
   });
 
@@ -48,7 +48,7 @@ contract("whitelist / activateWallet", (accounts) => {
       from: operatorAccount,
     });
     await expectRevert(
-      contracts.whitelist.activateWallet(accounts[4], {
+      contracts.whitelist.activateWallets([accounts[4]], {
         from: operatorAccount,
       }),
       "ALREADY_ACTIVATED_WALLET"
