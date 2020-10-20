@@ -88,7 +88,7 @@ contract("whitelist / authorizeTransfer", (accounts) => {
       await whitelist.updateJurisdictionFlows([1, 4, 4], [4, 1, 4], [1, 1, 1], {
         from: accounts[0],
       });
-      await whitelist.addOperator(operatorAccount,{from:accounts[0]});
+      await whitelist.addOperator(operatorAccount, { from: accounts[0] });
       await whitelist.approveNewUsers([accounts[4], accounts[7]], [4, 4], {
         from: accounts[0],
       });
