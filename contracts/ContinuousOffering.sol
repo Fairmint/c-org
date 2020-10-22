@@ -628,9 +628,7 @@ contract ContinuousOffering
       {
         emit StateChange(state, STATE_RUN);
         state = STATE_RUN;
-        if(__startedOn == 0) {
-          __startedOn = block.timestamp;
-        }
+        __startedOn = block.timestamp;
 
         // Math worst case:
         // MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE * MAX_BEFORE_SQUARE/2
