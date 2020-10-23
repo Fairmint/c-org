@@ -700,15 +700,8 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole {
   /**
    * @notice activate wallet enlist user when user is not enlisted
    * @dev This function can be called even user does not have balance
-   * only owner or callingContract can call this function
+   * only owner can call this function
    */
-  function activateWallet(
-    address _wallet
-  ) external {
-    require(msg.sender == address(callingContract) || isOperator(msg.sender), "CALL_VIA_CONTRACT_OR_OPERATOR_ONLY");
-    _activateWallet(_wallet);
-  }
-
   function activateWallets(
     address[] calldata _wallets
   ) external onlyOperator {
@@ -839,8 +832,16 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole {
     );
     address toUserId = authorizedWalletToUserId[_to];
     require(toUserId != address(0) || _to == address(0), "TO_USER_UNKNOWN");
-    require(walletActivated[_from] || _from == address(0),"FROM_DEACTIVATED_WALLET");
-    require(walletActivated[_to] || _to == address(0),"TO_DEACTIVATED_WALLET");
+    if(!walletActivated[_from] && _from != address(0)){
+      _activateWallet(_from);
+    }
+    if(!walletActivated[_to] && _to != address(0)){
+      _activateWallet(_to);
+    }
+    if(callingContract.balanceOf(_from) == _value && _from != address(0)){
+      //deactivate wallets without balance
+      _deactivateWallet(_from);
+    }
 
     // A single user can move funds between wallets they control without restriction
     if (fromUserId != toUserId) {

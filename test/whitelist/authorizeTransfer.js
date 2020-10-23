@@ -88,7 +88,7 @@ contract("whitelist / authorizeTransfer", (accounts) => {
       await whitelist.updateJurisdictionFlows([1, 4, 4], [4, 1, 4], [1, 1, 1], {
         from: accounts[0],
       });
-
+      await whitelist.addOperator(operatorAccount, { from: accounts[0] });
       await whitelist.approveNewUsers([accounts[4], accounts[7]], [4, 4], {
         from: accounts[0],
       });
@@ -115,38 +115,6 @@ contract("whitelist / authorizeTransfer", (accounts) => {
           from: accounts[1],
         }),
         "TO_USER_UNKNOWN"
-      );
-    });
-
-    it("should fail if _from is not activated", async () => {
-      await whitelist.addApprovedUserWallets([accounts[4]], [accounts[5]], {
-        from: accounts[0],
-      });
-      await whitelist.addApprovedUserWallets([accounts[7]], [accounts[6]], {
-        from: accounts[0],
-      });
-      await whitelist.activateWallet(accounts[6], { from: accounts[1] });
-      await expectRevert(
-        whitelist.authorizeTransfer(accounts[5], accounts[6], 100, false, {
-          from: accounts[1],
-        }),
-        "FROM_DEACTIVATED_WALLET"
-      );
-    });
-
-    it("should fail if _to is not activated", async () => {
-      await whitelist.addApprovedUserWallets([accounts[4]], [accounts[5]], {
-        from: accounts[0],
-      });
-      await whitelist.addApprovedUserWallets([accounts[7]], [accounts[6]], {
-        from: accounts[0],
-      });
-      await whitelist.activateWallet(accounts[5], { from: accounts[1] });
-      await expectRevert(
-        whitelist.authorizeTransfer(accounts[5], accounts[6], 100, false, {
-          from: accounts[1],
-        }),
-        "TO_DEACTIVATED_WALLET"
       );
     });
   });
