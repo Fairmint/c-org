@@ -169,7 +169,7 @@ contract("dat / upgrade", (accounts) => {
 
     await approveAll(contracts, accounts);
     await dai.mint(trader, "99999999999999999999999999", { from: accounts[0] });
-    await dai.approve(contracts.dat.address, -1, { from: trader });
+    await dai.approve(contracts.dat.address, constants.MAX_UINT, { from: trader });
     await contracts.dat.buy(trader, "100000000000000000000", 1, {
       from: trader,
     });
