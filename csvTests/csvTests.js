@@ -185,7 +185,7 @@ contract("dat / csvTests", (accounts) => {
             )) == 0
           ) {
             console.log(`  Set #${row.account.id} to approve dat`);
-            await currency.approve(contracts.dat.address, -1, {
+            await currency.approve(contracts.dat.address, constants.MAX_UINT, {
               from: row.account.address,
             });
           }

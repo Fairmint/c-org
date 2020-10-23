@@ -64,7 +64,7 @@ contract("dat / permitBuy", (accounts) => {
     const tx = await wallet.sign({
       to: usdc.address,
       data: usdc.contract.methods
-        .approve(contracts.dat.address, -1)
+        .approve(contracts.dat.address, constants.MAX_UINT)
         .encodeABI(),
       gasLimit: 6000000,
       nonce: await web3.eth.getTransactionCount(wallet.address),
