@@ -235,6 +235,12 @@ contract("whitelist / authorizeTransfer", (accounts) => {
       );
     });
 
+    it("can sell: lockup", async () => {
+      await contracts.dat.sell(trader, "100000000", 1, {
+        from: trader,
+      });
+    });
+
     describe("after unlock", async () => {
       beforeEach(async () => {
         await time.increase(31);
