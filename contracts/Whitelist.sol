@@ -879,6 +879,7 @@ contract Whitelist is IWhitelist, Ownable, OperatorRole {
         // a more clear error message.
         require(balance >= _value, "INSUFFICIENT_BALANCE");
         require(
+          _isSell || 
           balance >= info.totalTokensLocked.add(_value),
           "INSUFFICIENT_TRANSFERABLE_BALANCE"
         );
