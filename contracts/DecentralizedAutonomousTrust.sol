@@ -1076,4 +1076,47 @@ contract DecentralizedAutonomousTrust
     uint wad = allowed ? uint(-1) : 0;
     _approve(holder, spender, wad);
   }
+
+  /**
+  * @dev Storage slot with the admin of the contract.
+  * This is the keccak-256 hash of "eip1967.proxy.admin" subtracted by 1, and is
+  * validated in the constructor.
+  * Code from: https://etherscan.io/address/0xa1d65e8fb6e87b60feccbc582f7f97804b725521#code
+  */
+  bytes32 internal constant ADMIN_SLOT = 0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103;
+  
+  /**
+   * @return The admin slot.
+   * Code from: https://etherscan.io/address/0xa1d65e8fb6e87b60feccbc582f7f97804b725521#code
+   */
+  function _admin() internal view returns (address adm) {
+    bytes32 slot = ADMIN_SLOT;
+    assembly {
+      adm := sload(slot)
+    }
+  }
+
+  /**
+   * @dev Modifier to check that the sender is the proxy admin.
+   */
+  modifier onlyProxyAdmin() {
+    require(msg.sender == _admin(), "Only the Proxy Admin is allowed to call this contract");
+    _;
+  }
+
+  /**
+    * @notice Rescue ERC20 tokens locked up in this contract.
+    * @param tokenContract ERC20 token contract address
+    * @param to        Recipient address
+    * @param amount    Amount to withdraw
+    * Using standard from contract Rescuable:
+    * https://etherscan.io/address/0xb7277a6e95992041568d9391d09d0122023778a2#code
+    */
+    function rescueERC20(
+        IERC20 tokenContract,
+        address to,
+        uint256 amount
+    ) external onlyProxyAdmin {
+        tokenContract.safeTransfer(to, amount);
+    }
 }
