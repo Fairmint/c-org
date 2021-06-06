@@ -7,7 +7,7 @@ jobs:
     context: docker-hub-credentials
     docker:
       - image: circleci/node:10
-      - image: trufflesuite/ganache-cli:v6.12.0
+      - image: trufflesuite/ganache-cli:v6.12.2
         command: ganache-cli -e 10000000000 -a 100
     working_directory: ~/repo
     steps:
@@ -27,7 +27,7 @@ jobs:
     context: docker-hub-credentials
     docker:
       - image: circleci/node:10
-      - image: trufflesuite/ganache-cli:v6.12.0
+      - image: trufflesuite/ganache-cli:v6.12.2
         command: ganache-cli -e 10000000000 -a 100 -k istanbul
     working_directory: ~/repo
     steps:
@@ -54,7 +54,7 @@ jobs:
     context: docker-hub-credentials
     docker:
       - image: circleci/node:10
-      - image: trufflesuite/ganache-cli:v6.12.0
+      - image: trufflesuite/ganache-cli:v6.12.2
         command: ganache-cli -e 10000000000 -a 100 -k istanbul
     working_directory: ~/repo
     steps:
