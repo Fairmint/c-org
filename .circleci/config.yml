@@ -6,7 +6,7 @@ jobs:
   build:
     context: docker-hub-credentials
     docker:
-      - image: circleci/node:10
+      - image: circleci/node:16
       - image: trufflesuite/ganache-cli:v6.12.0
         command: ganache-cli -e 10000000000 -a 100
     working_directory: ~/repo
@@ -26,7 +26,7 @@ jobs:
   test:
     context: docker-hub-credentials
     docker:
-      - image: circleci/node:10
+      - image: circleci/node:16
       - image: trufflesuite/ganache-cli:v6.12.0
         command: ganache-cli -e 10000000000 -a 100 -k istanbul
     working_directory: ~/repo
@@ -41,7 +41,7 @@ jobs:
   coverage:
     context: docker-hub-credentials
     docker:
-      - image: circleci/node:10
+      - image: circleci/node:16
     working_directory: ~/repo
     steps:
       - attach_workspace:
@@ -53,7 +53,7 @@ jobs:
   csv:
     context: docker-hub-credentials
     docker:
-      - image: circleci/node:10
+      - image: circleci/node:16
       - image: trufflesuite/ganache-cli:v6.12.0
         command: ganache-cli -e 10000000000 -a 100 -k istanbul
     working_directory: ~/repo
@@ -67,7 +67,7 @@ jobs:
   publishABI:
     context: docker-hub-credentials
     docker:
-      - image: circleci/node:10
+      - image: circleci/node:16
     working_directory: ~/repo
     steps:
       - attach_workspace:
@@ -83,7 +83,7 @@ jobs:
   publishContracts:
     context: docker-hub-credentials
     docker:
-      - image: circleci/node:10
+      - image: circleci/node:16
     working_directory: ~/repo
     steps:
       - attach_workspace:
